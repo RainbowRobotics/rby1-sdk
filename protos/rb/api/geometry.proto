@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package rb.api;
+
+message Vec2 {
+  double x = 1;
+  double y = 2;
+}
+
+message SE2Velocity {
+  Vec2 linear = 1;    // (m/s)
+  double angular = 2; // (rad/s)
+}

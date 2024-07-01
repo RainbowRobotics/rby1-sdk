@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+
+message Gamepad {
+  repeated bool buttons = 1;
+  repeated double joystick = 2;
+}
+
+message UploadGamepadDataRequest {
+  RequestHeader request_header = 1;
+
+  Gamepad data = 2;
+}
+
+message UploadGamepadDataResponse {
+  ResponseHeader response_header = 1;
+
+}

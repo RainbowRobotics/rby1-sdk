@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/gamepad.proto";
+
+service GamepadService {
+  rpc UploadGamepadData(stream Gamepad) returns (UploadGamepadDataResponse) {}
+}

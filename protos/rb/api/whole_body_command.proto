@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/basic_command.proto";
+
+message WholeBodyCommand {
+  message Request {
+    oneof command {
+      StopCommand.Request stop_command = 1;
+    }
+  }
+
+  message Feedback {
+    oneof feedback {
+      StopCommand.Feedback stop_command_feedback = 1;
+    }
+  }
+}

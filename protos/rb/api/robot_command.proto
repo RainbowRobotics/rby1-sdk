@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+import "rb/api/whole_body_command.proto";
+import "rb/api/component_based_command.proto";
+
+message RobotCommand {
+  message Request {
+    oneof command {
+      WholeBodyCommand.Request whole_body_command = 1;
+
+      ComponentBasedCommand.Request component_based_command = 2;
+    }
+
+    double final_time = 100;
+
+    double lookahead_time = 101;
+  }
+
+  message Feedback {
+    oneof feedback {
+      WholeBodyCommand.Feedback whole_body_command_feedback = 1;
+
+      ComponentBasedCommand.Feedback component_based_command_feedback = 2;
+    }
+
+    enum Status {
+      STATUS_IDLE = 0;
+      STATUS_PREPARING = 1;
+      STATUS_RUNNING = 2;
+      STATUS_FINISHED = 3;
+    }
+    Status status = 3;
+
+    enum FinishCode {
+      FINISH_CODE_UNKNOWN = 0;
+      FINISH_CODE_OK = 1;
+      FINISH_CODE_CANCELED = 2;
+      FINISH_CODE_PREEMPTED = 3;
+      FINISH_CODE_INITIALIZED_FAILED = 4;
+    }
+    FinishCode finish_code = 4;
+  }
+}
+
+message RobotCommandRequest {
+  RequestHeader request_header = 1;
+
+  RobotCommand.Request command = 2;
+
+  int32 priority = 3;
+}
+
+message RobotCommandResponse {
+  ResponseHeader response_header = 1;
+
+  RobotCommand.Feedback feedback = 2;
+
+  uint64 id = 3;
+}

@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "google/protobuf/duration.proto";
+import "rb/api/geometry.proto";
+
+message StopCommand {
+  message Request {
+
+  }
+
+  message Feedback {
+
+  }
+}
+
+message SE2VelocityCommand {
+  message Request {
+    double final_time = 1;
+
+    double lookahead_time = 2;
+
+    SE2Velocity velocity = 3;
+
+    SE2Velocity acceleration_limit = 4;
+  }
+
+  message Feedback {
+
+  }
+}
+
+message JointVelocityCommand {
+  message Request {
+    double final_time = 1;
+
+    double lookahead_time = 2;
+
+    repeated double velocity = 3;
+
+    repeated double acceleration_limit = 4;
+  }
+
+  message Feedback {
+
+  }
+}
+
+message RTControlCommand {
+  message Request {
+    // TODO
+  }
+
+  message Feedback {
+    string address = 1;
+
+    int32 port = 2;
+  }
+}

@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "google/protobuf/timestamp.proto";
+
+// Standard request header
+message RequestHeader {
+  // Client local system clock
+  google.protobuf.Timestamp request_timestamp = 1;
+}
+
+// Standard response header
+message ResponseHeader {
+  //  Echo
+  RequestHeader request_header = 1;
+
+  // Robot clock
+  google.protobuf.Timestamp request_received_timestamp = 2;
+
+  // Robot clock
+  google.protobuf.Timestamp response_timestamp = 3;
+
+  // If set, there is error
+  CommonError error = 4;
+}
+
+message CommonError {
+  enum Code {
+    // Code is not specified.
+    CODE_UNSPECIFIED = 0;
+
+    // Not an error.  Request was successful.
+    CODE_OK = 1;
+
+    // Service experienced an unexpected error state.
+    CODE_INTERNAL_SERVER_ERROR = 2;
+
+    // Ill-formed request.  Request arguments were not valid.
+    CODE_INVALID_REQUEST = 3;
+  }
+  // Error code
+  Code code = 1;
+
+  // Human-readable error message
+  string message = 2;
+}

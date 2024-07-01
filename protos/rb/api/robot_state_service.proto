@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/robot_state.proto";
+
+service RobotStateService {
+  rpc GetRobotState(GetRobotStateRequest) returns (GetRobotStateResponse) {}
+
+  rpc GetRobotStateStream(GetRobotStateRequest) returns (stream GetRobotStateResponse) {}
+}

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "google/protobuf/timestamp.proto";
+import "rb/api/header.proto";
+
+message BatteryState {
+  double voltage = 1; // V
+
+  double current = 2; // Amp
+}
+
+message PowerState {
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_POWER_ON = 1;
+    STATUS_POWER_OFF = 2;
+  }
+  Status status = 1;
+}
+
+message RobotState {
+  google.protobuf.Timestamp timestamp = 1;
+
+  // Battery State
+  BatteryState battery_state = 2;
+
+  // Power State
+  map<string, PowerState> power_states = 3;
+
+  repeated bool ready = 10;
+  repeated double position = 11;
+  repeated double velocity = 12;
+  repeated double current = 13;
+}
+
+message GetRobotStateRequest {
+  RequestHeader request_header = 1;
+}
+
+message GetRobotStateResponse {
+  ResponseHeader response_header = 1;
+
+  RobotState robot_state = 2;
+}

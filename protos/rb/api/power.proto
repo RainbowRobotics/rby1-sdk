@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+
+message PowerCommandRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  // Power ID
+  string name = 2;
+
+  // Power command
+  enum Command {
+    COMMAND_UNKNOWN = 0;
+    COMMAND_POWER_ON = 1;
+    COMMAND_POWER_OFF = 2;
+  }
+  Command command = 3;
+}
+
+message PowerCommandResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+message MotorCommandRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  // Motor ID
+  string name = 2;
+
+  // Modes for power command
+  enum Command {
+    COMMAND_UNKNOWN = 0;
+    COMMAND_SERVO_ON = 1;
+  }
+  Command command = 3;
+}
+
+message MotorCommandResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  // TODO
+}

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/mobility_command.proto";
+
+message ComponentBasedCommand {
+  message Request {
+    MobilityCommand.Request mobility_command = 1;
+//    ManipulatorCommand.Input manipulator_control_input = 2;
+//    HeadCommand.Input head_control_input = 3;
+  }
+
+  message Feedback {
+    MobilityCommand.Feedback mobility_command_feedback = 1;
+    //    ManipulatorControl.Feedback manipulator_control_feedback = 2;
+    //    HeadControl.Feedback head_control_feedback = 3;
+  }
+}

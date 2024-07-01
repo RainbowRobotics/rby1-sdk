@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+
+message PingRequest {
+  RequestHeader request_header = 1;
+}
+
+message PingResponse {
+  ResponseHeader response_header = 1;
+}

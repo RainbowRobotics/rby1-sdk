@@ -11,11 +11,14 @@ grpcio = "1.65.2"
 grpcio-tools = "1.65.2"
 pyside6 = "^6.7.2"
 numpy = "^2.0.1"
-#
-#
-#[build-system]
-#requires = ["poetry-core"]
-#build-backend = "poetry.core.masonry.api"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "poetry"
+update_changelog_on_bump = true
+major_version_zero = true
 
 [build-system]
 requires = [

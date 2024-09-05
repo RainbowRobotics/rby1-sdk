@@ -7,5 +7,9 @@ import "rb/api/robot_state.proto";
 service RobotStateService {
   rpc GetRobotState(GetRobotStateRequest) returns (GetRobotStateResponse) {}
 
-  rpc GetRobotStateStream(GetRobotStateRequest) returns (stream GetRobotStateResponse) {}
+  rpc GetRobotStateStream(GetRobotStateStreamRequest) returns (stream GetRobotStateStreamResponse) {}
+
+  rpc GetControlManagerState(GetControlManagerStateRequest) returns (GetControlManagerStateResponse) {}
+
+  rpc ResetOdometry(ResetOdometryRequest) returns (ResetOdometryResponse) {}
 }

@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+
+message GetParameterRequest {
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+message GetParameterResponse {
+  ResponseHeader response_header = 1;
+
+  string parameter = 2;
+}
+
+message SetParameterRequest {
+  RequestHeader request_header = 1;
+
+  string name = 2;
+
+  string parameter = 3;
+}
+
+message SetParameterResponse {
+  ResponseHeader response_header = 1;
+}
+
+message GetParameterListRequest {
+  RequestHeader request_header = 1;
+}
+
+message GetParameterListResponse {
+  ResponseHeader response_header = 1;
+
+  message ParameterType {
+    string name = 1;
+
+    int32 type = 2;
+  }
+
+  repeated ParameterType parameters = 2;
+}

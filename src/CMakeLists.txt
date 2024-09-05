@@ -1,0 +1,49 @@
+if (BUILD_PYTHON_BINDINGS)
+    set(LIBRARY_TYPE STATIC)
+else()
+    set(LIBRARY_TYPE SHARED)
+endif()
+
+add_library(rby1-sdk ${LIBRARY_TYPE}
+        robot.cpp
+        robot_command_builder.cpp
+        robot_command_feedback.cpp
+
+        base/dynamixel_bus.cpp
+
+        math/qp_solver.cpp
+        math/se2.cpp
+        math/so3.cpp
+        math/se3.cpp
+        math/trapezoidal_motion_generator.cpp
+
+        dynamics/inertial.cpp
+        dynamics/link.cpp
+        dynamics/joint.cpp
+        dynamics/robot.cpp
+
+        upc/device.cpp
+        upc/master_arm.cpp
+
+        $<TARGET_OBJECTS:proto-objects>
+)
+target_link_libraries(rby1-sdk PUBLIC
+        Eigen3::Eigen
+)
+target_link_libraries(rby1-sdk PRIVATE
+        osqp::osqp
+        OsqpEigen::OsqpEigen
+        tinyxml2::tinyxml2
+        gRPC::grpc++
+        protobuf::libprotobuf
+        nlohmann_json::nlohmann_json
+        DynamixelSDK
+)
+target_include_directories(rby1-sdk PUBLIC
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+        $<BUILD_INTERFACE:${PROTO_BINARY_DIR}>)
+target_compile_definitions(rby1-sdk PUBLIC
+        $<INSTALL_INTERFACE:-DRBY1_SDK_MODEL_PATH="include/rby1-sdk/model">
+        $<BUILD_INTERFACE:-DRBY1_SDK_MODEL_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../include/rby1-sdk/model">
+)

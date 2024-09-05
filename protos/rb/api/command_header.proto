@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "google/protobuf/duration.proto";
+
+message CommandHeader {
+  message Request {
+    google.protobuf.Duration control_hold_time = 1;
+  }
+
+  message Feedback {
+    bool finished = 1;
+  }
+}

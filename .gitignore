@@ -1,0 +1,16 @@
+.venv
+.vscode
+.idea
+
+cmake-build-*
+build*
+octave-workspace
+
+CMakeUserPresets.json
+
+__pycache__
+poetry.lock
+
+.conan
+*.egg-info
+_skbuild

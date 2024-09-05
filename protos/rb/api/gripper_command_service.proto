@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/gripper_command.proto";
+
+service GripperCommandService {
+  rpc GripperInitialization(GripperInitializationRequest) returns (GripperInitializationResponse) {}
+
+  // Joint command
+  rpc GripperMove(GripperMoveRequest) returns (GripperMoveResponse) {}
+}

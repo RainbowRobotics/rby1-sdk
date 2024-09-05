@@ -35,24 +35,56 @@ message PowerCommandResponse {
   string message = 3;
 }
 
-message MotorCommandRequest {
+message JointCommandRequest {
   // Request header
   RequestHeader request_header = 1;
 
   // Motor ID
   string name = 2;
 
-  // Modes for power command
+  // Modes for joint/motor command
   enum Command {
     COMMAND_UNKNOWN = 0;
     COMMAND_SERVO_ON = 1;
+    COMMAND_BRAKE_ENGAGE = 2;
+    COMMAND_BRAKE_RELEASE = 3;
+    COMMAND_HOME_OFFSET_RST = 4;
   }
   Command command = 3;
 }
 
-message MotorCommandResponse {
+message JointCommandResponse {
   // Response header
   ResponseHeader response_header = 1;
 
-  // TODO
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+message ToolFlangePowerCommandRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  // Tool Flange name
+  string name = 2;
+
+  enum Command {
+    COMMAND_UNKNOWN = 0;
+    COMMAND_POWER_OFF = 1;
+    COMMAND_POWER_12V = 2;
+    COMMAND_POWER_24V = 3;
+  }
+  Command command = 3;
+}
+
+message ToolFlangePowerCommandResponse {
+  // Response header
+  ResponseHeader response_header = 1;
 }

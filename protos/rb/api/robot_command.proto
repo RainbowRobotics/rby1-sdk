@@ -3,36 +3,42 @@ syntax = "proto3";
 package rb.api;
 
 import "rb/api/header.proto";
+import "rb/api/basic_command.proto";
+import "rb/api/command_header.proto";
 import "rb/api/whole_body_command.proto";
 import "rb/api/component_based_command.proto";
 
 message RobotCommand {
   message Request {
+    CommandHeader.Request command_header = 1;
+
     oneof command {
-      WholeBodyCommand.Request whole_body_command = 1;
+      WholeBodyCommand.Request whole_body_command = 2;
 
-      ComponentBasedCommand.Request component_based_command = 2;
+      ComponentBasedCommand.Request component_based_command = 3;
+
+      JogCommand.Request jog_command = 4;
     }
-
-    double final_time = 100;
-
-    double lookahead_time = 101;
   }
 
   message Feedback {
-    oneof feedback {
-      WholeBodyCommand.Feedback whole_body_command_feedback = 1;
+    CommandHeader.Feedback command_header_feedback = 1;
 
-      ComponentBasedCommand.Feedback component_based_command_feedback = 2;
+    oneof feedback {
+      WholeBodyCommand.Feedback whole_body_command_feedback = 2;
+
+      ComponentBasedCommand.Feedback component_based_command_feedback = 3;
+
+      JogCommand.Feedback jog_command_feedback = 4;
     }
 
     enum Status {
       STATUS_IDLE = 0;
-      STATUS_PREPARING = 1;
+      STATUS_INITIALIZING = 1;
       STATUS_RUNNING = 2;
       STATUS_FINISHED = 3;
     }
-    Status status = 3;
+    Status status = 10;
 
     enum FinishCode {
       FINISH_CODE_UNKNOWN = 0;
@@ -40,15 +46,18 @@ message RobotCommand {
       FINISH_CODE_CANCELED = 2;
       FINISH_CODE_PREEMPTED = 3;
       FINISH_CODE_INITIALIZED_FAILED = 4;
+      FINISH_CODE_CONTROL_MANAGER_IDLE = 5;
+      FINISH_CODE_CONTROL_MANAGER_FAULT = 6;
+      FINISH_CODE_UNEXPECTED_STATE = 7;
     }
-    FinishCode finish_code = 4;
+    FinishCode finish_code = 11;
   }
 }
 
 message RobotCommandRequest {
   RequestHeader request_header = 1;
 
-  RobotCommand.Request command = 2;
+  RobotCommand.Request robot_command = 2;
 
   int32 priority = 3;
 }
@@ -57,6 +66,4 @@ message RobotCommandResponse {
   ResponseHeader response_header = 1;
 
   RobotCommand.Feedback feedback = 2;
-
-  uint64 id = 3;
 }

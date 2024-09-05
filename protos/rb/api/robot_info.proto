@@ -1,0 +1,52 @@
+// TODO Plan to be changed
+
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+
+message BatteryInfo {
+
+}
+
+message PowerInfo {
+  string name = 1;
+}
+
+message JointInfo {
+  string name = 1;
+
+  bool has_brake = 2;
+}
+
+message RobotInfo {
+  //
+  string robot_version = 1;
+
+  BatteryInfo battery_info = 2;
+
+  repeated PowerInfo power_infos = 3;
+
+  int32 degree_of_freedom = 4;
+
+  repeated JointInfo joint_infos = 5;
+
+  repeated uint32 mobility_joint_idx = 6;
+
+  repeated uint32 body_joint_idx = 7;
+
+  repeated uint32 head_joint_idx = 8;
+}
+
+message GetRobotInfoRequest {
+  //
+  RequestHeader request_header = 1;
+}
+
+message GetRobotInfoResponse {
+  //
+  ResponseHeader response_header = 1;
+
+  RobotInfo robot_info = 2;
+}

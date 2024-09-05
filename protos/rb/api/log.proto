@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "google/protobuf/timestamp.proto";
+import "rb/api/header.proto";
+
+message Log {
+  enum Level {
+    LEVEL_TRACE = 0;
+    LEVEL_DEBUG = 1;
+    LEVEL_INFO = 2;
+    LEVEL_WARN = 3;
+    LEVEL_ERROR = 4;
+    LEVEL_CRITICAL = 5;
+  }
+
+  google.protobuf.Timestamp timestamp = 1;
+
+  Level level = 2;
+
+  string message = 3;
+
+  string logger_name = 10;
+}
+
+message GetLastLogRequest {
+  RequestHeader request_header = 1;
+
+  int32 log_count = 2;
+}
+
+message GetLastLogResponse {
+  ResponseHeader response_header = 1;
+
+  repeated Log logs = 2;
+}
+
+message GetLogStreamRequest {
+  RequestHeader request_header = 1;
+
+  double update_rate = 2; // Hz
+}
+
+message GetLogStreamResponse {
+  ResponseHeader response_header = 1;
+
+  repeated Log logs = 2;
+}
+
+message SetLogLevelRequest {
+  RequestHeader request_header = 1;
+
+  Log.Level level = 2;
+}
+
+message SetLogLevelResponse {
+  ResponseHeader response_header = 1;
+}

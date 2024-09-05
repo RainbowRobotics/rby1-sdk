@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/command_header.proto";
+import "rb/api/arm_command.proto";
+import "rb/api/torso_command.proto";
+
+message BodyComponentBasedCommand {
+  message Request {
+    CommandHeader.Request command_header = 1;
+
+    ArmCommand.Request right_arm_command = 2;
+
+    ArmCommand.Request left_arm_command = 3;
+
+    TorsoCommand.Request torso_command = 4;
+  }
+
+  message Feedback {
+    CommandHeader.Feedback command_header_feedback = 1;
+
+    ArmCommand.Feedback right_arm_command_feedback = 2;
+
+    ArmCommand.Feedback left_arm_command_feedback = 3;
+
+    TorsoCommand.Feedback torso_command_feedback = 4;
+  }
+}

@@ -3,36 +3,138 @@ syntax = "proto3";
 package rb.api;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 import "rb/api/header.proto";
+import "rb/api/geometry.proto";
+import "rb/api/control_manager.proto";
+
+message SystemStat {
+  double cpu_usage = 1; // %
+
+  double memory_usage = 2; // %
+
+  double uptime = 3; // sec
+
+  double program_uptime = 4; // sec
+}
 
 message BatteryState {
   double voltage = 1; // V
 
   double current = 2; // Amp
+
+  double level_percent = 3; // %
 }
 
 message PowerState {
-  enum Status {
-    STATUS_UNKNOWN = 0;
-    STATUS_POWER_ON = 1;
-    STATUS_POWER_OFF = 2;
+  enum State {
+    STATE_UNKNOWN = 0;
+    STATE_POWER_ON = 1;
+    STATE_POWER_OFF = 2;
   }
-  Status status = 1;
+
+  State state = 1;
+
+  double voltage = 2;
+}
+
+message JointState {
+  enum FETState {
+    FET_STATE_UNKNOWN = 0;
+    FET_STATE_ON = 1;
+    FET_STATE_OFF = 2;
+  }
+
+  enum RunState {
+    RUN_STATE_UNKNOWN = 0;
+    RUN_STATE_CONTROL_ON = 1;
+    RUN_STATE_CONTROL_OFF = 2;
+  }
+
+  enum InitializationState {
+    INIT_STATE_UNKNOWN = 0;
+    INIT_STATE_INITIALIZED = 1;
+    INIT_STATE_UNINITIALIZED = 2;
+  }
+
+  bool is_ready = 1;
+  FETState fet_state = 2;
+  RunState run_state = 3;
+  InitializationState init_state = 4;
+
+  // MOTOR STATE
+  uint32 motor_type = 5;
+  uint64 motor_state = 6;
+
+  google.protobuf.Duration time_since_last_update = 9;
+  bool power_on = 10;
+  double position = 11;
+  double velocity = 12;
+  double current = 13;
+  double torque = 14;
+
+  double target_position = 21;
+  double target_velocity = 22;
+  uint32 target_feedback_gain = 23;
+  double target_feedforward_torque = 24;
+}
+
+message ToolFlangeState {
+  google.protobuf.Duration time_since_last_update = 1;
+
+  Vec3 gyro = 2;
+  Vec3 acceleration = 3;
+
+  bool switch_A = 4;
+  int32 output_voltage = 5;
+}
+
+message FTSensorData {
+  google.protobuf.Duration time_since_last_update = 1;
+
+  Vec3 force = 2;
+  Vec3 torque = 3;
 }
 
 message RobotState {
   google.protobuf.Timestamp timestamp = 1;
 
+  // System Statistic
+  SystemStat system_stat = 2;
+
   // Battery State
-  BatteryState battery_state = 2;
+  BatteryState battery_state = 3;
 
   // Power State
-  map<string, PowerState> power_states = 3;
+  repeated PowerState power_states = 4;
 
-  repeated bool ready = 10;
-  repeated double position = 11;
-  repeated double velocity = 12;
-  repeated double current = 13;
+  // Joint State
+  repeated JointState joint_states = 5;
+
+  // Tool Flange State
+  ToolFlangeState tool_flange_right = 6;
+  ToolFlangeState tool_flange_left = 7;
+
+  // Force Torque Sensor
+  FTSensorData ft_sensor_right = 8;
+  FTSensorData ft_sensor_left = 9;
+
+  repeated double is_ready = 30;
+  repeated double position = 31;
+  repeated double velocity = 32;
+  repeated double current = 33;
+  repeated double torque = 34;
+
+  repeated double target_position = 41;
+  repeated double target_velocity = 42;
+  repeated uint32 target_feedback_gain = 43;
+  repeated double target_feedforward_torque = 44;
+
+  // Mobility State
+  SE2Pose odometry = 45;
+
+  // Center Of Mass
+  Vec3 center_of_mass = 46; // Position of center of mass with respect t base link
 }
 
 message GetRobotStateRequest {
@@ -43,4 +145,40 @@ message GetRobotStateResponse {
   ResponseHeader response_header = 1;
 
   RobotState robot_state = 2;
+
+  ControlManagerState control_manager_state = 3;
+}
+
+message GetRobotStateStreamRequest {
+  RequestHeader request_header = 1;
+
+  double update_rate = 2; // Hz
+}
+
+message GetRobotStateStreamResponse {
+  ResponseHeader response_header = 1;
+
+  RobotState robot_state = 2;
+
+  ControlManagerState control_manager_state = 3;
+}
+
+message ResetOdometryRequest {
+  RequestHeader request_header = 1;
+
+  SE2Pose initial_pose = 2;
+}
+
+message ResetOdometryResponse {
+  ResponseHeader response_header = 1;
+}
+
+message GetControlManagerStateRequest {
+  RequestHeader request_header = 1;
+}
+
+message GetControlManagerStateResponse {
+  ResponseHeader response_header = 1;
+
+  ControlManagerState control_manager_state = 2;
 }

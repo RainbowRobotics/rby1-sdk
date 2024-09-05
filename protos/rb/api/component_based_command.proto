@@ -3,17 +3,28 @@ syntax = "proto3";
 package rb.api;
 
 import "rb/api/mobility_command.proto";
+import "rb/api/body_command.proto";
+import "rb/api/head_command.proto";
+import "rb/api/command_header.proto";
 
 message ComponentBasedCommand {
   message Request {
-    MobilityCommand.Request mobility_command = 1;
-//    ManipulatorCommand.Input manipulator_control_input = 2;
-//    HeadCommand.Input head_control_input = 3;
+    CommandHeader.Request command_header = 1;
+
+    MobilityCommand.Request mobility_command = 2;
+
+    BodyCommand.Request body_command = 3;
+
+    HeadCommand.Request head_command = 4;
   }
 
   message Feedback {
-    MobilityCommand.Feedback mobility_command_feedback = 1;
-    //    ManipulatorControl.Feedback manipulator_control_feedback = 2;
-    //    HeadControl.Feedback head_control_feedback = 3;
+    CommandHeader.Feedback command_header_feedback = 1;
+
+    MobilityCommand.Feedback mobility_command_feedback = 2;
+
+    BodyCommand.Feedback body_command_feedback = 3;
+
+    HeadCommand.Feedback head_command_feedback = 4;
   }
 }

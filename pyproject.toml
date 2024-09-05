@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "rby1-sdk"
+version = "0.1.0"
+description = ""
+authors = ["Keunjun Choi <keunjun.choi@rainbow-robotics.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+grpcio = "1.65.2"
+grpcio-tools = "1.65.2"
+pyside6 = "^6.7.2"
+numpy = "^2.0.1"
+#
+#
+#[build-system]
+#requires = ["poetry-core"]
+#build-backend = "poetry.core.masonry.api"
+
+[build-system]
+requires = [
+    "conan>=2.0.14",
+    "setuptools",
+    "scikit-build>=0.17.3",
+    "skbuild-conan",
+    "cmake>=3.28",
+    "ninja",
+    "pybind11-stubgen",
+    "poetry-core",
+    "numpy>=2.0.1"
+]
+build-backend = "setuptools.build_meta"

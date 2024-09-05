@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/robot_info.proto";
+
+service RobotInfoService {
+  rpc GetRobotInfo(GetRobotInfoRequest) returns (GetRobotInfoResponse) {}
+}

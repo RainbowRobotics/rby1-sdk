@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/command_header.proto";
+import "rb/api/basic_command.proto";
+
+message TorsoCommand {
+  message Request {
+    CommandHeader.Request command_header = 1;
+
+    oneof command {
+      JointPositionCommand.Request joint_position_command = 2;
+
+      GravityCompensationCommand.Request gravity_compensation_command = 3;
+
+      CartesianCommand.Request cartesian_command = 4;
+
+      ImpedanceControlCommand.Request impedance_control_command = 5;
+
+      OptimalControlCommand.Request optimal_control_command = 6;
+    }
+  }
+
+  message Feedback {
+    CommandHeader.Feedback command_header_feedback = 1;
+
+    oneof feedback {
+      JointPositionCommand.Feedback joint_position_command_feedback = 2;
+
+      GravityCompensationCommand.Feedback gravity_compensation_command_feedback = 3;
+
+      CartesianCommand.Feedback cartesian_command_feedback = 4;
+
+      ImpedanceControlCommand.Feedback impedance_control_command_feedback = 5;
+
+      OptimalControlCommand.Feedback optimal_control_command_feedback = 6;
+    }
+  }
+}

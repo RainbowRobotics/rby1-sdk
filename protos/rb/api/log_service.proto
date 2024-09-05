@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/log.proto";
+
+service LogService {
+  rpc GetLastLog(GetLastLogRequest) returns (GetLastLogResponse) {}
+
+  rpc GetLogStream(GetLogStreamRequest) returns (stream GetLogStreamResponse) {}
+
+  rpc SetLogLevel(SetLogLevelRequest) returns (SetLogLevelResponse) {}
+}

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/basic_command.proto";
+import "rb/api/command_header.proto";
+import "rb/api/body_component_based_command.proto";
+
+message BodyCommand {
+  message Request {
+    CommandHeader.Request command_header = 1;
+
+    oneof command {
+      JointPositionCommand.Request joint_position_command = 2;
+
+      OptimalControlCommand.Request optimal_control_command = 3;
+
+      GravityCompensationCommand.Request gravity_compensation_command = 4;
+
+      CartesianCommand.Request cartesian_command = 5;
+
+      BodyComponentBasedCommand.Request body_component_based_command = 6;
+    }
+  }
+
+  message Feedback {
+    CommandHeader.Feedback command_header_feedback = 1;
+
+    oneof feedback {
+      JointPositionCommand.Feedback joint_position_command_feedback = 2;
+
+      OptimalControlCommand.Feedback optimal_control_command_feedback = 3;
+
+      GravityCompensationCommand.Feedback gravity_compensation_command_feedback = 4;
+
+      CartesianCommand.Feedback cartesian_command_feedback = 5;
+
+      BodyComponentBasedCommand.Feedback body_component_based_command_feedback = 6;
+    }
+  }
+}

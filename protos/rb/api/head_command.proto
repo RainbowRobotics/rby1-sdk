@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/command_header.proto";
+import "rb/api/basic_command.proto";
+
+message HeadCommand {
+  message Request {
+    CommandHeader.Request command_header = 1;
+
+    oneof command {
+      JointPositionCommand.Request joint_position_command = 2;
+    }
+  }
+
+  message Feedback {
+    CommandHeader.Feedback command_header_feedback = 1;
+
+    oneof feedback {
+      JointPositionCommand.Feedback joint_position_command_feedback = 2;
+    }
+  }
+}

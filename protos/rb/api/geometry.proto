@@ -7,7 +7,39 @@ message Vec2 {
   double y = 2;
 }
 
+message Vec3 {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message SE2Pose {
+  Vec2 position = 1;    // (m)
+  double angle = 2;     // (rad)
+}
+
 message SE2Velocity {
   Vec2 linear = 1;    // (m/s)
   double angular = 2; // (rad/s)
+}
+
+message Quaternion {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double w = 4;
+}
+
+message EulerAngleZYX {
+  double z = 1;
+  double y = 2;
+  double x = 3;
+}
+
+message SE3Pose {
+  Vec3 position = 1; // (m)
+  oneof rotation {
+    Quaternion quaternion = 2;
+    EulerAngleZYX euler = 3;
+  }
 }

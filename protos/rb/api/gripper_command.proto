@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+
+message GripperInitializationRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+message GripperInitializationResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+}
+
+message GripperMoveRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+
+  int32 position = 3;
+
+  int32 velocity = 4;
+
+  int32 force = 5;
+}
+
+message GripperMoveResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+}

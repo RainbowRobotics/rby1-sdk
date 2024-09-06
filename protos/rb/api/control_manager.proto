@@ -3,6 +3,7 @@ syntax = "proto3";
 package rb.api;
 
 import "rb/api/header.proto";
+import "google/protobuf/wrappers.proto";
 
 message ControlManagerState {
   enum State {
@@ -23,6 +24,10 @@ message ControlManagerState {
     CONTROL_STATE_SWITCHING = 3;
   }
   ControlState control_state = 3;
+
+  repeated uint32 enabled_joint_idx = 4;
+
+  bool unlimited_mode_enabled = 5;
 }
 
 message ControlManagerCommandRequest {
@@ -37,6 +42,8 @@ message ControlManagerCommandRequest {
     COMMAND_RESET_FAULT = 3;
   }
   Command command = 2;
+
+  google.protobuf.BoolValue unlimited_mode_enabled = 3;
 }
 
 message ControlManagerCommandResponse {

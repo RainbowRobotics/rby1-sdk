@@ -255,6 +255,10 @@ rb::ControlManagerState ProtoToControlManagerState(const api::ControlManagerStat
   cms.state = static_cast<rb::ControlManagerState::State>(msg.state());
   cms.time_scale = msg.time_scale();
   cms.control_state = static_cast<rb::ControlManagerState::ControlState>(msg.control_state());
+  for (const auto& idx : msg.enabled_joint_idx()) {
+    cms.enabled_joint_idx.push_back(idx);
+  }
+  cms.unlimited_mode_enabled = msg.unlimited_mode_enabled();
 
   return cms;
 }
@@ -677,10 +681,11 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return true;
   }
 
-  bool EnableControlManager() const {  // NOLINT
+  bool EnableControlManager(bool unlimited_mode_enabled) const {  // NOLINT
     api::ControlManagerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_command(api::ControlManagerCommandRequest::COMMAND_ENABLE);
+    req.mutable_unlimited_mode_enabled()->set_value(unlimited_mode_enabled);
 
     api::ControlManagerCommandResponse res;
     grpc::ClientContext context;
@@ -1117,8 +1122,8 @@ bool Robot<T>::IsServoOn(const std::string& dev_name) const {
 }
 
 template <typename T>
-bool Robot<T>::EnableControlManager() const {
-  return impl_->EnableControlManager();
+bool Robot<T>::EnableControlManager(bool unlimited_mode_enabled) const {
+  return impl_->EnableControlManager(unlimited_mode_enabled);
 }
 
 template <typename T>

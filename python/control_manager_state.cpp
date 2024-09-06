@@ -24,7 +24,9 @@ void bind_control_manager_state(py::module_& m) {
   cms.def(py::init<>())
       .def_readonly("state", &ControlManagerState::state)
       .def_readonly("time_scale", &ControlManagerState::time_scale)
-      .def_readonly("control_state", &ControlManagerState::control_state);
+      .def_readonly("control_state", &ControlManagerState::control_state)
+      .def_readonly("enabled_joint_idx", &ControlManagerState::enabled_joint_idx)
+      .def_readonly("unlimited_mode_enabled", &ControlManagerState::unlimited_mode_enabled);
 }
 
 void pybind11_control_manager_state(py::module_& m) {

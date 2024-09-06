@@ -16,6 +16,8 @@ struct ControlManagerState {
   State state;
   double time_scale;
   ControlState control_state;
+  std::vector<unsigned int> enabled_joint_idx;
+  bool unlimited_mode_enabled;
 };
 
 }  // namespace rb

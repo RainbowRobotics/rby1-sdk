@@ -50,7 +50,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("is_power_on", &Robot<T>::IsPowerOn, "dev_name"_a)
       .def("servo_on", &Robot<T>::ServoOn, "dev_name"_a)
       .def("is_servo_on", &Robot<T>::IsServoOn, "dev_name"_a)
-      .def("enable_control_manager", &Robot<T>::EnableControlManager)
+      .def("enable_control_manager", &Robot<T>::EnableControlManager, py::arg("unlimited_mode_enabled") = false)
       .def("disable_control_manager", &Robot<T>::DisableControlManager)
       .def("reset_fault_control_manager", &Robot<T>::ResetFaultControlManager)
       .def("set_tool_flange_output_voltage", &Robot<T>::SetToolFlangeOutputVoltage)

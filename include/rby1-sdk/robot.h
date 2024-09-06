@@ -68,7 +68,7 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool IsServoOn(const std::string& dev_name) const;  // NOLINT
 
-  bool EnableControlManager() const;  // NOLINT
+  bool EnableControlManager(bool unlimited_mode_enabled = false) const;  // NOLINT
 
   bool DisableControlManager() const;  // NOLINT
 

@@ -65,7 +65,9 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("create_command_stream", &Robot<T>::CreateCommandStream, "priority"_a)
       .def("reset_odometry", &Robot<T>::ResetOdometry, "angle"_a, "position"_a)
       .def("set_parameter", &Robot<T>::SetParameter, "name"_a, "value"_a)
-      .def("get_parameter", &Robot<T>::GetParameter, "name"_a);
+      .def("get_parameter", &Robot<T>::GetParameter, "name"_a)
+      .def("get_robot_model", &Robot<T>::GetRobotModel)
+      .def("import_robot_model", &Robot<T>::ImportRobotModel, "name"_a, "model"_a);
 }
 
 void pybind11_robot(py::module_& m) {

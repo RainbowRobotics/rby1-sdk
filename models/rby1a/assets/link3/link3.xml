@@ -1,0 +1,116 @@
+<mujoco model="link3">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="125,125,125.004" specular="1.0" shininess="0.2" rgba="0.490196 0.490196 0.490196 1.000000"/>
+    <material name="153,153,153.004" specular="1.0" shininess="0.2" rgba="0.600000 0.600000 0.600000 1.000000"/>
+    <material name="156,168,171_3.003" specular="1.0" shininess="0.2" rgba="0.611765 0.658824 0.670588 1.000000"/>
+    <material name="204,204,204.004" specular="1.0" shininess="0.2" rgba="0.800000 0.800000 0.800000 1.000000"/>
+    <material name="220,239,237.003" specular="1.0" shininess="0.2" rgba="0.862745 0.937255 0.929412 1.000000"/>
+    <material name="242,242,242.004" specular="1.0" shininess="0.2" rgba="0.949020 0.949020 0.949020 1.000000"/>
+    <material name="247,247,247.003" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_15.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_16.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_17.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_18.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_19.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_2.006" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_2.007" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_20.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_21.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_22.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_23.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="255,255,255_1.004" specular="1.0" shininess="0.2" rgba="1.000000 1.000000 1.000000 1.000000"/>
+    <material name="69,69,69.004" specular="1.0" shininess="0.2" rgba="0.270588 0.270588 0.270588 1.000000"/>
+    <material name="69,69,69_11.002" specular="1.0" shininess="0.2" rgba="0.270588 0.270588 0.270588 1.000000"/>
+    <material name="69,69,69_11.004" specular="1.0" shininess="0.2" rgba="0.270588 0.270588 0.270588 1.000000"/>
+    <material name="75,75,75_12.001" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <material name="75,75,75_13.001" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <material name="75,75,75_4.003" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <mesh file="link3_0.obj"/>
+    <mesh file="link3_1.obj"/>
+    <mesh file="link3_2.obj"/>
+    <mesh file="link3_3.obj"/>
+    <mesh file="link3_4.obj"/>
+    <mesh file="link3_5.obj"/>
+    <mesh file="link3_6.obj"/>
+    <mesh file="link3_7.obj"/>
+    <mesh file="link3_8.obj"/>
+    <mesh file="link3_9.obj"/>
+    <mesh file="link3_10.obj"/>
+    <mesh file="link3_11.obj"/>
+    <mesh file="link3_12.obj"/>
+    <mesh file="link3_13.obj"/>
+    <mesh file="link3_14.obj"/>
+    <mesh file="link3_15.obj"/>
+    <mesh file="link3_16.obj"/>
+    <mesh file="link3_17.obj"/>
+    <mesh file="link3_18.obj"/>
+    <mesh file="link3_19.obj"/>
+    <mesh file="link3_20.obj"/>
+    <mesh file="link3_21.obj"/>
+    <mesh file="link3_22.obj"/>
+    <mesh file="link3_23.obj"/>
+    <mesh file="link3_24.obj"/>
+  </asset>
+  <worldbody>
+    <body name="link3">
+      <geom mesh="link3_0" material="247,247,247_20.001" class="visual"/>
+      <geom mesh="link3_1" material="69,69,69_11.002" class="visual"/>
+      <geom mesh="link3_2" material="247,247,247_15.001" class="visual"/>
+      <geom mesh="link3_3" material="75,75,75_12.001" class="visual"/>
+      <geom mesh="link3_4" material="75,75,75_13.001" class="visual"/>
+      <geom mesh="link3_5" material="247,247,247_16.001" class="visual"/>
+      <geom mesh="link3_6" material="247,247,247_17.001" class="visual"/>
+      <geom mesh="link3_7" material="247,247,247_18.001" class="visual"/>
+      <geom mesh="link3_8" material="247,247,247_19.001" class="visual"/>
+      <geom mesh="link3_9" material="247,247,247_21.001" class="visual"/>
+      <geom mesh="link3_10" material="247,247,247_22.001" class="visual"/>
+      <geom mesh="link3_11" material="247,247,247_23.001" class="visual"/>
+      <geom mesh="link3_12" material="247,247,247_2.006" class="visual"/>
+      <geom mesh="link3_13" material="247,247,247_2.007" class="visual"/>
+      <geom mesh="link3_14" material="69,69,69_11.004" class="visual"/>
+      <geom mesh="link3_15" material="156,168,171_3.003" class="visual"/>
+      <geom mesh="link3_16" material="220,239,237.003" class="visual"/>
+      <geom mesh="link3_17" material="69,69,69.004" class="visual"/>
+      <geom mesh="link3_18" material="255,255,255_1.004" class="visual"/>
+      <geom mesh="link3_19" material="242,242,242.004" class="visual"/>
+      <geom mesh="link3_20" material="125,125,125.004" class="visual"/>
+      <geom mesh="link3_21" material="153,153,153.004" class="visual"/>
+      <geom mesh="link3_22" material="204,204,204.004" class="visual"/>
+      <geom mesh="link3_23" material="75,75,75_4.003" class="visual"/>
+      <geom mesh="link3_24" material="247,247,247.003" class="visual"/>
+      <geom mesh="link3_0" class="collision"/>
+      <geom mesh="link3_1" class="collision"/>
+      <geom mesh="link3_2" class="collision"/>
+      <geom mesh="link3_3" class="collision"/>
+      <geom mesh="link3_4" class="collision"/>
+      <geom mesh="link3_5" class="collision"/>
+      <geom mesh="link3_6" class="collision"/>
+      <geom mesh="link3_7" class="collision"/>
+      <geom mesh="link3_8" class="collision"/>
+      <geom mesh="link3_9" class="collision"/>
+      <geom mesh="link3_10" class="collision"/>
+      <geom mesh="link3_11" class="collision"/>
+      <geom mesh="link3_12" class="collision"/>
+      <geom mesh="link3_13" class="collision"/>
+      <geom mesh="link3_14" class="collision"/>
+      <geom mesh="link3_15" class="collision"/>
+      <geom mesh="link3_16" class="collision"/>
+      <geom mesh="link3_17" class="collision"/>
+      <geom mesh="link3_18" class="collision"/>
+      <geom mesh="link3_19" class="collision"/>
+      <geom mesh="link3_20" class="collision"/>
+      <geom mesh="link3_21" class="collision"/>
+      <geom mesh="link3_22" class="collision"/>
+      <geom mesh="link3_23" class="collision"/>
+      <geom mesh="link3_24" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

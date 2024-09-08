@@ -6,7 +6,6 @@ void bind_model(py::module_& m, const std::string& model_name) {
       .def(py::init<>())
       .def_property_readonly("model_name", &PyModel<T>::get_model_name)
       .def_property_readonly("robot_dof", &PyModel<T>::get_robot_dof)
-      .def_property_readonly("default_urdf_model_path", &PyModel<T>::get_default_urdf_model_path)
       .def_property_readonly("robot_joint_names", &PyModel<T>::get_robot_joint_names)
       .def_property_readonly("mobility_idx", &PyModel<T>::get_mobility_idx)
       .def_property_readonly("body_idx", &PyModel<T>::get_body_idx)

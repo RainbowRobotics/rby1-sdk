@@ -305,6 +305,8 @@ rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
 
   info.robot_version = msg.robot_version();
 
+  info.sdk_commit_id = msg.sdk_commit_id();
+
   if (msg.has_battery_info()) {
     info.battery_info = ProtoToBatteryInfo(msg.battery_info());
   }
@@ -927,6 +929,43 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return "";
   }
 
+  std::string GetRobotModel() const {  // NOLINT
+    api::GetRobotModelRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::GetRobotModelResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = robot_info_service_->GetRobotModel(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+
+    return res.model();
+  }
+
+  bool ImportRobotModel(const std::string& name, const std::string& model) {
+    api::ImportRobotModelRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(name);
+    req.set_model(model);
+
+    api::ImportRobotModelResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = robot_info_service_->ImportRobotModel(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() != api::CommonError::CODE_OK) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
     explicit StateReader(api::RobotStateService::Stub* stub, const std::function<void(const RobotState<T>&)>& cb,
@@ -1199,6 +1238,16 @@ bool Robot<T>::SetParameter(const std::string& name, const std::string& value) {
 template <typename T>
 std::string Robot<T>::GetParameter(const std::string& name) const {
   return impl_->GetParameter(name);
+}
+
+template <typename T>
+std::string Robot<T>::GetRobotModel() const {
+  return impl_->GetRobotModel();
+}
+
+template <typename T>
+bool Robot<T>::ImportRobotModel(const std::string& name, const std::string& model) const {
+  return impl_->ImportRobotModel(name, model);
 }
 
 template <typename T>

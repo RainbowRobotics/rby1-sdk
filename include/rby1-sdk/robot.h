@@ -102,6 +102,10 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   std::string GetParameter(const std::string& name) const;  // NOLINT
 
+  std::string GetRobotModel() const;  // NOLINT
+
+  bool ImportRobotModel(const std::string& name, const std::string& model) const;  // NOLINT
+
  private:
   explicit Robot(std::string address);
 

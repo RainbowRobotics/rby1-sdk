@@ -1,0 +1,40 @@
+<mujoco model="right_arm_4">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="247,247,247_27.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_28.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="247,247,247_33.001" specular="1.0" shininess="0.2" rgba="0.968627 0.968627 0.968627 1.000000"/>
+    <material name="39,39,39_4.004" specular="1.0" shininess="0.2" rgba="0.152941 0.152941 0.152941 1.000000"/>
+    <material name="39,39,39_4.005" specular="1.0" shininess="0.2" rgba="0.152941 0.152941 0.152941 1.000000"/>
+    <material name="75,75,75_22.001" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <mesh file="right_arm_4_0.obj"/>
+    <mesh file="right_arm_4_1.obj"/>
+    <mesh file="right_arm_4_2.obj"/>
+    <mesh file="right_arm_4_3.obj"/>
+    <mesh file="right_arm_4_4.obj"/>
+    <mesh file="right_arm_4_5.obj"/>
+  </asset>
+  <worldbody>
+    <body name="right_arm_4">
+      <geom mesh="right_arm_4_0" material="75,75,75_22.001" class="visual"/>
+      <geom mesh="right_arm_4_1" material="247,247,247_27.001" class="visual"/>
+      <geom mesh="right_arm_4_2" material="39,39,39_4.004" class="visual"/>
+      <geom mesh="right_arm_4_3" material="39,39,39_4.005" class="visual"/>
+      <geom mesh="right_arm_4_4" material="247,247,247_33.001" class="visual"/>
+      <geom mesh="right_arm_4_5" material="247,247,247_28.001" class="visual"/>
+      <geom mesh="right_arm_4_0" class="collision"/>
+      <geom mesh="right_arm_4_1" class="collision"/>
+      <geom mesh="right_arm_4_2" class="collision"/>
+      <geom mesh="right_arm_4_3" class="collision"/>
+      <geom mesh="right_arm_4_4" class="collision"/>
+      <geom mesh="right_arm_4_5" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

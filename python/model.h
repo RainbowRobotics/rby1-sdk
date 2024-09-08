@@ -20,8 +20,6 @@ class PyModel : public PyModelBase {
 
   auto get_robot_dof() { return T::kRobotDOF; }
 
-  auto get_default_urdf_model_path() { return T::kDefaultURDFModelPath; }
-
   auto get_robot_joint_names() { return T::kRobotJointNames; }
 
   auto get_mobility_idx() { return T::kMobilityIdx; }

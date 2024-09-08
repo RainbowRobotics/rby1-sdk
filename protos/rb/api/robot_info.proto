@@ -24,6 +24,8 @@ message RobotInfo {
   //
   string robot_version = 1;
 
+  string sdk_commit_id = 10;
+
   BatteryInfo battery_info = 2;
 
   repeated PowerInfo power_infos = 3;
@@ -49,4 +51,26 @@ message GetRobotInfoResponse {
   ResponseHeader response_header = 1;
 
   RobotInfo robot_info = 2;
+}
+
+message GetRobotModelRequest {
+  RequestHeader request_header = 1;
+}
+
+message GetRobotModelResponse {
+  ResponseHeader response_header = 1;
+
+  string model = 2;
+}
+
+message ImportRobotModelRequest {
+  RequestHeader request_header = 1;
+
+  string name = 2;
+
+  string model = 3;
+}
+
+message ImportRobotModelResponse {
+  ResponseHeader response_header = 1;
 }

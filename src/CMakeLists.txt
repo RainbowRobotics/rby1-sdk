@@ -1,4 +1,4 @@
-if (BUILD_PYTHON_BINDINGS)
+if (BUILD_PYTHON_BINDINGS OR BUILD_LIB_STATIC)
     set(LIBRARY_TYPE STATIC)
 else()
     set(LIBRARY_TYPE SHARED)
@@ -39,11 +39,8 @@ target_link_libraries(rby1-sdk PRIVATE
         nlohmann_json::nlohmann_json
         DynamixelSDK
 )
+
 target_include_directories(rby1-sdk PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         $<BUILD_INTERFACE:${PROTO_BINARY_DIR}>)
-target_compile_definitions(rby1-sdk PUBLIC
-        $<INSTALL_INTERFACE:-DRBY1_SDK_MODEL_PATH="include/rby1-sdk/model">
-        $<BUILD_INTERFACE:-DRBY1_SDK_MODEL_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../include/rby1-sdk/model">
-)

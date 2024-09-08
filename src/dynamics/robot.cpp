@@ -7,9 +7,12 @@
 using namespace std;
 using namespace rb::math;
 
-namespace rb::dyn {
+namespace {
 
-RobotConfiguration LoadRobotFromURDF(const std::string& path, const std::string& base_link_name) {
+using namespace rb;
+using namespace rb::dyn;
+
+RobotConfiguration _load_robot_from_urdf(tinyxml2::XMLDocument& doc, const std::string& base_link_name) {
   using namespace tinyxml2;
 
   const auto& ToDoubleArray3 = [](const std::string& str) {
@@ -35,12 +38,6 @@ RobotConfiguration LoadRobotFromURDF(const std::string& path, const std::string&
     }
     return math::SE3::Identity();
   };
-
-  XMLDocument doc;
-  XMLError ok = doc.LoadFile(path.c_str());
-  if (ok != XMLError::XML_SUCCESS) {
-    throw std::runtime_error("Load URDF failed");
-  }
 
   std::string robot_name{};
   std::unordered_map<std::string, std::shared_ptr<Link>> links;
@@ -274,6 +271,34 @@ RobotConfiguration LoadRobotFromURDF(const std::string& path, const std::string&
   rc.mobile_base = mobile_base;
 
   return rc;
+}
+
+}  // namespace
+
+namespace rb::dyn {
+
+RobotConfiguration LoadRobotFromURDFData(const std::string& model, const std::string& base_link_name) {
+  using namespace tinyxml2;
+
+  XMLDocument doc;
+  XMLError ok = doc.Parse(model.c_str());
+  if (ok != XMLError::XML_SUCCESS) {
+    throw std::runtime_error("Cannot parse model data");
+  }
+
+  return _load_robot_from_urdf(doc, base_link_name);
+}
+
+RobotConfiguration LoadRobotFromURDF(const std::string& path, const std::string& base_link_name) {
+  using namespace tinyxml2;
+
+  XMLDocument doc;
+  XMLError ok = doc.LoadFile(path.c_str());
+  if (ok != XMLError::XML_SUCCESS) {
+    throw std::runtime_error("Load URDF failed");
+  }
+
+  return _load_robot_from_urdf(doc, base_link_name);
 }
 
 }  // namespace rb::dyn

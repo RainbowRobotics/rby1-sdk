@@ -1,0 +1,24 @@
+<mujoco model="right_arm_f2">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="70,70,70.002" specular="1.0" shininess="0.2" rgba="0.274510 0.274510 0.274510 1.000000"/>
+    <material name="75,75,75.003" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <mesh file="right_arm_f2_0.obj"/>
+    <mesh file="right_arm_f2_1.obj"/>
+  </asset>
+  <worldbody>
+    <body name="right_arm_f2">
+      <geom mesh="right_arm_f2_0" material="70,70,70.002" class="visual"/>
+      <geom mesh="right_arm_f2_1" material="75,75,75.003" class="visual"/>
+      <geom mesh="right_arm_f2_0" class="collision"/>
+      <geom mesh="right_arm_f2_1" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

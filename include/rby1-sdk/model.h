@@ -13,8 +13,6 @@ class A {
 
   static constexpr size_t kRobotDOF = 24;
 
-  static constexpr std::string_view kDefaultURDFModelPath = RBY1_SDK_MODEL_PATH "/rby1a/model.urdf";
-
   static constexpr std::array<std::string_view, kRobotDOF> kRobotJointNames = {
       "right_wheel", "left_wheel",  "torso_0",     "torso_1",     "torso_2",     "torso_3",
       "torso_4",     "torso_5",     "right_arm_0", "right_arm_1", "right_arm_2", "right_arm_3",

@@ -690,12 +690,8 @@ class Robot {
           }
           mb->right_wheel_idx = joint_idx_[rc.mobile_base->joints[0]];
           mb->left_wheel_idx = joint_idx_[rc.mobile_base->joints[1]];
-          std::cout << "mb->right_wheel_idx: " << mb->right_wheel_idx << std::endl;
-          std::cout << "mb->left_wheel_idx: " << mb->left_wheel_idx << std::endl;
           mb->wheel_base = rc.mobile_base->params[0];
           mb->wheel_radius = rc.mobile_base->params[1];
-          std::cout << "mb->wheel_base: " << mb->wheel_base << std::endl;
-          std::cout << "mb->wheel_radius: " << mb->wheel_radius << std::endl;
           mobile_base_ = mb;
           break;
         }
@@ -784,6 +780,8 @@ class Robot {
    */
   std::shared_ptr<MobileBase> mobile_base_;
 };
+
+RobotConfiguration LoadRobotFromURDFData(const std::string& model, const std::string& base_link_name);
 
 RobotConfiguration LoadRobotFromURDF(const std::string& path, const std::string& base_link_name);
 

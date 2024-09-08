@@ -17,6 +17,8 @@ struct JointInfo {
 struct RobotInfo {
   std::string robot_version{};
 
+  std::string sdk_commit_id{};
+
   BatteryInfo battery_info;
 
   std::vector<PowerInfo> power_infos{};

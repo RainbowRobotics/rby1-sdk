@@ -1,0 +1,80 @@
+<mujoco model="link5">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="125,125,125.003" specular="1.0" shininess="0.2" rgba="0.490196 0.490196 0.490196 1.000000"/>
+    <material name="153,153,153.003" specular="1.0" shininess="0.2" rgba="0.600000 0.600000 0.600000 1.000000"/>
+    <material name="204,204,204.003" specular="1.0" shininess="0.2" rgba="0.800000 0.800000 0.800000 1.000000"/>
+    <material name="242,242,242.003" specular="1.0" shininess="0.2" rgba="0.949020 0.949020 0.949020 1.000000"/>
+    <material name="254,254,255_7.001" specular="1.0" shininess="0.2" rgba="0.996078 0.996078 1.000000 1.000000"/>
+    <material name="255,255,255_1.003" specular="1.0" shininess="0.2" rgba="1.000000 1.000000 1.000000 1.000000"/>
+    <material name="39,39,39_5.002" specular="1.0" shininess="0.2" rgba="0.152941 0.152941 0.152941 1.000000"/>
+    <material name="39,39,39_5.003" specular="1.0" shininess="0.2" rgba="0.152941 0.152941 0.152941 1.000000"/>
+    <material name="69,69,69.003" specular="1.0" shininess="0.2" rgba="0.270588 0.270588 0.270588 1.000000"/>
+    <material name="69,69,69_2.001" specular="1.0" shininess="0.2" rgba="0.270588 0.270588 0.270588 1.000000"/>
+    <material name="75,75,75_15.001" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <material name="75,75,75_16.001" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <material name="75,75,75_17.001" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <material name="75,75,75_18.001" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <material name="75,75,75_8.001" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <material name="75,75,75_9.001" specular="1.0" shininess="0.2" rgba="0.294118 0.294118 0.294118 1.000000"/>
+    <mesh file="link5_0.obj"/>
+    <mesh file="link5_1.obj"/>
+    <mesh file="link5_2.obj"/>
+    <mesh file="link5_3.obj"/>
+    <mesh file="link5_4.obj"/>
+    <mesh file="link5_5.obj"/>
+    <mesh file="link5_6.obj"/>
+    <mesh file="link5_7.obj"/>
+    <mesh file="link5_8.obj"/>
+    <mesh file="link5_9.obj"/>
+    <mesh file="link5_10.obj"/>
+    <mesh file="link5_11.obj"/>
+    <mesh file="link5_12.obj"/>
+    <mesh file="link5_13.obj"/>
+    <mesh file="link5_14.obj"/>
+    <mesh file="link5_15.obj"/>
+  </asset>
+  <worldbody>
+    <body name="link5">
+      <geom mesh="link5_0" material="39,39,39_5.003" class="visual"/>
+      <geom mesh="link5_1" material="69,69,69_2.001" class="visual"/>
+      <geom mesh="link5_2" material="254,254,255_7.001" class="visual"/>
+      <geom mesh="link5_3" material="75,75,75_9.001" class="visual"/>
+      <geom mesh="link5_4" material="75,75,75_17.001" class="visual"/>
+      <geom mesh="link5_5" material="75,75,75_18.001" class="visual"/>
+      <geom mesh="link5_6" material="75,75,75_16.001" class="visual"/>
+      <geom mesh="link5_7" material="75,75,75_15.001" class="visual"/>
+      <geom mesh="link5_8" material="75,75,75_8.001" class="visual"/>
+      <geom mesh="link5_9" material="39,39,39_5.002" class="visual"/>
+      <geom mesh="link5_10" material="69,69,69.003" class="visual"/>
+      <geom mesh="link5_11" material="255,255,255_1.003" class="visual"/>
+      <geom mesh="link5_12" material="242,242,242.003" class="visual"/>
+      <geom mesh="link5_13" material="125,125,125.003" class="visual"/>
+      <geom mesh="link5_14" material="153,153,153.003" class="visual"/>
+      <geom mesh="link5_15" material="204,204,204.003" class="visual"/>
+      <geom mesh="link5_0" class="collision"/>
+      <geom mesh="link5_1" class="collision"/>
+      <geom mesh="link5_2" class="collision"/>
+      <geom mesh="link5_3" class="collision"/>
+      <geom mesh="link5_4" class="collision"/>
+      <geom mesh="link5_5" class="collision"/>
+      <geom mesh="link5_6" class="collision"/>
+      <geom mesh="link5_7" class="collision"/>
+      <geom mesh="link5_8" class="collision"/>
+      <geom mesh="link5_9" class="collision"/>
+      <geom mesh="link5_10" class="collision"/>
+      <geom mesh="link5_11" class="collision"/>
+      <geom mesh="link5_12" class="collision"/>
+      <geom mesh="link5_13" class="collision"/>
+      <geom mesh="link5_14" class="collision"/>
+      <geom mesh="link5_15" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -12,9 +12,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ############################################################
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples")
+set(BUILD_LIB_STATIC OFF CACHE BOOL "Build static rby1_sdk library")
 set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "Build Python bindings using Pybind11")
 
-message (STATUS "RBY1-SDK: Build examples: " ${BUILD_EXAMPLES})
+message(STATUS "RBY1-SDK: Build examples: " ${BUILD_EXAMPLES})
 
 ############################################################
 # DEPENDENCIES
@@ -99,7 +100,9 @@ endif ()
 # INSTALL
 ############################################################
 
-if (NOT BUILD_PYTHON_BINDINGS)
+if ((NOT BUILD_PYTHON_BINDINGS)
+        AND (${PROJECT_NAME} STREQUAL ${CMAKE_PROJECT_NAME})
+)
     include(GNUInstallDirs)
     set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/rby1-sdk)
 
@@ -111,6 +114,7 @@ if (NOT BUILD_PYTHON_BINDINGS)
     set_target_properties(rby1-sdk PROPERTIES EXPORT_NAME rby1-sdk)
 
     install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    install(DIRECTORY models/ DESTINATION share/rby1-sdk/models)
 
     install(EXPORT rby1-sdk-targets
             FILE

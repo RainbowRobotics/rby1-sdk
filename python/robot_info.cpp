@@ -28,6 +28,7 @@ void bind_robot_info(py::module_& m) {
   py::class_<RobotInfo>(m, "RobotInfo")
       .def(py::init<>())
       .def_readonly("robot_version", &RobotInfo::robot_version)
+      .def_readonly("sdk_commit_id", &RobotInfo::sdk_commit_id)
       .def_readonly("battery_info", &RobotInfo::battery_info)
       .def_readonly("power_infos", &RobotInfo::power_infos)
       .def_readonly("degree_of_freedom", &RobotInfo::degree_of_freedom)

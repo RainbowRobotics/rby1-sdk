@@ -9,13 +9,13 @@ int main() {
 
   try {
     // Latency timer setting
-    upc::InitializeDevice("/dev/ttyUSB0");
+    upc::InitializeDevice("/dev/rby1_master_arm");
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return 1;
   }
 
-  auto master_arm = std::make_shared<upc::MasterArm>("/dev/ttyUSB0");
+  auto master_arm = std::make_shared<upc::MasterArm>("/dev/rby1_master_arm");
   master_arm->SetModelPath(PATH "/master_arm.urdf");
   master_arm->SetControlPeriod(0.02);
 
@@ -54,7 +54,7 @@ int main() {
       input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
       input.target_position(Eigen::seq(7, 13)) = q_left;
     }
-
+    std::cout<<"trigger : [" << state.button_right.button << ", " << state.button_left.button <<"]" <<std::endl;
     return input;
   });
 

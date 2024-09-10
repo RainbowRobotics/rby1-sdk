@@ -665,8 +665,7 @@
         <child link="link_torso_2"/>
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.350"/>
         <axis xyz="0 1 0"/>
-        <limit effort="1000.0" lower="-2.617993" upper="1.570796" velocity="3.14159265" acceleration="3.141592"/>
-        <!-- -148  -->
+        <limit effort="1000.0" lower="-2.478367" upper="1.570796" velocity="3.14159265" acceleration="3.141592"/>
     </joint>
 
     <joint name="torso_3" type="revolute">

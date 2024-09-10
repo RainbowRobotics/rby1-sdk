@@ -4,6 +4,7 @@ set(MODULE_TEST
         right_arm
         left_arm
         ft_sensor 
+        master_arm
 )
 
 foreach (SRC IN LISTS MODULE_TEST)

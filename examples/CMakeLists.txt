@@ -9,7 +9,6 @@ set(EXAMPLES
         velocity_estimation
 
         master_arm
-        master_arm_
         teleoperation_with_joint_mapping
 
         kinematic_calibration

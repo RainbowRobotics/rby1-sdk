@@ -13,6 +13,7 @@
 #include "rb/api/control_manager_service.grpc.pb.h"
 #include "rb/api/log_service.grpc.pb.h"
 #include "rb/api/parameter_service.grpc.pb.h"
+#include "rb/api/ping_service.grpc.pb.h"
 #include "rb/api/power_service.grpc.pb.h"
 #include "rb/api/robot_command_service.grpc.pb.h"
 #include "rb/api/robot_info_service.grpc.pb.h"
@@ -37,217 +38,13 @@ struct timespec DurationToTimespec(const google::protobuf::Duration& duration) {
   return t;
 }
 
+int64_t TimestampInNS(const google::protobuf::Timestamp& time) {
+  return (int64_t)time.seconds() * (int64_t)1e9 + (int64_t)time.nanos();
+}
+
 }  // namespace
 
 namespace rb::api {
-
-template <typename T>
-rb::RobotState<T> ProtoToRobotState(const api::RobotState& msg) {
-  rb::RobotState<T> rs;
-
-  if (msg.has_system_stat()) {
-    const auto& rs_s = msg.system_stat();
-    rs.system_stat.cpu_usage = rs_s.cpu_usage();
-    rs.system_stat.memory_usage = rs_s.memory_usage();
-    rs.system_stat.uptime = rs_s.uptime();
-    rs.system_stat.program_uptime = rs_s.program_uptime();
-  }
-
-  if (msg.has_timestamp()) {
-    const auto& rs_ts = msg.timestamp();
-    rs.timestamp.tv_sec = rs_ts.seconds();
-    rs.timestamp.tv_nsec = rs_ts.nanos();
-  }
-
-  if (msg.has_battery_state()) {
-    const auto& rs_bs = msg.battery_state();
-    rs.battery_state.voltage = rs_bs.voltage();
-    rs.battery_state.current = rs_bs.current();
-    rs.battery_state.level_percent = rs_bs.level_percent();
-  }
-
-  for (const auto& s : msg.power_states()) {
-    rb::PowerState ps;
-    ps.voltage = s.voltage();
-    ps.state = static_cast<rb::PowerState::State>(s.state());
-    rs.power_states.push_back(ps);
-  }
-
-  const auto& proto_to_tool_flange = [](rb::ToolFlangeState& tf, const api::ToolFlangeState& tf_proto) {
-    if (tf_proto.has_time_since_last_update()) {
-      tf.time_since_last_update = DurationToTimespec(tf_proto.time_since_last_update());
-    } else {
-      tf.time_since_last_update.tv_sec = 999;
-    }
-
-    if (tf_proto.has_gyro()) {
-      tf.gyro(0) = tf_proto.gyro().x();
-      tf.gyro(1) = tf_proto.gyro().y();
-      tf.gyro(2) = tf_proto.gyro().z();
-    }
-
-    if (tf_proto.has_acceleration()) {
-      tf.acceleration(0) = tf_proto.acceleration().x();
-      tf.acceleration(1) = tf_proto.acceleration().y();
-      tf.acceleration(2) = tf_proto.acceleration().z();
-    }
-
-    tf.switch_A = tf_proto.switch_a();
-    tf.output_voltage = tf_proto.output_voltage();
-  };
-  if (msg.has_tool_flange_right()) {
-    proto_to_tool_flange(rs.tool_flange_right, msg.tool_flange_right());
-  }
-  if (msg.has_tool_flange_left()) {
-    proto_to_tool_flange(rs.tool_flange_left, msg.tool_flange_left());
-  }
-
-  const auto& proto_to_ftsensor = [](rb::FTSensorData& ft, const api::FTSensorData& ft_proto) {
-    if (ft_proto.has_time_since_last_update()) {
-      ft.time_since_last_update = DurationToTimespec(ft_proto.time_since_last_update());
-    } else {
-      ft.time_since_last_update.tv_sec = 999;
-    }
-
-    if (ft_proto.has_force()) {
-      ft.force(0) = ft_proto.force().x();
-      ft.force(1) = ft_proto.force().y();
-      ft.force(2) = ft_proto.force().z();
-    }
-
-    if (ft_proto.has_torque()) {
-      ft.torque(0) = ft_proto.torque().x();
-      ft.torque(1) = ft_proto.torque().y();
-      ft.torque(2) = ft_proto.torque().z();
-    }
-  };
-  if (msg.has_ft_sensor_right()) {
-    proto_to_ftsensor(rs.ft_sensor_right, msg.ft_sensor_right());
-  }
-  if (msg.has_ft_sensor_left()) {
-    proto_to_ftsensor(rs.ft_sensor_left, msg.ft_sensor_left());
-  }
-
-  if (msg.joint_states_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of the joint state does not match the DOF.");
-  }
-
-  for (int i = 0; i < msg.joint_states_size(); i++) {
-    const auto& s = msg.joint_states(i);
-    auto& js = rs.joint_states[i];
-
-    js.is_ready = s.is_ready();
-    js.fet_state = static_cast<rb::JointState::FETState>(s.fet_state());
-    js.run_state = static_cast<rb::JointState::RunState>(s.run_state());
-    js.init_state = static_cast<rb::JointState::InitializationState>(s.init_state());
-
-    js.motor_type = s.motor_type();
-    js.motor_state = s.motor_state();
-
-    if (s.has_time_since_last_update()) {
-      js.time_since_last_update = DurationToTimespec(s.time_since_last_update());
-    } else {
-      js.time_since_last_update.tv_sec = 999;
-    }
-    js.power_on = s.power_on();
-    js.position = s.position();
-    js.velocity = s.velocity();
-    js.current = s.current();
-    js.torque = s.torque();
-    js.target_position = s.target_position();
-    js.target_velocity = s.target_velocity();
-    js.target_feedback_gain = s.target_feedback_gain();
-    js.target_feedforward_torque = s.target_feedforward_torque();
-  }
-
-  if (msg.is_ready_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of 'is_ready' vector does not match the DOF.");
-  }
-
-  for (int i = 0; i < T::kRobotDOF; i++) {
-    rs.is_ready[i] = msg.is_ready(i);
-  }
-
-  if (msg.position_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of 'position' vector does not match the DOF.");
-  }
-
-  for (int i = 0; i < T::kRobotDOF; i++) {
-    rs.position[i] = msg.position(i);
-  }
-
-  if (msg.velocity_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of 'velocity' vector does not match the DOF.");
-  }
-
-  for (int i = 0; i < T::kRobotDOF; i++) {
-    rs.velocity[i] = msg.velocity(i);
-  }
-
-  if (msg.current_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of 'current' vector does not match the DOF.");
-  }
-
-  for (int i = 0; i < T::kRobotDOF; i++) {
-    rs.current[i] = msg.current(i);
-  }
-
-  if (msg.torque_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of 'torque' vector does not match the DOF.");
-  }
-
-  for (int i = 0; i < T::kRobotDOF; i++) {
-    rs.torque[i] = msg.torque(i);
-  }
-
-  if (msg.target_position_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of 'target_position' vector does not match the DOF.");
-  }
-
-  for (int i = 0; i < T::kRobotDOF; i++) {
-    rs.target_position[i] = msg.target_position(i);
-  }
-
-  if (msg.target_velocity_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of 'target_velocity' vector does not match the DOF.");
-  }
-
-  for (int i = 0; i < T::kRobotDOF; i++) {
-    rs.target_velocity[i] = msg.target_velocity(i);
-  }
-
-  if (msg.target_feedback_gain_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of 'target_feedback_gain' vector does not match the DOF.");
-  }
-
-  for (int i = 0; i < T::kRobotDOF; i++) {
-    rs.target_feedback_gain[i] = msg.target_feedback_gain(i);
-  }
-
-  if (msg.target_feedforward_torque_size() != T::kRobotDOF) {
-    throw std::runtime_error("The size of 'target_feedforward_torque' vector does not match the DOF.");
-  }
-
-  for (int i = 0; i < T::kRobotDOF; i++) {
-    rs.target_feedforward_torque[i] = msg.target_feedforward_torque(i);
-  }
-
-  if (msg.has_odometry()) {
-    Eigen::Vector<double, 2> pos{Eigen::Vector<double, 2>::Zero()};
-    if (msg.odometry().has_position()) {
-      pos = Eigen::Vector<double, 2>{msg.odometry().position().x(), msg.odometry().position().y()};
-    }
-    rs.odometry = math::SE2::T(msg.odometry().angle(), pos);
-  }
-
-  if (msg.has_center_of_mass()) {
-    rs.center_of_mass(0) = msg.center_of_mass().x();
-    rs.center_of_mass(1) = msg.center_of_mass().y();
-    rs.center_of_mass(2) = msg.center_of_mass().z();
-  }
-
-  return rs;
-}
 
 rb::ControlManagerState ProtoToControlManagerState(const api::ControlManagerState& msg) {
   rb::ControlManagerState cms{};
@@ -279,7 +76,7 @@ rb::Log ProtoToLog(const api::Log& msg) {
   return log;
 }
 
-rb::BatteryInfo ProtoToBatteryInfo(const api::BatteryInfo& msg) {
+rb::BatteryInfo ProtoToBatteryInfo(const api::BatteryInfo& /* msg */) {
   return {};
 }
 
@@ -514,7 +311,8 @@ class RobotCommandStreamHandlerImpl
 template <typename T>
 class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
  public:
-  explicit RobotImpl(std::string address) : address_(std::move(address)), connected_(false) {}
+  explicit RobotImpl(std::string address)
+      : address_(std::move(address)), connected_(false), time_sync_established_(false), time_sync_estimate_(0) {}
 
   ~RobotImpl() {
     StopStateUpdate();
@@ -534,6 +332,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ChannelArguments args;
     args.SetInt(GRPC_ARG_MAX_RECONNECT_BACKOFF_MS, timeout_ms);
     channel_ = grpc::CreateCustomChannel(address_, grpc::InsecureChannelCredentials(), args);
+    ping_service_ = api::PingService::NewStub(channel_);
     power_service_ = api::PowerService::NewStub(channel_);
     control_manager_service_ = api::ControlManagerService::NewStub(channel_);
     robot_info_service_ = api::RobotInfoService::NewStub(channel_);
@@ -575,7 +374,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
   }
 
-  api::RobotInfo GetRobotInfo() const {
+  api::RobotInfo GetRobotInfo() const {  // NOLINT
     api::GetRobotInfoRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -761,7 +560,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       return;
     }
 
-    state_reader_ = std::make_unique<StateReader>(robot_state_service_.get(), cb, rate);
+    state_reader_ = std::make_unique<StateReader>(this->shared_from_this(), robot_state_service_.get(), cb, rate);
   }
 
   void StopStateUpdate() {
@@ -799,7 +598,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       throw std::runtime_error(status.error_message());
     }
 
-    return api::ProtoToRobotState<T>(res.robot_state());
+    return ProtoToRobotState(res.robot_state());
   }
 
   std::vector<Log> GetLastLog(unsigned int count) const {  // NOLINT
@@ -822,7 +621,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return logs;
   }
 
-  ControlManagerState GetControlManagerState() const {
+  ControlManagerState GetControlManagerState() const {  // NOLINT
     api::GetControlManagerStateRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -966,10 +765,63 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return true;
   }
 
+  bool SyncTime() {
+    api::PingRequest req;
+    api::PingResponse res;
+    grpc::ClientContext context;
+
+    int64_t client_req_utc_time;
+    int64_t client_req_time, client_res_time;
+    int64_t robot_recv_req_time, robot_send_res_time;
+
+    client_req_utc_time = TimestampInNS(google::protobuf::util::TimeUtil::GetCurrentTime());
+    client_req_time = TimespecInNS(GetCurrentTime());
+    InitializeRequestHeader(req.mutable_request_header());
+    grpc::Status status = ping_service_->Ping(&context, req, &res);
+    client_res_time = TimespecInNS(GetCurrentTime());
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    if (res.has_response_header()) {
+      const auto& res_header = res.response_header();
+
+      if (res_header.has_request_received_timestamp()) {
+        robot_recv_req_time = TimestampInNS(res_header.request_received_timestamp());
+      } else {
+        return false;
+      }
+
+      if (res_header.has_response_timestamp()) {
+        robot_send_res_time = TimestampInNS(res_header.response_timestamp());
+      } else {
+        return false;
+      }
+
+      if (client_res_time < client_req_time) {
+        return false;
+      }
+
+      if (robot_send_res_time < robot_recv_req_time) {
+        return false;
+      }
+
+      time_sync_established_ = true;
+      time_sync_estimate_ = (client_req_utc_time - robot_recv_req_time) +
+                            ((client_res_time - client_req_time) - (robot_send_res_time - robot_recv_req_time)) / 2;
+      return true;
+    }
+
+    return false;
+  }
+
+  bool HasEstablishedTimeSync() { return time_sync_established_; }
+
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
-    explicit StateReader(api::RobotStateService::Stub* stub, const std::function<void(const RobotState<T>&)>& cb,
-                         double rate) {
+    explicit StateReader(std::shared_ptr<RobotImpl<T>> robot, api::RobotStateService::Stub* stub,
+                         const std::function<void(const RobotState<T>&)>& cb, double rate)
+        : robot_(std::move(robot)) {
       cb_ = cb;
 
       api::GetRobotStateStreamRequest req;
@@ -997,7 +849,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     void OnReadDone(bool ok) override {
       if (ok) {
         if (res_.has_robot_state() && cb_) {
-          cb_(api::ProtoToRobotState<T>(res_.robot_state()));
+          cb_(robot_->ProtoToRobotState(res_.robot_state()));
         }
         StartRead(&res_);
       }
@@ -1011,6 +863,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     }
 
    private:
+    std::shared_ptr<RobotImpl<T>> robot_;
     grpc::ClientContext context_;
     std::function<void(const RobotState<T>&)> cb_;
     api::GetRobotStateStreamResponse res_;
@@ -1078,11 +931,226 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     bool done_ = false;
   };
 
+  rb::RobotState<T> ProtoToRobotState(const api::RobotState& msg) const {
+    rb::RobotState<T> rs;
+
+    if (msg.has_timestamp()) {
+      if (time_sync_established_) {
+        int64_t rs_ts = TimestampInNS(msg.timestamp());
+        rs_ts += time_sync_estimate_;
+        rs.timestamp.tv_nsec = rs_ts % 1000000000;
+        rs.timestamp.tv_sec = (rs_ts - rs.timestamp.tv_nsec) / 1000000000;
+      } else {
+        const auto& rs_ts = msg.timestamp();
+        rs.timestamp.tv_sec = rs_ts.seconds();
+        rs.timestamp.tv_nsec = rs_ts.nanos();
+      }
+    }
+
+    if (msg.has_system_stat()) {
+      const auto& rs_s = msg.system_stat();
+      rs.system_stat.cpu_usage = rs_s.cpu_usage();
+      rs.system_stat.memory_usage = rs_s.memory_usage();
+      rs.system_stat.uptime = rs_s.uptime();
+      rs.system_stat.program_uptime = rs_s.program_uptime();
+    }
+
+    if (msg.has_battery_state()) {
+      const auto& rs_bs = msg.battery_state();
+      rs.battery_state.voltage = rs_bs.voltage();
+      rs.battery_state.current = rs_bs.current();
+      rs.battery_state.level_percent = rs_bs.level_percent();
+    }
+
+    for (const auto& s : msg.power_states()) {
+      rb::PowerState ps;
+      ps.voltage = s.voltage();
+      ps.state = static_cast<rb::PowerState::State>(s.state());
+      rs.power_states.push_back(ps);
+    }
+
+    const auto& proto_to_tool_flange = [](rb::ToolFlangeState& tf, const api::ToolFlangeState& tf_proto) {
+      if (tf_proto.has_time_since_last_update()) {
+        tf.time_since_last_update = DurationToTimespec(tf_proto.time_since_last_update());
+      } else {
+        tf.time_since_last_update.tv_sec = 999;
+      }
+
+      if (tf_proto.has_gyro()) {
+        tf.gyro(0) = tf_proto.gyro().x();
+        tf.gyro(1) = tf_proto.gyro().y();
+        tf.gyro(2) = tf_proto.gyro().z();
+      }
+
+      if (tf_proto.has_acceleration()) {
+        tf.acceleration(0) = tf_proto.acceleration().x();
+        tf.acceleration(1) = tf_proto.acceleration().y();
+        tf.acceleration(2) = tf_proto.acceleration().z();
+      }
+
+      tf.switch_A = tf_proto.switch_a();
+      tf.output_voltage = tf_proto.output_voltage();
+    };
+    if (msg.has_tool_flange_right()) {
+      proto_to_tool_flange(rs.tool_flange_right, msg.tool_flange_right());
+    }
+    if (msg.has_tool_flange_left()) {
+      proto_to_tool_flange(rs.tool_flange_left, msg.tool_flange_left());
+    }
+
+    const auto& proto_to_ftsensor = [](rb::FTSensorData& ft, const api::FTSensorData& ft_proto) {
+      if (ft_proto.has_time_since_last_update()) {
+        ft.time_since_last_update = DurationToTimespec(ft_proto.time_since_last_update());
+      } else {
+        ft.time_since_last_update.tv_sec = 999;
+      }
+
+      if (ft_proto.has_force()) {
+        ft.force(0) = ft_proto.force().x();
+        ft.force(1) = ft_proto.force().y();
+        ft.force(2) = ft_proto.force().z();
+      }
+
+      if (ft_proto.has_torque()) {
+        ft.torque(0) = ft_proto.torque().x();
+        ft.torque(1) = ft_proto.torque().y();
+        ft.torque(2) = ft_proto.torque().z();
+      }
+    };
+    if (msg.has_ft_sensor_right()) {
+      proto_to_ftsensor(rs.ft_sensor_right, msg.ft_sensor_right());
+    }
+    if (msg.has_ft_sensor_left()) {
+      proto_to_ftsensor(rs.ft_sensor_left, msg.ft_sensor_left());
+    }
+
+    if (msg.joint_states_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of the joint state does not match the DOF.");
+    }
+
+    for (int i = 0; i < msg.joint_states_size(); i++) {
+      const auto& s = msg.joint_states(i);
+      auto& js = rs.joint_states[i];
+
+      js.is_ready = s.is_ready();
+      js.fet_state = static_cast<rb::JointState::FETState>(s.fet_state());
+      js.run_state = static_cast<rb::JointState::RunState>(s.run_state());
+      js.init_state = static_cast<rb::JointState::InitializationState>(s.init_state());
+
+      js.motor_type = s.motor_type();
+      js.motor_state = s.motor_state();
+
+      if (s.has_time_since_last_update()) {
+        js.time_since_last_update = DurationToTimespec(s.time_since_last_update());
+      } else {
+        js.time_since_last_update.tv_sec = 999;
+      }
+      js.power_on = s.power_on();
+      js.position = s.position();
+      js.velocity = s.velocity();
+      js.current = s.current();
+      js.torque = s.torque();
+      js.target_position = s.target_position();
+      js.target_velocity = s.target_velocity();
+      js.target_feedback_gain = s.target_feedback_gain();
+      js.target_feedforward_torque = s.target_feedforward_torque();
+    }
+
+    if (msg.is_ready_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of 'is_ready' vector does not match the DOF.");
+    }
+
+    for (int i = 0; i < T::kRobotDOF; i++) {
+      rs.is_ready[i] = msg.is_ready(i);
+    }
+
+    if (msg.position_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of 'position' vector does not match the DOF.");
+    }
+
+    for (int i = 0; i < T::kRobotDOF; i++) {
+      rs.position[i] = msg.position(i);
+    }
+
+    if (msg.velocity_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of 'velocity' vector does not match the DOF.");
+    }
+
+    for (int i = 0; i < T::kRobotDOF; i++) {
+      rs.velocity[i] = msg.velocity(i);
+    }
+
+    if (msg.current_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of 'current' vector does not match the DOF.");
+    }
+
+    for (int i = 0; i < T::kRobotDOF; i++) {
+      rs.current[i] = msg.current(i);
+    }
+
+    if (msg.torque_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of 'torque' vector does not match the DOF.");
+    }
+
+    for (int i = 0; i < T::kRobotDOF; i++) {
+      rs.torque[i] = msg.torque(i);
+    }
+
+    if (msg.target_position_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of 'target_position' vector does not match the DOF.");
+    }
+
+    for (int i = 0; i < T::kRobotDOF; i++) {
+      rs.target_position[i] = msg.target_position(i);
+    }
+
+    if (msg.target_velocity_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of 'target_velocity' vector does not match the DOF.");
+    }
+
+    for (int i = 0; i < T::kRobotDOF; i++) {
+      rs.target_velocity[i] = msg.target_velocity(i);
+    }
+
+    if (msg.target_feedback_gain_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of 'target_feedback_gain' vector does not match the DOF.");
+    }
+
+    for (int i = 0; i < T::kRobotDOF; i++) {
+      rs.target_feedback_gain[i] = msg.target_feedback_gain(i);
+    }
+
+    if (msg.target_feedforward_torque_size() != T::kRobotDOF) {
+      throw std::runtime_error("The size of 'target_feedforward_torque' vector does not match the DOF.");
+    }
+
+    for (int i = 0; i < T::kRobotDOF; i++) {
+      rs.target_feedforward_torque[i] = msg.target_feedforward_torque(i);
+    }
+
+    if (msg.has_odometry()) {
+      Eigen::Vector<double, 2> pos{Eigen::Vector<double, 2>::Zero()};
+      if (msg.odometry().has_position()) {
+        pos = Eigen::Vector<double, 2>{msg.odometry().position().x(), msg.odometry().position().y()};
+      }
+      rs.odometry = math::SE2::T(msg.odometry().angle(), pos);
+    }
+
+    if (msg.has_center_of_mass()) {
+      rs.center_of_mass(0) = msg.center_of_mass().x();
+      rs.center_of_mass(1) = msg.center_of_mass().y();
+      rs.center_of_mass(2) = msg.center_of_mass().z();
+    }
+
+    return rs;
+  }
+
  private:
   std::string address_;
   bool connected_;
 
   std::shared_ptr<grpc::Channel> channel_;
+  std::unique_ptr<api::PingService::Stub> ping_service_;
   std::unique_ptr<api::PowerService::Stub> power_service_;
   std::unique_ptr<api::ControlManagerService::Stub> control_manager_service_;
   std::unique_ptr<api::RobotInfoService::Stub> robot_info_service_;
@@ -1093,6 +1161,9 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
   std::unique_ptr<StateReader> state_reader_;
   std::unique_ptr<LogReader> log_reader_;
+
+  bool time_sync_established_;
+  int64_t time_sync_estimate_;
 
   friend class RobotCommandHandlerImpl<T>;
 };
@@ -1248,6 +1319,16 @@ std::string Robot<T>::GetRobotModel() const {
 template <typename T>
 bool Robot<T>::ImportRobotModel(const std::string& name, const std::string& model) const {
   return impl_->ImportRobotModel(name, model);
+}
+
+template <typename T>
+bool Robot<T>::SyncTime() {
+  return impl_->SyncTime();
+}
+
+template <typename T>
+bool Robot<T>::HasEstablishedTimeSync() {
+  return impl_->HasEstablishedTimeSync();
 }
 
 template <typename T>

@@ -106,6 +106,14 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool ImportRobotModel(const std::string& name, const std::string& model) const;  // NOLINT
 
+  bool SyncTime();
+
+  bool HasEstablishedTimeSync();
+
+  void StartTimeSync(bool freq);
+
+  void StopTimeSync();
+
  private:
   explicit Robot(std::string address);
 

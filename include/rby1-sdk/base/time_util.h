@@ -5,8 +5,7 @@
 namespace rb {
 
 inline long GetDurationInNs(struct timespec start, struct timespec end) {
-  return ((long)end.tv_sec * 1000000000 + (long)end.tv_nsec) -
-         ((long)start.tv_sec * 1000000000 + (long)start.tv_nsec);
+  return ((long)end.tv_sec * 1000000000 + (long)end.tv_nsec) - ((long)start.tv_sec * 1000000000 + (long)start.tv_nsec);
 }
 
 inline struct timespec GetDurationInTimespec(struct timespec start, struct timespec end) {
@@ -27,6 +26,10 @@ inline struct timespec GetCurrentTime() {
 
 inline double TimespecToDouble(const struct timespec& ts) {
   return (double)ts.tv_sec + ((double)ts.tv_nsec) / 1.e9;
+}
+
+inline int64_t TimespecInNS(const struct timespec& ts) {
+  return (int64_t)ts.tv_sec * 1e9 + (int64_t)ts.tv_nsec;
 }
 
 class TimeWatch {

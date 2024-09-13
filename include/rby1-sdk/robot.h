@@ -52,29 +52,29 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   [[nodiscard]] bool IsConnected() const;
 
-  RobotInfo GetRobotInfo() const;  // NOLINT
+  RobotInfo GetRobotInfo() const;
 
-  //  bool SetTimeScale(double time_scale) const;  // NOLINT // TODO
+  double GetTimeScale() const;
 
-  //  double GetTimeScale() const; // NOLINT // TODO
+  double SetTimeScale(double time_scale) const;
 
-  bool PowerOn(const std::string& dev_name) const;  // NOLINT
+  bool PowerOn(const std::string& dev_name) const;
 
-  bool PowerOff(const std::string& dev_name) const;  // NOLINT
+  bool PowerOff(const std::string& dev_name) const;
 
-  bool IsPowerOn(const std::string& dev_name) const;  //NOLINT
+  bool IsPowerOn(const std::string& dev_name) const;
 
-  bool ServoOn(const std::string& dev_name) const;  // NOLINT
+  bool ServoOn(const std::string& dev_name) const;
 
-  bool IsServoOn(const std::string& dev_name) const;  // NOLINT
+  bool IsServoOn(const std::string& dev_name) const;
 
-  bool EnableControlManager(bool unlimited_mode_enabled = false) const;  // NOLINT
+  bool EnableControlManager(bool unlimited_mode_enabled = false) const;
 
-  bool DisableControlManager() const;  // NOLINT
+  bool DisableControlManager() const;
 
-  bool ResetFaultControlManager() const;  // NOLINT
+  bool ResetFaultControlManager() const;
 
-  bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const;  // NOLINT
+  bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const;
 
   void StartStateUpdate(const std::function<void(const RobotState<T>&)>& cb, double rate);
 
@@ -84,11 +84,11 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   void StopLogStream();
 
-  RobotState<T> GetState() const;  // NOLINT
+  RobotState<T> GetState() const;
 
-  std::vector<Log> GetLastLog(unsigned int count) const;  // NOLINT
+  std::vector<Log> GetLastLog(unsigned int count) const;
 
-  ControlManagerState GetControlManagerState() const;  // NOLINT
+  ControlManagerState GetControlManagerState() const;
 
   std::unique_ptr<RobotCommandHandler<T>> SendCommand(const RobotCommandBuilder& builder, int priority = 1);
 
@@ -100,19 +100,19 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool SetParameter(const std::string& name, const std::string& value);
 
-  std::string GetParameter(const std::string& name) const;  // NOLINT
+  std::string GetParameter(const std::string& name) const;
 
-  std::string GetRobotModel() const;  // NOLINT
+  std::string GetRobotModel() const;
 
-  bool ImportRobotModel(const std::string& name, const std::string& model) const;  // NOLINT
+  bool ImportRobotModel(const std::string& name, const std::string& model) const;
 
   bool SyncTime();
 
   bool HasEstablishedTimeSync();
 
-  void StartTimeSync(bool freq);
+  bool StartTimeSync(long period_sec = 10 /* sec */);
 
-  void StopTimeSync();
+  bool StopTimeSync();
 
  private:
   explicit Robot(std::string address);
@@ -126,7 +126,7 @@ class RobotCommandHandler {
  public:
   ~RobotCommandHandler();
 
-  bool IsDone() const;  // NOLINT
+  bool IsDone() const;
 
   void Wait();
 
@@ -136,7 +136,7 @@ class RobotCommandHandler {
 
   RobotCommandFeedback Get();  // TODO
 
-  bool GetStatus() const;  // NOLINT
+  bool GetStatus() const;
 
  private:
   explicit RobotCommandHandler(std::unique_ptr<RobotCommandHandlerImpl<T>> impl);
@@ -151,7 +151,7 @@ class RobotCommandStreamHandler {
  public:
   ~RobotCommandStreamHandler();
 
-  bool IsDone() const;  // NOLINT
+  bool IsDone() const;
 
   void Wait();
 

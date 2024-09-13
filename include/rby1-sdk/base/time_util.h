@@ -1,35 +1,108 @@
 #pragma once
 
 #include <ctime>
+#include <iostream>
 
 namespace rb {
 
+constexpr int64_t kNanosecondsInSecond = 1000000000;
+
+/**
+ * @brief Calculates the duration between two timespec values in nanoseconds.
+ *
+ * @param start The start time as a timespec structure.
+ * @param end The end time as a timespec structure.
+ * @return int64_t The duration between start and end in nanoseconds.
+ */
 inline long GetDurationInNs(struct timespec start, struct timespec end) {
-  return ((long)end.tv_sec * 1000000000 + (long)end.tv_nsec) - ((long)start.tv_sec * 1000000000 + (long)start.tv_nsec);
+  return (static_cast<int64_t>(end.tv_sec) * kNanosecondsInSecond + end.tv_nsec) -
+         (static_cast<int64_t>(start.tv_sec) * kNanosecondsInSecond + start.tv_nsec);
 }
 
+/**
+ * @brief Calculates the duration between two timespec values as a timespec structure.
+ *
+ * @param start The start time as a timespec structure.
+ * @param end The end time as a timespec structure.
+ * @return timespec The duration between start and end as a timespec structure.
+ */
 inline struct timespec GetDurationInTimespec(struct timespec start, struct timespec end) {
-  struct timespec d {};
+  int64_t duration_ns = GetDurationInNs(start, end);
 
-  long duration = GetDurationInNs(start, end);
-  d.tv_nsec = duration % 1000000000;
-  d.tv_sec = (duration - d.tv_nsec) / 1000000000;
-  return d;
+  struct timespec duration {};
+
+  duration.tv_sec = duration_ns / kNanosecondsInSecond;
+  duration.tv_nsec = duration_ns % kNanosecondsInSecond;
+  return duration;
 }
 
+/**
+ * @brief Gets the current time using the CLOCK_MONOTONIC clock.
+ *
+ * @return timespec The current time as a timespec structure.
+ *
+ * @note CLOCK_MONOTONIC is used to retrieve the time since the system boot, unaffected by system clock changes.
+ *       In case of failure, an empty timespec structure is returned.
+ */
 inline struct timespec GetCurrentTime() {
-  struct timespec ts {};
+  struct timespec current_time {};
 
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-  return ts;
+  if (clock_gettime(CLOCK_MONOTONIC, &current_time) != 0) {
+    std::cerr << "Failed to get current time" << std::endl;
+  }
+
+  return current_time;
 }
 
+/**
+ * @brief Converts a timespec structure to a 64-bit integer representing the time in nanoseconds.
+ *
+ * @param ts The timespec structure to convert.
+ * @return int64_t The time in nanoseconds.
+ */
+inline int64_t TimespecInNs(const struct timespec& ts) {
+  return static_cast<int64_t>(ts.tv_sec) * kNanosecondsInSecond + static_cast<int64_t>(ts.tv_nsec);
+}
+
+/**
+ * @brief Converts a std::chrono::time_point to a timespec structure.
+ *
+ * @param tp The time_point to convert, with the system clock and nanosecond precision.
+ * @return timespec A timespec structure representing the same time as the given time_point.
+ */
+inline struct timespec TimepointToTimespec(
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> tp) {
+  using namespace std::chrono;
+
+  auto secs = time_point_cast<seconds>(tp);
+  auto ns = time_point_cast<nanoseconds>(tp) - time_point_cast<nanoseconds>(secs);
+
+  return timespec{secs.time_since_epoch().count(), ns.count()};
+}
+
+/**
+ * @brief Converts a timespec structure to a double value representing the time in seconds.
+ *
+ * @param ts The timespec structure to convert.
+ * @return double The time in seconds, including the fractional part from nanoseconds.
+ */
 inline double TimespecToDouble(const struct timespec& ts) {
-  return (double)ts.tv_sec + ((double)ts.tv_nsec) / 1.e9;
+  return static_cast<double>(TimespecInNs(ts)) / static_cast<double>(kNanosecondsInSecond);
 }
 
-inline int64_t TimespecInNS(const struct timespec& ts) {
-  return (int64_t)ts.tv_sec * 1e9 + (int64_t)ts.tv_nsec;
+/**
+ * @brief Normalizes a timespec structure by ensuring the nanosecond field is less than one second.
+ *
+ * @param ts The timespec structure to normalize.
+ * @return timespec The normalized timespec structure.
+ *
+ * @note This function ensures that the tv_nsec value is within the range [0, kNanosecondsInSecond).
+ *       If tv_nsec is larger than or equal to kNanosecondsInSecond, it carries over to the seconds field.
+ */
+inline timespec NormalizeTimespec(timespec ts) {
+  ts.tv_sec += ts.tv_nsec / kNanosecondsInSecond;
+  ts.tv_nsec %= kNanosecondsInSecond;
+  return ts;
 }
 
 class TimeWatch {

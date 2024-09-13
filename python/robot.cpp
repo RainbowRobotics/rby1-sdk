@@ -45,6 +45,8 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("disconnect", &Robot<T>::Disconnect)
       .def("is_connected", &Robot<T>::IsConnected)
       .def("get_robot_info", &Robot<T>::GetRobotInfo)
+      .def("get_time_scale", &Robot<T>::GetTimeScale)
+      .def("set_time_scale", &Robot<T>::SetTimeScale, "time_scale"_a)
       .def("power_on", &Robot<T>::PowerOn, "dev_name"_a)
       .def("power_off", &Robot<T>::PowerOff, "dev_name"_a)
       .def("is_power_on", &Robot<T>::IsPowerOn, "dev_name"_a)
@@ -67,7 +69,11 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("set_parameter", &Robot<T>::SetParameter, "name"_a, "value"_a)
       .def("get_parameter", &Robot<T>::GetParameter, "name"_a)
       .def("get_robot_model", &Robot<T>::GetRobotModel)
-      .def("import_robot_model", &Robot<T>::ImportRobotModel, "name"_a, "model"_a);
+      .def("import_robot_model", &Robot<T>::ImportRobotModel, "name"_a, "model"_a)
+      .def("sync_time", &Robot<T>::SyncTime)
+      .def("has_established_time_sync", &Robot<T>::HasEstablishedTimeSync)
+      .def("start_time_sync", &Robot<T>::StartTimeSync, "period_sec"_a)
+      .def("stop_time_sync", &Robot<T>::StopTimeSync);
 }
 
 void pybind11_robot(py::module_& m) {

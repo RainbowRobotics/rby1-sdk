@@ -17,11 +17,13 @@ message Log {
 
   google.protobuf.Timestamp timestamp = 1;
 
+  google.protobuf.Timestamp robot_system_timestamp = 4;
+
   Level level = 2;
 
   string message = 3;
 
-  string logger_name = 10;
+  reserved 10;
 }
 
 message GetLastLogRequest {

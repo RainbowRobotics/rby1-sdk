@@ -19,11 +19,11 @@ struct Log {
 
   struct timespec timestamp {};
 
+  struct timespec robot_system_timestamp {};
+
   Level level;
 
   std::string message;
-
-  std::string logger_name;
 };
 
 inline std::string ToString(const Log::Level& level) {
@@ -56,7 +56,8 @@ inline std::ostream& operator<<(std::ostream& out, const rb::Log& log) {
   out << "[" << log.timestamp.tv_sec << ".";
   out << std::setw(9) << std::setfill('0') << log.timestamp.tv_nsec << "] ";
 
-  out << "[" << log.logger_name << "] ";
+  out << "[" << log.robot_system_timestamp.tv_sec << ".";
+  out << std::setw(9) << std::setfill('0') << log.robot_system_timestamp.tv_nsec << "] ";
 
   out << "[" << log.level << "] ";
 

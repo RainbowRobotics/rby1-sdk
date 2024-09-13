@@ -7,5 +7,7 @@ import "rb/api/control_manager.proto";
 service ControlManagerService {
   rpc ControlManagerCommand(ControlManagerCommandRequest) returns (ControlManagerCommandResponse) {}
 
+  rpc GetTimeScale(GetTimeScaleRequest) returns (GetTimeScaleResponse) {}
+
   rpc SetTimeScale(SetTimeScaleRequest) returns (SetTimeScaleResponse) {}
 }

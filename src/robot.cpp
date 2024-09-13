@@ -19,6 +19,7 @@
 #include "rb/api/robot_info_service.grpc.pb.h"
 #include "rb/api/robot_state_service.grpc.pb.h"
 
+#include "rby1-sdk/base/event_loop.h"
 #include "rby1-sdk/base/time_util.h"
 #include "rby1-sdk/log.h"
 #include "rby1-sdk/model.h"
@@ -27,7 +28,10 @@
 namespace {
 
 void InitializeRequestHeader(rb::api::RequestHeader* req_header) {
-  *req_header->mutable_request_timestamp() = google::protobuf::util::TimeUtil::GetCurrentTime();
+  const auto& ts = rb::TimepointToTimespec(std::chrono::system_clock::now());
+
+  req_header->mutable_request_timestamp()->set_seconds(ts.tv_sec);
+  req_header->mutable_request_timestamp()->set_nanos(ts.tv_nsec);
 }
 
 struct timespec DurationToTimespec(const google::protobuf::Duration& duration) {
@@ -38,8 +42,8 @@ struct timespec DurationToTimespec(const google::protobuf::Duration& duration) {
   return t;
 }
 
-int64_t TimestampInNS(const google::protobuf::Timestamp& time) {
-  return (int64_t)time.seconds() * (int64_t)1e9 + (int64_t)time.nanos();
+int64_t TimestampInNs(const google::protobuf::Timestamp& time) {
+  return (int64_t)time.seconds() * (int64_t)rb::kNanosecondsInSecond + (int64_t)time.nanos();
 }
 
 }  // namespace
@@ -58,22 +62,6 @@ rb::ControlManagerState ProtoToControlManagerState(const api::ControlManagerStat
   cms.unlimited_mode_enabled = msg.unlimited_mode_enabled();
 
   return cms;
-}
-
-rb::Log ProtoToLog(const api::Log& msg) {
-  rb::Log log;
-
-  if (msg.has_timestamp()) {
-    const auto& rs_ts = msg.timestamp();
-    log.timestamp.tv_sec = rs_ts.seconds();
-    log.timestamp.tv_nsec = rs_ts.nanos();
-  }
-
-  log.level = static_cast<rb::Log::Level>(msg.level());
-  log.message = msg.message();
-  log.logger_name = msg.logger_name();
-
-  return log;
 }
 
 rb::BatteryInfo ProtoToBatteryInfo(const api::BatteryInfo& /* msg */) {
@@ -388,6 +376,35 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.robot_info();
   }
 
+  double GetTimeScale() const {  // NOLINT
+    api::GetTimeScaleRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::GetTimeScaleResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = control_manager_service_->GetTimeScale(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+
+    return res.time_scale();
+  }
+
+  double SetTimeScale(double time_scale) {
+    api::SetTimeScaleRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_time_scale(time_scale);
+
+    api::SetTimeScaleResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = control_manager_service_->SetTimeScale(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+
+    return res.current_time_scale();
+  }
+
   bool PowerOn(const std::string& dev_name) const {  // NOLINT
     api::PowerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
@@ -576,7 +593,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       return;
     }
 
-    log_reader_ = std::make_unique<LogReader>(log_service_.get(), cb, rate);
+    log_reader_ = std::make_unique<LogReader>(this->shared_from_this(), log_service_.get(), cb, rate);
   }
 
   void StopLogStream() {
@@ -604,7 +621,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   std::vector<Log> GetLastLog(unsigned int count) const {  // NOLINT
     api::GetLastLogRequest req;
     InitializeRequestHeader(req.mutable_request_header());
-    req.set_log_count(count);
+    req.set_log_count(static_cast<int32_t>(count));
 
     api::GetLastLogResponse res;
     grpc::ClientContext context;
@@ -774,11 +791,11 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     int64_t client_req_time, client_res_time;
     int64_t robot_recv_req_time, robot_send_res_time;
 
-    client_req_utc_time = TimestampInNS(google::protobuf::util::TimeUtil::GetCurrentTime());
-    client_req_time = TimespecInNS(GetCurrentTime());
+    client_req_utc_time = TimespecInNs(TimepointToTimespec(std::chrono::system_clock::now()));
+    client_req_time = TimespecInNs(GetCurrentTime());
     InitializeRequestHeader(req.mutable_request_header());
     grpc::Status status = ping_service_->Ping(&context, req, &res);
-    client_res_time = TimespecInNS(GetCurrentTime());
+    client_res_time = TimespecInNs(GetCurrentTime());
     if (!status.ok()) {
       throw std::runtime_error("gRPC call failed: " + status.error_message());
     }
@@ -787,13 +804,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       const auto& res_header = res.response_header();
 
       if (res_header.has_request_received_timestamp()) {
-        robot_recv_req_time = TimestampInNS(res_header.request_received_timestamp());
+        robot_recv_req_time = TimestampInNs(res_header.request_received_timestamp());
       } else {
         return false;
       }
 
       if (res_header.has_response_timestamp()) {
-        robot_send_res_time = TimestampInNS(res_header.response_timestamp());
+        robot_send_res_time = TimestampInNs(res_header.response_timestamp());
       } else {
         return false;
       }
@@ -807,8 +824,9 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       }
 
       time_sync_established_ = true;
-      time_sync_estimate_ = (client_req_utc_time - robot_recv_req_time) +
-                            ((client_res_time - client_req_time) - (robot_send_res_time - robot_recv_req_time)) / 2;
+      time_sync_estimate_ = client_req_utc_time -
+                            (robot_recv_req_time -
+                             ((client_res_time - client_req_time) - (robot_send_res_time - robot_recv_req_time)) / 2);
       return true;
     }
 
@@ -816,6 +834,29 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   }
 
   bool HasEstablishedTimeSync() { return time_sync_established_; }
+
+  bool StartTimeSync(long period_sec) {
+    if (time_sync_) {
+      return false;
+    }
+
+    time_sync_ = std::make_unique<EventLoop>();
+    time_sync_->PushCyclicTask([=] { SyncTime(); }, std::chrono::seconds(period_sec));
+
+    return true;
+  }
+
+  bool StopTimeSync() {
+    if (!time_sync_) {
+      return false;
+    }
+
+    time_sync_->Pause();
+    time_sync_->WaitForTasks();
+    time_sync_.reset();
+
+    return true;
+  }
 
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
@@ -875,8 +916,9 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
   class LogReader : public grpc::ClientReadReactor<api::GetLogStreamResponse> {
    public:
-    explicit LogReader(api::LogService::Stub* stub, const std::function<void(const std::vector<Log>&)>& cb,
-                       double rate) {
+    explicit LogReader(std::shared_ptr<RobotImpl<T>> robot, api::LogService::Stub* stub,
+                       const std::function<void(const std::vector<Log>&)>& cb, double rate)
+        : robot_(std::move(robot)) {
       cb_ = cb;
 
       api::GetLogStreamRequest req;
@@ -906,7 +948,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
         if (cb_) {
           std::vector<Log> logs;
           for (const auto& log : res_.logs()) {
-            logs.push_back(ProtoToLog(log));
+            logs.push_back(robot_->ProtoToLog(log));
           }
           cb_(logs);
         }
@@ -922,6 +964,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     }
 
    private:
+    std::shared_ptr<RobotImpl<T>> robot_;
     grpc::ClientContext context_;
     std::function<void(const std::vector<Log>&)> cb_;
     api::GetLogStreamResponse res_;
@@ -936,10 +979,10 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
     if (msg.has_timestamp()) {
       if (time_sync_established_) {
-        int64_t rs_ts = TimestampInNS(msg.timestamp());
+        int64_t rs_ts = TimestampInNs(msg.timestamp());
         rs_ts += time_sync_estimate_;
-        rs.timestamp.tv_nsec = rs_ts % 1000000000;
-        rs.timestamp.tv_sec = (rs_ts - rs.timestamp.tv_nsec) / 1000000000;
+        rs.timestamp.tv_sec = rs_ts / kNanosecondsInSecond;
+        rs.timestamp.tv_nsec = rs_ts % kNanosecondsInSecond;
       } else {
         const auto& rs_ts = msg.timestamp();
         rs.timestamp.tv_sec = rs_ts.seconds();
@@ -973,7 +1016,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       if (tf_proto.has_time_since_last_update()) {
         tf.time_since_last_update = DurationToTimespec(tf_proto.time_since_last_update());
       } else {
-        tf.time_since_last_update.tv_sec = 999;
+        tf.time_since_last_update.tv_sec = 12 * 60 * 60 /* 12 hour */;
       }
 
       if (tf_proto.has_gyro()) {
@@ -1145,6 +1188,33 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return rs;
   }
 
+  Log ProtoToLog(const api::Log& msg) const {
+    rb::Log log;
+
+    if (msg.has_robot_system_timestamp()) {
+      const auto& rs_ts = msg.robot_system_timestamp();
+      log.robot_system_timestamp.tv_sec = rs_ts.seconds();
+      log.robot_system_timestamp.tv_nsec = rs_ts.nanos();
+    }
+    if (msg.has_timestamp()) {
+      if (time_sync_established_) {
+        int64_t rs_ts = TimestampInNs(msg.timestamp());
+        rs_ts += time_sync_estimate_;
+        log.timestamp.tv_sec = rs_ts / kNanosecondsInSecond;
+        log.timestamp.tv_nsec = rs_ts % kNanosecondsInSecond;
+      } else {
+        const auto& rs_ts = msg.timestamp();
+        log.timestamp.tv_sec = rs_ts.seconds();
+        log.timestamp.tv_nsec = rs_ts.nanos();
+      }
+    }
+
+    log.level = static_cast<rb::Log::Level>(msg.level());
+    log.message = msg.message();
+
+    return log;
+  }
+
  private:
   std::string address_;
   bool connected_;
@@ -1164,6 +1234,8 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
   bool time_sync_established_;
   int64_t time_sync_estimate_;
+
+  std::unique_ptr<EventLoop> time_sync_;
 
   friend class RobotCommandHandlerImpl<T>;
 };
@@ -1204,6 +1276,16 @@ bool Robot<T>::IsConnected() const {
 template <typename T>
 RobotInfo Robot<T>::GetRobotInfo() const {
   return ProtoToRobotInfo(impl_->GetRobotInfo());
+}
+
+template <typename T>
+double Robot<T>::GetTimeScale() const {
+  return impl_->GetTimeScale();
+}
+
+template <typename T>
+double Robot<T>::SetTimeScale(double time_scale) const {
+  return impl_->SetTimeScale(time_scale);
 }
 
 template <typename T>
@@ -1329,6 +1411,16 @@ bool Robot<T>::SyncTime() {
 template <typename T>
 bool Robot<T>::HasEstablishedTimeSync() {
   return impl_->HasEstablishedTimeSync();
+}
+
+template <typename T>
+bool Robot<T>::StartTimeSync(long period_sec) {
+  return impl_->StartTimeSync(period_sec);
+}
+
+template <typename T>
+bool Robot<T>::StopTimeSync() {
+  return impl_->StopTimeSync();
 }
 
 template <typename T>

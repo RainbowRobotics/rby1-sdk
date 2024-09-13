@@ -28,7 +28,7 @@ robot.servo_on(".*")
 robot.reset_fault_control_manager()
 robot.enable_control_manager()
 
-target_position = [0, 0.5, 0, 0, 0, 0] + [0, 0, 0, -1.2, 0, 0, 0] + [0, 0, 0, -1.2, 0, 0, 0]
+target_position = [100000, 0.5, 0, 0, 0, 0] + [0, 0, 0, -1.2, 0, 0, 0] + [0, 0, 0, -1.2, 0, 0, 0]
 rc = rby1_sdk.RobotCommandBuilder().set_command(
     rby1_sdk.ComponentBasedCommandBuilder()
     .set_body_command(rby1_sdk.JointPositionCommandBuilder()

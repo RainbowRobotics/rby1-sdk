@@ -1,5 +1,5 @@
-#include <pybind11/pybind11.h>
 #include <pybind11/chrono.h>
+#include <pybind11/pybind11.h>
 
 #include "common.h"
 #include "rby1-sdk/log.h"
@@ -20,9 +20,10 @@ void bind_log(py::module_& m) {
 
   log.def(py::init<>())
       .def_property_readonly("timestamp", [](const Log& self) { return timespec_to_time_point(self.timestamp); })
+      .def_property_readonly("robot_system_timestamp",
+                             [](const Log& self) { return timespec_to_time_point(self.robot_system_timestamp); })
       .def_readonly("level", &Log::level)
       .def_readonly("message", &Log::message)
-      .def_readonly("logger_name", &Log::logger_name)
       .def("__repr__", [](const Log& self) {
         std::stringstream ss;
         ss << self;

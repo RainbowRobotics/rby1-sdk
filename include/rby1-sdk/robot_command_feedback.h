@@ -10,7 +10,7 @@ class RobotCommandFeedbackParserImpl;
 
 class Feedback {
  public:
-  bool valid() const { return valid_; }  // NOLINT
+  bool valid() const { return valid_; }
 
  private:
   bool valid_;
@@ -20,7 +20,7 @@ class Feedback {
 
 class CommandHeaderFeedback : public Feedback {
  public:
-  bool finished() const { return finished_; }  // NOLINT
+  bool finished() const { return finished_; }
 
  private:
   bool finished_;
@@ -30,7 +30,7 @@ class CommandHeaderFeedback : public Feedback {
 
 class CommandFeedback : public Feedback {
  public:
-  const CommandHeaderFeedback& command_header() const { return command_header_; }  // NOLINT
+  const CommandHeaderFeedback& command_header() const { return command_header_; }
 
  protected:
   CommandHeaderFeedback command_header_{};
@@ -54,7 +54,7 @@ class SE2VelocityCommandFeedback : public CommandFeedback {
 
 class JogCommandFeedback : public CommandFeedback {
  public:
-  const std::string& target_joint_name() const { return target_joint_name_; }  // NOLINT
+  const std::string& target_joint_name() const { return target_joint_name_; }
 
  protected:
   std::string target_joint_name_;
@@ -84,7 +84,7 @@ class CartesianCommandFeedback : public CommandFeedback {
     double rotation_error;
   };
 
-  const std::vector<TrackingError>& tracking_errors() const { return tracking_errors_; }  // NOLINT
+  const std::vector<TrackingError>& tracking_errors() const { return tracking_errors_; }
 
  protected:
   std::vector<TrackingError> tracking_errors_;
@@ -107,7 +107,7 @@ class ImpedanceControlCommandFeedback : public CommandFeedback {
     double rotation_error;
   };
 
-  const TrackingError& tracking_error() const { return tracking_error_; }  // NOLINT
+  const TrackingError& tracking_error() const { return tracking_error_; }
 
  protected:
   TrackingError tracking_error_{};
@@ -118,13 +118,13 @@ class ImpedanceControlCommandFeedback : public CommandFeedback {
 
 class OptimalControlCommandFeedback : public CommandFeedback {
  public:
-  double total_cost() const { return total_cost_; }  // NOLINT
+  double total_cost() const { return total_cost_; }
 
-  const std::vector<double>& cartesian_costs() const { return cartesian_costs_; }  // NOLINT
+  const std::vector<double>& cartesian_costs() const { return cartesian_costs_; }
 
-  double center_of_mass_cost() const { return center_of_mass_cost_; }  // NOLINT
+  double center_of_mass_cost() const { return center_of_mass_cost_; }
 
-  const std::vector<double>& joint_position_costs() const { return joint_position_costs_; }  // NOLINT
+  const std::vector<double>& joint_position_costs() const { return joint_position_costs_; }
 
  protected:
   double total_cost_;
@@ -138,7 +138,7 @@ class OptimalControlCommandFeedback : public CommandFeedback {
 
 class WholeBodyCommandFeedback : public CommandFeedback {
  public:
-  const StopCommandFeedback& stop_command() const { return stop_command_; }  // NOLINT
+  const StopCommandFeedback& stop_command() const { return stop_command_; }
 
  protected:
   StopCommandFeedback stop_command_;
@@ -149,17 +149,15 @@ class WholeBodyCommandFeedback : public CommandFeedback {
 
 class ArmCommandFeedback : public CommandFeedback {
  public:
-  const JointPositionCommandFeedback& joint_position_command() const { return joint_position_command_; }  // NOLINT
+  const JointPositionCommandFeedback& joint_position_command() const { return joint_position_command_; }
 
-  const GravityCompensationCommandFeedback& gravity_compensation_command() const {  // NOLINT
+  const GravityCompensationCommandFeedback& gravity_compensation_command() const {
     return gravity_compensation_command_;
   }
 
-  const CartesianCommandFeedback& cartesian_command() const { return cartesian_command_; }  // NOLINT
+  const CartesianCommandFeedback& cartesian_command() const { return cartesian_command_; }
 
-  const ImpedanceControlCommandFeedback& impedance_control_command() const {  // NOLINT
-    return impedance_control_command_;
-  }
+  const ImpedanceControlCommandFeedback& impedance_control_command() const { return impedance_control_command_; }
 
  protected:
   JointPositionCommandFeedback joint_position_command_;
@@ -173,19 +171,17 @@ class ArmCommandFeedback : public CommandFeedback {
 
 class TorsoCommandFeedback : public CommandFeedback {
  public:
-  const JointPositionCommandFeedback& joint_position_command() const { return joint_position_command_; }  // NOLINT
+  const JointPositionCommandFeedback& joint_position_command() const { return joint_position_command_; }
 
-  const GravityCompensationCommandFeedback& gravity_compensation_command() const {  // NOLINT
+  const GravityCompensationCommandFeedback& gravity_compensation_command() const {
     return gravity_compensation_command_;
   }
 
-  const CartesianCommandFeedback& cartesian_command() const { return cartesian_command_; }  // NOLINT
+  const CartesianCommandFeedback& cartesian_command() const { return cartesian_command_; }
 
-  const ImpedanceControlCommandFeedback& impedance_control_command() const {  // NOLINT
-    return impedance_control_command_;
-  }
+  const ImpedanceControlCommandFeedback& impedance_control_command() const { return impedance_control_command_; }
 
-  const OptimalControlCommandFeedback& optimal_control_command() const { return optimal_control_command_; }  // NOLINT
+  const OptimalControlCommandFeedback& optimal_control_command() const { return optimal_control_command_; }
 
  protected:
   JointPositionCommandFeedback joint_position_command_;

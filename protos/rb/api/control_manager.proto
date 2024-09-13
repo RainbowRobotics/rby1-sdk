@@ -53,6 +53,18 @@ message ControlManagerCommandResponse {
   ControlManagerState control_manager_state = 2;
 }
 
+message GetTimeScaleRequest {
+  // Request header
+  RequestHeader request_header = 1;
+}
+
+message GetTimeScaleResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  double time_scale = 2;
+}
+
 message SetTimeScaleRequest {
   // Request header
   RequestHeader request_header = 1;

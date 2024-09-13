@@ -5,6 +5,10 @@ package rb.api;
 import "rb/api/parameter.proto";
 
 service ParameterService {
+  rpc ResetAllParametersToDefault(ResetAllParametersToDefaultRequest) returns (ResetAllParametersToDefaultResponse) {}
+
+  rpc ResetParameterToDefault(ResetParameterToDefaultRequest) returns (ResetParameterToDefaultResponse) {}
+
   rpc GetParameter(GetParameterRequest) returns (GetParameterResponse) {}
 
   rpc SetParameter(SetParameterRequest) returns (SetParameterResponse) {}

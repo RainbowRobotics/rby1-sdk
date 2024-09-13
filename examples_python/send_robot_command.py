@@ -12,29 +12,27 @@ recorded_velocity = []
 
 def cb(rs):
     global recorded_position, recorded_velocity
-    recorded_position = recorded_position + [rs.position[3]]
-    recorded_velocity = recorded_velocity + [rs.velocity[3]]
+    recorded_position = recorded_position + [rs.target_position[3]]
+    recorded_velocity = recorded_velocity + [rs.target_position[11]]
 
 
 robot.start_state_update(cb,
-                         100  # (Hz)
+                         0.1  # (Hz)
                          )
-
-robot.set_parameter("joint_position_command.cutoff_frequency", "5")
-robot.set_parameter("default.acceleration_limit_scaling", "0.8")
 
 robot.power_on(".*")
 robot.servo_on(".*")
 robot.reset_fault_control_manager()
 robot.enable_control_manager()
 
-target_position = [100000, 0.5, 0, 0, 0, 0] + [0, 0, 0, -1.2, 0, 0, 0] + [0, 0, 0, -1.2, 0, 0, 0]
+target_position = [0, 0.5, 0, 0, 0, 0] + [0, 0, 0, -1.2, 0, 0, 0] + [0, 0, 0, -1.2, 0, 0, 0]
 rc = rby1_sdk.RobotCommandBuilder().set_command(
     rby1_sdk.ComponentBasedCommandBuilder()
     .set_body_command(rby1_sdk.JointPositionCommandBuilder()
+                      .set_command_header(rby1_sdk.CommandHeaderBuilder().set_control_hold_time(1))
                       .set_minimum_time(5)
                       .set_position(target_position)
-    )
+                      )
 )
 rv = robot.send_command(rc, 10).get()
 

@@ -38,8 +38,33 @@ message GetParameterListResponse {
   message ParameterType {
     string name = 1;
 
+    // Type of parameter
+    // 0: int
+    // 1: double
+    // 2: std::string
+    // 3: std::array<double, 3>
+    // 4: std::array<double, 6>
+    // 5: std::array<double, 7>
     int32 type = 2;
   }
 
   repeated ParameterType parameters = 2;
+}
+
+message ResetParameterToDefaultRequest {
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+message ResetParameterToDefaultResponse {
+  ResponseHeader response_header = 1;
+}
+
+message ResetAllParametersToDefaultRequest {
+  RequestHeader request_header = 1;
+}
+
+message ResetAllParametersToDefaultResponse {
+  ResponseHeader response_header = 1;
 }

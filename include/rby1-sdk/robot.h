@@ -98,9 +98,15 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool ResetOdometry(double angle, const Eigen::Vector<double, 2>& position);
 
+  std::vector<std::pair<std::string, int>> GetParameterList() const;
+
   bool SetParameter(const std::string& name, const std::string& value);
 
   std::string GetParameter(const std::string& name) const;
+
+  bool ResetParameterToDefault(const std::string& name) const;
+
+  void ResetAllParametersToDefault() const;
 
   std::string GetRobotModel() const;
 

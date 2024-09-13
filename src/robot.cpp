@@ -694,6 +694,33 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return false;
   }
 
+  std::vector<std::pair<std::string, int>> GetParameterList() {
+    api::GetParameterListRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::GetParameterListResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = parameter_service_->GetParameterList(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() != api::CommonError::CODE_OK) {
+          throw std::runtime_error("GetParameter failed: " + res.response_header().error().message());
+        }
+      }
+    }
+
+    std::vector<std::pair<std::string, int>> rv;
+    for (const auto& param : res.parameters()) {
+      rv.emplace_back(param.name(), param.type());
+    }
+
+    return rv;
+  }
+
   bool SetParameter(const std::string& name, const std::string& value) {
     std::stringstream ss;
     ss << "{\"value\": " << value << "}";
@@ -743,6 +770,37 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     }
 
     return "";
+  }
+
+  bool ResetParameterToDefault(const std::string& name) {
+    api::ResetParameterToDefaultRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(name);
+
+    api::ResetParameterToDefaultResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = parameter_service_->ResetParameterToDefault(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+
+    return true;
+  }
+
+  void ResetAllParametersToDefault() {
+    api::ResetAllParametersToDefaultRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::ResetAllParametersToDefaultResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = parameter_service_->ResetAllParametersToDefault(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
   }
 
   std::string GetRobotModel() const {  // NOLINT
@@ -1384,6 +1442,11 @@ bool Robot<T>::ResetOdometry(double angle, const Eigen::Vector<double, 2>& posit
 }
 
 template <typename T>
+std::vector<std::pair<std::string, int>> Robot<T>::GetParameterList() const {
+  return impl_->GetParameterList();
+}
+
+template <typename T>
 bool Robot<T>::SetParameter(const std::string& name, const std::string& value) {
   return impl_->SetParameter(name, value);
 }
@@ -1391,6 +1454,16 @@ bool Robot<T>::SetParameter(const std::string& name, const std::string& value) {
 template <typename T>
 std::string Robot<T>::GetParameter(const std::string& name) const {
   return impl_->GetParameter(name);
+}
+
+template <typename T>
+bool Robot<T>::ResetParameterToDefault(const std::string& name) const {
+  return impl_->ResetParameterToDefault(name);
+}
+
+template <typename T>
+void Robot<T>::ResetAllParametersToDefault() const {
+  impl_->ResetAllParametersToDefault();
 }
 
 template <typename T>

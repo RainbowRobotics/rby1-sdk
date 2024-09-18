@@ -33,6 +33,12 @@ class RobotCommandStreamHandler;
 template <typename T>
 class RobotCommandStreamHandlerImpl;
 
+template <typename T>
+struct ControlInput;
+
+template <typename T>
+struct ControlState;
+
 }  // namespace rb
 
 namespace rb {
@@ -94,7 +100,7 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   std::unique_ptr<RobotCommandStreamHandler<T>> CreateCommandStream(int priority = 1);
 
-  //  void Control(std::function<ControlInput(const RobotState<T>&)> control);
+  bool Control(std::function<ControlInput<T>(const ControlState<T>&)> control, int port = 0, int priority = 1);
 
   bool ResetOdometry(double angle, const Eigen::Vector<double, 2>& position);
 
@@ -119,6 +125,8 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool StartTimeSync(long period_sec = 10 /* sec */);
 
   bool StopTimeSync();
+
+  std::shared_ptr<dyn::Robot<T::kRobotDOF>> GetDynamics(const std::string& urdf_model = "");
 
  private:
   explicit Robot(std::string address);
@@ -175,6 +183,25 @@ class RobotCommandStreamHandler {
   std::unique_ptr<RobotCommandStreamHandlerImpl<T>> impl_;
 
   friend class RobotImpl<T>;
+};
+
+template <typename T>
+struct ControlInput {
+  Eigen::Vector<bool, T::kRobotDOF> mode{Eigen::Vector<bool, T::kRobotDOF>::Constant(false)};
+  Eigen::Vector<double, T::kRobotDOF> target{Eigen::Vector<double, T::kRobotDOF>::Zero()};
+  Eigen::Vector<unsigned int, T::kRobotDOF> feedback_gain{Eigen::Vector<unsigned int, T::kRobotDOF>::Zero()};
+  Eigen::Vector<double, T::kRobotDOF> feedforward_torque{Eigen::Vector<double, T::kRobotDOF>::Zero()};
+  bool finish{false};
+};
+
+template <typename T>
+struct ControlState {
+  double t{0.};
+  Eigen::Vector<bool, T::kRobotDOF> is_ready{Eigen::Vector<bool, T::kRobotDOF>::Constant(false)};
+  Eigen::Vector<double, T::kRobotDOF> position{Eigen::Vector<double, T::kRobotDOF>::Zero()};
+  Eigen::Vector<double, T::kRobotDOF> velocity{Eigen::Vector<double, T::kRobotDOF>::Zero()};
+  Eigen::Vector<double, T::kRobotDOF> current{Eigen::Vector<double, T::kRobotDOF>::Zero()};
+  Eigen::Vector<double, T::kRobotDOF> torque{Eigen::Vector<double, T::kRobotDOF>::Zero()};
 };
 
 }  // namespace rb

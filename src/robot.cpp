@@ -23,7 +23,11 @@
 #include "rby1-sdk/base/time_util.h"
 #include "rby1-sdk/log.h"
 #include "rby1-sdk/model.h"
+#include "rby1-sdk/net/real_time_control_protocol.h"
+#include "rby1-sdk/net/udp_server.h"
 #include "rby1-sdk/robot.h"
+
+using namespace std::chrono_literals;
 
 namespace {
 
@@ -362,7 +366,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
   }
 
-  api::RobotInfo GetRobotInfo() const {  // NOLINT
+  api::RobotInfo GetRobotInfo() const {
     api::GetRobotInfoRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -376,7 +380,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.robot_info();
   }
 
-  double GetTimeScale() const {  // NOLINT
+  double GetTimeScale() const {
     api::GetTimeScaleRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -405,7 +409,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.current_time_scale();
   }
 
-  bool PowerOn(const std::string& dev_name) const {  // NOLINT
+  bool PowerOn(const std::string& dev_name) const {
     api::PowerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(dev_name);
@@ -421,7 +425,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.status() == api::PowerCommandResponse::STATUS_SUCCESS;
   }
 
-  bool PowerOff(const std::string& dev_name) const {  // NOLINT
+  bool PowerOff(const std::string& dev_name) const {
     api::PowerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(dev_name);
@@ -437,7 +441,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.status() == api::PowerCommandResponse::STATUS_SUCCESS;
   }
 
-  bool IsPowerOn(const std::string& dev_name) const {  // NOLINT
+  bool IsPowerOn(const std::string& dev_name) const {
     const auto& info = GetRobotInfo();
     const auto& state = GetState();
 
@@ -462,7 +466,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return true;
   }
 
-  bool ServoOn(const std::string& dev_name) const {  // NOLINT
+  bool ServoOn(const std::string& dev_name) const {
     api::JointCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(dev_name);
@@ -478,7 +482,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
   }
 
-  bool IsServoOn(const std::string& dev_name) const {  // NOLINT
+  bool IsServoOn(const std::string& dev_name) const {
     const auto& info = GetRobotInfo();
     const auto& state = GetState();
 
@@ -499,7 +503,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return true;
   }
 
-  bool EnableControlManager(bool unlimited_mode_enabled) const {  // NOLINT
+  bool EnableControlManager(bool unlimited_mode_enabled) const {
     api::ControlManagerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_command(api::ControlManagerCommandRequest::COMMAND_ENABLE);
@@ -515,7 +519,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.control_manager_state().state() == api::ControlManagerState::CONTROL_MANAGER_STATE_ENABLED;
   }
 
-  bool DisableControlManager() const {  // NOLINT
+  bool DisableControlManager() const {
     api::ControlManagerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_command(api::ControlManagerCommandRequest::COMMAND_DISABLE);
@@ -530,7 +534,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.control_manager_state().state() == api::ControlManagerState::CONTROL_MANAGER_STATE_IDLE;
   }
 
-  bool ResetFaultControlManager() const {  // NOLINT
+  bool ResetFaultControlManager() const {
     api::ControlManagerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_command(api::ControlManagerCommandRequest::COMMAND_RESET_FAULT);
@@ -545,7 +549,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.control_manager_state().state() == api::ControlManagerState::CONTROL_MANAGER_STATE_IDLE;
   }
 
-  bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const {  // NOLINT
+  bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const {
     api::ToolFlangePowerCommandRequest::Command cmd;
     if (voltage == 0) {
       cmd = api::ToolFlangePowerCommandRequest::COMMAND_POWER_OFF;
@@ -618,7 +622,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return ProtoToRobotState(res.robot_state());
   }
 
-  std::vector<Log> GetLastLog(unsigned int count) const {  // NOLINT
+  std::vector<Log> GetLastLog(unsigned int count) const {
     api::GetLastLogRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_log_count(static_cast<int32_t>(count));
@@ -638,7 +642,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return logs;
   }
 
-  ControlManagerState GetControlManagerState() const {  // NOLINT
+  ControlManagerState GetControlManagerState() const {
     api::GetControlManagerStateRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -664,6 +668,90 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return std::unique_ptr<RobotCommandStreamHandler<T>>(
         new RobotCommandStreamHandler<T>(std::make_unique<RobotCommandStreamHandlerImpl<T>>(
             this->shared_from_this(), robot_command_service_.get(), priority)));
+  }
+
+  bool Control(std::function<ControlInput<T>(const ControlState<T>&)> control, int port, int priority) {
+    std::shared_ptr<UdpServer> server_;
+    try {
+      server_ = std::make_shared<UdpServer>(port);
+    } catch (std::exception& e) {
+      std::cerr << e.what() << std::endl;
+      return false;
+    }
+
+    api::RobotCommandRequest req;
+    req.set_allocated_robot_command(
+        static_cast<api::RobotCommand::Request*>(RobotCommandBuilder()
+                                                     .SetCommand(WholeBodyCommandBuilder().SetCommand(
+                                                         RealTimeControlCommandBuilder().SetPort(server_->GetPort())))
+                                                     .Build()));
+    req.set_priority(priority);
+
+    auto handler = std::unique_ptr<RobotCommandHandler<T>>(
+        new RobotCommandHandler<T>(std::make_unique<RobotCommandHandlerImpl<T>>(this->shared_from_this(), req)));
+
+    bool finished{false};
+
+    constexpr size_t kMaxPacketLength = 4096;
+    std::array<unsigned char, kMaxPacketLength> send_packet{};
+    int recv_pkt_size_{0};
+    std::array<unsigned char, kMaxPacketLength> recv_packet{};
+
+    struct sockaddr_storage client_addr {};
+
+    while (!handler->IsDone()) {
+      {
+        int len =
+            server_->RecvFrom(recv_packet.data() + recv_pkt_size_, kMaxPacketLength - recv_pkt_size_, client_addr);
+        if (len > 0) {
+          recv_pkt_size_ += len;
+        }
+      }
+
+      int tmp = 0;
+      while (tmp < recv_pkt_size_) {
+        auto rv = ValidateRTProtocol(recv_packet.data() + tmp, recv_pkt_size_ - tmp);
+        if (rv.first) {  // Receive command
+          auto packet_pointer = recv_packet.data() + tmp;
+          tmp += rv.second;
+
+          int dof = (int)GetDoFRobotStateRTProtocol(packet_pointer);
+          if (dof == T::kRobotDOF) {
+            ControlState<T> state;
+
+            ParseRobotStateRTProtocol(packet_pointer, nullptr, &state.t, state.is_ready.data(), state.position.data(),
+                                      state.velocity.data(), state.current.data(), state.torque.data());
+
+            if (!finished) {
+              ControlInput<T> input = control(state);
+
+              int len =
+                  BuildRobotCommandRTPacket(send_packet.data(), T::kRobotDOF, input.mode.data(), input.target.data(),
+                                            input.feedback_gain.data(), input.feedforward_torque.data(), input.finish);
+              server_->SendTo(send_packet.data(), len, client_addr);
+
+              finished = input.finish;
+            }
+            break;
+          }
+        } else {
+          if (rv.second == 0) {
+            break;
+          } else {
+            tmp += rv.second;
+            // Invalid packet
+          }
+        }
+      }
+      if (tmp > 0) {
+        std::rotate(recv_packet.begin(), recv_packet.begin() + tmp, recv_packet.end());
+        recv_pkt_size_ -= tmp;
+      }
+
+      std::this_thread::sleep_for(10us);
+    }
+
+    return finished;
   }
 
   bool ResetOdometry(double angle, const Eigen::Vector<double, 2>& position) {
@@ -803,7 +891,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     }
   }
 
-  std::string GetRobotModel() const {  // NOLINT
+  std::string GetRobotModel() const {
     api::GetRobotModelRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -914,6 +1002,25 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     time_sync_.reset();
 
     return true;
+  }
+
+  std::shared_ptr<dyn::Robot<T::kRobotDOF>> GetDynamics(std::string urdf_model) {
+    if (urdf_model.empty()) {
+      urdf_model = GetRobotModel();
+    }
+
+    std::shared_ptr<dyn::Robot<T::kRobotDOF>> dyn_robot;
+    try {
+      rb::dyn::RobotConfiguration rc = dyn::LoadRobotFromURDFData(urdf_model, "base");
+      dyn_robot = std::make_shared<dyn::Robot<T::kRobotDOF>>(rc);
+    } catch (std::exception& e) {
+      std::stringstream ss;
+      ss << "Failed to load dynamics model: ";
+      ss << e.what();
+      throw std::runtime_error(ss.str());
+    }
+
+    return dyn_robot;
   }
 
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
@@ -1437,6 +1544,11 @@ std::unique_ptr<RobotCommandStreamHandler<T>> Robot<T>::CreateCommandStream(int 
 }
 
 template <typename T>
+bool Robot<T>::Control(std::function<ControlInput<T>(const ControlState<T>&)> control, int port, int priority) {
+  return impl_->Control(std::move(control), port, priority);
+}
+
+template <typename T>
 bool Robot<T>::ResetOdometry(double angle, const Eigen::Vector<double, 2>& position) {
   return impl_->ResetOdometry(angle, position);
 }
@@ -1494,6 +1606,11 @@ bool Robot<T>::StartTimeSync(long period_sec) {
 template <typename T>
 bool Robot<T>::StopTimeSync() {
   return impl_->StopTimeSync();
+}
+
+template <typename T>
+std::shared_ptr<dyn::Robot<T::kRobotDOF>> Robot<T>::GetDynamics(const std::string& urdf_model) {
+  return impl_->GetDynamics(urdf_model);
 }
 
 template <typename T>

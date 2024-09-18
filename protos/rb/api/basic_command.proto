@@ -246,13 +246,15 @@ message OptimalControlCommand {
 message RealTimeControlCommand {
   message Request {
     CommandHeader.Request command_header = 1;
+
+    uint32 port = 2;
   }
 
   message Feedback {
     CommandHeader.Feedback command_header_feedback = 1;
 
-    int32 port = 2;
+    reserved 2;
 
-    uint64 uid = 3;
+    reserved 3;
   }
 }

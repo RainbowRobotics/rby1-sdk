@@ -14,7 +14,7 @@ class A {
   static constexpr size_t kRobotDOF = 24;
 
   static constexpr std::array<std::string_view, kRobotDOF> kRobotJointNames = {
-      "right_wheel", "left_wheel",  "torso_0",     "torso_1",     "torso_2",     "torso_3",
+      "right_wheel", "left_wheel",  "torso_0",     "torso_1",      "torso_2",     "torso_3",
       "torso_4",     "torso_5",     "right_arm_0", "right_arm_1", "right_arm_2", "right_arm_3",
       "right_arm_4", "right_arm_5", "right_arm_6", "left_arm_0",  "left_arm_1",  "left_arm_2",
       "left_arm_3",  "left_arm_4",  "left_arm_5",  "left_arm_6",  "head_0",      "head_1"};

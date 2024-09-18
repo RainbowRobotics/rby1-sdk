@@ -16,6 +16,7 @@ class JointVelocityCommandBuilderImpl;
 class JogCommandBuilderImpl;
 class SE2VelocityCommandBuilderImpl;
 class StopCommandBuilderImpl;
+class RealTimeControlCommandBuilderImpl;
 class ArmCommandBuilderImpl;
 class TorsoCommandBuilderImpl;
 class BodyComponentBasedCommandBuilderImpl;
@@ -181,7 +182,7 @@ class JogCommandBuilder {
    public:
     explicit AbsolutePosition(double value) : value_(value) {}
 
-    double value() const { return value_; }  // NOLINT
+    double value() const { return value_; }
 
    private:
     double value_{};
@@ -191,7 +192,7 @@ class JogCommandBuilder {
    public:
     explicit RelativePosition(double value) : value_(value) {}
 
-    double value() const { return value_; }  // NOLINT
+    double value() const { return value_; }
 
    private:
     double value_{};
@@ -201,7 +202,7 @@ class JogCommandBuilder {
    public:
     explicit OneStep(bool direction) : value_(direction) {}
 
-    bool value() const { return value_; }  // NOLINT
+    bool value() const { return value_; }
 
    private:
     bool value_{};
@@ -274,6 +275,23 @@ class StopCommandBuilder {
   friend class WholeBodyCommandBuilderImpl;
 };
 
+class RealTimeControlCommandBuilder {
+ public:
+  RealTimeControlCommandBuilder();
+
+  ~RealTimeControlCommandBuilder();
+
+  RealTimeControlCommandBuilder& SetPort(int port);
+
+ private:
+  [[nodiscard]] void* Build() const;
+
+ private:
+  std::unique_ptr<RealTimeControlCommandBuilderImpl> impl_;
+
+  friend class WholeBodyCommandBuilderImpl;
+};
+
 class CartesianCommandBuilder {
  public:
   CartesianCommandBuilder();
@@ -332,13 +350,13 @@ class ArmCommandBuilder {
  public:
   ArmCommandBuilder();
 
-  ArmCommandBuilder(const JointPositionCommandBuilder& builder);  // NOLINT
+  ArmCommandBuilder(const JointPositionCommandBuilder& builder);
 
-  ArmCommandBuilder(const GravityCompensationCommandBuilder& builder);  // NOLINT
+  ArmCommandBuilder(const GravityCompensationCommandBuilder& builder);
 
-  ArmCommandBuilder(const CartesianCommandBuilder& builder);  // NOLINT
+  ArmCommandBuilder(const CartesianCommandBuilder& builder);
 
-  ArmCommandBuilder(const ImpedanceControlCommandBuilder& builder);  // NOLINT
+  ArmCommandBuilder(const ImpedanceControlCommandBuilder& builder);
 
   ~ArmCommandBuilder();
 
@@ -363,15 +381,15 @@ class TorsoCommandBuilder {
  public:
   TorsoCommandBuilder();
 
-  TorsoCommandBuilder(const JointPositionCommandBuilder& builder);  // NOLINT
+  TorsoCommandBuilder(const JointPositionCommandBuilder& builder);
 
-  TorsoCommandBuilder(const GravityCompensationCommandBuilder& builder);  // NOLINT
+  TorsoCommandBuilder(const GravityCompensationCommandBuilder& builder);
 
-  TorsoCommandBuilder(const CartesianCommandBuilder& builder);  // NOLINT
+  TorsoCommandBuilder(const CartesianCommandBuilder& builder);
 
-  TorsoCommandBuilder(const ImpedanceControlCommandBuilder& builder);  // NOLINT
+  TorsoCommandBuilder(const ImpedanceControlCommandBuilder& builder);
 
-  TorsoCommandBuilder(const OptimalControlCommandBuilder& builder);  // NOLINT
+  TorsoCommandBuilder(const OptimalControlCommandBuilder& builder);
 
   ~TorsoCommandBuilder();
 
@@ -419,15 +437,15 @@ class BodyCommandBuilder {
  public:
   BodyCommandBuilder();
 
-  BodyCommandBuilder(const JointPositionCommandBuilder& builder);  // NOLINT
+  BodyCommandBuilder(const JointPositionCommandBuilder& builder);
 
-  BodyCommandBuilder(const OptimalControlCommandBuilder& builder);  // NOLINT
+  BodyCommandBuilder(const OptimalControlCommandBuilder& builder);
 
-  BodyCommandBuilder(const GravityCompensationCommandBuilder& builder);  // NOLINT
+  BodyCommandBuilder(const GravityCompensationCommandBuilder& builder);
 
-  BodyCommandBuilder(const CartesianCommandBuilder& builder);  // NOLINT
+  BodyCommandBuilder(const CartesianCommandBuilder& builder);
 
-  BodyCommandBuilder(const BodyComponentBasedCommandBuilder& builder);  // NOLINT
+  BodyCommandBuilder(const BodyComponentBasedCommandBuilder& builder);
 
   ~BodyCommandBuilder();
 
@@ -454,9 +472,9 @@ class MobilityCommandBuilder {
  public:
   MobilityCommandBuilder();
 
-  MobilityCommandBuilder(const JointVelocityCommandBuilder& builder);  // NOLINT
+  MobilityCommandBuilder(const JointVelocityCommandBuilder& builder);
 
-  MobilityCommandBuilder(const SE2VelocityCommandBuilder& builder);  // NOLINT
+  MobilityCommandBuilder(const SE2VelocityCommandBuilder& builder);
 
   ~MobilityCommandBuilder();
 
@@ -477,7 +495,7 @@ class HeadCommandBuilder {
  public:
   HeadCommandBuilder();
 
-  HeadCommandBuilder(const JointPositionCommandBuilder& builder);  // NOLINT
+  HeadCommandBuilder(const JointPositionCommandBuilder& builder);
 
   ~HeadCommandBuilder();
 
@@ -517,11 +535,15 @@ class WholeBodyCommandBuilder {
  public:
   WholeBodyCommandBuilder();
 
-  WholeBodyCommandBuilder(const StopCommandBuilder& builder);  // NOLINT
+  WholeBodyCommandBuilder(const StopCommandBuilder& builder);
+
+  WholeBodyCommandBuilder(const RealTimeControlCommandBuilder& builder);
 
   ~WholeBodyCommandBuilder();
 
   WholeBodyCommandBuilder& SetCommand(const StopCommandBuilder& builder);
+
+  WholeBodyCommandBuilder& SetCommand(const RealTimeControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;
@@ -536,11 +558,11 @@ class RobotCommandBuilder {
  public:
   RobotCommandBuilder();
 
-  RobotCommandBuilder(const WholeBodyCommandBuilder& builder);  // NOLINT
+  RobotCommandBuilder(const WholeBodyCommandBuilder& builder);
 
-  RobotCommandBuilder(const ComponentBasedCommandBuilder& builder);  // NOLINT
+  RobotCommandBuilder(const ComponentBasedCommandBuilder& builder);
 
-  RobotCommandBuilder(const JogCommandBuilder& builder);  // NOLINT
+  RobotCommandBuilder(const JogCommandBuilder& builder);
 
   ~RobotCommandBuilder();
 

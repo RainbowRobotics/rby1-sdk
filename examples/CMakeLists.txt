@@ -5,7 +5,6 @@ set(EXAMPLES
         trapezoidal_motion_generator
         so3
         optimal_control
-        udp_test
         velocity_estimation
 
         master_arm
@@ -23,8 +22,11 @@ set(EXAMPLES
         gravity_compensation
         self_collision_checking
         demo_motion
+        real_time_control_command
 
         mobility_command
+
+        rtcomm_protocol
 )
 
 foreach (SRC IN LISTS EXAMPLES)
@@ -41,6 +43,7 @@ foreach (SRC IN LISTS EXAMPLES)
     target_compile_definitions(${EXECUTABLE_NAME} PUBLIC
             -DPATH="${CMAKE_CURRENT_SOURCE_DIR}"
     )
+    message(STATUS ${EXECUTABLE_NAME})
 endforeach ()
 
 #add_executable(example_rtcomm_protocol

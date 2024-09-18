@@ -11,6 +11,8 @@ message WholeBodyCommand {
 
     oneof command {
       StopCommand.Request stop_command = 2;
+
+      RealTimeControlCommand.Request real_time_control_command = 3;
     }
   }
 
@@ -19,6 +21,8 @@ message WholeBodyCommand {
 
     oneof feedback {
       StopCommand.Feedback stop_command_feedback = 2;
+
+      RealTimeControlCommand.Feedback real_time_control_command_feedback = 3;
     }
   }
 }

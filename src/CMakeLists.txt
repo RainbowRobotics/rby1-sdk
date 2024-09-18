@@ -1,8 +1,8 @@
 if (BUILD_PYTHON_BINDINGS OR BUILD_LIB_STATIC)
     set(LIBRARY_TYPE STATIC)
-else()
+else ()
     set(LIBRARY_TYPE SHARED)
-endif()
+endif ()
 
 add_library(rby1-sdk ${LIBRARY_TYPE}
         robot.cpp
@@ -24,6 +24,8 @@ add_library(rby1-sdk ${LIBRARY_TYPE}
 
         upc/device.cpp
         upc/master_arm.cpp
+
+        net/real_time_control_protocol.cpp
 
         $<TARGET_OBJECTS:proto-objects>
 )

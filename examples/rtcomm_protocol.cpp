@@ -1,6 +1,6 @@
-#include "rby1-sdk/net/rtcomm_protocol.h"
 #include <Eigen/Core>
 #include <iostream>
+#include "rby1-sdk/net/real_time_control_protocol.h"
 
 int main() {
   std::array<unsigned char, 1024> packet{};
@@ -54,7 +54,6 @@ int main() {
   /////
   std::cout << "Robot Command" << std::endl;
   {
-    uint64_t uid = 101;
     Eigen::Vector<bool, DOF> mode;
     Eigen::Vector<double, DOF> target, feedforward_torque;
     Eigen::Vector<unsigned int, DOF> feedback_gain;
@@ -64,7 +63,7 @@ int main() {
     feedback_gain.setRandom();
     feedforward_torque.setRandom();
 
-    int len = rb::BuildRobotCommandRTPacket(packet.data(), uid, DOF, mode.data(), target.data(), feedback_gain.data(),
+    int len = rb::BuildRobotCommandRTPacket(packet.data(), DOF, mode.data(), target.data(), feedback_gain.data(),
                                             feedforward_torque.data(), finished);
     std::cout << "len: " << len << std::endl;
     for (int i = 0; i < len; i++) {
@@ -76,16 +75,14 @@ int main() {
     auto valid = rb::ValidateRTProtocol(packet.data(), len);
     std::cout << "Validation: " << std::boolalpha << valid.first << " " << valid.second << std::endl;
 
-    uint64_t new_uid;
     size_t new_N;
     Eigen::Vector<bool, DOF> new_mode;
     Eigen::Vector<double, DOF> new_target, new_feedforward_torque;
     Eigen::Vector<unsigned int, DOF> new_feedback_gain;
     bool new_finished;
-    rb::ParseRobotCommandRTProtocol(packet.data(), &new_uid, &new_N, new_mode.data(), new_target.data(),
+    rb::ParseRobotCommandRTProtocol(packet.data(), &new_N, new_mode.data(), new_target.data(),
                                     new_feedback_gain.data(), new_feedforward_torque.data(), &new_finished);
 
-    std::cout << "uid: " << uid << " / " << new_uid << std::endl;
     std::cout << "N: " << DOF << " / " << new_N << std::endl;
     std::cout << "mode: " << std::endl << mode.transpose() << std::endl << new_mode.transpose() << std::endl;
     std::cout << "target: " << std::endl << target.transpose() << std::endl << new_target.transpose() << std::endl;

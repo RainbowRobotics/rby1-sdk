@@ -302,6 +302,20 @@ class StopCommandBuilderImpl {
   std::unique_ptr<api::StopCommand::Request> req_;
 };
 
+class RealTimeControlCommandBuilderImpl {
+ public:
+  RealTimeControlCommandBuilderImpl() : req_(std::make_unique<api::RealTimeControlCommand::Request>()) {}
+
+  ~RealTimeControlCommandBuilderImpl() = default;
+
+  void SetPort(int port) { req_->set_port(port); }
+
+  api::RealTimeControlCommand::Request* Build() { return req_.release(); }
+
+ private:
+  std::unique_ptr<api::RealTimeControlCommand::Request> req_;
+};
+
 class CartesianCommandBuilderImpl {
  public:
   CartesianCommandBuilderImpl() : req_(std::make_unique<api::CartesianCommand::Request>()) {}
@@ -551,6 +565,10 @@ class WholeBodyCommandBuilderImpl {
 
   void SetCommand(const StopCommandBuilder& builder) {
     req_->set_allocated_stop_command(static_cast<api::StopCommand::Request*>(builder.Build()));
+  }
+
+  void SetCommand(const RealTimeControlCommandBuilder& builder) {
+    req_->set_allocated_real_time_control_command(static_cast<api::RealTimeControlCommand::Request*>(builder.Build()));
   }
 
   api::WholeBodyCommand::Request* Build() { return req_.release(); }
@@ -851,6 +869,20 @@ StopCommandBuilder& StopCommandBuilder::SetCommandHeader(const CommandHeaderBuil
 }
 
 void* StopCommandBuilder::Build() const {
+  return static_cast<void*>(impl_->Build());
+}
+
+RealTimeControlCommandBuilder::RealTimeControlCommandBuilder()
+    : impl_(std::make_unique<RealTimeControlCommandBuilderImpl>()) {}
+
+RealTimeControlCommandBuilder::~RealTimeControlCommandBuilder() = default;
+
+RealTimeControlCommandBuilder& RealTimeControlCommandBuilder::SetPort(int port) {
+  impl_->SetPort(port);
+  return *this;
+}
+
+void* RealTimeControlCommandBuilder::Build() const {
   return static_cast<void*>(impl_->Build());
 }
 
@@ -1172,9 +1204,19 @@ WholeBodyCommandBuilder::WholeBodyCommandBuilder(const StopCommandBuilder& build
   SetCommand(builder);
 }
 
+WholeBodyCommandBuilder::WholeBodyCommandBuilder(const RealTimeControlCommandBuilder& builder)
+    : WholeBodyCommandBuilder() {
+  SetCommand(builder);
+}
+
 WholeBodyCommandBuilder::~WholeBodyCommandBuilder() = default;
 
 WholeBodyCommandBuilder& WholeBodyCommandBuilder::SetCommand(const StopCommandBuilder& builder) {
+  impl_->SetCommand(builder);
+  return *this;
+}
+
+WholeBodyCommandBuilder& WholeBodyCommandBuilder::SetCommand(const RealTimeControlCommandBuilder& builder) {
   impl_->SetCommand(builder);
   return *this;
 }

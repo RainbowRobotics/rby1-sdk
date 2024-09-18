@@ -77,9 +77,48 @@ void bind_robot_command_stream_handler(py::module_& m, const std::string& handle
 }
 
 template <typename T>
+void bind_control_state(py::module_& m, const std::string& handler_name) {
+  py::class_<ControlState<T>>(m, handler_name.c_str())
+      .def(py::init<>())
+      .def_readonly("t", &ControlState<T>::t)
+      .def_readonly("is_ready", &ControlState<T>::is_ready)
+      .def_readonly("position", &ControlState<T>::position)
+      .def_readonly("velocity", &ControlState<T>::velocity)
+      .def_readonly("current", &ControlState<T>::current)
+      .def_readonly("torque", &ControlState<T>::torque);
+}
+
+template <typename T>
+void bind_control_input(py::module_& m, const std::string& handler_name) {
+  py::class_<ControlInput<T>>(m, handler_name.c_str())
+      .def(py::init<>())
+      .def_property(
+          "mode", [](ControlInput<T>& self) -> Eigen::Vector<bool, T::kRobotDOF>& { return self.mode; },
+          [](ControlInput<T>& self, const Eigen::Vector<bool, T::kRobotDOF>& mat) { self.mode = mat; },
+          py::return_value_policy::reference_internal)
+      .def_property(
+          "target", [](ControlInput<T>& self) -> Eigen::Vector<double, T::kRobotDOF>& { return self.target; },
+          [](ControlInput<T>& self, const Eigen::Vector<double, T::kRobotDOF>& mat) { self.target = mat; },
+          py::return_value_policy::reference_internal)
+      .def_property(
+          "feedback_gain",
+          [](ControlInput<T>& self) -> Eigen::Vector<unsigned int, T::kRobotDOF>& { return self.feedback_gain; },
+          [](ControlInput<T>& self, const Eigen::Vector<unsigned int, T::kRobotDOF>& mat) { self.feedback_gain = mat; },
+          py::return_value_policy::reference_internal)
+      .def_property(
+          "feedforward_torque",
+          [](ControlInput<T>& self) -> Eigen::Vector<double, T::kRobotDOF>& { return self.feedforward_torque; },
+          [](ControlInput<T>& self, const Eigen::Vector<double, T::kRobotDOF>& mat) { self.feedforward_torque = mat; },
+          py::return_value_policy::reference_internal)
+      .def_readwrite("finish", &ControlInput<T>::finish);
+}
+
+template <typename T>
 void bind_robot(py::module_& m, const std::string& robot_name) {
   bind_robot_command_handler<T>(m, robot_name + "_CommandHandler");
   bind_robot_command_stream_handler<T>(m, robot_name + "_CommandStreamHandler");
+  bind_control_state<T>(m, robot_name + "_ControlState");
+  bind_control_input<T>(m, robot_name + "_ControlInput");
 
   py::class_<Robot<T>, std::shared_ptr<Robot<T>>>(m, robot_name.c_str())
       .def_static("create", &Robot<T>::Create)
@@ -108,8 +147,19 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("get_state", &Robot<T>::GetState, py::call_guard<py::gil_scoped_release>())
       .def("get_last_log", &Robot<T>::GetLastLog, "count"_a)
       .def("get_control_manager_state", &Robot<T>::GetControlManagerState)
-      .def("send_command", &Robot<T>::SendCommand, "builder"_a, "priority"_a)
-      .def("create_command_stream", &Robot<T>::CreateCommandStream, "priority"_a)
+      .def("send_command", &Robot<T>::SendCommand, "builder"_a, "priority"_a = 1)
+      .def("create_command_stream", &Robot<T>::CreateCommandStream, "priority"_a = 1)
+      .def(
+          "control",
+          [](Robot<T>& self, std::function<ControlInput<T>(const ControlState<T>&)> control, int port, int priority) {
+            return self.Control(
+                [=](const ControlState<T>& state) {
+                  py::gil_scoped_acquire acquire;
+                  return control(state);
+                },
+                port, priority);
+          },
+          "control"_a, "port"_a = 0, "priority"_a = 1, py::call_guard<py::gil_scoped_release>())
       .def("reset_odometry", &Robot<T>::ResetOdometry, "angle"_a, "position"_a)
       .def("get_parameter_list", &Robot<T>::GetParameterList)
       .def("set_parameter", &Robot<T>::SetParameter, "name"_a, "value"_a)

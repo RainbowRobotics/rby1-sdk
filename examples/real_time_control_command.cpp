@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
         // Make control input
         input.mode.setConstant(kPositionControlMode);
         input.target = state.position * 0.9;
-        input.feedback_gain.setConstant(10);
+        input.feedback_gain.setConstant(2);
         input.feedforward_torque.setConstant(0);
 
         input.finish = (count++) > 2000;

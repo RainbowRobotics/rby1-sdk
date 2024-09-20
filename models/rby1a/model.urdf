@@ -84,11 +84,13 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
-        <!--                <capsule sp="0.0 0.0 0.0" ep="-0.230 0.0 0.0" radius="0.105"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+               <collision>
+                    <origin xyz="-0.115 0 0" rpy="0 1.5708 0"/>
+                    <geometry>
+                        <capsule radius="0.105" length="0.230"/>
+                        <!-- <capsule sp="0.0 0.0 0.0" ep="-0.230 0.0 0.0" radius="0.105" length="1"/> -->
+                    </geometry>
+               </collision>
     </link>
 
     <link name="link_torso_1">
@@ -108,11 +110,13 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
-        <!--                <capsule sp="0.01 0.0 0.130" ep="0.01 0.0 0.350" radius="0.115"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+               <collision>
+                    <origin xyz="0.0100 0 0.2400" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.115" length="0.220"/>
+                       <!-- <capsule sp="0.01 0.0 0.130" ep="0.01 0.0 0.350" radius="0.115"/> -->
+                   </geometry>
+               </collision>
     </link>
 
     <link name="link_torso_2">
@@ -132,11 +136,14 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
+               <collision>
+                    <origin xyz="0.0250 0 0.2300" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.095" length="0.1600"/>
         <!--                <capsule sp="0.025 0.0 0.15" ep="0.025 0.0 0.310" radius="0.095"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+                   </geometry>
+               </collision>
+
     </link>
 
     <link name="link_torso_3">
@@ -174,11 +181,17 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
+
+
+               <collision>
+                    <origin xyz="-0.070000 0 0.038500" rpy="0 1.5708 0"/>
+                    <geometry>
+                        <capsule radius="0.105" length="0.2"/>
         <!--                <capsule sp="0.03 0.0 0.0385" ep="-0.170 0.0 0.0385" radius="0.105"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+                   </geometry>
+               </collision>
+
+
     </link>
 
     <link name="link_torso_5">
@@ -198,11 +211,15 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
+
+               <collision>
+                    <origin xyz="0 0 0.0075" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.155" length="0.1350"/>
         <!--                <capsule sp="0.0 0.0 -0.06" ep="0.0 0.0 0.075" radius="0.155"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+                   </geometry>
+               </collision>
+
     </link>
 
     <link name="link_right_arm_0">
@@ -221,6 +238,14 @@
                 <color rgba="0.7 0.7 0.7 1.0"/>
             </material>
         </visual>
+
+               <collision>
+                    <origin xyz="-0.015 0.018 -0.008" rpy="0 1.5708 0"/>
+                    <geometry>
+                        <capsule radius="0.075" length="0.0700"/>
+                   </geometry>
+               </collision>
+
     </link>
 
     <link name="link_right_arm_1">
@@ -240,11 +265,15 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
+        
+               <collision>
+                    <origin xyz="0 0 -0.1000" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.050" length="0.2000"/>
         <!--                <capsule sp="0.0 0.0 0.0" ep="0.0 0.0 -0.200" radius="0.050"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+                   </geometry>
+               </collision>
+
     </link>
 
     <link name="link_right_arm_2">
@@ -264,11 +293,13 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
+               <collision>
+                    <origin xyz="0.0260 0 -0.2760" rpy="1.5708 0 0"/>
+                    <geometry>
+                        <capsule radius="0.05" length="0.080000"/>
         <!--                <capsule sp="0.026 -0.040 -0.276" ep="0.026 0.040 -0.276" radius="0.05"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+                   </geometry>
+               </collision>
     </link>
 
     <link name="link_right_arm_3">
@@ -288,11 +319,17 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
+
+
+               <collision>
+                    <origin xyz="-0.0310 0 -0.1075" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.04" length="0.1150"/>
         <!--                <capsule sp="-0.031 0.0 -0.05" ep="-0.031 0.0 -0.165" radius="0.04"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+                   </geometry>
+               </collision>
+
+
     </link>
 
     <link name="link_right_arm_4">
@@ -312,11 +349,16 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
+
+
+               <collision>
+                    <origin xyz="0 -0.038000 0.017500" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.035" length="0.095000"/>
         <!--                <capsule sp="0.0 -0.038 0.065" ep="0.0 -0.038 -0.030" radius="0.035"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+                   </geometry>
+               </collision>
+
     </link>
 
     <link name="link_right_arm_5">
@@ -336,11 +378,16 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
+
+
+               <collision>
+                    <origin xyz="0 0 -0.024000" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.075" length="0.052000"/>
         <!--                <capsule sp="0.0 0.0 0.002" ep="0.0 0.0 -0.050" radius="0.075"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+                   </geometry>
+               </collision>
+
     </link>
 
     <link name="link_right_arm_6">
@@ -377,6 +424,14 @@
                 <color rgba="0.7 0.7 0.7 1.0"/>
             </material>
         </visual>
+
+                <collision>
+                    <origin xyz="-0.015 -0.018 -0.008" rpy="0 1.5708 0"/>
+                    <geometry>
+                        <capsule radius="0.075" length="0.0700"/>
+                   </geometry>
+               </collision>
+
     </link>
 
     <link name="link_left_arm_1">
@@ -396,11 +451,12 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
-        <!--                <capsule sp="0.0 0.0 0.0" ep="0.0 0.0 -0.200" radius="0.050"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+               <collision>
+                    <origin xyz="0 0 -0.1000" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.050" length="0.2000"/>
+                   </geometry>
+               </collision>
     </link>
 
     <link name="link_left_arm_2">
@@ -420,11 +476,13 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
-        <!--                <capsule sp="0.026 -0.040 -0.276" ep="0.026 0.040 -0.276" radius="0.05"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+               <collision>
+                    <origin xyz="0.0260 0 -0.2760" rpy="1.5708 0 0"/>
+                    <geometry>
+                        <capsule radius="0.05" length="0.080000"/>
+                   </geometry>
+               </collision>
+
     </link>
 
     <link name="link_left_arm_3">
@@ -444,11 +502,12 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
-        <!--                <capsule sp="-0.031 0.0 -0.05" ep="-0.031 0.0 -0.165" radius="0.04"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+               <collision>
+                    <origin xyz="-0.0310 0 -0.1075" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.04" length="0.1150"/>
+                   </geometry>
+               </collision>
     </link>
 
     <link name="link_left_arm_4">
@@ -468,11 +527,13 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
-        <!--                <capsule sp="0.0 0.038 0.065" ep="0.0 0.038 -0.030" radius="0.035"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+               <collision>
+                    <origin xyz="0 0.038000 0.017500" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.035" length="0.095000"/>
+                   </geometry>
+               </collision>
+
     </link>
 
     <link name="link_left_arm_5">
@@ -492,11 +553,12 @@
             </material>
         </visual>
 
-        <!--        <collision>-->
-        <!--            <geometry>-->
-        <!--                <capsule sp="0.0 0.0 0.002" ep="0.0 0.0 -0.050" radius="0.075"/>-->
-        <!--            </geometry>-->
-        <!--        </collision>-->
+               <collision>
+                    <origin xyz="0 0 -0.024000" rpy="0 0 0"/>
+                    <geometry>
+                        <capsule radius="0.075" length="0.052000"/>
+                   </geometry>
+               </collision>
     </link>
 
     <link name="link_left_arm_6">

@@ -5,7 +5,7 @@ import time
 
 from rby1_sdk import *
 
-ROBOT_ADDRESS = "localhost:50051"
+ROBOT_ADDRESS = "192.168.30.1:50051"
 
 print("Attempting to connect to the robot...")
 
@@ -81,7 +81,7 @@ robot.set_parameter("default.linear_acceleration_limit", "5")
 
 print("parameters setting is done")
 
-minimum_time = 5.0
+minimum_time = 5.0/3.0
 
 D2R = np.pi / 180  # Degrees to radians conversion factor
 
@@ -160,7 +160,7 @@ def example_joint_position_command_2(robot):
 
 
 D2R = np.pi / 180  # Degree to Radian conversion factor
-minimum_time = 4.0
+minimum_time = 4.0 /3.0
 angular_velocity_limit = np.pi * 1.5
 linear_velocity_limit = 1.5
 acceleration_limit = 1.0
@@ -332,7 +332,7 @@ def example_cartesian_command_3(robot):
 
 
 D2R = np.pi / 180  # Degree to Radian conversion factor
-minimum_time = 4.0
+minimum_time = 4.0 /3.0
 linear_velocity_limit = 1.5
 angular_velocity_limit = np.pi * 1.5
 acceleration_limit = 1.0
@@ -471,7 +471,7 @@ def example_relative_command_1(robot):
 
 # Constants
 D2R = np.pi / 180  # Degree to Radian conversion factor
-minimum_time = 4.0
+minimum_time = 4.0/3.0
 linear_velocity_limit = 1.5
 angular_velocity_limit = np.pi * 1.5
 acceleration_limit = 1.0
@@ -608,8 +608,9 @@ def example_optimal_control_2(robot):
 
 
 D2R = np.pi / 180  # Degree to Radian conversion factor
-minimum_time = 4.0
-weight = 0.001
+minimum_time = 4.0/3.0
+# weight = 0.001
+weight = 0.0015
 stop_cost = 1e-2
 velocity_tracking_gain = 0.01
 min_delta_cost = 1e-4
@@ -644,17 +645,20 @@ def example_optimal_control_3(robot):
     COM = np.array([0.0, 0.0, 0.5])
 
     # Build optimal control command
-    optimal_control_command = OptimalControlCommandBuilder().set_center_of_mass_target("base", COM,
-                                                                                       weight).add_cartesian_target(
-        "base", "ee_left", T_left, weight, weight).add_cartesian_target("base", "ee_right", T_right, weight,
-                                                                        weight).add_joint_position_target("torso_4",
-                                                                                                          0.0,
-                                                                                                          weight).add_joint_position_target(
-        "torso_2", -np.pi / 2, weight).add_joint_position_target("right_arm_2", np.pi / 4,
-                                                                 weight).add_joint_position_target("left_arm_2",
-                                                                                                   -np.pi / 4,
-                                                                                                   weight).set_velocity_tracking_gain(
-        velocity_tracking_gain).set_stop_cost(stop_cost).set_min_delta_cost(min_delta_cost).set_patience(patience)
+    optimal_control_command = (OptimalControlCommandBuilder()
+                                .set_center_of_mass_target("base", COM, weight)
+                                .add_cartesian_target("base", "ee_left", T_left, weight, weight)
+                                .add_cartesian_target("base", "ee_right", T_right, weight, weight)
+                                .add_joint_position_target("torso_4", 0, weight)
+                                .add_joint_position_target("torso_3", np.pi/4, weight)
+                                .add_joint_position_target("torso_2", -np.pi / 2, weight)
+                                .add_joint_position_target("right_arm_2", np.pi / 4, weight)
+                                .add_joint_position_target("left_arm_2", -np.pi / 4,weight)
+                                .set_velocity_tracking_gain(velocity_tracking_gain)
+                                .set_stop_cost(stop_cost)
+                                .set_min_delta_cost(min_delta_cost)
+                                .set_patience(patience)
+                                )
 
     # Send command
     rc = RobotCommandBuilder().set_command(

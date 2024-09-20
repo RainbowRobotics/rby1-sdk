@@ -1,6 +1,6 @@
 import rby1_sdk
 
-robot = rby1_sdk.create_robot_a("localhost:50051")
+robot = rby1_sdk.create_robot_a("192.168.30.1:50051")
 
 robot.connect()
 

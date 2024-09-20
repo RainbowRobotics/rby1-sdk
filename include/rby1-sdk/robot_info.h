@@ -8,6 +8,10 @@ struct PowerInfo {
   std::string name{};
 };
 
+struct EMOInfo {
+  std::string name{};
+};
+
 struct JointInfo {
   std::string name{};
 
@@ -22,6 +26,8 @@ struct RobotInfo {
   BatteryInfo battery_info;
 
   std::vector<PowerInfo> power_infos{};
+
+  std::vector<EMOInfo> emo_infos{};
 
   int degree_of_freedom{};
 

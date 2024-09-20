@@ -2,10 +2,12 @@
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+#include <thread>
 
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/net/real_time_control_protocol.h"
 #include "rby1-sdk/robot.h"
+#include "rby1-sdk/robot_command_builder.h"
 
 using namespace rb;
 using namespace std::chrono_literals;
@@ -74,10 +76,43 @@ int main(int argc, char** argv) {
   }
   std::cout << "Control Manager enabled successfully." << std::endl;
 
+  {
+    Eigen::Vector<double, 6> q_joint_waist;
+    Eigen::Vector<double, 7> q_joint_right_arm;
+    Eigen::Vector<double, 7> q_joint_left_arm;
+
+    q_joint_waist << 0, 30, -60, 30, 0, 0;
+    q_joint_right_arm << -45, -30, 0, -90, 0, 45, 0;
+    q_joint_left_arm << -45, 30, 0, -90, 0, 45, 0;
+
+    Eigen::Vector<double, 20> q;
+    q.block(0, 0, 6, 1) = q_joint_waist;
+    q.block(6, 0, 7, 1) = q_joint_right_arm;
+    q.block(6 + 7, 0, 7, 1) = q_joint_left_arm;
+
+    q = q * 3.141592 / 180.;
+
+    JointPositionCommandBuilder joint_position_command;
+    joint_position_command.SetPosition(q).SetMinimumTime(5.0);
+
+    auto rv = robot
+                  ->SendCommand(RobotCommandBuilder().SetCommand(
+                      ComponentBasedCommandBuilder().SetBodyCommand(joint_position_command)))
+                  ->Get();
+
+    if (rv.finish_code() != RobotCommandFeedback::FinishCode::kOk) {
+      std::cerr << "Error: Failed to conduct demo motion." << std::endl;
+      return 1;
+    }
+
+    std::this_thread::sleep_for(1s);
+  }
+
   auto dyn = robot->GetDynamics();
   auto dyn_state = dyn->MakeState({"base", "ee_right"}, y1_model::A::kRobotJointNames);
 
   int count = 0;
+
   auto rv = robot->Control(
       [&](const auto& state) {
         ControlInput<y1_model::A> input;
@@ -127,7 +162,7 @@ int main(int argc, char** argv) {
         input.finish = (count++) > 2000;
         return input;
       },
-      10000);
+      0, 10);
 
   std::cout << "Control Result: " << std::boolalpha << rv << std::endl;
 

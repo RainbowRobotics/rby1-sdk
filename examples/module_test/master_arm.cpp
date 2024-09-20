@@ -54,7 +54,7 @@ int main() {
       input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
       input.target_position(Eigen::seq(7, 13)) = q_left;
     }
-    std::cout<<"trigger : [" << state.button_right.button << ", " << state.button_left.button <<"]" <<std::endl;
+    std::cout << "trigger : [" << state.button_right.button << ", " << state.button_left.button << "]" << std::endl;
     return input;
   });
 

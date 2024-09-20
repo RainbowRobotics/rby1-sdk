@@ -7,7 +7,6 @@ set(EXAMPLES
         optimal_control
         velocity_estimation
 
-        master_arm
         teleoperation_with_joint_mapping
 
         kinematic_calibration
@@ -36,7 +35,7 @@ foreach (SRC IN LISTS EXAMPLES)
     )
     target_link_libraries(${EXECUTABLE_NAME} PRIVATE
             rby1-sdk
-
+        
             DynamixelSDK
             OsqpEigen::OsqpEigen
     )
@@ -45,10 +44,3 @@ foreach (SRC IN LISTS EXAMPLES)
     )
     message(STATUS ${EXECUTABLE_NAME})
 endforeach ()
-
-#add_executable(example_rtcomm_protocol
-#        rtcomm_protocol.cpp
-#)
-#target_link_libraries(example_rtcomm_protocol PRIVATE
-#        rby1-sdk
-#)

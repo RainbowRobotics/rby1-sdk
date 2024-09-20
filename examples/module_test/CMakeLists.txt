@@ -5,6 +5,8 @@ set(MODULE_TEST
         left_arm
         ft_sensor 
         master_arm
+        gripper
+        tool_flange
 )
 
 foreach (SRC IN LISTS MODULE_TEST)

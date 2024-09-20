@@ -1005,12 +1005,19 @@ int main(int argc, char** argv) {
       q_joint_ref = q_joint_ma;
     }
 
+    auto dyn = robot->GetDynamics();
+    auto dyn_state = dyn->MakeState({"base"}, y1_model::A::kRobotJointNames);
+
+    Eigen::Vector<double, 14> q_lower_limit, q_upper_limit;
+    q_upper_limit = dyn->GetLimitQUpper(dyn_state).block(2 + 6, 0, 14, 1);
+    q_lower_limit = dyn->GetLimitQLower(dyn_state).block(2 + 6, 0, 14, 1);
+
     auto stream = robot->CreateCommandStream();
 
     std::this_thread::sleep_for(5s);
 
-    double right_arm_minimum_time = 5.;
-    double left_arm_minimum_time = 5.;
+    double right_arm_minimum_time = 1.;
+    double left_arm_minimum_time = 1.;
     double lpf_update_ratio = 0.2;
 
     std::cout << "Start to send command to robot." << std::endl;
@@ -1025,14 +1032,22 @@ int main(int argc, char** argv) {
             //right hand position control mode
             q_joint_ref.block(0, 0, 7, 1) = q_joint_ref.block(0, 0, 7, 1) * (1 - lpf_update_ratio) +
                                             q_joint_ma.block(0, 0, 7, 1) * lpf_update_ratio;
+          }else{
+            right_arm_minimum_time = 1.0;
           }
 
           if (hand_controller_button(1)) {
             //left hand position control mode
             q_joint_ref.block(7, 0, 7, 1) = q_joint_ref.block(7, 0, 7, 1) * (1 - lpf_update_ratio) +
                                             q_joint_ma.block(7, 0, 7, 1) * lpf_update_ratio;
+          }else{
+            left_arm_minimum_time = 1.0;
           }
         }
+      }
+
+      for (int i = 0; i < 14; i++) {
+        q_joint_ref(i) = std::clamp(q_joint_ref(i), q_lower_limit(i), q_upper_limit(i));
       }
 
       Eigen::Vector<double, 7> target_position_left = q_joint_ref.block(7, 0, 7, 1);
@@ -1057,13 +1072,13 @@ int main(int argc, char** argv) {
           BodyComponentBasedCommandBuilder()
               .SetLeftArmCommand(JointPositionCommandBuilder()
                                      .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
-                                     .SetMinimumTime(right_arm_minimum_time)
+                                     .SetMinimumTime(left_arm_minimum_time)
                                      .SetPosition(target_position_left)
                                      .SetVelocityLimit(vel_limit)
                                      .SetAccelerationLimit(acc_limit))
               .SetRightArmCommand(JointPositionCommandBuilder()
                                       .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
-                                      .SetMinimumTime(left_arm_minimum_time)
+                                      .SetMinimumTime(right_arm_minimum_time)
                                       .SetPosition(target_position_right)
                                       .SetVelocityLimit(vel_limit)
                                       .SetAccelerationLimit(acc_limit))));

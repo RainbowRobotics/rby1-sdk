@@ -49,6 +49,8 @@ using namespace rb;
 #define MIN_INDEX 0
 #define MAX_INDEX 1
 
+bool isInitFinish = false;
+
 void TorqueEnable(dynamixel::PortHandler* portHandler, dynamixel::PacketHandler* packetHandler, int id, int onoff) {
   packetHandler->write1ByteTxOnly(portHandler, id, ADDR_TORQUE_ENABLE, onoff);
   std::this_thread::sleep_for(std::chrono::microseconds(500));
@@ -175,8 +177,15 @@ void control_loop_for_gripper(dynamixel::PortHandler* portHandler, dynamixel::Pa
           540 * 0.9) {
         is_init = false;
       }
+
+      std::cout <<" id: " << id<< std::endl;
+      std::cout <<" q_min_max_vector[id](0): " << q_min_max_vector[id](0)* 180 / 3.141592<< std::endl;
+      std::cout <<" q_min_max_vector[id](1): " << q_min_max_vector[id](1)* 180 / 3.141592<< std::endl;
+      std::cout <<" is_init: " << is_init<< std::endl;
+      
     }
 
+    
     if (is_init) {
       for (auto const& id : activeIDs) {
         if (q_min_max_vector[id](MIN_INDEX) > q_min_max_vector[id](MAX_INDEX)) {
@@ -187,7 +196,9 @@ void control_loop_for_gripper(dynamixel::PortHandler* portHandler, dynamixel::Pa
 
         SendCurrent(portHandler, packetHandler, id, 0);
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+      std::this_thread::sleep_for(std::chrono::milliseconds(3000));\
+      isInitFinish = true;
+      
       break;
     }
 
@@ -196,7 +207,7 @@ void control_loop_for_gripper(dynamixel::PortHandler* portHandler, dynamixel::Pa
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
   }
 
-  std::cout << "finish init\n";
+  std::cout << "OK\n";
 }
 
 std::string resolve_symlink(const std::string& symlink) {
@@ -305,12 +316,13 @@ int main(int argc, char** argv) {
 
   std::thread gripper_handler(control_loop_for_gripper, portHandler_gripper, packetHandler_gripper, activeIDs_gripper);
 
-  // while (1) {
-  //   std::this_thread::sleep_for(5ms);
-  // }
+  while (1) {
+    std::this_thread::sleep_for(5ms);
+    if(isInitFinish)
+      break;
+  }
 
   gripper_handler.join();
-
   portHandler_gripper->closePort();
 
   return 0;

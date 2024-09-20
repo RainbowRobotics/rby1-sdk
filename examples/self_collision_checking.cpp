@@ -15,12 +15,12 @@ using namespace rb::math;
 enum LinkName {
   BASE = 0,
 
-  AR,
-  AP,
-  KN,
-  HP,
-  HR,
-  HY,
+  AR, 2^0
+  AP, 2^1
+  KN, 2^2
+  HP, 2^3
+  HR, 2^4
+  HY, 2^5
 
   RSP,
   RSR,
@@ -314,8 +314,8 @@ int main() {
     collision_pair_and_margins.push_back(std::make_tuple(LinkName::HY, LinkName::LWP, 0.01));
 
     // RSR ↔ LWY1 LWP
-    collision_pair_and_margins.push_back(std::make_tuple(LinkName::RSP, LinkName::LWY, 0.01));
-    collision_pair_and_margins.push_back(std::make_tuple(LinkName::RSP, LinkName::LWP, 0.01));
+    collision_pair_and_margins.push_back(std::make_tuple(LinkName::RSR, LinkName::LWY, 0.01));
+    collision_pair_and_margins.push_back(std::make_tuple(LinkName::RSR, LinkName::LWP, 0.01));
 
     // RSY ↔ LWY1 LWP
     collision_pair_and_margins.push_back(std::make_tuple(LinkName::RSY, LinkName::LWY, 0.01));

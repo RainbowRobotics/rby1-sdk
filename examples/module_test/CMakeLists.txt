@@ -20,6 +20,6 @@ foreach (SRC IN LISTS MODULE_TEST)
             OsqpEigen::OsqpEigen
     )
     target_compile_definitions(${EXECUTABLE_NAME} PUBLIC
-            -DPATH="${CMAKE_CURRENT_SOURCE_DIR}"
+            -DMODELS_PATH="${CMAKE_SOURCE_DIR}/models/"
     )
 endforeach ()

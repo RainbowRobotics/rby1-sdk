@@ -2,10 +2,54 @@
 
 #include <iostream>
 
+#include "rby1-sdk/model.h"
+#include "rby1-sdk/robot.h"
+#include <csignal>
+#include <cstdlib>
+
 using namespace rb;
 using namespace std::chrono_literals;
+const std::string kAll = "^((?!wheel|right|left|torso|head).)*";
 
-int main() {
+auto robot = Robot<y1_model::A>::Create("192.168.30.1:50051");
+auto master_arm = std::make_shared<upc::MasterArm>("/dev/rby1_master_arm");
+
+void signalHandler(int signum){
+  
+  master_arm->StopControl();
+  robot->PowerOff("12v");
+  exit(signum);
+}
+
+int main(int argc, char** argv) {
+
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " <server address>" << std::endl;
+    return 1;
+  }
+
+  std::string address{argv[1]};
+  signal(SIGINT, signalHandler);
+  // auto robot = Robot<y1_model::A>::Create(address);
+
+  std::cout << "Attempting to connect to the robot..." << std::endl;
+  if (!robot->Connect()) {
+    std::cerr << "Error: Unable to establish connection to the robot at " << address << std::endl;
+    return 1;
+  }
+  std::cout << "Successfully connected to the robot." << std::endl;
+
+  std::cout << "Checking power status..." << std::endl;
+  if (!robot->IsPowerOn("12v")) {
+    std::cout << "Power is currently OFF. Attempting to power on..." << std::endl;
+    if (!robot->PowerOn("12v")) {
+      std::cerr << "Error: Failed to power on the robot." << std::endl;
+      return 1;
+    }
+    std::cout << "Robot powered on successfully." << std::endl;
+  } else {
+    std::cout << "Power is already ON." << std::endl;
+  }
 
   try {
     // Latency timer setting
@@ -15,8 +59,8 @@ int main() {
     return 1;
   }
 
-  auto master_arm = std::make_shared<upc::MasterArm>("/dev/rby1_master_arm");
-  master_arm->SetModelPath(PATH "/master_arm.urdf");
+  
+  master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
   master_arm->SetControlPeriod(0.02);
 
   auto active_ids = master_arm->Initialize();
@@ -54,13 +98,15 @@ int main() {
       input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
       input.target_position(Eigen::seq(7, 13)) = q_left;
     }
-    std::cout << "trigger : [" << state.button_right.button << ", " << state.button_left.button << "]" << std::endl;
+    std::cout << "button : [" << state.button_right.button << ", " << state.button_left.button << "]" << std::endl;
+    std::cout << "trigger : [" << state.button_right.trigger << ", " << state.button_left.trigger << "]" << std::endl;
     return input;
   });
 
-  std::this_thread::sleep_for(100s);
+  std::this_thread::sleep_for(10s);
 
   master_arm->StopControl();
+  robot->PowerOff("12v");
 
   return 0;
 }

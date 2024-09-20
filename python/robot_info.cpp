@@ -17,6 +17,12 @@ void bind_power_info(py::module_& m) {
       .def_readonly("name", &PowerInfo::name);
 }
 
+void bind_emo_info(py::module_& m) {
+  py::class_<EMOInfo>(m, "EMOInfo")  //
+      .def(py::init<>())
+      .def_readonly("name", &EMOInfo::name);
+}
+
 void bind_joint_info(py::module_& m) {
   py::class_<JointInfo>(m, "JointInfo")
       .def(py::init<>())
@@ -31,6 +37,7 @@ void bind_robot_info(py::module_& m) {
       .def_readonly("sdk_commit_id", &RobotInfo::sdk_commit_id)
       .def_readonly("battery_info", &RobotInfo::battery_info)
       .def_readonly("power_infos", &RobotInfo::power_infos)
+      .def_readonly("emo_infos", &RobotInfo::emo_infos)
       .def_readonly("degree_of_freedom", &RobotInfo::degree_of_freedom)
       .def_readonly("joint_infos", &RobotInfo::joint_infos)
       .def_readonly("mobility_joint_idx", &RobotInfo::mobility_joint_idx)
@@ -41,6 +48,7 @@ void bind_robot_info(py::module_& m) {
 void pybind11_robot_info(py::module_& m) {
   bind_battery_info(m);
   bind_power_info(m);
+  bind_emo_info(m);
   bind_joint_info(m);
   bind_robot_info(m);
 }

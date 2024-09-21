@@ -1,21 +1,9 @@
 <mujoco model="rby1">
   <compiler angle="radian" autolimits="true" eulerseq="xyz" />
-  <option timestep="0.003" solver="CG" iterations="30" tolerance="1e-6" />
-  <size nuserdata="144" />
 
   <default>
     <joint armature="10" damping="50" range="-3.14 3.14" />
     <material specular="0.5" shininess="0.25" />
-
-    <default class="visual">
-      <geom group="2" type="mesh" contype="0" conaffinity="0" />
-    </default>
-    <default class="collision">
-      <geom group="3" type="mesh" />
-    </default>
-    <default class="in-model-collision">
-      <geom group="2" contype="0" conaffinity="0" rgba="0.3 0 0 0.0" />
-    </default>
   </default>
 
   <visual>

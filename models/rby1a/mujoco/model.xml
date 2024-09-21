@@ -1,6 +1,19 @@
 <mujoco model="rby1">
+  <option timestep="0.002" solver="CG" iterations="10" tolerance="1e-6" />
+  <size nuserdata="144" />
+
   <default>
     <motor ctrlrange="-3000000 3000000" ctrllimited="true" />
+
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0" />
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh" contype="1" conaffinity="0" />
+    </default>
+    <default class="in-model-collision">
+      <geom group="2" contype="0" conaffinity="0" rgba="0.3 0 0 0.0" />
+    </default>
   </default>
   
   <include file="./rby1.xml" />

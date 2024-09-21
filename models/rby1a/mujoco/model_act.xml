@@ -1,5 +1,5 @@
 <mujoco model="rby1">
-  <option timestep="0.002" solver="CG" iterations="20" tolerance="1e-6" />
+  <option timestep="0.002" solver="CG" iterations="30" tolerance="1e-6" />
 
   <default>
     <motor ctrllimited="true" ctrlrange="-100 100" />

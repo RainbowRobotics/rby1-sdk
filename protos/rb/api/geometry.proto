@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package rb.api;
 
-import "google/protobuf/wrappers.proto";
-
 message Vec2 {
   double x = 1;
   double y = 2;

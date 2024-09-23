@@ -78,7 +78,17 @@ class Geom : public std::enable_shared_from_this<Geom> {
  public:
   Geom(unsigned int coltype = 0, unsigned int colaffinity = 0) : coltype_(coltype), colaffinity_(colaffinity) {}
 
+  virtual ~Geom() {}
+
   virtual GeomType GetType() const = 0;
+
+  unsigned int GetColtype() const { return coltype_; }
+
+  unsigned int GetColaffinity() const { return colaffinity_; }
+
+  static bool Filter(const Geom& geom1, const Geom& geom2) {
+    return (geom1.coltype_ & geom2.colaffinity_) || (geom2.coltype_ & geom1.colaffinity_);
+  }
 
  protected:
   unsigned int coltype_;

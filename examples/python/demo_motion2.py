@@ -1,6 +1,7 @@
 import rby1_sdk
 import numpy as np
 import sys
+from time import sleep
 import time
 
 from rby1_sdk import *
@@ -89,9 +90,9 @@ def example_joint_position_command_1(robot):
     print("joint position command example 1")
 
     # Initialize joint positions
-    q_joint_waist = np.deg2rad(np.array([0, 50, -100, 50, 0, 0]))
-    q_joint_right_arm = np.deg2rad(np.array([-15, -5, 5, -90, 20, -65, 0]))
-    q_joint_left_arm = np.deg2rad(np.array([-15, 5, -5, -90, -20, -65, 0]))
+    q_joint_waist = np.deg2rad(np.array([0, 60, -120, 60, 0, 0]))
+    q_joint_right_arm = np.deg2rad(np.array([-45, -30, 0, -45, 0, -90, 90]))
+    q_joint_left_arm = np.deg2rad(np.array([-45, 30, 0, -45, 0, -90, -90]))
 
     print(f"{q_joint_waist=}")
     rc = RobotCommandBuilder().set_command(
@@ -128,8 +129,8 @@ def example_joint_position_command_2(robot):
 
     # Initialize joint positions
     q_joint_waist = np.deg2rad(np.array([0, 25, -50, 25, 0, 0]))
-    q_joint_right_arm = np.deg2rad(np.array([-15, -5, 5, -90, 20, -65, 0]))
-    q_joint_left_arm = np.deg2rad(np.array([-15, 5, -5, -90, -20, -65, 0]))
+    q_joint_right_arm = np.deg2rad(np.array([-45, -30, 0, -45, 0, -90, 90]))
+    q_joint_left_arm = np.deg2rad(np.array([-45, 30, 0, -45, 0, -90, -90]))
 
     rc = RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder().set_body_command(
@@ -151,10 +152,9 @@ def example_joint_position_command_2(robot):
             )
         )
     )
-
     rv = robot.send_command(rc, 10).get()
 
-    if rv.finish_code != RobotCommandFeedback.FinishCode.Ok:
+    if rv.fsleepinish_code != RobotCommandFeedback.FinishCode.Ok:
         print("Error: Failed to conduct demo motion.")
         return 1
 
@@ -166,6 +166,8 @@ def example_joint_position_command_2(robot):
 
 if not example_joint_position_command_1(robot):
     print("finish motion")
+
+sleep(7.0)
 if not example_joint_position_command_2(robot):
     print("finish motion")
 

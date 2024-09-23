@@ -723,7 +723,8 @@ def example_mixed_command_1(robot):
         .set_body_command(BodyComponentBasedCommandBuilder()
                           .set_torso_command(torso_command)
                           .set_right_arm_command(right_arm_command)
-                          .set_left_arm_command(left_arm_command))
+                        #   .set_left_arm_command(left_arm_command)
+        )
     ), 10).get()
 
     if rv.finish_code != RobotCommandFeedback.FinishCode.Ok:

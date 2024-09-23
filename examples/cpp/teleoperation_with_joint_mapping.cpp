@@ -71,7 +71,7 @@ Eigen::Matrix<double, 2, 1> hand_controller_button = Eigen::Matrix<double, 2, 1>
 
 std::vector<Eigen::Matrix<double, 2, 1>> hand_controller_trigger_min_max = {
     // Eigen::Matrix<double, 2, 1>({11850, 12900}), Eigen::Matrix<double, 2, 1>({13350, 14400})};
-    Eigen::Matrix<double, 2, 1>({4460, 5580}), Eigen::Matrix<double, 2, 1>({14740, 15780})};
+    Eigen::Matrix<double, 2, 1>({13700, 14600}), Eigen::Matrix<double, 2, 1>({10100, 11050})};
 int gripper_direction = 0;
 bool ma_info_verbose = true;
 
@@ -873,7 +873,7 @@ int main(int argc, char** argv) {
     std::this_thread::sleep_for(1s);
   }
 
-  robot->SetParameter("joint_position_command.cutoff_frequency", "15.0");
+  robot->SetParameter("joint_position_command.cutoff_frequency", "10.0");
   std::cout << robot->GetParameter("joint_position_command.cutoff_frequency") << std::endl;
 
   const char* devicename_master_arm = "/dev/rby1_master_arm";
@@ -1018,7 +1018,7 @@ int main(int argc, char** argv) {
 
     double right_arm_minimum_time = 1.;
     double left_arm_minimum_time = 1.;
-    double lpf_update_ratio = 0.2;
+    double lpf_update_ratio = 0.1;
 
     std::cout << "Start to send command to robot." << std::endl;
 

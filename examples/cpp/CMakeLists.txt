@@ -19,7 +19,7 @@ set(EXAMPLES
         get_robot_state
         get_robot_state2
         gravity_compensation
-        self_collision_checking
+        # self_collision_checking
         demo_motion
         real_time_control_command
 

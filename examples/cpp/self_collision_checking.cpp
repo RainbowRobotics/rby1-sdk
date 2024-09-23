@@ -15,12 +15,12 @@ using namespace rb::math;
 enum LinkName {
   BASE = 0,
 
-  AR, 2^0
-  AP, 2^1
-  KN, 2^2
-  HP, 2^3
-  HR, 2^4
-  HY, 2^5
+  AR,
+  AP,
+  KN,
+  HP,
+  HR,
+  HY,
 
   RSP,
   RSR,

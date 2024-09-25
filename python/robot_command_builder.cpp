@@ -9,7 +9,9 @@ using namespace rb;
 void pybind11_robot_command_builder(py::module_& m) {
   py::class_<CommandHeaderBuilder>(m, "CommandHeaderBuilder")
       .def(py::init<>())
-      .def("set_control_hold_time", &CommandHeaderBuilder::SetControlHoldTime);
+      .def("set_control_hold_time", &CommandHeaderBuilder::SetControlHoldTime)
+      .def("set_gravity", &CommandHeaderBuilder::SetGravity)
+      .def("add_inertial", &CommandHeaderBuilder::AddInertial);
 
   py::class_<JointPositionCommandBuilder>(m, "JointPositionCommandBuilder")
       .def(py::init<>())

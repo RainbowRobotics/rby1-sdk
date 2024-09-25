@@ -16,17 +16,6 @@ class State {
   template <typename T, int N>
   using ContainerType = typename std::conditional_t<(N > 0), std::array<T, (unsigned int)N>, std::vector<T>>;
 
-  template <int N>
-  void Set(Eigen::Vector<double, DOF>& s, const Eigen::Vector<double, N>& i) {
-    if (s.size() == i.size()) {
-      s = i(rtu_joint_map);
-    } else if (s.size() > i.size()) {
-      s.template head<>(i.size()) = i(rtu_joint_map.template head<>(i.size()));
-    } else {
-      throw std::runtime_error("i.size cannot be greater than s.size");
-    }
-  }
-
   unsigned int GetBaseLinkIdx() const {  // NOLINT
     return base_link_user_idx;
   }
@@ -102,6 +91,17 @@ class State {
     V.setZero();
     Vdot0.setZero();
     F.setZero();
+  }
+
+  template <int N>
+  void Set(Eigen::Vector<double, DOF>& s, const Eigen::Vector<double, N>& i) {
+    if (s.size() == i.size()) {
+      s = i(rtu_joint_map);
+    } else if (s.size() > i.size()) {
+      s.template head<>(i.size()) = i(rtu_joint_map.template head<>(i.size()));
+    } else {
+      throw std::runtime_error("i.size cannot be greater than s.size");
+    }
   }
 
   ContainerType<std::string, DOF> joint_names;

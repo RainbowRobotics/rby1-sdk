@@ -149,7 +149,7 @@ class Robot {
   }
 
   std::shared_ptr<Link> GetLink(std::shared_ptr<State<DOF>> state, int index) const {
-    if (index >= state->utr_link_map.size()) {
+    if (index >= (int)state->utr_link_map.size()) {
       return nullptr;
     }
     const auto& idx = state->utr_link_map[index];
@@ -170,7 +170,7 @@ class Robot {
     std::fill(flag.begin(), flag.end(), false);
 
     auto state = std::shared_ptr<State<DOF>>(new State<DOF>(n_joints_));
-    for (int i = 0; i < joint_names.size(); i++) {
+    for (int i = 0; i < (int)joint_names.size(); i++) {
       const auto& name = joint_names[i];
 
       auto it = std::find_if(joints_.begin(), joints_.end(), [name](const auto& j) { return j.joint->name_ == name; });
@@ -209,7 +209,7 @@ class Robot {
         state->link_names.push_back(k);
       }
     }
-    for (int i = 0; i < state->link_names.size(); i++) {
+    for (int i = 0; i < (int)state->link_names.size(); i++) {
       const auto& n = state->link_names[i];
       auto it = link_idx_.find(n);
       if (it == link_idx_.end()) {
@@ -228,7 +228,7 @@ class Robot {
   int GetNumberOfJoints() const { return n_joints_; }
 
   void ComputeForwardKinematics(std::shared_ptr<State<DOF>> state) {
-    for (int i = 0; i < n_joints_; i++) {
+    for (int i = 0; i < (int)n_joints_; i++) {
       state->E[i] = math::SE3::Exp(joints_[i].S, state->q(i));
 
       int parent_joint_idx = links_[joints_[i].parent_link_idx].parent_joint_idx;
@@ -239,7 +239,7 @@ class Robot {
   }
 
   void ComputeDiffForwardKinematics(std::shared_ptr<State<DOF>> state) {  // In Body Frame
-    for (int i = 0; i < n_joints_; i++) {
+    for (int i = 0; i < (int)n_joints_; i++) {
       state->V.col(i) = joints_[i].S * state->qdot(i);
 
       int parent_joint_idx = links_[joints_[i].parent_link_idx].parent_joint_idx;
@@ -248,7 +248,7 @@ class Robot {
   }
 
   void Compute2ndDiffForwardKinematics(std::shared_ptr<State<DOF>> state) {
-    for (int i = 0; i < n_joints_; i++) {
+    for (int i = 0; i < (int)n_joints_; i++) {
       state->Vdot.col(i) = joints_[i].S * state->qddot(i);
 
       int parent_joint_idx = links_[joints_[i].parent_link_idx].parent_joint_idx;
@@ -281,7 +281,7 @@ class Robot {
     Fs.resize(n_joints_);
 
     // Calculate Vdot
-    for (int i = 0; i < n_joints_; i++) {
+    for (int i = 0; i < (int)n_joints_; i++) {
       int parent_joint_idx = links_[joints_[i].parent_link_idx].parent_joint_idx;
       if (parent_joint_idx < 0) {
         Vdot[i] = math::SE3::InvAd(state->E[i], state->Vdot0);
@@ -314,7 +314,7 @@ class Robot {
     std::vector<Eigen::Matrix<double, 6, DOF>> J;
     J.resize(n_joints_);
 
-    for (int i = 0; i < n_joints_; i++) {
+    for (int i = 0; i < (int)n_joints_; i++) {
       int parent_joint_idx = links_[joints_[i].parent_link_idx].parent_joint_idx;
       if (parent_joint_idx < 0) {
         J[i].setZero();
@@ -325,7 +325,7 @@ class Robot {
       }
     }
 
-    for (int i = 0; i < n_joints_; i++) {
+    for (int i = 0; i < (int)n_joints_; i++) {
       M += J[i].transpose() * links_[joints_[i].child_link_idx].J * J[i];
     }
 
@@ -441,8 +441,8 @@ class Robot {
     J.resize(3, n_joints_);
     J.setZero();
     double mass = 0;
-    for (int i = 0; i < links_.size(); i++) {
-      const auto& link = links_[i];
+    for (int i = 0; i < (int)links_.size(); i++) {
+//      const auto& link = links_[i];
       double m = Inertial::GetMass(links_[i].I);
       J += m * SE3::GetRotation(GetTransformation(state, state->utr_link_map[ref_link], {i, 0})) *
            (SE3::InvAd(SE3::T(Inertial::GetCOM(links_[i].I))) *
@@ -485,7 +485,7 @@ class Robot {
                                               const std::function<double(std::shared_ptr<Joint>)>& getter) {
     Eigen::Vector<double, DOF> prop;
     prop.resize(n_joints_);
-    for (int i = 0; i < n_joints_; i++) {
+    for (int i = 0; i < (int)n_joints_; i++) {
       prop(state->rtu_joint_map[i]) = getter(joints_[i].joint);
     }
     return prop;

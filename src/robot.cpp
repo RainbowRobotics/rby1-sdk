@@ -80,6 +80,14 @@ rb::PowerInfo ProtoToPowerInfo(const api::PowerInfo& msg) {
   return pi;
 }
 
+rb::EMOInfo ProtoToEMOInfo(const api::EMOInfo& msg) {
+  rb::EMOInfo ei;
+
+  ei.name = msg.name();
+
+  return ei;
+}
+
 rb::JointInfo ProtoToJointInfo(const api::JointInfo& msg) {
   rb::JointInfo ji;
 
@@ -102,6 +110,10 @@ rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
 
   for (const auto& pi : msg.power_infos()) {
     info.power_infos.push_back(ProtoToPowerInfo(pi));
+  }
+
+  for (const auto& ei : msg.emo_infos()) {
+    info.emo_infos.push_back(ProtoToEMOInfo(ei));
   }
 
   for (const auto& ji : msg.joint_infos()) {
@@ -1177,6 +1189,12 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       rs.power_states.push_back(ps);
     }
 
+    for (const auto& s : msg.emo_states()) {
+      rb::EMOState es;
+      es.state = static_cast<rb::EMOState::State>(s.state());
+      rs.emo_states.push_back(es);
+    }
+
     const auto& proto_to_tool_flange = [](rb::ToolFlangeState& tf, const api::ToolFlangeState& tf_proto) {
       if (tf_proto.has_time_since_last_update()) {
         tf.time_since_last_update = DurationToTimespec(tf_proto.time_since_last_update());
@@ -1715,3 +1733,5 @@ RobotCommandFeedback RobotCommandStreamHandler<T>::RequestFeedback(int timeout_m
 template class rb::Robot<rb::y1_model::A>;
 template class rb::RobotCommandHandler<rb::y1_model::A>;
 template class rb::RobotCommandStreamHandler<rb::y1_model::A>;
+template class rb::ControlInput<rb::y1_model::A>;
+template class rb::ControlState<rb::y1_model::A>;

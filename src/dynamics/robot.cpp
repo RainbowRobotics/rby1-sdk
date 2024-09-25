@@ -102,25 +102,14 @@ RobotConfiguration _load_robot_from_urdf(tinyxml2::XMLDocument& doc, const std::
 
       XMLElement* geometry_element = collision_element->FirstChildElement("geometry");
       if (geometry_element) {
-        // sphere
+        // capsule
         XMLElement* capsule_element = geometry_element->FirstChildElement("capsule");
         if (capsule_element) {
-          std::array<double, 3> sp{0, 0, 0};
-          if (capsule_element->FindAttribute("sp")) {
-            sp = ToDoubleArray3(capsule_element->Attribute("sp"));
-          }
-
-          std::array<double, 3> ep{0, 0, 0};
-          if (capsule_element->FindAttribute("ep")) {
-            ep = ToDoubleArray3(capsule_element->Attribute("ep"));
-          }
-
-          double radius = 0;
-          if (capsule_element->FindAttribute("radius")) {
-            radius = capsule_element->DoubleAttribute("radius");
-          }
-
-          geom = std::make_shared<GeomCapsule>(Eigen::Vector3d{sp.data()}, Eigen::Vector3d{ep.data()}, radius);
+          geom = std::make_shared<GeomCapsule>(capsule_element->DoubleAttribute("length", 0),        //
+                                               capsule_element->DoubleAttribute("radius", 0),        //
+                                               capsule_element->UnsignedAttribute("coltype", 0),     //
+                                               capsule_element->UnsignedAttribute("colaffinity", 0)  //
+          );
         }
       }
 
@@ -140,7 +129,12 @@ RobotConfiguration _load_robot_from_urdf(tinyxml2::XMLDocument& doc, const std::
   XMLElement* joint = robot->FirstChildElement("joint");
   while (joint) {
     std::string name = joint->Attribute("name");
+
     std::string type = joint->Attribute("type");
+    if(joint->FindAttribute("in_model_type")) {
+      type = joint->Attribute("in_model_type");
+    }
+
     std::string parent_name, child_name;
     math::SE3::MatrixType T{math::SE3::Identity()};
 

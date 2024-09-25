@@ -60,4 +60,8 @@ double Inertial::GetMass(const Inertial::MatrixType& I) {
   return I(3, 3);
 }
 
+Eigen::Vector<double, 6> Inertial::GetInertia(const Inertial::MatrixType& I) {
+  return {I(0, 0), I(1, 1), I(2, 2), I(0, 1), I(0, 2), I(1, 2)};
+}
+
 }  // namespace rb::dyn

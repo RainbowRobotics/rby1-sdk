@@ -37,6 +37,9 @@ class Inertial {
   static Eigen::Vector3d GetCOM(const MatrixType& I);
 
   static double GetMass(const MatrixType& I);
+
+  // [I_{xx}, I_{yy}, I_{zz}, I_{xy}, I_{xz}, I_{yz}]^T
+  static Eigen::Vector<double, 6> GetInertia(const MatrixType& I);
 };
 
 }  // namespace rb::dyn

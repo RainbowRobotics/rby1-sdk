@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "Eigen/Core"
+#include "dynamics/inertial.h"
 #include "math/liegroup.h"
 
 namespace rb {
@@ -34,6 +35,10 @@ class CommandHeaderBuilder {
   ~CommandHeaderBuilder();
 
   CommandHeaderBuilder& SetControlHoldTime(double control_hold_time);
+
+  CommandHeaderBuilder& SetGravity(const Eigen::Vector3d& gravity);
+
+  CommandHeaderBuilder& AddInertial(const std::string& name, const dyn::Inertial::MatrixType& inertial);
 
  private:
   [[nodiscard]] void* Build() const;

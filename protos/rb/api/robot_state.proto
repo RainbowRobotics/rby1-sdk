@@ -38,6 +38,15 @@ message PowerState {
   double voltage = 2;
 }
 
+message EMOState {
+  enum State {
+    STATE_RELEASED = 0;
+    STATE_PRESSED = 1;
+  }
+
+  State state = 1;
+}
+
 message JointState {
   enum FETState {
     FET_STATE_UNKNOWN = 0;
@@ -107,6 +116,9 @@ message RobotState {
 
   // Power State
   repeated PowerState power_states = 4;
+
+  // EMO state
+  repeated EMOState emo_states = 100;
 
   // Joint State
   repeated JointState joint_states = 5;

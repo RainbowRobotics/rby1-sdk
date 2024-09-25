@@ -11,6 +11,8 @@
 namespace py = pybind11;
 using namespace rb;
 
+void pybind11_dynamics(py::module_& m);
+
 void pybind11_robot_state(py::module_& m);
 void pybind11_model(py::module_& m);
 void pybind11_robot_command_builder(py::module_& m);
@@ -32,6 +34,9 @@ py::object create_robot(const py::object& model, const std::string& address) {
 
 PYBIND11_MODULE(_bindings, m) {
   m.doc() = "RBY1-SDK";  // optional module docstring
+
+  auto dyn_m = m.def_submodule("dynamics", "Dynamics module for rby1");
+  pybind11_dynamics(dyn_m);
 
   pybind11_robot_state(m);
   pybind11_control_manager_state(m);

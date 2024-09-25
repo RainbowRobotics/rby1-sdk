@@ -43,3 +43,24 @@ message SE3Pose {
     EulerAngleZYX euler = 3;
   }
 }
+
+message Inertial {
+  // Mass (kg)
+  double mass = 1;
+
+  // Center of mass (m)
+  Vec3 center_of_mass = 2;
+
+  // Inertia tensor
+  Inertia inertia = 3;
+}
+
+// Inertia tensor components (kg*m^2)
+message Inertia {
+  double ixx = 1;
+  double iyy = 2;
+  double izz = 3;
+  double ixy = 4;
+  double ixz = 5;
+  double iyz = 6;
+}

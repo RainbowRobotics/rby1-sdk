@@ -40,6 +40,17 @@ void bind_power_state(pybind11::module_& m) {
       .def_readonly("voltage", &PowerState::voltage);
 }
 
+void bind_emo_state(pybind11::module_& m) {
+  auto ps = py::class_<EMOState>(m, "EMOState");
+
+  py::enum_<EMOState::State>(ps, "State")
+      .value("Released", EMOState::State::kReleased)
+      .value("Pressed", EMOState::State::kPressed);
+
+  ps.def(py::init<>())  //
+      .def_readonly("state", &EMOState::state);
+}
+
 void bind_tool_flange(py::module_& m) {
   py::class_<ToolFlangeState>(m, "ToolFlangeState")
       .def(py::init<>())
@@ -110,6 +121,7 @@ void bind_robot_state(py::module_& m, const std::string& robot_state_name) {
       .def_readonly("system_stat", &RobotState<T>::system_stat)
       .def_readonly("battery_state", &RobotState<T>::battery_state)
       .def_readonly("power_states", &RobotState<T>::power_states)
+      .def_readonly("emo_states", &RobotState<T>::emo_states)
       .def_readonly("joint_states", &RobotState<T>::joint_states)
       .def_readonly("tool_flange_right", &RobotState<T>::tool_flange_right)
       .def_readonly("tool_flange_left", &RobotState<T>::tool_flange_left)
@@ -132,6 +144,7 @@ void pybind11_robot_state(py::module_& m) {
   bind_system_stat(m);
   bind_battery_state(m);
   bind_power_state(m);
+  bind_emo_state(m);
   bind_joint_state(m);
   bind_tool_flange(m);
   bind_ft_sensor(m);

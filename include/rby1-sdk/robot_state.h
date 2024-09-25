@@ -29,6 +29,12 @@ struct PowerState {
   double voltage{0.};
 };
 
+struct EMOState {
+  enum class State { kReleased = 0, kPressed = 1 };
+
+  State state{State::kReleased};
+};
+
 struct JointState {
   enum class FETState { kUnknown = 0, kOn = 1, kOff = 2 };
   enum class RunState { kUnknown = 0, kControlOn = 1, kControlOff = 2 };
@@ -76,13 +82,15 @@ struct FTSensorData {
 
 template <typename T>
 struct RobotState {
-  struct timespec timestamp {};  // 데이터를 측정(또는 업데이트)한 시간
+  struct timespec timestamp {};  // Robot state update timestamp
 
   SystemStat system_stat{};  // System Statistic
 
   BatteryState battery_state{};  // Battery state
 
   std::vector<PowerState> power_states{};  //Power state
+
+  std::vector<EMOState> emo_states{};  // EMO button state
 
   std::array<JointState, T::kRobotDOF> joint_states{};  // Joint state
 

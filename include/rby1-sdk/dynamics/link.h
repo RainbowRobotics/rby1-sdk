@@ -76,13 +76,33 @@ class Collision : public std::enable_shared_from_this<Collision> {
 
 class Geom : public std::enable_shared_from_this<Geom> {
  public:
+  Geom(unsigned int coltype = 0, unsigned int colaffinity = 0) : coltype_(coltype), colaffinity_(colaffinity) {}
+
+  virtual ~Geom() {}
+
   virtual GeomType GetType() const = 0;
+
+  unsigned int GetColtype() const { return coltype_; }
+
+  unsigned int GetColaffinity() const { return colaffinity_; }
+
+  static bool Filter(const Geom& geom1, const Geom& geom2) {
+    return (geom1.coltype_ & geom2.colaffinity_) || (geom2.coltype_ & geom1.colaffinity_);
+  }
+
+ protected:
+  unsigned int coltype_;
+  unsigned int colaffinity_;
 };
 
 class GeomCapsule : public Geom {
  public:
-  GeomCapsule(Eigen::Vector3d sp, Eigen::Vector3d ep, double radius)
-      : sp_(std::move(sp)), ep_(std::move(ep)), radius_(radius) {}
+  GeomCapsule(double length, double radius, unsigned int coltype = 0, unsigned int colaffinity = 0)
+      : GeomCapsule({0, 0, length / 2}, {0, 0, -length / 2}, radius, coltype, colaffinity) {}
+
+  GeomCapsule(Eigen::Vector3d sp, Eigen::Vector3d ep, double radius, unsigned int coltype = 0,
+              unsigned int colaffinity = 0)
+      : Geom(coltype, colaffinity), sp_(std::move(sp)), ep_(std::move(ep)), radius_(radius) {}
 
   GeomType GetType() const override { return GeomType::kCapsule; }
 

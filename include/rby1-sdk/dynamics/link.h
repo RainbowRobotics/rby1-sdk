@@ -13,6 +13,7 @@ class Robot;
 class Link;
 class Joint;
 class Collision;
+struct CollisionResult;
 class Geom;
 class GeomCapsule;
 
@@ -78,7 +79,7 @@ class Geom : public std::enable_shared_from_this<Geom> {
  public:
   Geom(unsigned int coltype = 0, unsigned int colaffinity = 0) : coltype_(coltype), colaffinity_(colaffinity) {}
 
-  virtual ~Geom() {}
+  virtual ~Geom() = default;
 
   virtual GeomType GetType() const = 0;
 
@@ -86,13 +87,11 @@ class Geom : public std::enable_shared_from_this<Geom> {
 
   unsigned int GetColaffinity() const { return colaffinity_; }
 
-  virtual std::pair<bool, double> ComputeMinimumDistance(const math::SE3::MatrixType& T, const Geom& other_geom,
-                                                         const math::SE3::MatrixType& other_T) const = 0;
+  virtual std::optional<CollisionResult> ComputeMinimumDistance(const math::SE3::MatrixType& T, const Geom& other_geom,
+                                                                const math::SE3::MatrixType& other_T) const = 0;
 
-  bool Filter(const Geom& other_geom) const { return Filter(*this, other_geom); }
-
-  static bool Filter(const Geom& geom1, const Geom& geom2) {
-    return (geom1.coltype_ & geom2.colaffinity_) || (geom2.coltype_ & geom1.colaffinity_);
+  bool Filter(const Geom& other_geom) const {
+    return (coltype_ & other_geom.colaffinity_) || (other_geom.coltype_ & colaffinity_);
   }
 
  protected:
@@ -109,8 +108,8 @@ class GeomCapsule : public Geom {
 
   GeomType GetType() const override;
 
-  std::pair<bool, double> ComputeMinimumDistance(const math::SE3::MatrixType& T, const Geom& other_geom,
-                                                 const math::SE3::MatrixType& other_T) const override;
+  std::optional<CollisionResult> ComputeMinimumDistance(const math::SE3::MatrixType& T, const Geom& other_geom,
+                                                        const math::SE3::MatrixType& other_T) const override;
 
   Eigen::Vector3d GetStartPoint() const;
 
@@ -122,6 +121,15 @@ class GeomCapsule : public Geom {
   Eigen::Vector3d sp_;
   Eigen::Vector3d ep_;
   double radius_;
+};
+
+struct CollisionResult {
+  int link1_idx;
+  int link2_idx;
+  Eigen::Vector3d position1;
+  Eigen::Vector3d position2;
+  double distance;
+  double penetration_depth;
 };
 
 }  // namespace rb::dyn

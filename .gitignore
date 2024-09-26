@@ -14,3 +14,4 @@ poetry.lock
 .conan
 *.egg-info
 _skbuild
+*.npz

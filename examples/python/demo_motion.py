@@ -710,20 +710,12 @@ def example_mixed_command_1(robot):
                          .set_acceleration_limit(np.array([1.0]) * 7)
                          .set_minimum_time(minimum_time))
 
-    left_arm_command = (CartesianCommandBuilder()
-                        .add_target("base", "ee_left", T_left, linear_velocity_limit, angular_velocity_limit,
-                                    acceleration_limit)
-                        .set_minimum_time(minimum_time)
-                        .set_stop_orientation_tracking_error(stop_orientation_tracking_error)
-                        .set_stop_position_tracking_error(stop_position_tracking_error))
-
     # Send command
     rv = robot.send_command(RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder()
         .set_body_command(BodyComponentBasedCommandBuilder()
                           .set_torso_command(torso_command)
                           .set_right_arm_command(right_arm_command)
-                        #   .set_left_arm_command(left_arm_command))
         )
     ), 10).get()
 

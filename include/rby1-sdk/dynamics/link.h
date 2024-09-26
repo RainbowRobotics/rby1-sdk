@@ -86,6 +86,11 @@ class Geom : public std::enable_shared_from_this<Geom> {
 
   unsigned int GetColaffinity() const { return colaffinity_; }
 
+  virtual std::pair<bool, double> ComputeMinimumDistance(const math::SE3::MatrixType& T, const Geom& other_geom,
+                                                         const math::SE3::MatrixType& other_T) const = 0;
+
+  bool Filter(const Geom& other_geom) const { return Filter(*this, other_geom); }
+
   static bool Filter(const Geom& geom1, const Geom& geom2) {
     return (geom1.coltype_ & geom2.colaffinity_) || (geom2.coltype_ & geom1.colaffinity_);
   }
@@ -97,20 +102,21 @@ class Geom : public std::enable_shared_from_this<Geom> {
 
 class GeomCapsule : public Geom {
  public:
-  GeomCapsule(double length, double radius, unsigned int coltype = 0, unsigned int colaffinity = 0)
-      : GeomCapsule({0, 0, length / 2}, {0, 0, -length / 2}, radius, coltype, colaffinity) {}
+  GeomCapsule(double length, double radius, unsigned int coltype = 0, unsigned int colaffinity = 0);
 
   GeomCapsule(Eigen::Vector3d sp, Eigen::Vector3d ep, double radius, unsigned int coltype = 0,
-              unsigned int colaffinity = 0)
-      : Geom(coltype, colaffinity), sp_(std::move(sp)), ep_(std::move(ep)), radius_(radius) {}
+              unsigned int colaffinity = 0);
 
-  GeomType GetType() const override { return GeomType::kCapsule; }
+  GeomType GetType() const override;
 
-  Eigen::Vector3d GetStartPoint() const { return sp_; }
+  std::pair<bool, double> ComputeMinimumDistance(const math::SE3::MatrixType& T, const Geom& other_geom,
+                                                 const math::SE3::MatrixType& other_T) const override;
 
-  Eigen::Vector3d GetEndPoint() const { return ep_; }
+  Eigen::Vector3d GetStartPoint() const;
 
-  double GetRadius() const { return radius_; }
+  Eigen::Vector3d GetEndPoint() const;
+
+  double GetRadius() const;
 
  private:
   Eigen::Vector3d sp_;

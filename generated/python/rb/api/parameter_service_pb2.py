@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from rb.api import parameter_pb2 as rb_dot_api_dot_parameter__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1erb/api/parameter_service.proto\x12\x06rb.api\x1a\x16rb/api/parameter.proto2\x85\x02\n\x10ParameterService\x12K\n\x0cGetParameter\x12\x1b.rb.api.GetParameterRequest\x1a\x1c.rb.api.GetParameterResponse\"\x00\x12K\n\x0cSetParameter\x12\x1b.rb.api.SetParameterRequest\x1a\x1c.rb.api.SetParameterResponse\"\x00\x12W\n\x10GetParameterList\x12\x1f.rb.api.GetParameterListRequest\x1a .rb.api.GetParameterListResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1erb/api/parameter_service.proto\x12\x06rb.api\x1a\x16rb/api/parameter.proto2\xed\x03\n\x10ParameterService\x12x\n\x1bResetAllParametersToDefault\x12*.rb.api.ResetAllParametersToDefaultRequest\x1a+.rb.api.ResetAllParametersToDefaultResponse\"\x00\x12l\n\x17ResetParameterToDefault\x12&.rb.api.ResetParameterToDefaultRequest\x1a\'.rb.api.ResetParameterToDefaultResponse\"\x00\x12K\n\x0cGetParameter\x12\x1b.rb.api.GetParameterRequest\x1a\x1c.rb.api.GetParameterResponse\"\x00\x12K\n\x0cSetParameter\x12\x1b.rb.api.SetParameterRequest\x1a\x1c.rb.api.SetParameterResponse\"\x00\x12W\n\x10GetParameterList\x12\x1f.rb.api.GetParameterListRequest\x1a .rb.api.GetParameterListResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,5 +23,5 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'rb.api.parameter_service_pb
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_PARAMETERSERVICE']._serialized_start=67
-  _globals['_PARAMETERSERVICE']._serialized_end=328
+  _globals['_PARAMETERSERVICE']._serialized_end=560
 # @@protoc_insertion_point(module_scope)

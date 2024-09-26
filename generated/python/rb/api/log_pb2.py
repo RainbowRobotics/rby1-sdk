@@ -16,7 +16,7 @@ from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__
 from rb.api import header_pb2 as rb_dot_api_dot_header__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10rb/api/log.proto\x12\x06rb.api\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x13rb/api/header.proto\"\xec\x01\n\x03Log\x12-\n\ttimestamp\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12 \n\x05level\x18\x02 \x01(\x0e\x32\x11.rb.api.Log.Level\x12\x0f\n\x07message\x18\x03 \x01(\t\x12\x13\n\x0blogger_name\x18\n \x01(\t\"n\n\x05Level\x12\x0f\n\x0bLEVEL_TRACE\x10\x00\x12\x0f\n\x0bLEVEL_DEBUG\x10\x01\x12\x0e\n\nLEVEL_INFO\x10\x02\x12\x0e\n\nLEVEL_WARN\x10\x03\x12\x0f\n\x0bLEVEL_ERROR\x10\x04\x12\x12\n\x0eLEVEL_CRITICAL\x10\x05\"U\n\x11GetLastLogRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x11\n\tlog_count\x18\x02 \x01(\x05\"`\n\x12GetLastLogResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x19\n\x04logs\x18\x02 \x03(\x0b\x32\x0b.rb.api.Log\"Y\n\x13GetLogStreamRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x13\n\x0bupdate_rate\x18\x02 \x01(\x01\"b\n\x14GetLogStreamResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x19\n\x04logs\x18\x02 \x03(\x0b\x32\x0b.rb.api.Log\"e\n\x12SetLogLevelRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12 \n\x05level\x18\x02 \x01(\x0e\x32\x11.rb.api.Log.Level\"F\n\x13SetLogLevelResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeaderb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10rb/api/log.proto\x12\x06rb.api\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x13rb/api/header.proto\"\x99\x02\n\x03Log\x12-\n\ttimestamp\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12:\n\x16robot_system_timestamp\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12 \n\x05level\x18\x02 \x01(\x0e\x32\x11.rb.api.Log.Level\x12\x0f\n\x07message\x18\x03 \x01(\t\"n\n\x05Level\x12\x0f\n\x0bLEVEL_TRACE\x10\x00\x12\x0f\n\x0bLEVEL_DEBUG\x10\x01\x12\x0e\n\nLEVEL_INFO\x10\x02\x12\x0e\n\nLEVEL_WARN\x10\x03\x12\x0f\n\x0bLEVEL_ERROR\x10\x04\x12\x12\n\x0eLEVEL_CRITICAL\x10\x05J\x04\x08\n\x10\x0b\"U\n\x11GetLastLogRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x11\n\tlog_count\x18\x02 \x01(\x05\"`\n\x12GetLastLogResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x19\n\x04logs\x18\x02 \x03(\x0b\x32\x0b.rb.api.Log\"Y\n\x13GetLogStreamRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x13\n\x0bupdate_rate\x18\x02 \x01(\x01\"b\n\x14GetLogStreamResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x19\n\x04logs\x18\x02 \x03(\x0b\x32\x0b.rb.api.Log\"e\n\x12SetLogLevelRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12 \n\x05level\x18\x02 \x01(\x0e\x32\x11.rb.api.Log.Level\"F\n\x13SetLogLevelResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeaderb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -24,19 +24,19 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'rb.api.log_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_LOG']._serialized_start=83
-  _globals['_LOG']._serialized_end=319
-  _globals['_LOG_LEVEL']._serialized_start=209
-  _globals['_LOG_LEVEL']._serialized_end=319
-  _globals['_GETLASTLOGREQUEST']._serialized_start=321
-  _globals['_GETLASTLOGREQUEST']._serialized_end=406
-  _globals['_GETLASTLOGRESPONSE']._serialized_start=408
-  _globals['_GETLASTLOGRESPONSE']._serialized_end=504
-  _globals['_GETLOGSTREAMREQUEST']._serialized_start=506
-  _globals['_GETLOGSTREAMREQUEST']._serialized_end=595
-  _globals['_GETLOGSTREAMRESPONSE']._serialized_start=597
-  _globals['_GETLOGSTREAMRESPONSE']._serialized_end=695
-  _globals['_SETLOGLEVELREQUEST']._serialized_start=697
-  _globals['_SETLOGLEVELREQUEST']._serialized_end=798
-  _globals['_SETLOGLEVELRESPONSE']._serialized_start=800
-  _globals['_SETLOGLEVELRESPONSE']._serialized_end=870
+  _globals['_LOG']._serialized_end=364
+  _globals['_LOG_LEVEL']._serialized_start=248
+  _globals['_LOG_LEVEL']._serialized_end=358
+  _globals['_GETLASTLOGREQUEST']._serialized_start=366
+  _globals['_GETLASTLOGREQUEST']._serialized_end=451
+  _globals['_GETLASTLOGRESPONSE']._serialized_start=453
+  _globals['_GETLASTLOGRESPONSE']._serialized_end=549
+  _globals['_GETLOGSTREAMREQUEST']._serialized_start=551
+  _globals['_GETLOGSTREAMREQUEST']._serialized_end=640
+  _globals['_GETLOGSTREAMRESPONSE']._serialized_start=642
+  _globals['_GETLOGSTREAMRESPONSE']._serialized_end=740
+  _globals['_SETLOGLEVELREQUEST']._serialized_start=742
+  _globals['_SETLOGLEVELREQUEST']._serialized_end=843
+  _globals['_SETLOGLEVELRESPONSE']._serialized_start=845
+  _globals['_SETLOGLEVELRESPONSE']._serialized_end=915
 # @@protoc_insertion_point(module_scope)

@@ -44,12 +44,34 @@ class RobotInfoServiceStub(object):
                 request_serializer=rb_dot_api_dot_robot__info__pb2.GetRobotInfoRequest.SerializeToString,
                 response_deserializer=rb_dot_api_dot_robot__info__pb2.GetRobotInfoResponse.FromString,
                 _registered_method=True)
+        self.GetRobotModel = channel.unary_unary(
+                '/rb.api.RobotInfoService/GetRobotModel',
+                request_serializer=rb_dot_api_dot_robot__info__pb2.GetRobotModelRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_robot__info__pb2.GetRobotModelResponse.FromString,
+                _registered_method=True)
+        self.ImportRobotModel = channel.unary_unary(
+                '/rb.api.RobotInfoService/ImportRobotModel',
+                request_serializer=rb_dot_api_dot_robot__info__pb2.ImportRobotModelRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_robot__info__pb2.ImportRobotModelResponse.FromString,
+                _registered_method=True)
 
 
 class RobotInfoServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def GetRobotInfo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetRobotModel(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ImportRobotModel(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -62,6 +84,16 @@ def add_RobotInfoServiceServicer_to_server(servicer, server):
                     servicer.GetRobotInfo,
                     request_deserializer=rb_dot_api_dot_robot__info__pb2.GetRobotInfoRequest.FromString,
                     response_serializer=rb_dot_api_dot_robot__info__pb2.GetRobotInfoResponse.SerializeToString,
+            ),
+            'GetRobotModel': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRobotModel,
+                    request_deserializer=rb_dot_api_dot_robot__info__pb2.GetRobotModelRequest.FromString,
+                    response_serializer=rb_dot_api_dot_robot__info__pb2.GetRobotModelResponse.SerializeToString,
+            ),
+            'ImportRobotModel': grpc.unary_unary_rpc_method_handler(
+                    servicer.ImportRobotModel,
+                    request_deserializer=rb_dot_api_dot_robot__info__pb2.ImportRobotModelRequest.FromString,
+                    response_serializer=rb_dot_api_dot_robot__info__pb2.ImportRobotModelResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -91,6 +123,60 @@ class RobotInfoService(object):
             '/rb.api.RobotInfoService/GetRobotInfo',
             rb_dot_api_dot_robot__info__pb2.GetRobotInfoRequest.SerializeToString,
             rb_dot_api_dot_robot__info__pb2.GetRobotInfoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetRobotModel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.RobotInfoService/GetRobotModel',
+            rb_dot_api_dot_robot__info__pb2.GetRobotModelRequest.SerializeToString,
+            rb_dot_api_dot_robot__info__pb2.GetRobotModelResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ImportRobotModel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.RobotInfoService/ImportRobotModel',
+            rb_dot_api_dot_robot__info__pb2.ImportRobotModelRequest.SerializeToString,
+            rb_dot_api_dot_robot__info__pb2.ImportRobotModelResponse.FromString,
             options,
             channel_credentials,
             insecure,

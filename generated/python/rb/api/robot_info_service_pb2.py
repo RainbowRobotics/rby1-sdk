@@ -15,13 +15,13 @@ _sym_db = _symbol_database.Default()
 from rb.api import robot_info_pb2 as rb_dot_api_dot_robot__info__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1frb/api/robot_info_service.proto\x12\x06rb.api\x1a\x17rb/api/robot_info.proto2_\n\x10RobotInfoService\x12K\n\x0cGetRobotInfo\x12\x1b.rb.api.GetRobotInfoRequest\x1a\x1c.rb.api.GetRobotInfoResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1frb/api/robot_info_service.proto\x12\x06rb.api\x1a\x17rb/api/robot_info.proto2\x88\x02\n\x10RobotInfoService\x12K\n\x0cGetRobotInfo\x12\x1b.rb.api.GetRobotInfoRequest\x1a\x1c.rb.api.GetRobotInfoResponse\"\x00\x12N\n\rGetRobotModel\x12\x1c.rb.api.GetRobotModelRequest\x1a\x1d.rb.api.GetRobotModelResponse\"\x00\x12W\n\x10ImportRobotModel\x12\x1f.rb.api.ImportRobotModelRequest\x1a .rb.api.ImportRobotModelResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'rb.api.robot_info_service_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_ROBOTINFOSERVICE']._serialized_start=68
-  _globals['_ROBOTINFOSERVICE']._serialized_end=163
+  _globals['_ROBOTINFOSERVICE']._serialized_start=69
+  _globals['_ROBOTINFOSERVICE']._serialized_end=333
 # @@protoc_insertion_point(module_scope)

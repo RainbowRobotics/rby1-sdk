@@ -13,19 +13,24 @@ _sym_db = _symbol_database.Default()
 
 
 from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb2
+from rb.api import geometry_pb2 as rb_dot_api_dot_geometry__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1brb/api/command_header.proto\x12\x06rb.api\x1a\x1egoogle/protobuf/duration.proto\"n\n\rCommandHeader\x1a?\n\x07Request\x12\x34\n\x11\x63ontrol_hold_time\x18\x01 \x01(\x0b\x32\x19.google.protobuf.Duration\x1a\x1c\n\x08\x46\x65\x65\x64\x62\x61\x63k\x12\x10\n\x08\x66inished\x18\x01 \x01(\x08\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1brb/api/command_header.proto\x12\x06rb.api\x1a\x1egoogle/protobuf/duration.proto\x1a\x15rb/api/geometry.proto\"\x93\x02\n\rCommandHeader\x1a\xe3\x01\n\x07Request\x12\x34\n\x11\x63ontrol_hold_time\x18\x01 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x1d\n\x07gravity\x18\x02 \x01(\x0b\x32\x0c.rb.api.Vec3\x12?\n\tinertials\x18\x03 \x03(\x0b\x32,.rb.api.CommandHeader.Request.InertialsEntry\x1a\x42\n\x0eInertialsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1f\n\x05value\x18\x02 \x01(\x0b\x32\x10.rb.api.Inertial:\x02\x38\x01\x1a\x1c\n\x08\x46\x65\x65\x64\x62\x61\x63k\x12\x10\n\x08\x66inished\x18\x01 \x01(\x08\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'rb.api.command_header_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_COMMANDHEADER']._serialized_start=71
-  _globals['_COMMANDHEADER']._serialized_end=181
-  _globals['_COMMANDHEADER_REQUEST']._serialized_start=88
-  _globals['_COMMANDHEADER_REQUEST']._serialized_end=151
-  _globals['_COMMANDHEADER_FEEDBACK']._serialized_start=153
-  _globals['_COMMANDHEADER_FEEDBACK']._serialized_end=181
+  _globals['_COMMANDHEADER_REQUEST_INERTIALSENTRY']._loaded_options = None
+  _globals['_COMMANDHEADER_REQUEST_INERTIALSENTRY']._serialized_options = b'8\001'
+  _globals['_COMMANDHEADER']._serialized_start=95
+  _globals['_COMMANDHEADER']._serialized_end=370
+  _globals['_COMMANDHEADER_REQUEST']._serialized_start=113
+  _globals['_COMMANDHEADER_REQUEST']._serialized_end=340
+  _globals['_COMMANDHEADER_REQUEST_INERTIALSENTRY']._serialized_start=274
+  _globals['_COMMANDHEADER_REQUEST_INERTIALSENTRY']._serialized_end=340
+  _globals['_COMMANDHEADER_FEEDBACK']._serialized_start=342
+  _globals['_COMMANDHEADER_FEEDBACK']._serialized_end=370
 # @@protoc_insertion_point(module_scope)

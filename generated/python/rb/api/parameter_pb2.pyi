@@ -58,3 +58,29 @@ class GetParameterListResponse(_message.Message):
     response_header: _header_pb2.ResponseHeader
     parameters: _containers.RepeatedCompositeFieldContainer[GetParameterListResponse.ParameterType]
     def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., parameters: _Optional[_Iterable[_Union[GetParameterListResponse.ParameterType, _Mapping]]] = ...) -> None: ...
+
+class ResetParameterToDefaultRequest(_message.Message):
+    __slots__ = ("request_header", "name")
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    name: str
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ..., name: _Optional[str] = ...) -> None: ...
+
+class ResetParameterToDefaultResponse(_message.Message):
+    __slots__ = ("response_header",)
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ...) -> None: ...
+
+class ResetAllParametersToDefaultRequest(_message.Message):
+    __slots__ = ("request_header",)
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ...) -> None: ...
+
+class ResetAllParametersToDefaultResponse(_message.Message):
+    __slots__ = ("response_header",)
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ...) -> None: ...

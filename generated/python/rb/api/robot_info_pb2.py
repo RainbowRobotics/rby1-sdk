@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from rb.api import header_pb2 as rb_dot_api_dot_header__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17rb/api/robot_info.proto\x12\x06rb.api\x1a\x13rb/api/header.proto\"\r\n\x0b\x42\x61tteryInfo\"\x19\n\tPowerInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\",\n\tJointInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\thas_brake\x18\x02 \x01(\x08\"\x84\x02\n\tRobotInfo\x12\x15\n\rrobot_version\x18\x01 \x01(\t\x12)\n\x0c\x62\x61ttery_info\x18\x02 \x01(\x0b\x32\x13.rb.api.BatteryInfo\x12&\n\x0bpower_infos\x18\x03 \x03(\x0b\x32\x11.rb.api.PowerInfo\x12\x19\n\x11\x64\x65gree_of_freedom\x18\x04 \x01(\x05\x12&\n\x0bjoint_infos\x18\x05 \x03(\x0b\x32\x11.rb.api.JointInfo\x12\x1a\n\x12mobility_joint_idx\x18\x06 \x03(\r\x12\x16\n\x0e\x62ody_joint_idx\x18\x07 \x03(\r\x12\x16\n\x0ehead_joint_idx\x18\x08 \x03(\r\"D\n\x13GetRobotInfoRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"n\n\x14GetRobotInfoResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12%\n\nrobot_info\x18\x02 \x01(\x0b\x32\x11.rb.api.RobotInfob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17rb/api/robot_info.proto\x12\x06rb.api\x1a\x13rb/api/header.proto\"\r\n\x0b\x42\x61tteryInfo\"\x19\n\tPowerInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x17\n\x07\x45MOInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\",\n\tJointInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\thas_brake\x18\x02 \x01(\x08\"\xbf\x02\n\tRobotInfo\x12\x15\n\rrobot_version\x18\x01 \x01(\t\x12\x15\n\rsdk_commit_id\x18\n \x01(\t\x12)\n\x0c\x62\x61ttery_info\x18\x02 \x01(\x0b\x32\x13.rb.api.BatteryInfo\x12&\n\x0bpower_infos\x18\x03 \x03(\x0b\x32\x11.rb.api.PowerInfo\x12\"\n\temo_infos\x18\x0b \x03(\x0b\x32\x0f.rb.api.EMOInfo\x12\x19\n\x11\x64\x65gree_of_freedom\x18\x04 \x01(\x05\x12&\n\x0bjoint_infos\x18\x05 \x03(\x0b\x32\x11.rb.api.JointInfo\x12\x1a\n\x12mobility_joint_idx\x18\x06 \x03(\r\x12\x16\n\x0e\x62ody_joint_idx\x18\x07 \x03(\r\x12\x16\n\x0ehead_joint_idx\x18\x08 \x03(\r\"D\n\x13GetRobotInfoRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"n\n\x14GetRobotInfoResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12%\n\nrobot_info\x18\x02 \x01(\x0b\x32\x11.rb.api.RobotInfo\"E\n\x14GetRobotModelRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"W\n\x15GetRobotModelResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\r\n\x05model\x18\x02 \x01(\t\"e\n\x17ImportRobotModelRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05model\x18\x03 \x01(\t\"K\n\x18ImportRobotModelResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeaderb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -26,12 +26,22 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_BATTERYINFO']._serialized_end=69
   _globals['_POWERINFO']._serialized_start=71
   _globals['_POWERINFO']._serialized_end=96
-  _globals['_JOINTINFO']._serialized_start=98
-  _globals['_JOINTINFO']._serialized_end=142
-  _globals['_ROBOTINFO']._serialized_start=145
-  _globals['_ROBOTINFO']._serialized_end=405
-  _globals['_GETROBOTINFOREQUEST']._serialized_start=407
-  _globals['_GETROBOTINFOREQUEST']._serialized_end=475
-  _globals['_GETROBOTINFORESPONSE']._serialized_start=477
-  _globals['_GETROBOTINFORESPONSE']._serialized_end=587
+  _globals['_EMOINFO']._serialized_start=98
+  _globals['_EMOINFO']._serialized_end=121
+  _globals['_JOINTINFO']._serialized_start=123
+  _globals['_JOINTINFO']._serialized_end=167
+  _globals['_ROBOTINFO']._serialized_start=170
+  _globals['_ROBOTINFO']._serialized_end=489
+  _globals['_GETROBOTINFOREQUEST']._serialized_start=491
+  _globals['_GETROBOTINFOREQUEST']._serialized_end=559
+  _globals['_GETROBOTINFORESPONSE']._serialized_start=561
+  _globals['_GETROBOTINFORESPONSE']._serialized_end=671
+  _globals['_GETROBOTMODELREQUEST']._serialized_start=673
+  _globals['_GETROBOTMODELREQUEST']._serialized_end=742
+  _globals['_GETROBOTMODELRESPONSE']._serialized_start=744
+  _globals['_GETROBOTMODELRESPONSE']._serialized_end=831
+  _globals['_IMPORTROBOTMODELREQUEST']._serialized_start=833
+  _globals['_IMPORTROBOTMODELREQUEST']._serialized_end=934
+  _globals['_IMPORTROBOTMODELRESPONSE']._serialized_start=936
+  _globals['_IMPORTROBOTMODELRESPONSE']._serialized_end=1011
 # @@protoc_insertion_point(module_scope)

@@ -25,8 +25,15 @@ void bind_log(py::module_& m) {
       .def_readonly("level", &Log::level)
       .def_readonly("message", &Log::message)
       .def("__repr__", [](const Log& self) {
+        auto timestamp = timespec_to_time_point(self.timestamp);
+        auto robot_system_timestamp = timespec_to_time_point(self.robot_system_timestamp);
         std::stringstream ss;
-        ss << self;
+        ss << "Log("                                                                                               //
+           << "timestamp=" << static_cast<std::string>(py::repr(py::cast(timestamp)))                              //
+           << ", robot_system_timestamp=" << static_cast<std::string>(py::repr(py::cast(robot_system_timestamp)))  //
+           << ", level=" << to_string(self.level)                                                                  //
+           << ", message='" << self.message << "'"                                                                 //
+           << ")";
         return ss.str();
       });
 }

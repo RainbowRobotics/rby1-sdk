@@ -442,7 +442,7 @@ class Robot {
     J.setZero();
     double mass = 0;
     for (int i = 0; i < (int)links_.size(); i++) {
-//      const auto& link = links_[i];
+      //      const auto& link = links_[i];
       double m = Inertial::GetMass(links_[i].I);
       J += m * SE3::GetRotation(GetTransformation(state, state->utr_link_map[ref_link], {i, 0})) *
            (SE3::InvAd(SE3::T(Inertial::GetCOM(links_[i].I))) *
@@ -451,6 +451,63 @@ class Robot {
       mass += m;
     }
     return J / mass;
+  }
+
+  std::vector<CollisionResult> DetectCollisionsOrNearestLinks(std::shared_ptr<State<DOF>> state,
+                                                              int collision_threshold = 0) {
+    std::vector<CollisionResult> dis;
+
+    int n = state->GetLinkNames().size();
+    for (int i = 0; i < n; i++) {
+      auto link1 = GetLink(state, i);
+      if (!link1) {
+        throw std::runtime_error("Index error");
+      }
+      auto link1_T = ComputeTransformation(state, 0, i);
+      for (int j = i + 1; j < n; j++) {
+        auto link2 = GetLink(state, j);
+        if (!link2) {
+          throw std::runtime_error("Index error");
+        }
+        auto link2_T = ComputeTransformation(state, 0, j);
+
+        for (auto link1_col : link1->GetCollisions()) {
+          for (auto link2_col : link2->GetCollisions()) {
+
+            for (auto link1_geom : link1_col->GetGeoms()) {
+              for (auto link2_geom : link2_col->GetGeoms()) {
+
+                if (link1_geom->GetType() == GeomType::kCapsule &&  //
+                    link2_geom->GetType() == GeomType::kCapsule &&  //
+                    link1_geom->Filter(*link2_geom)) {
+                  auto collision_result =
+                      link1_geom->ComputeMinimumDistance(link1_T * link1_col->GetOrigin(), *link2_geom,  //
+                                                         link2_T * link2_col->GetOrigin());
+                  if (collision_result.has_value()) {
+                    auto v = collision_result.value();
+                    v.link1 = link1->GetName();
+                    v.link2 = link2->GetName();
+                    dis.push_back(v);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    std::sort(dis.begin(), dis.end(),
+              [](const CollisionResult& r1, const CollisionResult& r2) { return r1.distance < r2.distance; });
+
+    std::vector<CollisionResult> rv;
+    for (const auto& d : dis) {
+      if (d.distance > 0 && (int)rv.size() >= collision_threshold) {
+        break;
+      }
+      rv.push_back(d);
+    }
+    return rv;
   }
 
   // TODO: ComputeBodyJacobianDot

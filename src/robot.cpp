@@ -116,6 +116,8 @@ rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
     info.emo_infos.push_back(ProtoToEMOInfo(ei));
   }
 
+  info.degree_of_freedom = msg.degree_of_freedom();
+
   for (const auto& ji : msg.joint_infos()) {
     info.joint_infos.push_back(ProtoToJointInfo(ji));
   }
@@ -1366,6 +1368,25 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       rs.center_of_mass(0) = msg.center_of_mass().x();
       rs.center_of_mass(1) = msg.center_of_mass().y();
       rs.center_of_mass(2) = msg.center_of_mass().z();
+    }
+
+    rs.collisions.clear();
+    for (const auto& col : msg.collisions()) {
+      dyn::CollisionResult cs;
+      cs.link1 = col.link1();
+      cs.link2 = col.link2();
+      if (col.has_position1()) {
+        cs.position1(0) = col.position1().x();
+        cs.position1(1) = col.position1().y();
+        cs.position1(2) = col.position1().z();
+      }
+      if (col.has_position2()) {
+        cs.position2(0) = col.position2().x();
+        cs.position2(1) = col.position2().y();
+        cs.position2(2) = col.position2().z();
+      }
+      cs.distance = col.distance();
+      rs.collisions.push_back(cs);
     }
 
     return rs;

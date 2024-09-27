@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "dynamics/link.h"
 #include "math/liegroup.h"
 
 namespace rb {
@@ -107,6 +108,7 @@ struct RobotState {
   Eigen::Vector<double, T::kRobotDOF> current{Eigen::Vector<double, T::kRobotDOF>::Zero()};
   Eigen::Vector<double, T::kRobotDOF> torque{Eigen::Vector<double, T::kRobotDOF>::Zero()};
 
+  // Last reference
   Eigen::Vector<double, T::kRobotDOF> target_position{Eigen::Vector<double, T::kRobotDOF>::Zero()};
   Eigen::Vector<double, T::kRobotDOF> target_velocity{Eigen::Vector<double, T::kRobotDOF>::Zero()};
   Eigen::Vector<uint32_t, T::kRobotDOF> target_feedback_gain{Eigen::Vector<uint32_t, T::kRobotDOF>::Zero()};
@@ -117,6 +119,67 @@ struct RobotState {
 
   // Center of mass
   Eigen::Vector<double, 3> center_of_mass;  // Cent of mass position with respect to base link
+
+  // Collisions
+  std::vector<dyn::CollisionResult> collisions;
 };
+
+inline std::string to_string(PowerState::State s) {
+  switch(s) {
+    case PowerState::State::kUnknown:
+      return "Unknown";
+    case PowerState::State::kPowerOn:
+      return "PowerOn";
+    case PowerState::State::kPowerOff:
+      return "PowerOff";
+  }
+  return "";
+}
+
+inline std::string to_string(EMOState::State s) {
+  switch(s) {
+    case EMOState::State::kReleased:
+      return "Released";
+    case EMOState::State::kPressed:
+      return "Pressed";
+  }
+  return "";
+}
+
+inline std::string to_string(JointState::FETState s) {
+  switch(s) {
+    case JointState::FETState::kUnknown:
+      return "Unknown";
+    case JointState::FETState::kOn:
+      return "On";
+    case JointState::FETState::kOff:
+      return "Unknown";
+  }
+  return "";
+}
+
+inline std::string to_string(JointState::RunState s) {
+  switch(s) {
+    case JointState::RunState::kUnknown:
+      return "Unknown";
+    case JointState::RunState::kControlOn:
+      return "ControlOn";
+    case JointState::RunState::kControlOff:
+      return "ControlOff";
+  }
+  return "";
+}
+
+inline std::string to_string(JointState::InitializationState s) {
+  switch(s) {
+    case JointState::InitializationState::kUnknown:
+      return "Unknown";
+    case JointState::InitializationState::kInitialized:
+      return "Initialized";
+    case JointState::InitializationState::kUninitialized:
+      return "Uninitialized";
+  }
+  return "";
+}
 
 }  // namespace rb

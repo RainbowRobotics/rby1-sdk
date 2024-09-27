@@ -105,6 +105,18 @@ message FTSensorData {
   Vec3 torque = 3;
 }
 
+message Collision {
+  string link1 = 1;
+
+  string link2 = 2;
+
+  Vec3 position1 = 3;
+
+  Vec3 position2 = 4;
+
+  double distance = 5;
+}
+
 message RobotState {
   google.protobuf.Timestamp timestamp = 1;
 
@@ -147,6 +159,9 @@ message RobotState {
 
   // Center Of Mass
   Vec3 center_of_mass = 46; // Position of center of mass with respect t base link
+
+  // Collisions
+  repeated Collision collisions = 47;
 }
 
 message GetRobotStateRequest {

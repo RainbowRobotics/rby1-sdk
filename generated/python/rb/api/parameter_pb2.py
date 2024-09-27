@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from rb.api import header_pb2 as rb_dot_api_dot_header__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16rb/api/parameter.proto\x12\x06rb.api\x1a\x13rb/api/header.proto\"R\n\x13GetParameterRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x0c\n\x04name\x18\x02 \x01(\t\"Z\n\x14GetParameterResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x11\n\tparameter\x18\x02 \x01(\t\"e\n\x13SetParameterRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tparameter\x18\x03 \x01(\t\"G\n\x14SetParameterResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"H\n\x17GetParameterListRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"\xbc\x01\n\x18GetParameterListResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x42\n\nparameters\x18\x02 \x03(\x0b\x32..rb.api.GetParameterListResponse.ParameterType\x1a+\n\rParameterType\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\x05\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16rb/api/parameter.proto\x12\x06rb.api\x1a\x13rb/api/header.proto\"R\n\x13GetParameterRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x0c\n\x04name\x18\x02 \x01(\t\"Z\n\x14GetParameterResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x11\n\tparameter\x18\x02 \x01(\t\"e\n\x13SetParameterRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tparameter\x18\x03 \x01(\t\"G\n\x14SetParameterResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"H\n\x17GetParameterListRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"\xbc\x01\n\x18GetParameterListResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x42\n\nparameters\x18\x02 \x03(\x0b\x32..rb.api.GetParameterListResponse.ParameterType\x1a+\n\rParameterType\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\x05\"]\n\x1eResetParameterToDefaultRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x0c\n\x04name\x18\x02 \x01(\t\"R\n\x1fResetParameterToDefaultResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"S\n\"ResetAllParametersToDefaultRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"V\n#ResetAllParametersToDefaultResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeaderb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -36,4 +36,12 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETPARAMETERLISTRESPONSE']._serialized_end=670
   _globals['_GETPARAMETERLISTRESPONSE_PARAMETERTYPE']._serialized_start=627
   _globals['_GETPARAMETERLISTRESPONSE_PARAMETERTYPE']._serialized_end=670
+  _globals['_RESETPARAMETERTODEFAULTREQUEST']._serialized_start=672
+  _globals['_RESETPARAMETERTODEFAULTREQUEST']._serialized_end=765
+  _globals['_RESETPARAMETERTODEFAULTRESPONSE']._serialized_start=767
+  _globals['_RESETPARAMETERTODEFAULTRESPONSE']._serialized_end=849
+  _globals['_RESETALLPARAMETERSTODEFAULTREQUEST']._serialized_start=851
+  _globals['_RESETALLPARAMETERSTODEFAULTREQUEST']._serialized_end=934
+  _globals['_RESETALLPARAMETERSTODEFAULTRESPONSE']._serialized_start=936
+  _globals['_RESETALLPARAMETERSTODEFAULTRESPONSE']._serialized_end=1022
 # @@protoc_insertion_point(module_scope)

@@ -13,6 +13,7 @@ class Robot;
 class Link;
 class Joint;
 class Collision;
+struct CollisionResult;
 class Geom;
 class GeomCapsule;
 
@@ -78,7 +79,7 @@ class Geom : public std::enable_shared_from_this<Geom> {
  public:
   Geom(unsigned int coltype = 0, unsigned int colaffinity = 0) : coltype_(coltype), colaffinity_(colaffinity) {}
 
-  virtual ~Geom() {}
+  virtual ~Geom() = default;
 
   virtual GeomType GetType() const = 0;
 
@@ -86,8 +87,11 @@ class Geom : public std::enable_shared_from_this<Geom> {
 
   unsigned int GetColaffinity() const { return colaffinity_; }
 
-  static bool Filter(const Geom& geom1, const Geom& geom2) {
-    return (geom1.coltype_ & geom2.colaffinity_) || (geom2.coltype_ & geom1.colaffinity_);
+  virtual std::optional<CollisionResult> ComputeMinimumDistance(const math::SE3::MatrixType& T, const Geom& other_geom,
+                                                                const math::SE3::MatrixType& other_T) const = 0;
+
+  bool Filter(const Geom& other_geom) const {
+    return (coltype_ & other_geom.colaffinity_) || (other_geom.coltype_ & colaffinity_);
   }
 
  protected:
@@ -97,25 +101,34 @@ class Geom : public std::enable_shared_from_this<Geom> {
 
 class GeomCapsule : public Geom {
  public:
-  GeomCapsule(double length, double radius, unsigned int coltype = 0, unsigned int colaffinity = 0)
-      : GeomCapsule({0, 0, length / 2}, {0, 0, -length / 2}, radius, coltype, colaffinity) {}
+  GeomCapsule(double length, double radius, unsigned int coltype = 0, unsigned int colaffinity = 0);
 
   GeomCapsule(Eigen::Vector3d sp, Eigen::Vector3d ep, double radius, unsigned int coltype = 0,
-              unsigned int colaffinity = 0)
-      : Geom(coltype, colaffinity), sp_(std::move(sp)), ep_(std::move(ep)), radius_(radius) {}
+              unsigned int colaffinity = 0);
 
-  GeomType GetType() const override { return GeomType::kCapsule; }
+  GeomType GetType() const override;
 
-  Eigen::Vector3d GetStartPoint() const { return sp_; }
+  std::optional<CollisionResult> ComputeMinimumDistance(const math::SE3::MatrixType& T, const Geom& other_geom,
+                                                        const math::SE3::MatrixType& other_T) const override;
 
-  Eigen::Vector3d GetEndPoint() const { return ep_; }
+  Eigen::Vector3d GetStartPoint() const;
 
-  double GetRadius() const { return radius_; }
+  Eigen::Vector3d GetEndPoint() const;
+
+  double GetRadius() const;
 
  private:
   Eigen::Vector3d sp_;
   Eigen::Vector3d ep_;
   double radius_;
+};
+
+struct CollisionResult {
+  std::string link1;
+  std::string link2;
+  Eigen::Vector3d position1;
+  Eigen::Vector3d position2;
+  double distance;
 };
 
 }  // namespace rb::dyn

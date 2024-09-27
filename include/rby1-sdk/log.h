@@ -26,20 +26,20 @@ struct Log {
   std::string message;
 };
 
-inline std::string ToString(const Log::Level& level) {
+inline std::string to_string(const Log::Level& level) {
   switch (level) {
     case Log::Level::kTrace:
-      return "trace";
+      return "Trace";
     case Log::Level::kDebug:
-      return "debug";
+      return "Debug";
     case Log::Level::kInfo:
-      return "info";
+      return "Info";
     case Log::Level::kWarn:
-      return "warn";
+      return "Warn";
     case Log::Level::kError:
-      return "error";
+      return "Error";
     case Log::Level::kCritical:
-      return "critical";
+      return "Critical";
   }
   return "";
 }
@@ -47,7 +47,7 @@ inline std::string ToString(const Log::Level& level) {
 }  // namespace rb
 
 inline std::ostream& operator<<(std::ostream& out, const rb::Log::Level& level) {
-  out << rb::ToString(level);
+  out << rb::to_string(level);
 
   return out;
 }

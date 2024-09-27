@@ -2,7 +2,7 @@ import math
 import os
 import sys
 import numpy as np
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'generated', 'python'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'generated', 'python'))
 
 import grpc
 import asyncio

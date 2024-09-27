@@ -39,6 +39,16 @@ class ParameterServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.ResetAllParametersToDefault = channel.unary_unary(
+                '/rb.api.ParameterService/ResetAllParametersToDefault',
+                request_serializer=rb_dot_api_dot_parameter__pb2.ResetAllParametersToDefaultRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_parameter__pb2.ResetAllParametersToDefaultResponse.FromString,
+                _registered_method=True)
+        self.ResetParameterToDefault = channel.unary_unary(
+                '/rb.api.ParameterService/ResetParameterToDefault',
+                request_serializer=rb_dot_api_dot_parameter__pb2.ResetParameterToDefaultRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_parameter__pb2.ResetParameterToDefaultResponse.FromString,
+                _registered_method=True)
         self.GetParameter = channel.unary_unary(
                 '/rb.api.ParameterService/GetParameter',
                 request_serializer=rb_dot_api_dot_parameter__pb2.GetParameterRequest.SerializeToString,
@@ -58,6 +68,18 @@ class ParameterServiceStub(object):
 
 class ParameterServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def ResetAllParametersToDefault(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ResetParameterToDefault(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetParameter(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -80,6 +102,16 @@ class ParameterServiceServicer(object):
 
 def add_ParameterServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'ResetAllParametersToDefault': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResetAllParametersToDefault,
+                    request_deserializer=rb_dot_api_dot_parameter__pb2.ResetAllParametersToDefaultRequest.FromString,
+                    response_serializer=rb_dot_api_dot_parameter__pb2.ResetAllParametersToDefaultResponse.SerializeToString,
+            ),
+            'ResetParameterToDefault': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResetParameterToDefault,
+                    request_deserializer=rb_dot_api_dot_parameter__pb2.ResetParameterToDefaultRequest.FromString,
+                    response_serializer=rb_dot_api_dot_parameter__pb2.ResetParameterToDefaultResponse.SerializeToString,
+            ),
             'GetParameter': grpc.unary_unary_rpc_method_handler(
                     servicer.GetParameter,
                     request_deserializer=rb_dot_api_dot_parameter__pb2.GetParameterRequest.FromString,
@@ -105,6 +137,60 @@ def add_ParameterServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class ParameterService(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def ResetAllParametersToDefault(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.ParameterService/ResetAllParametersToDefault',
+            rb_dot_api_dot_parameter__pb2.ResetAllParametersToDefaultRequest.SerializeToString,
+            rb_dot_api_dot_parameter__pb2.ResetAllParametersToDefaultResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ResetParameterToDefault(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.ParameterService/ResetParameterToDefault',
+            rb_dot_api_dot_parameter__pb2.ResetParameterToDefaultRequest.SerializeToString,
+            rb_dot_api_dot_parameter__pb2.ResetParameterToDefaultResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def GetParameter(request,

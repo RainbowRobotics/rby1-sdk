@@ -13,6 +13,8 @@ def cb(state):
     print(f"time [{state.timestamp}]")
     print(f"current position: {state.position}")
     print(f"center of mass: {state.center_of_mass}")
+    print(f"# of collisions: {len(state.collisions)}")
+    print(f" - [0] distance: {state.collisions[0].distance}")
 
 
 robot.start_state_update(cb,
@@ -20,4 +22,6 @@ robot.start_state_update(cb,
                          )
 
 robot.power_on(".*")
-time.sleep(10)
+robot.servo_on(".*")
+robot.disable_control_manager()
+time.sleep(10000)

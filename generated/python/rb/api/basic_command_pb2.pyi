@@ -282,17 +282,15 @@ class OptimalControlCommand(_message.Message):
 class RealTimeControlCommand(_message.Message):
     __slots__ = ()
     class Request(_message.Message):
-        __slots__ = ("command_header",)
+        __slots__ = ("command_header", "port")
         COMMAND_HEADER_FIELD_NUMBER: _ClassVar[int]
-        command_header: _command_header_pb2.CommandHeader.Request
-        def __init__(self, command_header: _Optional[_Union[_command_header_pb2.CommandHeader.Request, _Mapping]] = ...) -> None: ...
-    class Feedback(_message.Message):
-        __slots__ = ("command_header_feedback", "port", "uid")
-        COMMAND_HEADER_FEEDBACK_FIELD_NUMBER: _ClassVar[int]
         PORT_FIELD_NUMBER: _ClassVar[int]
-        UID_FIELD_NUMBER: _ClassVar[int]
-        command_header_feedback: _command_header_pb2.CommandHeader.Feedback
+        command_header: _command_header_pb2.CommandHeader.Request
         port: int
-        uid: int
-        def __init__(self, command_header_feedback: _Optional[_Union[_command_header_pb2.CommandHeader.Feedback, _Mapping]] = ..., port: _Optional[int] = ..., uid: _Optional[int] = ...) -> None: ...
+        def __init__(self, command_header: _Optional[_Union[_command_header_pb2.CommandHeader.Request, _Mapping]] = ..., port: _Optional[int] = ...) -> None: ...
+    class Feedback(_message.Message):
+        __slots__ = ("command_header_feedback",)
+        COMMAND_HEADER_FEEDBACK_FIELD_NUMBER: _ClassVar[int]
+        command_header_feedback: _command_header_pb2.CommandHeader.Feedback
+        def __init__(self, command_header_feedback: _Optional[_Union[_command_header_pb2.CommandHeader.Feedback, _Mapping]] = ...) -> None: ...
     def __init__(self) -> None: ...

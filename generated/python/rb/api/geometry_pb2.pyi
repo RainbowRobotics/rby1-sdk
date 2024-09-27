@@ -69,3 +69,29 @@ class SE3Pose(_message.Message):
     quaternion: Quaternion
     euler: EulerAngleZYX
     def __init__(self, position: _Optional[_Union[Vec3, _Mapping]] = ..., quaternion: _Optional[_Union[Quaternion, _Mapping]] = ..., euler: _Optional[_Union[EulerAngleZYX, _Mapping]] = ...) -> None: ...
+
+class Inertial(_message.Message):
+    __slots__ = ("mass", "center_of_mass", "inertia")
+    MASS_FIELD_NUMBER: _ClassVar[int]
+    CENTER_OF_MASS_FIELD_NUMBER: _ClassVar[int]
+    INERTIA_FIELD_NUMBER: _ClassVar[int]
+    mass: float
+    center_of_mass: Vec3
+    inertia: Inertia
+    def __init__(self, mass: _Optional[float] = ..., center_of_mass: _Optional[_Union[Vec3, _Mapping]] = ..., inertia: _Optional[_Union[Inertia, _Mapping]] = ...) -> None: ...
+
+class Inertia(_message.Message):
+    __slots__ = ("ixx", "iyy", "izz", "ixy", "ixz", "iyz")
+    IXX_FIELD_NUMBER: _ClassVar[int]
+    IYY_FIELD_NUMBER: _ClassVar[int]
+    IZZ_FIELD_NUMBER: _ClassVar[int]
+    IXY_FIELD_NUMBER: _ClassVar[int]
+    IXZ_FIELD_NUMBER: _ClassVar[int]
+    IYZ_FIELD_NUMBER: _ClassVar[int]
+    ixx: float
+    iyy: float
+    izz: float
+    ixy: float
+    ixz: float
+    iyz: float
+    def __init__(self, ixx: _Optional[float] = ..., iyy: _Optional[float] = ..., izz: _Optional[float] = ..., ixy: _Optional[float] = ..., ixz: _Optional[float] = ..., iyz: _Optional[float] = ...) -> None: ...

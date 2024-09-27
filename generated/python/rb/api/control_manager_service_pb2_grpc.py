@@ -44,6 +44,11 @@ class ControlManagerServiceStub(object):
                 request_serializer=rb_dot_api_dot_control__manager__pb2.ControlManagerCommandRequest.SerializeToString,
                 response_deserializer=rb_dot_api_dot_control__manager__pb2.ControlManagerCommandResponse.FromString,
                 _registered_method=True)
+        self.GetTimeScale = channel.unary_unary(
+                '/rb.api.ControlManagerService/GetTimeScale',
+                request_serializer=rb_dot_api_dot_control__manager__pb2.GetTimeScaleRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_control__manager__pb2.GetTimeScaleResponse.FromString,
+                _registered_method=True)
         self.SetTimeScale = channel.unary_unary(
                 '/rb.api.ControlManagerService/SetTimeScale',
                 request_serializer=rb_dot_api_dot_control__manager__pb2.SetTimeScaleRequest.SerializeToString,
@@ -55,6 +60,12 @@ class ControlManagerServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def ControlManagerCommand(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetTimeScale(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -73,6 +84,11 @@ def add_ControlManagerServiceServicer_to_server(servicer, server):
                     servicer.ControlManagerCommand,
                     request_deserializer=rb_dot_api_dot_control__manager__pb2.ControlManagerCommandRequest.FromString,
                     response_serializer=rb_dot_api_dot_control__manager__pb2.ControlManagerCommandResponse.SerializeToString,
+            ),
+            'GetTimeScale': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTimeScale,
+                    request_deserializer=rb_dot_api_dot_control__manager__pb2.GetTimeScaleRequest.FromString,
+                    response_serializer=rb_dot_api_dot_control__manager__pb2.GetTimeScaleResponse.SerializeToString,
             ),
             'SetTimeScale': grpc.unary_unary_rpc_method_handler(
                     servicer.SetTimeScale,
@@ -107,6 +123,33 @@ class ControlManagerService(object):
             '/rb.api.ControlManagerService/ControlManagerCommand',
             rb_dot_api_dot_control__manager__pb2.ControlManagerCommandRequest.SerializeToString,
             rb_dot_api_dot_control__manager__pb2.ControlManagerCommandResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetTimeScale(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.ControlManagerService/GetTimeScale',
+            rb_dot_api_dot_control__manager__pb2.GetTimeScaleRequest.SerializeToString,
+            rb_dot_api_dot_control__manager__pb2.GetTimeScaleResponse.FromString,
             options,
             channel_credentials,
             insecure,

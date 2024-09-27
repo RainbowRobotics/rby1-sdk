@@ -19,9 +19,26 @@ class PyGeom : public dyn::Geom {
 
   dyn::GeomType GetType() const override { PYBIND11_OVERRIDE_PURE(dyn::GeomType, dyn::Geom, GetType); }
 
+  std::optional<dyn::CollisionResult> ComputeMinimumDistance(const math::SE3::MatrixType& T, const Geom& other_geom,
+                                                             const math::SE3::MatrixType& other_T) const override {
+    PYBIND11_OVERRIDE_PURE(std::optional<dyn::CollisionResult>, dyn::Geom, ComputeMinimumDistance, T, other_geom,
+                           other_T);
+  }
+
   using dyn::Geom::GetColaffinity;
   using dyn::Geom::GetColtype;
 };
+
+void bind_collision_result(py::module& m) {
+  py::class_<dyn::CollisionResult>(m, "CollisionResult")
+      .def(py::init<>())
+      .def_readonly("link1", &dyn::CollisionResult::link1)
+      .def_readonly("link2", &dyn::CollisionResult::link2)
+      .def_readonly("position1", &dyn::CollisionResult::position1)
+      .def_readonly("position2", &dyn::CollisionResult::position2)
+      .def_readonly("distance", &dyn::CollisionResult::distance)
+      .def_readonly("penetration_depth", &dyn::CollisionResult::penetration_depth);
+}
 
 void bind_geom(py::module_& m) {
   py::enum_<dyn::GeomType>(m, "GeomType").value("Capsule", dyn::GeomType::kCapsule);
@@ -31,7 +48,8 @@ void bind_geom(py::module_& m) {
       .def("get_type", &dyn::Geom::GetType)
       .def("get_coltype", &dyn::Geom::GetColtype)
       .def("get_colaffinity", &dyn::Geom::GetColaffinity)
-      .def_static("filter", &dyn::Geom::Filter, "geom1"_a, "geom2"_a);
+      .def("compute_minimum_distance", &dyn::Geom::ComputeMinimumDistance, "T"_a, "other_geom"_a, "other_T"_a)
+      .def("filter", &dyn::Geom::Filter, "other_geom"_a);
 
   py::class_<dyn::GeomCapsule, std::shared_ptr<dyn::GeomCapsule>>(m, "GeomCapsule")
       .def(py::init<double, double, unsigned int, unsigned int>())
@@ -210,6 +228,8 @@ void bind_robot(py::module_& m) {
            static_cast<Eigen::Matrix<double, 3, DOF> (dyn::Robot<DOF>::*)(
                std::shared_ptr<dyn::State<DOF>>, unsigned int)>(&dyn::Robot<DOF>::ComputeCenterOfMassJacobian),
            "state"_a, "ref_link"_a)
+      .def("detect_collisions_or_nearest_links", &dyn::Robot<DOF>::DetectCollisionsOrNearestLinks, "state"_a,
+           "collision_threshold"_a = 0)
       .def("get_limit_q_lower", &dyn::Robot<DOF>::GetLimitQLower, "state"_a)
       .def("get_limit_q_upper", &dyn::Robot<DOF>::GetLimitQUpper, "state"_a)
       .def("get_limit_qdot_lower", &dyn::Robot<DOF>::GetLimitQdotLower, "state"_a)
@@ -272,6 +292,7 @@ void bind_state(py::module_& m) {
 }
 
 void pybind11_dynamics(py::module_& m) {
+  bind_collision_result(m);
   bind_geom(m);
   bind_collision(m);
 

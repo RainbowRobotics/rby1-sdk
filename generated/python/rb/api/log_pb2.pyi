@@ -9,7 +9,7 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class Log(_message.Message):
-    __slots__ = ("timestamp", "level", "message", "logger_name")
+    __slots__ = ("timestamp", "robot_system_timestamp", "level", "message")
     class Level(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
         __slots__ = ()
         LEVEL_TRACE: _ClassVar[Log.Level]
@@ -25,14 +25,14 @@ class Log(_message.Message):
     LEVEL_ERROR: Log.Level
     LEVEL_CRITICAL: Log.Level
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    ROBOT_SYSTEM_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     LEVEL_FIELD_NUMBER: _ClassVar[int]
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
-    LOGGER_NAME_FIELD_NUMBER: _ClassVar[int]
     timestamp: _timestamp_pb2.Timestamp
+    robot_system_timestamp: _timestamp_pb2.Timestamp
     level: Log.Level
     message: str
-    logger_name: str
-    def __init__(self, timestamp: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., level: _Optional[_Union[Log.Level, str]] = ..., message: _Optional[str] = ..., logger_name: _Optional[str] = ...) -> None: ...
+    def __init__(self, timestamp: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., robot_system_timestamp: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., level: _Optional[_Union[Log.Level, str]] = ..., message: _Optional[str] = ...) -> None: ...
 
 class GetLastLogRequest(_message.Message):
     __slots__ = ("request_header", "log_count")

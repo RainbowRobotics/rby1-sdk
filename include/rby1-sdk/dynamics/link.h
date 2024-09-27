@@ -124,8 +124,8 @@ class GeomCapsule : public Geom {
 };
 
 struct CollisionResult {
-  int link1_idx;
-  int link2_idx;
+  std::string link1;
+  std::string link2;
   Eigen::Vector3d position1;
   Eigen::Vector3d position2;
   double distance;

@@ -137,7 +137,8 @@ void bind_robot_state(py::module_& m, const std::string& robot_state_name) {
       .def_readonly("target_feedback_gain", &RobotState<T>::target_feedback_gain)
       .def_readonly("target_feedforward_torque", &RobotState<T>::target_feedforward_torque)
       .def_readonly("odometry", &RobotState<T>::odometry)
-      .def_readonly("center_of_mass", &RobotState<T>::center_of_mass);
+      .def_readonly("center_of_mass", &RobotState<T>::center_of_mass)
+      .def_readonly("collisions", &RobotState<T>::collisions);
 }
 
 void pybind11_robot_state(py::module_& m) {

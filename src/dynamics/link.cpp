@@ -156,14 +156,14 @@ std::optional<CollisionResult> GeomCapsule::ComputeMinimumDistance(const math::S
                                                                    const math::SE3::MatrixType& other_T) const {
   switch (other_geom.GetType()) {
     case GeomType::kCapsule: {
-      auto& other_capsule = dynamic_cast<const GeomCapsule&>(other_geom);
+      const auto& other_capsule = dynamic_cast<const GeomCapsule&>(other_geom);
       auto dis = compute_min_distance_two_capsules(
           {math::SE3::Multiply(T, GetStartPoint()), math::SE3::Multiply(T, GetEndPoint())},
           {math::SE3::Multiply(other_T, other_capsule.GetStartPoint()),
            math::SE3::Multiply(other_T, other_capsule.GetEndPoint())});
       CollisionResult rv;
-      rv.link1_idx = -1;
-      rv.link2_idx = -1;
+      rv.link1 = "";
+      rv.link2 = "";
       rv.position1 = std::get<1>(dis);
       rv.position2 = std::get<2>(dis);
       rv.distance = std::get<0>(dis);

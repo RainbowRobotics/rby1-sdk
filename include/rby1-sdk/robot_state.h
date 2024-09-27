@@ -124,4 +124,62 @@ struct RobotState {
   std::vector<dyn::CollisionResult> collisions;
 };
 
+inline std::string to_string(PowerState::State s) {
+  switch(s) {
+    case PowerState::State::kUnknown:
+      return "Unknown";
+    case PowerState::State::kPowerOn:
+      return "PowerOn";
+    case PowerState::State::kPowerOff:
+      return "PowerOff";
+  }
+  return "";
+}
+
+inline std::string to_string(EMOState::State s) {
+  switch(s) {
+    case EMOState::State::kReleased:
+      return "Released";
+    case EMOState::State::kPressed:
+      return "Pressed";
+  }
+  return "";
+}
+
+inline std::string to_string(JointState::FETState s) {
+  switch(s) {
+    case JointState::FETState::kUnknown:
+      return "Unknown";
+    case JointState::FETState::kOn:
+      return "On";
+    case JointState::FETState::kOff:
+      return "Unknown";
+  }
+  return "";
+}
+
+inline std::string to_string(JointState::RunState s) {
+  switch(s) {
+    case JointState::RunState::kUnknown:
+      return "Unknown";
+    case JointState::RunState::kControlOn:
+      return "ControlOn";
+    case JointState::RunState::kControlOff:
+      return "ControlOff";
+  }
+  return "";
+}
+
+inline std::string to_string(JointState::InitializationState s) {
+  switch(s) {
+    case JointState::InitializationState::kUnknown:
+      return "Unknown";
+    case JointState::InitializationState::kInitialized:
+      return "Initialized";
+    case JointState::InitializationState::kUninitialized:
+      return "Uninitialized";
+  }
+  return "";
+}
+
 }  // namespace rb

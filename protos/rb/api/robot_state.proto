@@ -115,8 +115,6 @@ message Collision {
   Vec3 position2 = 4;
 
   double distance = 5;
-
-  double penetration_depth = 6;
 }
 
 message RobotState {

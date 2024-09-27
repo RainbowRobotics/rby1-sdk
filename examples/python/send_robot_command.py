@@ -3,21 +3,16 @@ import time
 import rby1_sdk
 import numpy as np
 
-robot = rby1_sdk.create_robot_a("192.168.30.1:50051")
+robot = rby1_sdk.create_robot_a("localhost:50051")
 robot.connect()
 
-recorded_position = []
-recorded_velocity = []
 
-
-def cb(rs):
-    global recorded_position, recorded_velocity
-    recorded_position = recorded_position + [rs.target_position[3]]
-    recorded_velocity = recorded_velocity + [rs.target_position[11]]
+def cb(state: rby1_sdk.RobotState_A):
+    print(state)
 
 
 robot.start_state_update(cb,
-                         0.1  # (Hz)
+                         10  # (Hz)
                          )
 
 robot.power_on(".*")
@@ -50,6 +45,3 @@ rc = rby1_sdk.RobotCommandBuilder().set_command(
 robot.send_command(rc, 10).get()
 
 robot.stop_state_update()
-
-print(recorded_position)
-print(recorded_velocity)

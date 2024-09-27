@@ -129,7 +129,6 @@ struct CollisionResult {
   Eigen::Vector3d position1;
   Eigen::Vector3d position2;
   double distance;
-  double penetration_depth;
 };
 
 }  // namespace rb::dyn

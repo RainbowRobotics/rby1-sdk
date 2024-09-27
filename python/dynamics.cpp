@@ -3,8 +3,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <Eigen/Core>
+#include <iomanip>
 #include <utility>
 
+#include "common.h"
 #include "rby1-sdk/dynamics/robot.h"
 #include "rby1-sdk/dynamics/state.h"
 #include "rby1-sdk/model.h"
@@ -37,7 +39,19 @@ void bind_collision_result(py::module& m) {
       .def_readonly("position1", &dyn::CollisionResult::position1)
       .def_readonly("position2", &dyn::CollisionResult::position2)
       .def_readonly("distance", &dyn::CollisionResult::distance)
-      .def_readonly("penetration_depth", &dyn::CollisionResult::penetration_depth);
+      .def("__repr__", [](const dyn::CollisionResult& self) {
+        py::object np = py::module_::import("numpy");
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(kDoublePrecision)                              //
+           << "CollisionResult("                                                             //
+           << "link1='" << self.link1 << "'"                                                 //
+           << ", link2=" << self.link2 << "'"                                                //
+           << ", position1=" << np.attr("array2string")(self.position1).cast<std::string>()  //
+           << ", position2=" << np.attr("array2string")(self.position2).cast<std::string>()  //
+           << ", distance=" << self.distance                                                 //
+           << ")";
+        return ss.str();
+      });
 }
 
 void bind_geom(py::module_& m) {

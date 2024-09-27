@@ -7,7 +7,7 @@ using namespace rb::math;
 
 namespace {
 
-std::tuple<double, Eigen::Vector3d, Eigen::Vector3d> compute_min_distance_two_capsules(
+std::tuple<double, Eigen::Vector3d, Eigen::Vector3d> compute_min_distance_two_segments(
     const std::pair<Eigen::Vector3d, Eigen::Vector3d>& s1,  // first capsule start point, end point
     const std::pair<Eigen::Vector3d, Eigen::Vector3d>& s2   // second capsule start point, end point
 ) {
@@ -157,7 +157,7 @@ std::optional<CollisionResult> GeomCapsule::ComputeMinimumDistance(const math::S
   switch (other_geom.GetType()) {
     case GeomType::kCapsule: {
       const auto& other_capsule = dynamic_cast<const GeomCapsule&>(other_geom);
-      auto dis = compute_min_distance_two_capsules(
+      auto dis = compute_min_distance_two_segments(
           {math::SE3::Multiply(T, GetStartPoint()), math::SE3::Multiply(T, GetEndPoint())},
           {math::SE3::Multiply(other_T, other_capsule.GetStartPoint()),
            math::SE3::Multiply(other_T, other_capsule.GetEndPoint())});
@@ -166,8 +166,7 @@ std::optional<CollisionResult> GeomCapsule::ComputeMinimumDistance(const math::S
       rv.link2 = "";
       rv.position1 = std::get<1>(dis);
       rv.position2 = std::get<2>(dis);
-      rv.distance = std::get<0>(dis);
-      rv.penetration_depth = std::min(rv.distance - (radius_ + other_capsule.GetRadius()), 0.);
+      rv.distance = std::get<0>(dis) - (radius_ + other_capsule.GetRadius());
       return rv;
     }
   }

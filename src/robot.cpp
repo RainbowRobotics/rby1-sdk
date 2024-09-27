@@ -116,6 +116,8 @@ rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
     info.emo_infos.push_back(ProtoToEMOInfo(ei));
   }
 
+  info.degree_of_freedom = msg.degree_of_freedom();
+
   for (const auto& ji : msg.joint_infos()) {
     info.joint_infos.push_back(ProtoToJointInfo(ji));
   }
@@ -1384,7 +1386,6 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
         cs.position2(2) = col.position2().z();
       }
       cs.distance = col.distance();
-      cs.penetration_depth = col.penetration_depth();
       rs.collisions.push_back(cs);
     }
 

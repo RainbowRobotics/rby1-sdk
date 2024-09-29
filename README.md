@@ -75,7 +75,8 @@ To fix the Intellisense problem, add the following code at the top of your sourc
 #undef __ARM_NEON__
 #endif
 ```
-## Useful Links
-
-- Documentation : TBD
-- [Official Website](https://www.rainbowrobotics.com/rby1eng)
+## Resources and Support
+- Documentation: [https://rainbowrobotics.github.io/rby1-dev/](https://rainbowrobotics.github.io/rby1-dev/)
+- Official Website: [Rainbow Robotics](https://www.rainbowrobotics.com/rby1eng)
+- Official Support Email: rby.support@rainbow-robotics.com
+- GitHub Discussions: [Join the Discussion](https://github.com/RainbowRobotics/rby1-sdk/discussions)

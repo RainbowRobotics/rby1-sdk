@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rby1-sdk"
-version = "0.0.1"
+version = "0.1.0"
 description = ""
 authors = ["Keunjun Choi <keunjun.choi@rainbow-robotics.com>"]
 license = "Apache-2.0"
@@ -41,6 +41,7 @@ version_scheme = "pep440"
 version_provider = "poetry"
 update_changelog_on_bump = true
 major_version_zero = true
+change_type_map = { "BREAKING CHANGE" = "❗ BREAKING CHANGE", "fix" = "🐛 Fixes", "feat" = "✨ Features", "docs" = "📖 Document", "style" = "👓 Style", "refactor" = "♻️ Refactor", "perf" = "⚡ Performance", "test" = "💯 Test", "build" = "🏗️ Build", "ci" = "🤖 CI" }
 
 [build-system]
 requires = [

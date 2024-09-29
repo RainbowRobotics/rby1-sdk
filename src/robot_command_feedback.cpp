@@ -20,6 +20,15 @@ class RobotCommandFeedbackParserImpl {
     }
   }
 
+  void ParseRealtimeControlCommandFeedback(RealtimeControlCommandFeedback& self,
+                                           api::RealTimeControlCommand::Feedback* feedback) {
+    self.valid_ = true;
+
+    if (feedback->has_command_header_feedback()) {
+      ParseCommandHeaderFeedback(self.command_header_, feedback->mutable_command_header_feedback());
+    }
+  }
+
   void ParseSE2VelocityCommandFeedback(SE2VelocityCommandFeedback& self, api::SE2VelocityCommand::Feedback* feedback) {
     self.valid_ = true;
 
@@ -112,6 +121,10 @@ class RobotCommandFeedbackParserImpl {
     switch (feedback->feedback_case()) {
       case api::WholeBodyCommand_Feedback::kStopCommandFeedback:
         ParseStopCommandFeedback(self.stop_command_, feedback->mutable_stop_command_feedback());
+        break;
+      case api::WholeBodyCommand_Feedback::kRealTimeControlCommandFeedback:
+        ParseRealtimeControlCommandFeedback(self.realtime_control_command_,
+                                            feedback->mutable_real_time_control_command_feedback());
         break;
       case api::WholeBodyCommand_Feedback::FEEDBACK_NOT_SET:
         break;

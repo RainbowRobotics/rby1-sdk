@@ -33,6 +33,7 @@ class EventLoop {
     long period_ns = period.count();
     long offset_ns = offset.count();
 
+#ifdef __linux__
     const auto& get_next_wakeup_time = [period_ns](struct timespec ts) {
       ts.tv_nsec += period_ns;
       while (ts.tv_nsec >= 1000000000) {
@@ -65,6 +66,26 @@ class EventLoop {
     ts.tv_nsec = (long)(c % 1000000000);
     ts = get_next_wakeup_time(ts);
     PushTask([=] { cyclic_task(ts, cyclic_task); });
+#else
+    const auto& cyclic_task = [=](std::chrono::steady_clock::time_point next_wakeup_time, const auto& self) -> void {
+      std::this_thread::sleep_until(next_wakeup_time);
+      next_wakeup_time = next_wakeup_time + period;
+      if (cb) {
+        cb();
+      }
+
+      PushTask([=] { self(next_wakeup_time, self); });
+    };
+    uint64_t c = 0;
+    {
+      auto ts = std::chrono::steady_clock::now();
+      c = std::chrono::duration_cast<std::chrono::nanoseconds>(ts.time_since_epoch()).count();
+      c = (uint64_t)(c / period_ns + 1) * period_ns + offset_ns;
+    }
+    std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> ts((std::chrono::nanoseconds(c)));
+    ts += period;
+    PushTask([=] { cyclic_task(ts, cyclic_task); });
+#endif
   }
 
   template <typename F, typename... A>

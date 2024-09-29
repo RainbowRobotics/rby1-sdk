@@ -20,3 +20,4 @@ dist
 rby1_sdk
 
 !.github/**
+!build.py

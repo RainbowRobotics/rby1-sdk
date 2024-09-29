@@ -18,3 +18,5 @@ _skbuild
 dist
 
 rby1_sdk
+
+!.github/**

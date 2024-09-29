@@ -16,13 +16,20 @@
 #include <unistd.h>
 #endif
 
+#ifdef _WIN32
+#define POLICY_DEFAULT_VALUE 0
+#else
+#define POLICY_DEFAULT_VALUE SCHED_OTHER
+#endif
+
 namespace rb {
 
 class Thread {
  public:
   using Functor = std::function<void()>;
 
-  Thread() : thread_(), name_(), cpuid_(-1), priority_(0), policy_(SCHED_OTHER), started_(false), running_(false) {}
+  Thread()
+      : thread_(), name_(), cpuid_(-1), priority_(0), policy_(POLICY_DEFAULT_VALUE), started_(false), running_(false) {}
 
   ~Thread() {
     if (started_) {

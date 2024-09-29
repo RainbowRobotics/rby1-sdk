@@ -1,9 +1,24 @@
 cmake_minimum_required(VERSION 3.28)
-project(rby1-sdk)
+if (NOT DEFINED SKBUILD_PROJECT_VERSION)
+    file(READ ${CMAKE_SOURCE_DIR}/pyproject.toml PYPROJECT_STR)
+    string(REGEX MATCHALL "[^\n\r]+" PYPROJECT_STR_LIST "${PYPROJECT_STR}")
+
+    foreach (STR ${PYPROJECT_STR_LIST})
+        if (${STR} MATCHES "^version[ \t\r\n]+=[ \t\r\n]+\"(.*)\"")
+            set(RBY1_SDK_VERSION ${CMAKE_MATCH_1})
+        endif ()
+    endforeach ()
+else ()
+    set(RBY1_SDK_VERSION ${SKBUILD_PROJECT_VERSION})
+endif ()
+project(rby1-sdk
+        VERSION ${RBY1_SDK_VERSION}
+        LANGUAGES CXX)
 
 if (NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
 endif ()
+message(STATUS "RBY1-SDK Version: " ${PROJECT_VERSION})
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 

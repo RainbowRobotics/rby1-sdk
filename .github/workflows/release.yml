@@ -38,18 +38,22 @@ jobs:
           name: changelog_increment_file
           path: body.md
 
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y
+
+      - name: Update PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Set outputs for next jobs
         id: out
         run: |
-          sha_new=$(git rev-parse HEAD)
+          new_sha=$(git rev-parse HEAD)
+          version=$(poetry version -s)
           echo $sha_new
-          version=$(cz version | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+")
           echo $version
-          echo "::set-output name=SHA::$sha_new"
-          echo "::set-output name=VERSION::$version"
-      - run:
-          echo "SHA=$sha_new" >> $GITHUB_ENV
-          echo "VERSION=$version" >> $GITHUB_ENV
+          echo "SHA=$new_sha" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$version" >> "$GITHUB_OUTPUT"
 
   build-wheels:
     needs: [bump-version]
@@ -110,7 +114,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.SHA }}
+          ref: ${{ needs.bump-version.outputs.new_sha }}
           fetch-depth: 0
 
       - uses: actions/download-artifact@v4
@@ -131,7 +135,7 @@ jobs:
         with:
           body_path: "body.md"
           files: ./wheelhouse/*
-          tag_name: v${{ env.VERSION }}
+          tag_name: v${{ needs.bump-version.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

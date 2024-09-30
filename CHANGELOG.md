@@ -1,3 +1,9 @@
+## v0.1.4 (2024-09-30)
+
+### 🐛 Fixes
+
+- **release.yml**: fix path on windows
+
 ## v0.1.3 (2024-09-30)
 
 ### 🐛 Fixes

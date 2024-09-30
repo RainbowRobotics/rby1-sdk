@@ -20,6 +20,7 @@ include = [
     { path = "conanfile.py", format = "sdist" },
     # C extensions must be included in the wheel distribution.
     { path = "rby1_sdk/**/*.py", format = "wheel" },
+    { path = "rby1_sdk/**/*.pyd", format = "wheel" },
     { path = "rby1_sdk/**/*.so", format = "wheel" },
 ]
 

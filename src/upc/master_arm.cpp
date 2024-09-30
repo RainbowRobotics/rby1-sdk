@@ -9,7 +9,7 @@ MasterArm::MasterArm(const std::string& dev_name)
     : handler_(std::make_shared<DynamixelBus>(dev_name)), control_period_(0.1) {}
 
 MasterArm::~MasterArm() {
-  StopControl();
+  this->StopControl();
 }
 
 void MasterArm::SetControlPeriod(double control_period) {

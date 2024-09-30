@@ -5,9 +5,9 @@
 #include <string>
 #include <thread>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <Windows.h>
-#elif __APPLE__
+#elif defined(__APPLE__)
 #include <mach/mach.h>
 #include <mach/thread_policy.h>
 #else
@@ -16,7 +16,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #define POLICY_DEFAULT_VALUE 0
 #else
 #define POLICY_DEFAULT_VALUE SCHED_OTHER
@@ -57,12 +57,11 @@ class Thread {
       running_ = true;
 
       SetThreadName();
-
       SetThreadAffinity();
-
       SetThreadPriority();
 
       func();
+
       running_ = false;
     });
 
@@ -88,7 +87,7 @@ class Thread {
 
   void SetThreadName() {
     if (!name_.empty()) {
-#ifdef _WIN32
+#if defined(_WIN32)
       const DWORD MS_VC_EXCEPTION = 0x406D1388;
 
 #pragma pack(push, 8)
@@ -111,7 +110,7 @@ class Thread {
       __try {
         RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
       } __except (EXCEPTION_EXECUTE_HANDLER) {}
-#elif __APPLE__
+#elif defined(__APPLE__)
       pthread_setname_np(name_.c_str());
 #else
       pthread_setname_np(pthread_self(), name_.c_str());
@@ -119,12 +118,12 @@ class Thread {
     }
   }
 
-  void SetThreadAffinity() {
+  void SetThreadAffinity() {  // NOLINT
     if (cpuid_ != -1) {
-#ifdef _WIN32
+#if defined(_WIN32)
       DWORD_PTR mask = 1 << cpuid_;
       SetThreadAffinityMask(GetCurrentThread(), mask);
-#elif __APPLE__
+#elif defined(__APPLE__)
       thread_affinity_policy_data_t policy = {cpuid_};
       thread_port_t mach_thread = pthread_mach_thread_np(pthread_self());
       kern_return_t ret = thread_policy_set(mach_thread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy, 1);
@@ -144,16 +143,16 @@ class Thread {
     }
   }
 
-  void SetThreadPriority() {
+  void SetThreadPriority() {  // NOLINT
     if (priority_ != 0) {
-#ifdef _WIN32
+#if defined(_WIN32)
       int win_priority = THREAD_PRIORITY_NORMAL;
       if (priority_ > 0) {
         win_priority = THREAD_PRIORITY_HIGHEST;
       } else if (priority_ < 0) {
         win_priority = THREAD_PRIORITY_LOWEST;
       }
-      SetThreadPriority(GetCurrentThread(), win_priority);
+      ::SetThreadPriority(GetCurrentThread(), win_priority);
 #else
       struct sched_param param {};
 

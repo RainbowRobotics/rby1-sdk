@@ -5,10 +5,10 @@ package rb.api;
 import "rb/api/robot_command.proto";
 
 service RobotCommandService {
-  // 단일 명령을 주고 받는 경우
+  // In case of sending and receiving a single command
   rpc RobotCommand(RobotCommandRequest) returns (RobotCommandResponse) {}
 
-  // 명령을 지속적으로 주고 받고자 하는 경우
+  // In case of sending and receiving commands continuously
   rpc RobotCommandStream(stream RobotCommandRequest) returns (stream RobotCommandResponse) {}
 
 }

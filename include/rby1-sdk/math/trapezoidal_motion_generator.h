@@ -82,7 +82,13 @@ class TrapezoidalMotionGenerator {
           if (cv > 0) {
             if (cp + 0.5 * cv * cv / a_max < tp) {
               if (cv < v_max) {
-                spline_coeffs(i, 0) = {.start_t = 0, .end_t = 0, .init_p = cp, .init_v = cv, .a = -a_max};
+                Coeff coeff;  // TODO
+                coeff.start_t = 0;
+                coeff.end_t = 0;
+                coeff.init_p = cp;
+                coeff.init_v = cv;
+                coeff.a = -a_max;
+                spline_coeffs(i, 0) = coeff;
                 t = -cv / a_max;
                 cp -= 0.5 * cv * cv / a_max;
                 cv = 0;

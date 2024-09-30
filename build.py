@@ -27,11 +27,13 @@ def build(setup_kwargs: Dict[str, Any]) -> None:
     remove_files(dest_dir, "**/*.py")
     remove_files(dest_dir, "**/*.pyd")
     remove_files(dest_dir, "**/*.so")
+    remove_files(dest_dir, "**/*.pyi")
 
     # Copy built C-extensions back to the project.
     copy_files(src_dir, dest_dir, "**/*.py")
     copy_files(src_dir, dest_dir, "**/*.pyd")
     copy_files(src_dir, dest_dir, "**/*.so")
+    copy_files(src_dir, dest_dir, "**/*.pyi")
 
 
 def remove_files(target_dir: Path, pattern: str) -> None:

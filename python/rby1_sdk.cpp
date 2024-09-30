@@ -10,6 +10,7 @@
 
 namespace py = pybind11;
 using namespace rb;
+using namespace py::literals;
 
 void pybind11_dynamics(py::module_& m);
 
@@ -50,5 +51,5 @@ PYBIND11_MODULE(_bindings, m) {
   m.def("create_robot", &create_robot, "Creates a robot based on the provided model and address.", py::arg("model"),
         py::arg("address"));
 
-  m.def("create_robot_a", [](const std::string& address) { return Robot<y1_model::A>::Create(address); });
+  m.def("create_robot_a", [](const std::string& address) { return Robot<y1_model::A>::Create(address); }, "address"_a);
 }

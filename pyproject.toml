@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rby1-sdk"
-version = "0.1.0"
+version = "0.0.1"
 description = ""
 authors = ["Keunjun Choi <keunjun.choi@rainbow-robotics.com>"]
 license = "Apache-2.0"
@@ -21,6 +21,7 @@ include = [
     # C extensions must be included in the wheel distribution.
     { path = "rby1_sdk/**/*.py", format = "wheel" },
     { path = "rby1_sdk/**/*.pyd", format = "wheel" },
+    { path = "rby1_sdk/**/*.pyi", format = "wheel" },
     { path = "rby1_sdk/**/*.so", format = "wheel" },
 ]
 

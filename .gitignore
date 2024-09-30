@@ -18,6 +18,7 @@ _skbuild
 dist
 
 rby1_sdk
+wheelhouse
 
 !.github/**
 !build.py

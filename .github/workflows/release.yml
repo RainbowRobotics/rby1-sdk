@@ -68,6 +68,10 @@ jobs:
         os: [ ubuntu-22.04, windows-2022, macos-14 ]
         python-version: [ '3.10' ]
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -87,8 +91,8 @@ jobs:
         name: Update PATH (Windows)
         run: |
           echo "$APPDATA"
-          echo "$APPDATA\\Python\\Scripts"
-          echo "$APPDATA\\Python\\Scripts" >> $GITHUB_PATH
+          echo "$APPDATA\Python\Scripts"
+          echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
       - if: matrix.os == 'ubuntu-22.04'
         name: Update PATH (Ubuntu)
         run: |

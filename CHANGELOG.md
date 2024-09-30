@@ -1,3 +1,9 @@
+## v0.1.6 (2024-09-30)
+
+### 🐛 Fixes
+
+- **release.yml**: update release action
+
 ## v0.1.5 (2024-09-30)
 
 ### 🐛 Fixes

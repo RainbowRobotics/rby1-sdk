@@ -1,3 +1,10 @@
+## v0.1.11 (2024-09-30)
+
+### 🐛 Fixes
+
+- remove unnecessary dependency
+- resolve package Python requirement issue
+
 ## v0.1.10 (2024-09-30)
 
 ### 🐛 Fixes

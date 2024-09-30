@@ -1,3 +1,9 @@
+## v0.1.9 (2024-09-30)
+
+### 🐛 Fixes
+
+- remove build folder before Poetry build
+
 ## v0.1.8 (2024-09-30)
 
 ### 🐛 Fixes

@@ -83,7 +83,7 @@ jobs:
         name: Install Poetry (Windows)
         run: |
           (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
-          echo "%APPDATA%\\pypoetry\\venv\\Scripts" >> $GITHUB_PATH
+          echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
       - if: matrix.os == 'ubuntu-22.04'
         name: Install Poetry (Ubuntu)
         run: |

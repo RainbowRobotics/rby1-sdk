@@ -26,6 +26,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0
+          submodules: true
 
       - name: Create bump and changelog
         uses: commitizen-tools/commitizen-action@master
@@ -72,6 +73,7 @@ jobs:
         with:
           ref: ${{ needs.bump-version.outputs.new_sha }}
           fetch-depth: 0
+          submodules: true
 
       - uses: actions/setup-python@v5
         with:
@@ -79,10 +81,21 @@ jobs:
 
       - name: Install Poetry
         run: |
-          curl -sSL https://install.python-poetry.org | python - -y
+          if [ "${{ matrix.os }}" == "windows-2022" ]; then
+            (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+          else
+            curl -sSL https://install.python-poetry.org | python3 -
+          fi
 
       - name: Update PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-22.04" ]; then
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
+          elif [ "${{ matrix.os }}" == "windows-2022" ]; then
+            echo "%APPDATA%\\pypoetry\\venv\\Scripts" >> $GITHUB_PATH
+          elif [ "${{ matrix.os }}" == "macos-14" ]; then
+            echo "$HOME/Library/Application Support/pypoetry/venv/bin/poetry" >> $GITHUB_PATH
+          fi
 
       - name: Update Poetry configuration
         run: poetry config virtualenvs.create false

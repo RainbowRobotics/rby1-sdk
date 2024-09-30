@@ -30,10 +30,9 @@ generate-setup-file = false
 script = "build.py"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = "^3.10"
 grpcio = "1.65.2"
 grpcio-tools = "1.65.2"
-pyside6 = "^6.7.2"
 numpy = "^2.0.1"
 
 [tool.commitizen]

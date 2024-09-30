@@ -57,7 +57,7 @@ jobs:
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"
 
   build-wheels:
-    needs: [bump-version]
+    needs: [ bump-version ]
 
     runs-on: ${{ matrix.os }}
     name: "Build wheels"
@@ -79,23 +79,21 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
+      - if: matrix.os == 'windows-2022'
+        name: Install Poetry (Windows)
         run: |
-          if [ "${{ matrix.os }}" == "windows-2022" ]; then
-            (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
-          else
-            curl -sSL https://install.python-poetry.org | python3 -
-          fi
-
-      - name: Update PATH
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+          echo "%APPDATA%\\pypoetry\\venv\\Scripts" >> $GITHUB_PATH
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Install Poetry (Ubuntu)
         run: |
-          if [ "${{ matrix.os }}" == "ubuntu-22.04" ]; then
-            echo "$HOME/.local/bin" >> $GITHUB_PATH
-          elif [ "${{ matrix.os }}" == "windows-2022" ]; then
-            echo "%APPDATA%\\pypoetry\\venv\\Scripts" >> $GITHUB_PATH
-          elif [ "${{ matrix.os }}" == "macos-14" ]; then
-            echo "$HOME/Library/Application Support/pypoetry/venv/bin/poetry" >> $GITHUB_PATH
-          fi
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - if: matrix.os == 'macos-14'
+        name: Install Poetry (Ubuntu)
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/Library/Application Support/pypoetry/venv/bin/poetry" >> $GITHUB_PATH
 
       - name: Update Poetry configuration
         run: poetry config virtualenvs.create false
@@ -112,7 +110,7 @@ jobs:
           path: ./wheelhouse/*
 
   release:
-    needs: [bump-version, build-wheels]
+    needs: [ bump-version, build-wheels ]
 
     runs-on: ubuntu-latest
     name: "Release with python packages"

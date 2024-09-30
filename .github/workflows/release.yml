@@ -110,8 +110,13 @@ jobs:
         run: |
           rm -rf _skbuild
 
-      - name: Package project
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Package project (Ubuntu)
         run: poetry build -o wheelhouse
+
+      - if: matrix.os != 'ubuntu-22.04'
+        name: Package project (Other OSs)
+        run: poetry build -o wheelhouse -f wheel
 
       - uses: actions/upload-artifact@v4
         with:

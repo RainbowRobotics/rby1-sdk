@@ -1,9 +1,33 @@
 [tool.poetry]
 name = "rby1-sdk"
-version = "0.1.0"
+version = "0.0.1"
 description = ""
 authors = ["Keunjun Choi <keunjun.choi@rainbow-robotics.com>"]
+license = "Apache-2.0"
 readme = "README.md"
+homepage = "https://www.rainbow-robotics.com/"
+repository = "https://github.com/RainbowRobotics/rby1-sdk"
+include = [
+    # Source files for C extensions must be included in the source distribution.
+    { path = "cmake", format = "sdist" },
+    { path = "include", format = "sdist" },
+    { path = "models", format = "sdist" },
+    { path = "protos", format = "sdist" },
+    { path = "python", format = "sdist" },
+    { path = "src", format = "sdist" },
+    { path = "third-party", format = "sdist" },
+    { path = "CMakeLists.txt", format = "sdist" },
+    { path = "conanfile.py", format = "sdist" },
+    # C extensions must be included in the wheel distribution.
+    { path = "rby1_sdk/**/*.py", format = "wheel" },
+    { path = "rby1_sdk/**/*.pyd", format = "wheel" },
+    { path = "rby1_sdk/**/*.pyi", format = "wheel" },
+    { path = "rby1_sdk/**/*.so", format = "wheel" },
+]
+
+[tool.poetry.build]
+generate-setup-file = false
+script = "build.py"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
@@ -14,11 +38,12 @@ numpy = "^2.0.1"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-tag_format = "$version"
+tag_format = "v$major.$minor.$patch$prerelease"
 version_scheme = "pep440"
 version_provider = "poetry"
 update_changelog_on_bump = true
 major_version_zero = true
+change_type_map = { "BREAKING CHANGE" = "❗ BREAKING CHANGE", "fix" = "🐛 Fixes", "feat" = "✨ Features", "docs" = "📖 Document", "style" = "👓 Style", "refactor" = "♻️ Refactor", "perf" = "⚡ Performance", "test" = "💯 Test", "build" = "🏗️ Build", "ci" = "🤖 CI" }
 
 [build-system]
 requires = [
@@ -32,4 +57,4 @@ requires = [
     "poetry-core",
     "numpy>=2.0.1"
 ]
-build-backend = "setuptools.build_meta"
+build-backend = "poetry.core.masonry.api"

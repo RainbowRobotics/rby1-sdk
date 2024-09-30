@@ -40,7 +40,7 @@ enum class MobileBaseType {
 struct MobileBase {
   MobileBaseType type{MobileBaseType::kNone};
 
-  math::SE3::MatrixType T;  // front = x-axis
+  rb::math::SE3::MatrixType T;  // front = x-axis
   std::vector<std::string> joints;
   std::vector<double> params;
 };
@@ -78,10 +78,10 @@ class Robot {
     };
 
     std::vector<SubLink_> links;
-    Inertial::MatrixType J{Inertial::MatrixType::Zero()};  // Base link 기준 Link_ inertial
+    Inertial::MatrixType J{Inertial::MatrixType::Zero()};  // Link_ inertial wrt base link
     math::SE3::MatrixType M{math::SE3::Identity()};        // Base link to Link_ frame
 
-    Inertial::MatrixType I{Inertial::MatrixType::Zero()};  // Link_ frame 기준 Link_ inertial
+    Inertial::MatrixType I{Inertial::MatrixType::Zero()};  // Link_ inertial wrt Link_ frame
 
     int depth{0};
     int parent_joint_idx{-1};
@@ -100,7 +100,12 @@ class Robot {
     int AddLink(const std::shared_ptr<Link>& link, const math::SE3::MatrixType& M_wrt_p) {
       Inertial::MatrixType J_wrt_p = Inertial::Transform(M_wrt_p, link->I_);
       int idx = links.size();
-      links.push_back({.link = link, .J_wrt_p = J_wrt_p, .M_wrt_p = M_wrt_p, .M_wrt_base = M * M_wrt_p});
+      SubLink_ l;
+      l.link = link;
+      l.J_wrt_p = J_wrt_p;
+      l.M_wrt_p = M_wrt_p;
+      l.M_wrt_base = M * M_wrt_p;
+      links.push_back(l);
       I += J_wrt_p;
       J += Inertial::Transform(M, J_wrt_p);
       return idx;
@@ -670,15 +675,18 @@ class Robot {
     int link_idx = 0;
     int joint_idx = 0;
     {
-      que.push({
-          .parent_joint_idx = -1,               //
-          .parent_link_idx = link_idx++,        //
-          .link = base,                         //
-          .depth = 0,                           //
-          .merge_parent_link = false,           //
-          .M_wrt_base = math::SE3::Identity(),  //
-          .M_wrt_p = math::SE3::Identity()      //
-      });
+      {
+        QueueItem item;
+        item.parent_joint_idx = -1;
+        item.parent_link_idx = link_idx++;
+        item.link = base;
+        item.depth = 0;
+        item.merge_parent_link = false;
+        item.M_wrt_base = math::SE3::Identity();
+        item.M_wrt_p = math::SE3::Identity();
+        que.push(item);
+      }
+
       while (!que.empty()) {
         auto e = que.front();
         que.pop();
@@ -696,27 +704,37 @@ class Robot {
         for (const auto& joint : e.link->child_joints_) {
           if (!joint->fixed_) {
             math::SE3::MatrixType M_wrt_base = e.M_wrt_base * joint->T_pj_;
-            joints_[joint_idx] = {.joint = joint,
-                                  .S = math::SE3::Ad(M_wrt_base, joint->S_),
-                                  .parent_link_idx = e.parent_link_idx,
-                                  .child_link_idx = link_idx};
+            {
+              Joint_ j;
+              j.joint = joint;
+              j.S = math::SE3::Ad(M_wrt_base, joint->S_);
+              j.parent_link_idx = e.parent_link_idx;
+              j.child_link_idx = link_idx;
+              joints_[joint_idx] = j;
+            }
             joint_idx_[joint->name_] = joint_idx;
             links_[e.parent_link_idx].child_joint_idx.push_back(joint_idx);
-            que.push({.parent_joint_idx = joint_idx++,
-                      .parent_link_idx = link_idx++,
-                      .link = joint->child_link_,
-                      .depth = e.depth + 1,
-                      .merge_parent_link = false,
-                      .M_wrt_base = M_wrt_base,
-                      .M_wrt_p = math::SE3::Identity()});
+            {
+              QueueItem item;
+              item.parent_joint_idx = joint_idx++;
+              item.parent_link_idx = link_idx++;
+              item.link = joint->child_link_;
+              item.depth = e.depth + 1;
+              item.merge_parent_link = false;
+              item.M_wrt_base = M_wrt_base;
+              item.M_wrt_p = math::SE3::Identity();
+              que.push(item);
+            }
           } else {
-            que.push({.parent_joint_idx = e.parent_joint_idx,
-                      .parent_link_idx = e.parent_link_idx,
-                      .link = joint->child_link_,
-                      .depth = e.depth,
-                      .merge_parent_link = true,
-                      .M_wrt_base = e.M_wrt_base * joint->T_pj_ * joint->T_jc_,
-                      .M_wrt_p = e.M_wrt_p * joint->T_pj_ * joint->T_jc_});
+            QueueItem item;
+            item.parent_joint_idx = e.parent_joint_idx;
+            item.parent_link_idx = e.parent_link_idx;
+            item.link = joint->child_link_;
+            item.depth = e.depth;
+            item.merge_parent_link = true;
+            item.M_wrt_base = e.M_wrt_base * joint->T_pj_ * joint->T_jc_;
+            item.M_wrt_p = e.M_wrt_p * joint->T_pj_ * joint->T_jc_;
+            que.push(item);
           }
         }
       }

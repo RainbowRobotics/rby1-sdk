@@ -48,7 +48,10 @@ class DynamixelBusImpl {
     if (dxl_comm_result == COMM_SUCCESS) {
       int button = (position >> 8) & 0xff;
       int trigger = ((position >> 16) & 0xff) | (((position >> 24) & 0xff) << 8);
-      return std::make_pair(id, DynamixelBus::ButtonState{.button = button, .trigger = trigger});
+      DynamixelBus::ButtonState button_state{};
+      button_state.button = button;
+      button_state.trigger = trigger;
+      return std::make_pair(id, button_state);
     } else {
       return {};
     }

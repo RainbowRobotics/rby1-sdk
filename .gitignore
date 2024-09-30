@@ -15,3 +15,10 @@ poetry.lock
 *.egg-info
 _skbuild
 *.npz
+dist
+
+rby1_sdk
+wheelhouse
+
+!.github/**
+!build.py

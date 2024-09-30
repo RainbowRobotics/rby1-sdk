@@ -41,6 +41,9 @@ target_link_libraries(rby1-sdk PRIVATE
         nlohmann_json::nlohmann_json
         DynamixelSDK
 )
+if(WIN32)
+    target_link_libraries(rby1-sdk PUBLIC wsock32 ws2_32)
+endif()
 
 target_include_directories(rby1-sdk PUBLIC
         $<INSTALL_INTERFACE:include>

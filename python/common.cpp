@@ -12,7 +12,9 @@
 namespace py = pybind11;
 
 std::chrono::system_clock::time_point timespec_to_time_point(const timespec& ts) {
-  return std::chrono::system_clock::time_point(std::chrono::seconds(ts.tv_sec) + std::chrono::nanoseconds(ts.tv_nsec));
+  auto t = std::chrono::duration_cast<std::chrono::system_clock::time_point::duration>(
+      std::chrono::nanoseconds(((uint64_t)ts.tv_sec * 1000000000) + (uint64_t)ts.tv_nsec));
+  return std::chrono::system_clock::time_point(t);
 }
 
 std::chrono::nanoseconds timespec_to_nanoseconds(const timespec& ts) {

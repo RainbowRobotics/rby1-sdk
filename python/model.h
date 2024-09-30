@@ -10,12 +10,16 @@ using namespace rb;
 
 class PyModelBase {
  public:
+  virtual ~PyModelBase() = default;
+
   virtual std::string_view get_model_name() = 0;
 };
 
 template <typename T>
 class PyModel : public PyModelBase {
  public:
+  ~PyModel() override = default;
+
   std::string_view get_model_name() override { return T::kModelName; }
 
   auto get_robot_dof() { return T::kRobotDOF; }

@@ -84,10 +84,14 @@ class Joint : public std::enable_shared_from_this<Joint> {
   std::string name_{};
   bool fixed_;
   math::se3v::MatrixType S_;
-  double limit_q_lower_{-std::numeric_limits<double>::max()}, limit_q_upper_{std::numeric_limits<double>::max()};
-  double limit_qdot_lower_{-std::numeric_limits<double>::max()}, limit_qdot_upper_{std::numeric_limits<double>::max()};
-  //  double limit_qddot_lower_{-std::numeric_limits<double>::max()}, limit_qddot_upper_{std::numeric_limits<double>::max()};
-  double limit_qddot_lower_{-10.}, limit_qddot_upper_{10.};  // (rad/s^2)
+  double limit_q_lower_{-(std::numeric_limits<double>::max)()};
+  double limit_q_upper_{(std::numeric_limits<double>::max)()};
+  double limit_qdot_lower_{-(std::numeric_limits<double>::max)()};
+  double limit_qdot_upper_{(std::numeric_limits<double>::max)()};
+  //  double limit_qddot_lower_{-(std::numeric_limits<double>::max)()};
+  //  double limit_qddot_upper_{(std::numeric_limits<double>::max)()};
+  double limit_qddot_lower_{-10.};
+  double limit_qddot_upper_{10.};  // (rad/s^2)
 
   std::weak_ptr<Link> parent_link_;
   std::shared_ptr<Link> child_link_{nullptr};

@@ -45,6 +45,13 @@ class StopCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
+class RealtimeControlCommandFeedback : public CommandFeedback {
+ public:
+ protected:
+ private:
+  friend class RobotCommandFeedbackParserImpl;
+};
+
 class SE2VelocityCommandFeedback : public CommandFeedback {
  public:
  protected:
@@ -139,9 +146,11 @@ class OptimalControlCommandFeedback : public CommandFeedback {
 class WholeBodyCommandFeedback : public CommandFeedback {
  public:
   const StopCommandFeedback& stop_command() const { return stop_command_; }
+  const RealtimeControlCommandFeedback& realtime_control_command() const { return realtime_control_command_; }
 
  protected:
   StopCommandFeedback stop_command_;
+  RealtimeControlCommandFeedback realtime_control_command_;
 
  private:
   friend class RobotCommandFeedbackParserImpl;

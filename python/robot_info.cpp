@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 #include <iomanip>
 #include <string>
+#include <sstream>
 
 #include "common.h"
 #include "rby1-sdk/robot_info.h"

@@ -47,9 +47,16 @@ inline struct timespec GetDurationInTimespec(struct timespec start, struct times
 inline struct timespec GetCurrentTime() {
   struct timespec current_time {};
 
+#ifdef __linux__
   if (clock_gettime(CLOCK_MONOTONIC, &current_time) != 0) {
     std::cerr << "Failed to get current time" << std::endl;
   }
+#else
+  auto ct = std::chrono::steady_clock::now();
+  int64_t ct_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(ct.time_since_epoch()).count();
+  current_time.tv_sec = ct_ns / kNanosecondsInSecond;
+  current_time.tv_nsec = ct_ns % kNanosecondsInSecond;
+#endif
 
   return current_time;
 }
@@ -77,7 +84,7 @@ inline struct timespec TimepointToTimespec(
   auto secs = time_point_cast<seconds>(tp);
   auto ns = time_point_cast<nanoseconds>(tp) - time_point_cast<nanoseconds>(secs);
 
-  return timespec{secs.time_since_epoch().count(), ns.count()};
+  return timespec{secs.time_since_epoch().count(), static_cast<long>(ns.count())};
 }
 
 /**

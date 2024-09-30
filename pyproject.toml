@@ -33,7 +33,6 @@ script = "build.py"
 python = "^3.10"
 grpcio = "1.65.2"
 grpcio-tools = "1.65.2"
-pyside6 = "^6.7.2"
 numpy = "^2.0.1"
 
 [tool.commitizen]

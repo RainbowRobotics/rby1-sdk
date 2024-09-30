@@ -1,3 +1,9 @@
+## v0.1.2 (2024-09-30)
+
+### 🐛 Fixes
+
+- **release.yml**: change poetry path on windows
+
 ## v0.1.1 (2024-09-30)
 
 ### 🐛 Fixes

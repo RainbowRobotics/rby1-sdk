@@ -1,3 +1,9 @@
+## v0.1.3 (2024-09-30)
+
+### 🐛 Fixes
+
+- **release.yml**: use conditions for poetry install
+
 ## v0.1.2 (2024-09-30)
 
 ### 🐛 Fixes

@@ -90,8 +90,6 @@ jobs:
       - if: matrix.os == 'windows-2022'
         name: Update PATH (Windows)
         run: |
-          echo "$APPDATA"
-          echo "$APPDATA\Python\Scripts"
           echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
       - if: matrix.os == 'ubuntu-22.04'
         name: Update PATH (Ubuntu)
@@ -107,6 +105,10 @@ jobs:
 
       - name: Install dependencies
         run: poetry install --sync --no-interaction
+
+      - name: Remove build folder
+        run: |
+          rm -rf _skbuild
 
       - name: Package project
         run: poetry build -o wheelhouse

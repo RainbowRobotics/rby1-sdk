@@ -86,7 +86,9 @@ jobs:
       - if: matrix.os == 'windows-2022'
         name: Update PATH (Windows)
         run: |
-          echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
+          echo "$APPDATA"
+          echo "$APPDATA\\Python\\Scripts"
+          echo "$APPDATA\\Python\\Scripts" >> $GITHUB_PATH
       - if: matrix.os == 'ubuntu-22.04'
         name: Update PATH (Ubuntu)
         run: |

@@ -68,10 +68,6 @@ jobs:
         os: [ ubuntu-22.04, windows-2022, macos-14 ]
         python-version: [ '3.10' ]
 
-    defaults:
-      run:
-        shell: bash
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -83,20 +79,21 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - if: matrix.os == 'windows-2022'
-        name: Install Poetry (Windows)
-        run: |
-          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
-          echo "$APPDATA\\Python\\Scripts" >> $GITHUB_PATH
-      - if: matrix.os == 'ubuntu-22.04'
-        name: Install Poetry (Ubuntu)
+      - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
+
+      - if: matrix.os == 'windows-2022'
+        name: Update PATH (Windows)
+        run: |
+          echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Update PATH (Ubuntu)
+        run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - if: matrix.os == 'macos-14'
-        name: Install Poetry (Ubuntu)
+        name: Update PATH (Ubuntu)
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/Library/Application Support/pypoetry/venv/bin/poetry" >> $GITHUB_PATH
 
       - name: Update Poetry configuration

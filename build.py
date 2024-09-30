@@ -63,7 +63,7 @@ if __name__ == "__main__":
     build({
         "packages": find_packages("python"),
         "package_dir": {"": "python"},
-        "python_requires": ">=3.10, <3.13",
+        "python_requires": ">=3.10",
         "install_requires": [],
         "cmake_args": ["-DBUILD_PYTHON_BINDINGS=ON"],
         "conan_profile_settings": {"compiler.cppstd": 17},

@@ -187,7 +187,7 @@ void bind_robot(py::module_& m) {
     ss << "_" << DOF;
   }
 
-  py::class_<dyn::Robot<DOF>>(m, ss.str().c_str())
+  py::class_<dyn::Robot<DOF>, std::shared_ptr<dyn::Robot<DOF>>>(m, ss.str().c_str())
       .def(py::init<const dyn::RobotConfiguration&>(), "robot_configuration"_a)
       .def("get_base", &dyn::Robot<DOF>::GetBase)
       .def("get_link_names", &dyn::Robot<DOF>::GetLinkNames)
@@ -272,7 +272,7 @@ void bind_state(py::module_& m) {
     ss << "_" << DOF;
   }
 
-  py::class_<dyn::State<DOF>>(m, ss.str().c_str())
+  py::class_<dyn::State<DOF>, std::shared_ptr<dyn::State<DOF>>>(m, ss.str().c_str())
       .def("get_base_link_idx", &dyn::State<DOF>::GetBaseLinkIdx)
       .def(
           "set_q",  //

@@ -61,7 +61,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -128,7 +128,7 @@
 Right/Left Arm: Cartesian</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="PB_Tab2Start">
           <property name="geometry">
            <rect>
             <x>20</x>
@@ -141,7 +141,7 @@ Right/Left Arm: Cartesian</string>
            <string>Start</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="pushButton_4">
+         <widget class="QPushButton" name="PB_Tab2Stop">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -157,7 +157,7 @@ Right/Left Arm: Cartesian</string>
            <string>Stop</string>
           </property>
          </widget>
-         <widget class="QSlider" name="horizontalSlider">
+         <widget class="QSlider" name="S_Tab2YAxis">
           <property name="geometry">
            <rect>
             <x>120</x>
@@ -176,7 +176,7 @@ Right/Left Arm: Cartesian</string>
            <enum>Qt::Orientation::Horizontal</enum>
           </property>
          </widget>
-         <widget class="QSlider" name="verticalSlider">
+         <widget class="QSlider" name="S_Tab2ZAxis">
           <property name="geometry">
            <rect>
             <x>90</x>
@@ -195,7 +195,7 @@ Right/Left Arm: Cartesian</string>
            <enum>Qt::Orientation::Vertical</enum>
           </property>
          </widget>
-         <widget class="QSlider" name="horizontalSlider_2">
+         <widget class="QSlider" name="S_Tab2XAxis">
           <property name="geometry">
            <rect>
             <x>60</x>
@@ -266,7 +266,7 @@ Right/Left Arm: Cartesian</string>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <item>
-              <widget class="QDial" name="dial">
+              <widget class="QDial" name="D_Tab2Roll">
                <property name="minimum">
                 <number>-50</number>
                </property>
@@ -286,14 +286,14 @@ Right/Left Arm: Cartesian</string>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEdit_4"/>
+              <widget class="QLineEdit" name="LE_Tab2Roll"/>
              </item>
             </layout>
            </item>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
-              <widget class="QDial" name="dial_2">
+              <widget class="QDial" name="D_Tab2Yaw">
                <property name="minimum">
                 <number>-50</number>
                </property>
@@ -313,13 +313,13 @@ Right/Left Arm: Cartesian</string>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEdit_5"/>
+              <widget class="QLineEdit" name="LE_Tab2Yaw"/>
              </item>
             </layout>
            </item>
           </layout>
          </widget>
-         <widget class="QLineEdit" name="lineEdit">
+         <widget class="QLineEdit" name="LE_Tab2ZAxis">
           <property name="geometry">
            <rect>
             <x>110</x>
@@ -332,7 +332,7 @@ Right/Left Arm: Cartesian</string>
            <bool>true</bool>
           </property>
          </widget>
-         <widget class="QLineEdit" name="lineEdit_2">
+         <widget class="QLineEdit" name="LE_Tab2YAxis">
           <property name="geometry">
            <rect>
             <x>170</x>
@@ -345,7 +345,7 @@ Right/Left Arm: Cartesian</string>
            <bool>true</bool>
           </property>
          </widget>
-         <widget class="QLineEdit" name="lineEdit_3">
+         <widget class="QLineEdit" name="LE_Tab2XAxis">
           <property name="geometry">
            <rect>
             <x>110</x>
@@ -356,6 +356,19 @@ Right/Left Arm: Cartesian</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="PB_Tab2Reset">
+          <property name="geometry">
+           <rect>
+            <x>470</x>
+            <y>400</y>
+            <width>75</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Reset</string>
           </property>
          </widget>
         </widget>
@@ -377,7 +390,7 @@ Right/Left Arm: Cartesian</string>
 Right/Left Arm: Impedance Control</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="PB_Tab3Start">
           <property name="geometry">
            <rect>
             <x>20</x>
@@ -390,7 +403,7 @@ Right/Left Arm: Impedance Control</string>
            <string>Start</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="pushButton_5">
+         <widget class="QPushButton" name="PB_Tab3Stop">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -419,7 +432,7 @@ Right/Left Arm: Impedance Control</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>33</height>
     </rect>
    </property>
   </widget>

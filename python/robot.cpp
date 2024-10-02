@@ -171,7 +171,8 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("sync_time", &Robot<T>::SyncTime)
       .def("has_established_time_sync", &Robot<T>::HasEstablishedTimeSync)
       .def("start_time_sync", &Robot<T>::StartTimeSync, "period_sec"_a)
-      .def("stop_time_sync", &Robot<T>::StopTimeSync, py::call_guard<py::gil_scoped_release>());
+      .def("stop_time_sync", &Robot<T>::StopTimeSync, py::call_guard<py::gil_scoped_release>())
+      .def("get_dynamics", &Robot<T>::GetDynamics, "urdf_model"_a = "");
 }
 
 void pybind11_robot(py::module_& m) {

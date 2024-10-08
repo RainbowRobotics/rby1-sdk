@@ -69,9 +69,9 @@ std::mutex mtx_hand_controller_info;
 Eigen::Matrix<double, 2, 1> hand_controller_trigger = Eigen::Matrix<double, 2, 1>::Constant(0.5);
 Eigen::Matrix<double, 2, 1> hand_controller_button = Eigen::Matrix<double, 2, 1>::Constant(0);
 
+//XXX: CAUTION CHECK YOUR TRIGGER FIRMWARE
 std::vector<Eigen::Matrix<double, 2, 1>> hand_controller_trigger_min_max = {
-    // Eigen::Matrix<double, 2, 1>({11850, 12900}), Eigen::Matrix<double, 2, 1>({13350, 14400})};
-    Eigen::Matrix<double, 2, 1>({13700, 14600}), Eigen::Matrix<double, 2, 1>({10100, 11050})};
+    Eigen::Matrix<double, 2, 1>({0, 1000}), Eigen::Matrix<double, 2, 1>({0, 1000})};
 int gripper_direction = 0;
 bool ma_info_verbose = true;
 
@@ -776,6 +776,7 @@ std::string resolve_symlink(const std::string& symlink) {
 }
 
 int main(int argc, char** argv) {
+  hand_controller_trigger_min_max
   try {
     // Latency timer setting
     upc::InitializeDevice(upc::kGripperDeviceName);

@@ -776,7 +776,6 @@ std::string resolve_symlink(const std::string& symlink) {
 }
 
 int main(int argc, char** argv) {
-  hand_controller_trigger_min_max
   try {
     // Latency timer setting
     upc::InitializeDevice(upc::kGripperDeviceName);

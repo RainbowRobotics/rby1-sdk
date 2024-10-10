@@ -4,21 +4,27 @@ from rby1_sdk import *
 import argparse
 import numpy as np
 import math
+import sys
 
-CONTROL_HOLD_TIME = 30
+CONTROL_HOLD_TIME = 300
 MINIMUM_TIME = 5
+
+angular_velocity_limit = np.pi * 1.5
+linear_velocity_limit = 1.5
+acceleration_limit = 1.0
+stop_orientation_tracking_error = 1e-5
+stop_position_tracking_error = 1e-5
 
 def example_joint_position_command_1(robot):
     print("joint position command example 1")
 
     # Initialize joint positions
     q_joint_waist = np.zeros(6)
-    q_joint_right_arm = np.zeros(7)
-    q_joint_left_arm = np.zeros(7)
+    q_joint_right_arm = np.deg2rad(np.array([30, -10, 0, -100, 0, 20, 0]))
+    q_joint_left_arm = np.deg2rad(np.array([30, 10, 0, -100, 0, 20, 0]))
 
     # Set specific joint positions
-    q_joint_right_arm[1] = math.radians(-90)
-    q_joint_left_arm[1] = math.radians(90)
+    
 
     rc = RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder().set_body_command(
@@ -49,6 +55,58 @@ def example_joint_position_command_1(robot):
 
     return 0
 
+def example_cartesian_command_1(robot):
+    print("Cartesian command example 1")
+
+    # Initialize transformation matrices
+    T_torso = np.eye(4)
+    T_right = np.eye(4)
+    T_left = np.eye(4)
+
+    # Define transformation matrices
+    angle = np.pi / 6
+    T_torso[:3, :3] = np.array([[np.cos(angle), 0, np.sin(angle)],
+                                [0, 1, 0],
+                                [-np.sin(angle), 0, np.cos(angle)]])
+    T_torso[:3, 3] = [0.1, 0, 1.2]
+
+    angle = -np.pi / 4
+    T_right[:3, :3] = np.array([[np.cos(angle), 0, np.sin(angle)],
+                                [0, 1, 0],
+                                [-np.sin(angle), 0, np.cos(angle)]])
+    T_right[:3, 3] = [0.4, -0.4, 0]
+
+    T_left[:3, :3] = np.array([[np.cos(angle), 0, np.sin(angle)],
+                               [0, 1, 0],
+                               [-np.sin(angle), 0, np.cos(angle)]])
+    T_left[:3, 3] = [0.4, 0.4, 0]
+
+    # Build command
+    rc = RobotCommandBuilder().set_command(
+        ComponentBasedCommandBuilder().set_body_command(
+            CartesianCommandBuilder()
+            .add_target("base", "link_torso_5", T_torso, linear_velocity_limit, angular_velocity_limit,
+                        acceleration_limit)
+            .add_target("link_torso_5", "ee_right", T_right, linear_velocity_limit, angular_velocity_limit,
+                        acceleration_limit)
+            .add_target("link_torso_5", "ee_left", T_left, linear_velocity_limit, angular_velocity_limit,
+                        acceleration_limit)
+            .set_stop_position_tracking_error(stop_position_tracking_error)
+            .set_stop_orientation_tracking_error(stop_orientation_tracking_error)
+            .set_minimum_time(MINIMUM_TIME)
+        )
+    )
+
+    rv = robot.send_command(rc, 10).get()
+
+    if rv.finish_code != RobotCommandFeedback.FinishCode.Ok:
+        print("Error: Failed to conduct demo motion.")
+        return 1
+
+    return 0
+
+
+
 def example_impedance_control_command_1(robot):
     print("Impedance control command example 1")
 
@@ -68,12 +126,12 @@ def example_impedance_control_command_1(robot):
     T_right[:3, :3] = np.array([[np.cos(angle), 0, np.sin(angle)],
                                 [0, 1, 0],
                                 [-np.sin(angle), 0, np.cos(angle)]])
-    T_right[:3, 3] = [0.45, -0.4, -0.1]
+    T_right[:3, 3] = [0.4, -0.4, 0]
 
     T_left[:3, :3] = np.array([[np.cos(angle), 0, np.sin(angle)],
                                [0, 1, 0],
                                [-np.sin(angle), 0, np.cos(angle)]])
-    T_left[:3, 3] = [0.45, 0.4, -0.1]
+    T_left[:3, 3] = [0.4, 0.4, 0]
 
     # Build commands
     torso_command = rby1_sdk.ImpedanceControlCommandBuilder().set_command_header(
@@ -84,7 +142,7 @@ def example_impedance_control_command_1(robot):
     right_arm_command = rby1_sdk.ImpedanceControlCommandBuilder().set_command_header(
         rby1_sdk.CommandHeaderBuilder().set_control_hold_time(CONTROL_HOLD_TIME)
     ).set_reference_link_name("link_torso_5").set_link_name("ee_right").set_translation_weight(
-        [1000, 1000, 1000]).set_rotation_weight([50, 50, 50]).set_transformation(T_right)
+        [3000, 3000, 0]).set_rotation_weight([50, 50, 50]).set_transformation(T_right)
 
     left_arm_command = rby1_sdk.ImpedanceControlCommandBuilder().set_command_header(
         rby1_sdk.CommandHeaderBuilder().set_control_hold_time(CONTROL_HOLD_TIME)
@@ -95,16 +153,14 @@ def example_impedance_control_command_1(robot):
     rc = rby1_sdk.RobotCommandBuilder().set_command(
         rby1_sdk.ComponentBasedCommandBuilder().set_body_command(
             rby1_sdk.BodyComponentBasedCommandBuilder()
-            .set_torso_command(torso_command)
             .set_right_arm_command(right_arm_command)
-            .set_left_arm_command(left_arm_command)
         )
     )
 
     rv = robot.send_command(rc, 10).get()
 
     if rv.finish_code != RobotCommandFeedback.FinishCode.Ok:
-        print("Error: Failed to conduct demo motion.")
+        print("Error: Failed to conduct impedance motion.")
         return 1
 
     return 0
@@ -129,57 +185,41 @@ def main(address, power_device, servo):
         if not rv:
             print("Fail to servo on")
             exit(1)
-            
-    if robot.get_control_manager_state() == rby1_sdk.ControlManagerState.State.MajorFault \
-        or robot.get_control_manager_state == rby1_sdk.ControlManagerState.State.MinorFault:
-            robot.reset_fault_control_manager()
-            
+
+    control_manager_state = robot.get_control_manager_state()            
+    if (control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or \
+        control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
+
+        if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:
+            print("Warning: Detected a Major Fault in the Control Manager.")
+        else:
+            print("Warning: Detected a Minor Fault in the Control Manager.")
+
+        print("Attempting to reset the fault...")
+        if not robot.reset_fault_control_manager():
+            print("Error: Unable to reset the fault in the Control Manager.")
+            sys.exit(1)
+        print("Fault reset successfully.")
+
+    print("Control Manager state is normal. No faults detected.")
+
+    print("Enabling the Control Manager...")
     if not robot.enable_control_manager():
-        print("Failed to control on")
-        exit(1)
-    print(robot.get_control_manager_state())
+        print("Error: Failed to enable the Control Manager.")
+        sys.exit(1)
+    print("Control Manager enabled successfully.")
+
+    robot.set_parameter("default.acceleration_limit_scaling", "0.8")
+    robot.set_parameter("joint_position_command.cutoff_frequency", "5")
+    robot.set_parameter("cartesian_command.cutoff_frequency", "5")
+    robot.set_parameter("default.linear_acceleration_limit", "5")
+
     if not example_joint_position_command_1(robot):
         print("Finish Joint")
+    if not example_cartesian_command_1(robot):
+        print("Finish Impedance")        
     if not example_impedance_control_command_1(robot):
         print("Finish Impedance")
-
-
-
-
-
-
-
-
-
-
-
-
-# control_manager_state = robot.get_control_manager_state()
-
-# if (
-#         control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
-
-#     if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:
-#         print("Warning: Detected a Major Fault in the Control Manager.")
-#     else:
-#         print("Warning: Detected a Minor Fault in the Control Manager.")
-
-#     print("Attempting to reset the fault...")
-#     if not robot.reset_fault_control_manager():
-#         print("Error: Unable to reset the fault in the Control Manager.")
-#         sys.exit(1)
-#     print("Fault reset successfully.")
-
-# print("Control Manager state is normal. No faults detected.")
-
-# print("Enabling the Control Manager...")
-# if not robot.enable_control_manager():
-#     print("Error: Failed to enable the Control Manager.")
-#     sys.exit(1)
-# print("Control Manager enabled successfully.")
-
-
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="05_collisions")

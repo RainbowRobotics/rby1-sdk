@@ -26,6 +26,7 @@ set(EXAMPLES
         mobility_command
 
         rtcomm_protocol
+        stop_command
 )
 
 foreach (SRC IN LISTS EXAMPLES)

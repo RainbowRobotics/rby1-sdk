@@ -2,11 +2,10 @@ import rby1_sdk
 import numpy as np
 import time
 import sys
+import argparse
 
-ROBOT_ADDRESS = "192.168.30.1:50051"
-
-def pre_processing():
-    robot = rby1_sdk.create_robot_a(ROBOT_ADDRESS)
+def pre_processing(address):
+    robot = rby1_sdk.create_robot_a(address)
     robot.connect()
     
     if not robot.is_power_on(".*"):
@@ -49,7 +48,10 @@ def pre_processing():
     return robot
 
 if __name__ == '__main__':
-    robot = pre_processing()
+    parser = argparse.ArgumentParser(description="Replay")
+    parser.add_argument('--address', type=str, required=True, help="Robot address")
+    args = parser.parse_args()
+    robot = pre_processing(args.address)
     stream = robot.create_command_stream(10)
 
     saved_traj = np.load('recorded.npz', allow_pickle=True)['data']

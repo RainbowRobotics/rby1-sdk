@@ -45,3 +45,10 @@ foreach (SRC IN LISTS EXAMPLES)
     )
     message(STATUS ${EXECUTABLE_NAME})
 endforeach ()
+
+
+##
+
+if (BUILD_DATA_COLLECTOR)
+    add_subdirectory(data-collector)
+endif ()

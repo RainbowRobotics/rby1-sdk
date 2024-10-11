@@ -70,8 +70,8 @@ Eigen::Matrix<double, 2, 1> hand_controller_trigger = Eigen::Matrix<double, 2, 1
 Eigen::Matrix<double, 2, 1> hand_controller_button = Eigen::Matrix<double, 2, 1>::Constant(0);
 
 //XXX: CAUTION CHECK YOUR TRIGGER FIRMWARE
-std::vector<Eigen::Matrix<double, 2, 1>> hand_controller_trigger_min_max = {
-    Eigen::Matrix<double, 2, 1>({0, 1000}), Eigen::Matrix<double, 2, 1>({0, 1000})};
+std::vector<Eigen::Matrix<double, 2, 1>> hand_controller_trigger_min_max = {Eigen::Matrix<double, 2, 1>({0, 1000}),
+                                                                            Eigen::Matrix<double, 2, 1>({0, 1000})};
 int gripper_direction = 0;
 bool ma_info_verbose = true;
 
@@ -990,11 +990,16 @@ int main(int argc, char** argv) {
 
     robot
         ->SendCommand(RobotCommandBuilder().SetCommand(
-            ComponentBasedCommandBuilder().SetBodyCommand(BodyComponentBasedCommandBuilder().SetTorsoCommand(
-                JointPositionCommandBuilder()
-                    .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(1.))
-                    .SetMinimumTime(5)
-                    .SetPosition(Eigen::Vector<double, 6>{0, 30, -60, 30, 0, 0} * D2R)))))
+            ComponentBasedCommandBuilder()
+                .SetBodyCommand(BodyComponentBasedCommandBuilder().SetTorsoCommand(
+                    JointPositionCommandBuilder()
+                        .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(1.))
+                        .SetMinimumTime(5)
+                        .SetPosition(Eigen::Vector<double, 6>{0, 30, -60, 30, 0, 0} * D2R)))
+                .SetHeadCommand(JointPositionCommandBuilder()
+                                    .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(1.))
+                                    .SetMinimumTime(5)
+                                    .SetPosition(Eigen::Vector<double, 2>{0, 10} * D2R))))
         ->Get();
 
     Eigen::Matrix<double, 14, 1> q_joint_ref;
@@ -1032,7 +1037,7 @@ int main(int argc, char** argv) {
             //right hand position control mode
             q_joint_ref.block(0, 0, 7, 1) = q_joint_ref.block(0, 0, 7, 1) * (1 - lpf_update_ratio) +
                                             q_joint_ma.block(0, 0, 7, 1) * lpf_update_ratio;
-          }else{
+          } else {
             right_arm_minimum_time = 1.0;
           }
 
@@ -1040,7 +1045,7 @@ int main(int argc, char** argv) {
             //left hand position control mode
             q_joint_ref.block(7, 0, 7, 1) = q_joint_ref.block(7, 0, 7, 1) * (1 - lpf_update_ratio) +
                                             q_joint_ma.block(7, 0, 7, 1) * lpf_update_ratio;
-          }else{
+          } else {
             left_arm_minimum_time = 1.0;
           }
         }

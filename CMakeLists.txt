@@ -29,6 +29,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples")
 set(BUILD_LIB_STATIC OFF CACHE BOOL "Build static rby1_sdk library")
 set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "Build Python bindings using Pybind11")
+set(BUILD_DATA_COLLECTOR OFF CACHE BOOL "Build data collector")
 
 message(STATUS "RBY1-SDK: Build examples: " ${BUILD_EXAMPLES})
 

@@ -22,6 +22,8 @@ class ButtonGrid(QWidget):
         self.create_button(layout, "Teleoperation Record\n Stop", 2, 1, self.teleoperation_record_stop)
         self.create_button(layout, "Replay Start", 3, 0, self.replay_start)
         self.create_button(layout, "Replay Stop", 3, 1, self.replay_stop)
+        self.create_button(layout, "Impedance Start", 4, 0, self.impedance_start)
+        self.create_button(layout, "Impedance Stop", 4, 1, self.impedance_stop)
 
         # 레이아웃 설정
         self.setLayout(layout)
@@ -86,6 +88,14 @@ class ButtonGrid(QWidget):
     @Slot()
     def replay_stop(self):
         self.stop_process("replay")
+        
+    @Slot()
+    def impedance_start(self):
+        self.start_process("impedance", ["python", "examples/python/07_impedance_control.py", "--address", self.address])
+
+    @Slot()
+    def impedance_stop(self):
+        self.stop_process("impedance")
 
 # Application 실행
 if __name__ == "__main__":

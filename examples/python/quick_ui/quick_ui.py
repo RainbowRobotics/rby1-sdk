@@ -14,27 +14,38 @@ class ButtonGrid(QWidget):
         layout = QGridLayout()
 
         # 버튼 추가 및 레이아웃 설정
-        self.create_button(layout, "Demo Motion Start", 0, 0, self.demo_motion_start)
-        self.create_button(layout, "Demo Motion Stop", 0, 1, self.demo_motion_stop)
-        self.create_button(layout, "Teleoperation Start", 1, 0, self.teleoperation_start)
-        self.create_button(layout, "Teleoperation Stop", 1, 1, self.teleoperation_stop)
-        self.create_button(layout, "Teleoperation Record\n Start", 2, 0, self.teleoperation_record_start)
-        self.create_button(layout, "Teleoperation Record\n Stop", 2, 1, self.teleoperation_record_stop)
-        self.create_button(layout, "Replay Start", 3, 0, self.replay_start)
-        self.create_button(layout, "Replay Stop", 3, 1, self.replay_stop)
-        self.create_button(layout, "Impedance Start", 4, 0, self.impedance_start)
-        self.create_button(layout, "Impedance Stop", 4, 1, self.impedance_stop)
+        self.create_button(layout, "Zero", 0, 0, self.zero_pose, col_span=2, background_color="#3498db")
+        self.create_button(layout, "Demo Motion Start", 1, 0, self.demo_motion_start)
+        self.create_button(layout, "Demo Motion Stop", 1, 1, self.demo_motion_stop)
+        self.create_button(layout, "Teleoperation Start", 2, 0, self.teleoperation_start)
+        self.create_button(layout, "Teleoperation Stop", 2, 1, self.teleoperation_stop)
+        self.create_button(layout, "Teleoperation Record\n Start", 3, 0, self.teleoperation_record_start)
+        self.create_button(layout, "Teleoperation Record\n Stop", 3, 1, self.teleoperation_record_stop)
+        self.create_button(layout, "Replay Start", 4, 0, self.replay_start)
+        self.create_button(layout, "Replay Stop", 4, 1, self.replay_stop)
+        self.create_button(layout, "Impedance Start", 5, 0, self.impedance_start)
+        self.create_button(layout, "Impedance Stop", 5, 1, self.impedance_stop)
+        self.create_button(layout, "EMS Stop", 6, 0, self.ems_stop, col_span=2, background_color="#db3498")
 
         # 레이아웃 설정
         self.setLayout(layout)
         self.setWindowTitle("Quick UI")
 
-    def create_button(self, layout, text, row, col, slot):
+    def create_button(self, layout, text, row, col, slot, col_span=1, background_color=None, text_color=None):
         """버튼을 생성하고 레이아웃에 추가하며, 슬롯을 연결."""
         button = QPushButton(text)
-        button.setFixedSize(150, 100)
+        button.setMinimumSize(150, 80)
         button.clicked.connect(slot)
-        layout.addWidget(button, row, col)
+        
+        # 스타일 시트를 설정하여 색상 지정
+        style = ""
+        if background_color:
+            style += f"background-color: {background_color};"
+        if text_color:
+            style += f"color: {text_color};"
+        
+        button.setStyleSheet(style)
+        layout.addWidget(button, row, col, 1, col_span)
 
     def start_process(self, key, command):
         """특정 key에 해당하는 프로세스를 시작."""
@@ -55,8 +66,10 @@ class ButtonGrid(QWidget):
             process.wait()  # 프로세스가 완전히 종료될 때까지 대기
             self.processes[key] = None
             print(f"{key} stopped")
+    @Slot()
+    def zero_pose(self):
+        self.start_process("zero_pose", ["python", "examples/python/08_zero_pose.py", "--address", self.address])
 
-    # 슬롯 메서드 정의
     @Slot()
     def demo_motion_start(self):
         self.start_process("demo_motion", ["./build/examples/cpp/example_demo_motion", self.address])
@@ -96,6 +109,10 @@ class ButtonGrid(QWidget):
     @Slot()
     def impedance_stop(self):
         self.stop_process("impedance")
+    
+    @Slot()
+    def ems_stop(self):
+        self.start_process("ems_stop", ["python", "examples/python/06_stop_command.py", "--address", self.address])
 
 # Application 실행
 if __name__ == "__main__":

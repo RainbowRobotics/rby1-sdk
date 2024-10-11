@@ -182,7 +182,7 @@ def main(address, power_device, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="05_collisions")
+    parser = argparse.ArgumentParser(description="07_impedance_control")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")

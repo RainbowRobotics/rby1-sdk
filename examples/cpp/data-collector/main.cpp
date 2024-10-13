@@ -3,34 +3,45 @@
 #undef __ARM_NEON__
 #endif
 
+#include <csignal>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <vector>
 
 #include <highfive/H5Easy.hpp>
-#include <librealsense2/rs.hpp>
-#include <librealsense2/rs_advanced_mode.hpp>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
+#ifdef REALSENSE2
+#include <librealsense2/rs.hpp>
+#include <librealsense2/rs_advanced_mode.hpp>
+#endif
 
 #include "rby1-sdk/base/event_loop.h"
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 #include "rby1-sdk/robot_command_builder.h"
 #include "rby1-sdk/upc/master_arm.h"
+#include "utils.h"
 
 using namespace rb;
 using namespace cv;
+using namespace std::chrono;
 using namespace std::chrono_literals;
 
-const std::string RPC_ADDRESS = "192.168.30.1:50051";
+const double kFrequency = 50;   // (Hz) = Framerate
+const std::string kAll = ".*";  // NOLINT
 const std::string MASTER_ARM_DEV = "/dev/rby1_master_arm";
+const std::string COMMAND_POWER_OFF = "power_off";
+const std::string COMMAND_POWER_ON = "power_on";
+const std::string COMMAND_SERVO_ON = "servo_on";
+const std::string COMMAND_CONTROL_MANAGER_INIT = "init_control_manager";
 const std::string COMMAND_READY_POSE = "ready_pose";
 const std::string COMMAND_ZERO_POSE = "zero_pose";
 const std::string COMMAND_STOP_MOTION = "stop_motion";
+const std::string COMMAND_START_TELEOPERATION = "start_teleoperation";
 const std::string COMMAND_START = "start";
 const std::string COMMAND_STOP = "stop";
 const unsigned int kRobotDOF = y1_model::A::kRobotDOF;
@@ -43,43 +54,262 @@ std::shared_ptr<rb::upc::MasterArm> master_arm{nullptr};
 
 zmq::context_t zmq_ctx;
 zmq::socket_t srv_sock;
+zmq::socket_t pub_sock;
 
-rs2::context rs_ctx;
+/**
+ * IMAGE
+ */
+const unsigned int kWidth = 424, kHeight = 240;
+const unsigned int kCompressionLevel = 0;
 const std::size_t kCameraN = 3;
 const std::map<std::string, std::size_t> rs_serials = {{"233522071632", 0}, {"218622270382", 1}, {"128422271273", 2}};
+#ifdef REALSENSE2
+rs2::context rs_ctx;
 std::array<rs2::pipeline, kCameraN> rs_pipelines;
+#endif
 bool camera_error = false;
-const unsigned int kWidth = 424, kHeight = 240;
 
-std::shared_ptr<HighFive::File> record_file;
-std::array<HighFive::DataSet, kCameraN> record_depth_dataset;
-std::array<HighFive::DataSet, kCameraN> record_rgb_dataset;
-HighFive::DataSet record_qpos_dataset, record_qvel_dataset, record_ft_dataset,
-    record_action_dataset;
-unsigned int record_depth_init = 0;
-unsigned int record_rgb_init = 0;
+/**
+ * HDF5
+ */
+std::shared_ptr<HighFive::File> record_file{nullptr};
+std::array<std::unique_ptr<HighFive::DataSet>, kCameraN> record_depth_dataset;
+std::array<std::unique_ptr<HighFive::DataSet>, kCameraN> record_rgb_dataset;
+std::unique_ptr<HighFive::DataSet> record_action_dataset;
+std::unique_ptr<HighFive::DataSet> record_qpos_dataset;
+std::unique_ptr<HighFive::DataSet> record_qvel_dataset;
+std::unique_ptr<HighFive::DataSet> record_torque_dataset;
+std::unique_ptr<HighFive::DataSet> record_ft_dataset;
+Statistics stat_duration;
+/**
+ * RECORDED DATA
+ */
 std::array<Mat, kCameraN> record_depth;
 std::array<Mat, kCameraN> record_rgb;
-Eigen::Vector<double, kRobotDOF + kGripperDOF> record_qpos, record_qvel, record_action;
+Eigen::Vector<double, kRobotDOF + kGripperDOF> record_action;
+Eigen::Vector<double, kRobotDOF + kGripperDOF> record_qpos;
+Eigen::Vector<double, kRobotDOF + kGripperDOF> record_qvel;
+Eigen::Vector<double, kRobotDOF + kGripperDOF> record_torque;
 Eigen::Vector<double, 6 * 2> record_ft;
+int data_len = 0;
 
-EventLoop service_ev, robot_ev, camera_ev, record_ev;
+EventLoop publisher_ev, service_ev, robot_ev, cm_ev, camera_ev, record_ev;
 
-bool is_connected{false};
-bool is_motion_done{false};
 bool is_camera_failed{false};
 bool is_started{false};
 
+bool robot_connected{false};
+bool camera_connected{false};
+bool master_arm_connected{false};
+bool power{false};
+bool servo{false};
+bool control_manager{false};
+std::string control_manager_detail;
+
+void SignalHandler(int signum);
 void InitializeService();
 void DoService();
-void InitializeRobot();
+void InitializePublisher();
+void Publish();
+void InitializeRobot(const std::string& address);
 void StopMotion();
 void GoPose(const Eigen::Vector<double, 20>& body, const Eigen::Vector<double, 2>& head, double minimum_time = 5.0);
 bool IsMotionDone();
+void RobotPowerOff();
+void RobotPowerOn();
+void RobotServoOn();
+void RobotControlManagerInit();
 void InitializeCamera();
 void InitializeMasterArm();
+void InitializeH5File(const std::string& name);
+template <typename T>
+void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, std::size_t len, T* data);
+template <typename T>
+HighFive::DataSet CreateDataSet(const std::shared_ptr<HighFive::File>& file, const std::string& name, size_t len,
+                                int compression_level = 0);
 
-void signalHandler(int signum) {
+int main(int argc, char** argv) {
+  if (argc < 3) {
+    std::cerr << "Usage: " << argv[0] << " <rpc server address> <save folder path>" << std::endl;
+    return 1;
+  }
+  std::string address{argv[1]};
+  std::string save_folder_path{argv[2]};
+
+  signal(SIGINT, SignalHandler);
+
+  publisher_ev.DoTask([] { InitializePublisher(); });
+  service_ev.DoTask([] { InitializeService(); });
+  robot_ev.DoTask([=] { InitializeRobot(address); });
+  camera_ev.DoTask([] { InitializeCamera(); });
+  // InitializeMasterArm();
+
+  publisher_ev.PushTask([] { master_arm_connected = (master_arm != nullptr); });
+
+  publisher_ev.PushCyclicTask([] { Publish(); }, 100ms);
+  service_ev.PushCyclicTask([] { DoService(); }, 1ms);
+  robot_ev.PushCyclicTask(
+      [] {
+        bool p;
+        if (robot) {
+          p = robot->IsConnected();
+        } else {
+          p = false;
+        }
+        publisher_ev.PushTask([p] { robot_connected = p; });
+      },
+      100us);
+  cm_ev.PushCyclicTask(
+      [] {
+        if (!robot) {
+          return;
+        }
+
+        try {
+          auto cm = robot->GetControlManagerState();
+          publisher_ev.PushTask([=] {
+            control_manager = cm.state == rb::ControlManagerState::State::kEnabled;
+            switch (cm.state) {
+              case ControlManagerState::State::kUnknown:
+                control_manager_detail = "Unknown";
+                break;
+              case ControlManagerState::State::kIdle:
+                control_manager_detail = "Idle";
+                break;
+              case ControlManagerState::State::kEnabled:
+                control_manager_detail = "Enabled";
+                switch (cm.control_state) {
+                  case ControlManagerState::ControlState::kUnknown:
+                    control_manager_detail += "(Unknown)";
+                    break;
+                  case ControlManagerState::ControlState::kIdle:
+                    control_manager_detail += "(Idle)";
+                    break;
+                  case ControlManagerState::ControlState::kExecuting:
+                    control_manager_detail += "(Executing)";
+                    break;
+                  case ControlManagerState::ControlState::kSwitching:
+                    control_manager_detail += "(Switching)";
+                    break;
+                }
+                break;
+              case ControlManagerState::State::kMinorFault:
+                control_manager_detail = "MinorFault";
+                break;
+              case ControlManagerState::State::kMajorFault:
+                control_manager_detail = "MajorFault";
+                break;
+            }
+          });
+        } catch (...) {
+          robot = nullptr;
+        }
+      },
+      500ms);
+  camera_ev.PushCyclicTask(
+      [=] {
+#ifndef REALSENSE2
+        camera_error = true;
+#endif
+        publisher_ev.PushTask([=] { camera_connected = !camera_error; });
+        if (camera_error) {
+          service_ev.PushTask([] { is_camera_failed = camera_error; });
+          std::this_thread::sleep_for(10ms);
+          return;
+        }
+
+#ifdef REALSENSE2
+        int id = 0;
+        for (auto&& pipe : rs_pipelines) {
+          rs2::frameset fs;
+          if (pipe.poll_for_frames(&fs)) {
+            rs2::frame color_frame = fs.get_color_frame();
+            rs2::frame depth_frame = fs.get_depth_frame();
+            // rs2::frame f = rs2::colorizer().process(color_frame)
+            // rs2::frame f = rs2::colorizer().process(depth_frame)
+            record_ev.PushTask(
+                [rgb = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)color_frame.get_data(), Mat::AUTO_STEP), id] {
+                  record_rgb_init |= (1 << id);
+                  record_rgb[id] = rgb;
+                });
+            record_ev.PushTask(
+                [depth = Mat(Size(kWidth, kHeight), CV_16FC1, (void*)depth_frame.get_data(), Mat::AUTO_STEP), id] {
+                  record_depth_init |= (1 << id);
+                  record_depth[id] = depth;
+                });
+          }
+          id++;
+        }
+#endif
+      },
+      10us);
+  record_ev.PushCyclicTask(
+      [] {
+        auto start = steady_clock::now();
+
+        if (!record_file) {
+          return;
+        }
+
+        for (int i = 0; i < kCameraN; i++) {
+          AddDataIntoDataSet(record_depth_dataset[i], kWidth * kHeight, record_depth[i].data);
+          AddDataIntoDataSet(record_rgb_dataset[i], kWidth * kHeight * 3, record_rgb[i].data);
+        }
+        AddDataIntoDataSet(record_action_dataset, kRobotDOF + kGripperDOF, record_action.data());
+        AddDataIntoDataSet(record_qpos_dataset, kRobotDOF + kGripperDOF, record_qpos.data());
+        AddDataIntoDataSet(record_qvel_dataset, kRobotDOF + kGripperDOF, record_qvel.data());
+        AddDataIntoDataSet(record_ft_dataset, 6 * 2, record_ft.data());
+        data_len++;
+
+        auto end = steady_clock::now();
+
+        double d = (double)duration_cast<nanoseconds>(end - start).count() / 1.e9;
+        stat_duration.add(d);
+        if (stat_duration.count() >= kFrequency) {
+          std::cout << "[" << data_len << "] " << "Count: " << stat_duration.count()
+                    << ", Avg: " << stat_duration.avg() * 1e3 << " ms, Min: " << stat_duration.min() * 1e3
+                    << " ms, Max: " << stat_duration.max() * 1e3 << " ms" << std::endl;
+          stat_duration.reset();
+        }
+      },
+      microseconds((long)(1e6 /* 1 sec */ / kFrequency)));
+  //  record_ev.PushTask([=] {
+  //    if (record_file) {
+  //      return;
+  //    }
+  //
+  //    // Make File
+  //    record_file = std::make_shared<HighFive::File>(save_folder_path + "/example.h5", HighFive::File::Overwrite);
+  //
+  //    // Create Dataset
+  //    for (int i = 0; i < kCameraN; i++) {
+  //      record_depth_dataset[i] = std::make_unique<HighFive::DataSet>(CreateDataSet<std::uint16_t>(
+  //          record_file, "/observations/images/cam" + std::to_string(i) + "_depth", kWidth * kHeight, kCompressionLevel));
+  //      record_depth[i] = Mat(Size(kWidth, kHeight), CV_16FC1);
+  //
+  //      record_rgb_dataset[i] = std::make_unique<HighFive::DataSet>(
+  //          CreateDataSet<std::uint8_t>(record_file, "/observations/images/cam" + std::to_string(i) + "_rgb",
+  //                                      kWidth * kHeight * 3, kCompressionLevel));
+  //      record_rgb[i] = Mat(Size(kWidth, kHeight), CV_8UC3);
+  //    }
+  //    record_action_dataset =
+  //        std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/action", kRobotDOF + kGripperDOF));
+  //    record_qpos_dataset = std::make_unique<HighFive::DataSet>(
+  //        CreateDataSet<double>(record_file, "/observations/qpos", kRobotDOF + kGripperDOF));
+  //    record_qvel_dataset = std::make_unique<HighFive::DataSet>(
+  //        CreateDataSet<double>(record_file, "/observations/qvel", kRobotDOF + kGripperDOF));
+  //    record_ft_dataset =
+  //        std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/observations/ft_sensor", 6 * 2));
+  //
+  //    data_len = 0;
+  //  });
+
+  service_ev.WaitForTasks();
+
+  return 0;
+}
+
+void SignalHandler(int signum) {
   record_ev.DoTask([] {
     if (record_file) {
       record_file->flush();
@@ -87,6 +317,15 @@ void signalHandler(int signum) {
       record_file = nullptr;
     }
   });
+
+  camera_ev.DoTask([] {
+    if (!camera_error) {
+      // TODO: close rs pipelines
+    }
+
+    camera_error = true;
+  });
+
   std::cout << "Exit" << std::endl;
 
   _exit(EXIT_FAILURE);
@@ -95,186 +334,9 @@ void signalHandler(int signum) {
   raise(SIGTERM);
 }
 
-int main() {
-  signal(SIGINT, signalHandler);
-
-  service_ev.DoTask([] { InitializeService(); });
-  robot_ev.DoTask([] { InitializeRobot(); });
-  camera_ev.DoTask([] { InitializeCamera(); });
-  // InitializeMasterArm();
-
-  service_ev.PushLoopTask([] { DoService(); });
-  robot_ev.PushLoopTask([] {
-    bool _is_connected, _is_motion_done;
-
-    if (!robot) {
-      _is_connected = false;
-      _is_motion_done = true;
-    } else {
-      _is_connected = true;
-      _is_motion_done = IsMotionDone();
-    }
-
-    service_ev.PushTask([=] {
-      is_connected = _is_connected;
-      is_motion_done = _is_motion_done;
-    });
-  });
-  camera_ev.PushLoopTask([=] {
-    if (camera_error) {
-      service_ev.PushTask([] { is_camera_failed = camera_error; });
-      std::this_thread::sleep_for(10ms);
-      return;
-    }
-
-    int id = 0;
-    for (auto&& pipe : rs_pipelines) {
-      rs2::frameset fs;
-      if (pipe.poll_for_frames(&fs)) {
-        rs2::frame color_frame = fs.get_color_frame();
-        rs2::frame depth_frame = fs.get_depth_frame();
-        record_ev.PushTask(
-            [rgb = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)color_frame.get_data(), Mat::AUTO_STEP), id] {
-              record_rgb_init |= (1 << id);
-              record_rgb[id] = rgb;
-            });
-        record_ev.PushTask(
-            [depth = Mat(Size(kWidth, kHeight), CV_16FC1, (void*)depth_frame.get_data(), Mat::AUTO_STEP), id] {
-              record_depth_init |= (1 << id);
-              record_depth[id] = depth;
-            });
-      }
-      id++;
-    }
-  });
-  record_ev.PushCyclicTask(
-      [] {
-        if (!record_file) {
-          return;
-        }
-
-        if (record_rgb_init != (1 << kCameraN) - 1 || record_depth_init != (1 << kCameraN) - 1) {
-          return;
-        }
-
-        auto start = std::chrono::steady_clock::now();
-
-        for (int i = 0; i < kCameraN; i++) {
-          auto current_dims = record_depth_dataset[i].getSpace().getDimensions();
-          size_t current_rows = current_dims[0];
-          size_t new_rows = current_rows + 1;
-          record_depth_dataset[i].resize({new_rows, kWidth * kHeight});
-          record_depth_dataset[i].select({current_rows, 0}, {1, kWidth * kHeight}).write(record_depth[i].data);
-        }
-
-        for (int i = 0; i < kCameraN; i++) {
-          auto current_dims = record_rgb_dataset[i].getSpace().getDimensions();
-          size_t current_rows = current_dims[0];
-          size_t new_rows = current_rows + 1;
-          record_rgb_dataset[i].resize({new_rows, kWidth * kHeight * 3});
-          record_rgb_dataset[i].select({current_rows, 0}, {1, kWidth * kHeight * 3}).write(record_rgb[i].data);
-        }
-
-        {
-          auto current_dims = record_action_dataset.getSpace().getDimensions();
-          size_t current_rows = current_dims[0];
-          size_t new_rows = current_rows + 1;
-          record_action_dataset.resize({new_rows, kRobotDOF + kGripperDOF});
-          record_action_dataset.select({current_rows, 0}, {1, kRobotDOF + kGripperDOF}).write(record_action.data());
-        }
-
-        {
-          auto current_dims = record_qpos_dataset.getSpace().getDimensions();
-          size_t current_rows = current_dims[0];
-          size_t new_rows = current_rows + 1;
-          record_qpos_dataset.resize({new_rows, kRobotDOF + kGripperDOF});
-          record_qpos_dataset.select({current_rows, 0}, {1, kRobotDOF + kGripperDOF}).write(record_qpos.data());
-        }
-
-        {
-          auto current_dims = record_qvel_dataset.getSpace().getDimensions();
-          size_t current_rows = current_dims[0];
-          size_t new_rows = current_rows + 1;
-          record_qvel_dataset.resize({new_rows, kRobotDOF + kGripperDOF});
-          record_qvel_dataset.select({current_rows, 0}, {1, kRobotDOF + kGripperDOF}).write(record_qvel.data());
-        }
-
-        {
-          auto current_dims = record_ft_dataset.getSpace().getDimensions();
-          size_t current_rows = current_dims[0];
-          size_t new_rows = current_rows + 1;
-          record_ft_dataset.resize({new_rows, 6 * 2});
-          record_ft_dataset.select({current_rows, 0}, {1, 6 * 2}).write(record_ft.data());
-        }
-
-        static int count = 0;
-        std::cout
-            << count++ << " "
-            << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start).count() /
-                   1e6
-            << std::endl;
-      },
-      1000ms / 30);
-  record_ev.PushTask([] {
-    if (record_file) {
-      return;
-    }
-
-    record_file = std::make_shared<HighFive::File>("example.h5", HighFive::File::Overwrite);
-    for (int i = 0; i < kCameraN; i++) {
-      {
-        std::vector<size_t> dims = {0, kWidth * kHeight};
-        std::vector<size_t> max_dims = {HighFive::DataSpace::UNLIMITED, kWidth * kHeight};
-        HighFive::DataSetCreateProps props;
-        props.add(HighFive::Chunking(std::vector<hsize_t>{1, kWidth * kHeight}));
-        props.add(HighFive::Deflate(1));
-        record_depth_dataset[i] = record_file->createDataSet<std::uint16_t>(
-            "/observations/images/cam" + std::to_string(i) + "_depth", HighFive::DataSpace(dims, max_dims), props);
-      }
-
-      {
-        std::vector<size_t> dims = {0, kWidth * kHeight * 3};
-        std::vector<size_t> max_dims = {HighFive::DataSpace::UNLIMITED, kWidth * kHeight * 3};
-        HighFive::DataSetCreateProps props;
-        props.add(HighFive::Chunking(std::vector<hsize_t>{1, kWidth * kHeight * 3}));
-        props.add(HighFive::Deflate(1));
-        record_rgb_dataset[i] = record_file->createDataSet<std::uint8_t>(
-            "/observations/images/cam" + std::to_string(i) + "_rgb", HighFive::DataSpace(dims, max_dims), props);
-      }
-    }
-
-    {
-      std::vector<size_t> dims = {0, kRobotDOF + kGripperDOF};
-      std::vector<size_t> max_dims = {HighFive::DataSpace::UNLIMITED, kRobotDOF + kGripperDOF};
-      HighFive::DataSetCreateProps props;
-      props.add(HighFive::Chunking(std::vector<hsize_t>{1, kRobotDOF + kGripperDOF}));
-      record_action_dataset = record_file->createDataSet<double>("/action", HighFive::DataSpace(dims, max_dims), props);
-      record_qpos_dataset =
-          record_file->createDataSet<double>("/observations/qpos", HighFive::DataSpace(dims, max_dims), props);
-      record_qvel_dataset =
-          record_file->createDataSet<double>("/observations/qvel", HighFive::DataSpace(dims, max_dims), props);
-    }
-
-    {
-      std::vector<size_t> dims = {0, 6 * 2};
-      std::vector<size_t> max_dims = {HighFive::DataSpace::UNLIMITED, 6 * 2};
-      HighFive::DataSetCreateProps props;
-      props.add(HighFive::Chunking(std::vector<hsize_t>{1, 6 * 2}));
-      record_ft_dataset = record_file->createDataSet<double>("/observations/ft_sensor",
-                                                                  HighFive::DataSpace(dims, max_dims), props);
-    }
-  });
-
-  service_ev.WaitForTasks();
-
-  return 0;
-}
-
 void InitializeService() {
-  srv_sock = zmq::socket_t(zmq_ctx, zmq::socket_type::sub);
+  srv_sock = zmq::socket_t(zmq_ctx, zmq::socket_type::router);
   srv_sock.bind("tcp://*:5000");
-
-  srv_sock.set(zmq::sockopt::subscribe, "");
 }
 
 void DoService() {
@@ -282,7 +344,7 @@ void DoService() {
 
   try {
     zmq::recv_result_t result = zmq::recv_multipart(srv_sock, std::back_inserter(recv_msgs), zmq::recv_flags::dontwait);
-    if (recv_msgs.size() == 0) {
+    if (recv_msgs.empty()) {
       return;
     }
 
@@ -292,104 +354,65 @@ void DoService() {
     }
 
     std::string command = j["command"];
+    std::cout << "[Service] command received: " << command << std::endl;
+
     if (command == COMMAND_READY_POSE) {
       Eigen::Vector<double, 20> body_ready;
       Eigen::Vector<double, 2> head_ready;
-      double minimum_time = 5.0;
       body_ready << 0, 35, -70, 35, 0, 0, -30, -10, 0, -100, 0, 40, 0, -30, 10, 0, -100, 0, 40, 0;
       head_ready << 0, 0;
       body_ready *= M_PI / 180.;
       head_ready *= M_PI / 180.;
 
-      robot_ev.PushTask([=] { GoPose(body_ready, head_ready); });
+      robot_ev.PushTask([=] { GoPose(body_ready, head_ready, 5.0); });
     } else if (command == COMMAND_ZERO_POSE) {
-      robot_ev.PushTask([=] { GoPose(Eigen::Vector<double, 20>::Zero(), Eigen::Vector<double, 2>::Zero()); });
+      robot_ev.PushTask([=] { GoPose(Eigen::Vector<double, 20>::Zero(), Eigen::Vector<double, 2>::Zero(), 5.0); });
+    } else if (command == COMMAND_POWER_OFF) {
+      robot_ev.PushTask([=] { RobotPowerOff(); });
+    } else if (command == COMMAND_POWER_ON) {
+      robot_ev.PushTask([=] { RobotPowerOn(); });
+    } else if (command == COMMAND_SERVO_ON) {
+      robot_ev.PushTask([=] { RobotServoOn(); });
+    } else if (command == COMMAND_CONTROL_MANAGER_INIT) {
+      robot_ev.PushTask([=] { RobotControlManagerInit(); });
     } else if (command == COMMAND_STOP_MOTION) {
-      robot_ev.PushTask([=] {
-        if (!robot) {
-          return;
-        }
-      });
+      robot_ev.PushTask([=] { StopMotion(); });
     }
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
 }
 
-void InitializeRobot() {
-  const std::string kAll = ".*";
+void InitializePublisher() {
+  pub_sock = zmq::socket_t(zmq_ctx, zmq::socket_type::pub);
+  pub_sock.bind("tcp://*:5001");
+}
 
-  robot = Robot<y1_model::A>::Create(RPC_ADDRESS);
+void Publish() {
+  nlohmann::json j;
+
+  j["robot"] = robot_connected;
+  j["camera"] = camera_connected;
+  j["master_arm"] = master_arm_connected;
+
+  j["power"] = power;
+  j["servo"] = servo;
+  j["control_manager"]["state"] = control_manager;
+  j["control_manager"]["detail"] = control_manager_detail;
+
+  zmq::send_multipart(pub_sock, std::array<zmq::const_buffer, 2>{zmq::str_buffer("data"), zmq::buffer(j.dump())});
+}
+
+void InitializeRobot(const std::string& address) {
+  robot = Robot<y1_model::A>::Create(address);
 
   std::cout << "Attempting to connect to the robot..." << std::endl;
   if (!robot->Connect()) {
-    std::cerr << "Error: Unable to establish connection to the robot at " << RPC_ADDRESS << std::endl;
+    std::cerr << "Error: Unable to establish connection to the robot at " << address << std::endl;
     robot = nullptr;
     return;
   }
   std::cout << "Successfully connected to the robot." << std::endl;
-
-  // std::cout << "Checking power status..." << std::endl;
-  // if (!robot->IsPowerOn(kAll)) {
-  //   std::cout << "Power is currently OFF. Attempting to power on..." << std::endl;
-  //   if (!robot->PowerOn(kAll)) {
-  //     std::cerr << "Error: Failed to power on the robot." << std::endl;
-  //     robot = nullptr;
-  //     return;
-  //   }
-  //   std::cout << "Robot powered on successfully." << std::endl;
-  // } else {
-  //   std::cout << "Power is already ON." << std::endl;
-  // }
-
-  // std::cout << "Checking servo status..." << std::endl;
-  // if (!robot->IsServoOn(kAll)) {
-  //   std::cout << "Servo is currently OFF. Attempting to activate servo..." << std::endl;
-  //   if (!robot->ServoOn(kAll)) {
-  //     std::cerr << "Error: Failed to activate servo." << std::endl;
-  //     robot = nullptr;
-  //     return;
-  //   }
-  //   std::cout << "Servo activated successfully." << std::endl;
-  // } else {
-  //   std::cout << "Servo is already ON." << std::endl;
-  // }
-
-  // const auto& control_manager_state = robot->GetControlManagerState();
-  // if (control_manager_state.state == ControlManagerState::State::kMajorFault ||
-  //     control_manager_state.state == ControlManagerState::State::kMinorFault) {
-  //   std::cerr << "Warning: Detected a "
-  //             << (control_manager_state.state == ControlManagerState::State::kMajorFault ? "Major" : "Minor")
-  //             << " Fault in the Control Manager." << std::endl;
-
-  //   std::cout << "Attempting to reset the fault..." << std::endl;
-  //   if (!robot->ResetFaultControlManager()) {
-  //     std::cerr << "Error: Unable to reset the fault in the Control Manager." << std::endl;
-  //     robot = nullptr;
-  //     return;
-  //   }
-  //   std::cout << "Fault reset successfully." << std::endl;
-  // }
-  // std::cout << "Control Manager state is normal. No faults detected." << std::endl;
-
-  // std::cout << "Enabling the Control Manager..." << std::endl;
-  // if (!robot->EnableControlManager()) {
-  //   std::cerr << "Error: Failed to enable the Control Manager." << std::endl;
-  //   robot = nullptr;
-  //   return;
-  // }
-  // std::cout << "Control Manager enabled successfully." << std::endl;
-
-  // try {
-  //   if (robot->IsPowerOn("48v")) {
-  //     robot->SetToolFlangeOutputVoltage("left", 12);
-  //     robot->SetToolFlangeOutputVoltage("right", 12);
-  //   }
-  // } catch (std::exception& e) {
-  //   std::cerr << e.what() << std::endl;
-  //   robot = nullptr;
-  //   return;
-  // }
 
   robot->StartStateUpdate(
       [](const rb::RobotState<rb::y1_model::A>& state) {
@@ -405,20 +428,36 @@ void InitializeRobot() {
           record_ft.block(6, 0, 3, 1) = ft_left_torque;
           record_ft.block(9, 0, 3, 1) = ft_left_force;
         });
+
+        publisher_ev.PushTask([s = state] {
+          power = true;
+          for (const auto& p : s.power_states) {
+            power &= (p.state == PowerState::State::kPowerOn);
+          }
+
+          servo = true;
+          for (const auto& j : s.joint_states) {
+            servo &= j.is_ready;
+          }
+        });
       },
-      50 /* Hz */);
+      100 /* Hz */);
 }
 
 void GoPose(const Eigen::Vector<double, 20>& body, const Eigen::Vector<double, 2>& head, double minimum_time) {
+  std::cout << "[Robot] goto: " << body.transpose() << ", " << head.transpose() << std::endl;
+
   if (!robot) {
+    std::cerr << "[Robot] Robot is not initialized" << std::endl;
     return;
   }
 
   if (!IsMotionDone()) {
+    std::cerr << "[Robot] Robot is already moving" << std::endl;
     return;
   }
 
-  auto handler = robot->SendCommand(RobotCommandBuilder().SetCommand(
+  rc_handler = robot->SendCommand(RobotCommandBuilder().SetCommand(
       ComponentBasedCommandBuilder()
           .SetBodyCommand(JointPositionCommandBuilder().SetPosition(body).SetMinimumTime(minimum_time))
           .SetHeadCommand(JointPositionCommandBuilder().SetPosition(head).SetMinimumTime(minimum_time))));
@@ -440,31 +479,114 @@ bool IsMotionDone() {
       rc_handler = nullptr;
       return true;
     }
+    return false;
   }
 
   if (rcs_handler) {
     if (rcs_handler->IsDone()) {
-      if (is_started) {
-        std::cerr << "Stop unexpectedly" << std::endl;
-
-        record_ev.PushTask([] {
-          if (record_file) {
-            record_file->flush();
-            record_file.reset();
-            record_file = nullptr;
-          }
-        });
-      }
-
       rcs_handler = nullptr;
       return true;
     }
+    return false;
   }
 
-  return false;
+  return true;
+}
+
+void RobotPowerOff() {
+  if (!robot) {
+    std::cerr << "[Robot] Robot is not initialized" << std::endl;
+    return;
+  }
+
+  robot->PowerOff(kAll);
+  std::cout << "Robot powered off." << std::endl;
+}
+
+void RobotPowerOn() {
+  if (!robot) {
+    std::cerr << "[Robot] Robot is not initialized" << std::endl;
+    return;
+  }
+
+  std::cout << "Checking power status..." << std::endl;
+  if (!robot->IsPowerOn(kAll)) {
+    std::cout << "Power is currently OFF. Attempting to power on..." << std::endl;
+    if (!robot->PowerOn(kAll)) {
+      std::cerr << "Error: Failed to power on the robot." << std::endl;
+      robot = nullptr;
+      return;
+    }
+    std::cout << "Robot powered on successfully." << std::endl;
+  } else {
+    std::cout << "Power is already ON." << std::endl;
+  }
+
+  try {
+    if (robot->IsPowerOn("48v")) {
+      robot->SetToolFlangeOutputVoltage("left", 12);
+      robot->SetToolFlangeOutputVoltage("right", 12);
+    }
+  } catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+    return;
+  }
+}
+
+void RobotServoOn() {
+  if (!robot) {
+    std::cerr << "[Robot] Robot is not initialized" << std::endl;
+    return;
+  }
+
+  std::cout << "Checking servo status..." << std::endl;
+  if (!robot->IsServoOn(kAll)) {
+    std::cout << "Servo is currently OFF. Attempting to activate servo..." << std::endl;
+    if (!robot->ServoOn(kAll)) {
+      std::cerr << "Error: Failed to activate servo." << std::endl;
+      robot = nullptr;
+      return;
+    }
+    std::cout << "Servo activated successfully." << std::endl;
+  } else {
+    std::cout << "Servo is already ON." << std::endl;
+  }
+}
+
+void RobotControlManagerInit() {
+  if (!robot) {
+    std::cerr << "[Robot] Robot is not initialized" << std::endl;
+    return;
+  }
+
+  const auto& control_manager_state = robot->GetControlManagerState();
+  if (control_manager_state.state == ControlManagerState::State::kMajorFault ||
+      control_manager_state.state == ControlManagerState::State::kMinorFault) {
+    std::cerr << "Warning: Detected a "
+              << (control_manager_state.state == ControlManagerState::State::kMajorFault ? "Major" : "Minor")
+              << " Fault in the Control Manager." << std::endl;
+
+    std::cout << "Attempting to reset the fault..." << std::endl;
+    if (!robot->ResetFaultControlManager()) {
+      std::cerr << "Error: Unable to reset the fault in the Control Manager." << std::endl;
+      robot = nullptr;
+      return;
+    }
+    std::cout << "Fault reset successfully." << std::endl;
+  }
+  std::cout << "Control Manager state is normal. No faults detected." << std::endl;
+
+  std::cout << "Enabling the Control Manager..." << std::endl;
+  if (!robot->EnableControlManager()) {
+    std::cerr << "Error: Failed to enable the Control Manager." << std::endl;
+    robot = nullptr;
+    return;
+  }
+  std::cout << "Control Manager enabled successfully." << std::endl;
 }
 
 void InitializeCamera() {
+#ifdef REALSENSE2
   std::size_t dev_id;
   std::vector<std::string> serials;
   for (auto&& dev : rs_ctx.query_devices()) {
@@ -522,23 +644,24 @@ void InitializeCamera() {
     rs2::pipeline pipe(rs_ctx);
     rs2::config cfg;
     cfg.enable_device(serial);
-    cfg.enable_stream(RS2_STREAM_DEPTH, kWidth, kHeight, RS2_FORMAT_Z16, 30);
-    cfg.enable_stream(RS2_STREAM_COLOR, kWidth, kHeight, RS2_FORMAT_RGB8, 30);
+    cfg.enable_stream(RS2_STREAM_DEPTH, kWidth, kHeight, RS2_FORMAT_Z16, (int)kFrequency);
+    cfg.enable_stream(RS2_STREAM_COLOR, kWidth, kHeight, RS2_FORMAT_RGB8, (int)kFrequency);
     pipe.start(cfg);
     rs_pipelines[dev_id] = pipe;
   }
+#endif
 }
 
 void InitializeMasterArm() {
   try {
     // Latency timer setting
-    upc::InitializeDevice("/dev/rby1_master_arm");
+    upc::InitializeDevice(MASTER_ARM_DEV);
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     exit(1);
   }
 
-  master_arm = std::make_shared<upc::MasterArm>("/dev/rby1_master_arm");
+  master_arm = std::make_shared<upc::MasterArm>(MASTER_ARM_DEV);
 
   master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
   master_arm->SetControlPeriod(0.02);
@@ -580,4 +703,26 @@ void InitializeMasterArm() {
     }
     return input;
   });
+}
+
+template <typename T>
+void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, std::size_t len, T* data) {
+  auto current_dims = dataset->getSpace().getDimensions();
+  size_t current_rows = current_dims[0];
+  size_t new_rows = current_rows + 1;
+  dataset->resize({new_rows, len});
+  dataset->select({current_rows, 0}, {1, len}).write(data);
+}
+
+template <typename T>
+HighFive::DataSet CreateDataSet(const std::shared_ptr<HighFive::File>& file, const std::string& name, size_t len,
+                                int compression_level) {
+  std::vector<size_t> dims = {0, len};
+  std::vector<size_t> max_dims = {HighFive::DataSpace::UNLIMITED, len};
+  HighFive::DataSetCreateProps props;
+  props.add(HighFive::Chunking(std::vector<hsize_t>{1, len}));
+  if (compression_level != 0) {
+    props.add(HighFive::Deflate(compression_level));
+  }
+  return file->createDataSet<T>(name, HighFive::DataSpace(dims, max_dims), props);
 }

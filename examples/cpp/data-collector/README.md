@@ -22,7 +22,7 @@
 
 
 ```bash
-sudo apt install libhdf5-dev libopencv-dev libzmq3-dev nlohmann-json3-dev libboost-system-dev libboost-serialization-dev
+sudo apt install libhdf5-dev libopencv-dev libzmq3-dev nlohmann-json3-dev libboost-system-dev libboost-serialization-dev libboost-filesystem-dev
 
 # cppzmq
 wget https://github.com/zeromq/cppzmq/archive/refs/tags/v4.10.0.tar.gz

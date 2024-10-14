@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 
+#include <boost/filesystem.hpp>
 #include <highfive/H5Easy.hpp>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
@@ -42,8 +43,8 @@ const std::string COMMAND_READY_POSE = "ready_pose";
 const std::string COMMAND_ZERO_POSE = "zero_pose";
 const std::string COMMAND_STOP_MOTION = "stop_motion";
 const std::string COMMAND_START_TELEOPERATION = "start_teleoperation";
-const std::string COMMAND_START = "start";
-const std::string COMMAND_STOP = "stop";
+const std::string COMMAND_START_RECORDING = "start_recording";
+const std::string COMMAND_STOP_RECORDING = "stop_recording";
 const unsigned int kRobotDOF = y1_model::A::kRobotDOF;
 const unsigned int kGripperDOF = 2;
 
@@ -91,12 +92,15 @@ Eigen::Vector<double, kRobotDOF + kGripperDOF> record_qpos;
 Eigen::Vector<double, kRobotDOF + kGripperDOF> record_qvel;
 Eigen::Vector<double, kRobotDOF + kGripperDOF> record_torque;
 Eigen::Vector<double, 6 * 2> record_ft;
-int data_len = 0;
+std::atomic<int> data_len = 0;
 
 EventLoop publisher_ev, service_ev, robot_ev, cm_ev, camera_ev, record_ev;
 
 bool is_camera_failed{false};
 bool is_started{false};
+
+std::string upc_address;
+std::string save_folder_path;
 
 bool robot_connected{false};
 bool camera_connected{false};
@@ -105,11 +109,15 @@ bool power{false};
 bool servo{false};
 bool control_manager{false};
 std::string control_manager_detail;
+unsigned long storage_free{0};
+unsigned long storage_available{0};
+unsigned long storage_capacity{0};
 
 void SignalHandler(int signum);
 void InitializeService();
 void DoService();
 void InitializePublisher();
+void UpdateStat();
 void Publish();
 void InitializeRobot(const std::string& address);
 void StopMotion();
@@ -120,8 +128,9 @@ void RobotPowerOn();
 void RobotServoOn();
 void RobotControlManagerInit();
 void InitializeCamera();
-void InitializeMasterArm();
-void InitializeH5File(const std::string& name);
+//void InitializeMasterArm();
+void StartRecording(const std::string& file_path);
+void StopRecording();
 template <typename T>
 void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, std::size_t len, T* data);
 template <typename T>
@@ -133,20 +142,25 @@ int main(int argc, char** argv) {
     std::cerr << "Usage: " << argv[0] << " <rpc server address> <save folder path>" << std::endl;
     return 1;
   }
-  std::string address{argv[1]};
-  std::string save_folder_path{argv[2]};
+  upc_address = std::string(argv[1]);
+  save_folder_path = std::string(argv[2]);
 
   signal(SIGINT, SignalHandler);
 
   publisher_ev.DoTask([] { InitializePublisher(); });
   service_ev.DoTask([] { InitializeService(); });
-  robot_ev.DoTask([=] { InitializeRobot(address); });
+  robot_ev.DoTask([=] { InitializeRobot(upc_address); });
   camera_ev.DoTask([] { InitializeCamera(); });
   // InitializeMasterArm();
 
   publisher_ev.PushTask([] { master_arm_connected = (master_arm != nullptr); });
 
-  publisher_ev.PushCyclicTask([] { Publish(); }, 100ms);
+  publisher_ev.PushCyclicTask(
+      [] {
+        UpdateStat();
+        Publish();
+      },
+      100ms);
   service_ev.PushCyclicTask([] { DoService(); }, 1ms);
   robot_ev.PushCyclicTask(
       [] {
@@ -180,16 +194,16 @@ int main(int argc, char** argv) {
                 control_manager_detail = "Enabled";
                 switch (cm.control_state) {
                   case ControlManagerState::ControlState::kUnknown:
-                    control_manager_detail += "(Unknown)";
+                    control_manager_detail += " (Unknown)";
                     break;
                   case ControlManagerState::ControlState::kIdle:
-                    control_manager_detail += "(Idle)";
+                    control_manager_detail += " (Idle)";
                     break;
                   case ControlManagerState::ControlState::kExecuting:
-                    control_manager_detail += "(Executing)";
+                    control_manager_detail += " (Executing)";
                     break;
                   case ControlManagerState::ControlState::kSwitching:
-                    control_manager_detail += "(Switching)";
+                    control_manager_detail += " (Switching)";
                     break;
                 }
                 break;
@@ -266,43 +280,13 @@ int main(int argc, char** argv) {
         double d = (double)duration_cast<nanoseconds>(end - start).count() / 1.e9;
         stat_duration.add(d);
         if (stat_duration.count() >= kFrequency) {
-          std::cout << "[" << data_len << "] " << "Count: " << stat_duration.count()
+          std::cout << "[" << data_len.load() << "] " << "Count: " << stat_duration.count()
                     << ", Avg: " << stat_duration.avg() * 1e3 << " ms, Min: " << stat_duration.min() * 1e3
                     << " ms, Max: " << stat_duration.max() * 1e3 << " ms" << std::endl;
           stat_duration.reset();
         }
       },
       microseconds((long)(1e6 /* 1 sec */ / kFrequency)));
-  //  record_ev.PushTask([=] {
-  //    if (record_file) {
-  //      return;
-  //    }
-  //
-  //    // Make File
-  //    record_file = std::make_shared<HighFive::File>(save_folder_path + "/example.h5", HighFive::File::Overwrite);
-  //
-  //    // Create Dataset
-  //    for (int i = 0; i < kCameraN; i++) {
-  //      record_depth_dataset[i] = std::make_unique<HighFive::DataSet>(CreateDataSet<std::uint16_t>(
-  //          record_file, "/observations/images/cam" + std::to_string(i) + "_depth", kWidth * kHeight, kCompressionLevel));
-  //      record_depth[i] = Mat(Size(kWidth, kHeight), CV_16FC1);
-  //
-  //      record_rgb_dataset[i] = std::make_unique<HighFive::DataSet>(
-  //          CreateDataSet<std::uint8_t>(record_file, "/observations/images/cam" + std::to_string(i) + "_rgb",
-  //                                      kWidth * kHeight * 3, kCompressionLevel));
-  //      record_rgb[i] = Mat(Size(kWidth, kHeight), CV_8UC3);
-  //    }
-  //    record_action_dataset =
-  //        std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/action", kRobotDOF + kGripperDOF));
-  //    record_qpos_dataset = std::make_unique<HighFive::DataSet>(
-  //        CreateDataSet<double>(record_file, "/observations/qpos", kRobotDOF + kGripperDOF));
-  //    record_qvel_dataset = std::make_unique<HighFive::DataSet>(
-  //        CreateDataSet<double>(record_file, "/observations/qvel", kRobotDOF + kGripperDOF));
-  //    record_ft_dataset =
-  //        std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/observations/ft_sensor", 6 * 2));
-  //
-  //    data_len = 0;
-  //  });
 
   service_ev.WaitForTasks();
 
@@ -377,6 +361,14 @@ void DoService() {
       robot_ev.PushTask([=] { RobotControlManagerInit(); });
     } else if (command == COMMAND_STOP_MOTION) {
       robot_ev.PushTask([=] { StopMotion(); });
+    } else if (command == COMMAND_START_RECORDING) {
+      std::string name{"example"};
+      if (j.contains("name")) {
+        name = j["name"];
+      }
+      record_ev.PushTask([=] { StartRecording(save_folder_path + "/" + name + ".h5"); });
+    } else if (command == COMMAND_STOP_RECORDING) {
+      record_ev.PushTask([=] { StopRecording(); });
     }
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
@@ -388,6 +380,14 @@ void InitializePublisher() {
   pub_sock.bind("tcp://*:5001");
 }
 
+void UpdateStat() {
+  using namespace boost::filesystem;
+  space_info si = space(save_folder_path);
+  storage_free = si.free / (1 << 20);  // (MB)
+  storage_available = si.available / (1 << 20);
+  storage_capacity = si.capacity / (1 << 20);
+}
+
 void Publish() {
   nlohmann::json j;
 
@@ -395,10 +395,17 @@ void Publish() {
   j["camera"] = camera_connected;
   j["master_arm"] = master_arm_connected;
 
+  j["storage_available"] = storage_available;
+  j["storage_free"] = storage_free;
+  j["storage_capacity"] = storage_capacity;
+
   j["power"] = power;
   j["servo"] = servo;
   j["control_manager"]["state"] = control_manager;
   j["control_manager"]["detail"] = control_manager_detail;
+
+  j["recording"] = false;
+  j["recording_len"] = data_len.load();
 
   zmq::send_multipart(pub_sock, std::array<zmq::const_buffer, 2>{zmq::str_buffer("data"), zmq::buffer(j.dump())});
 }
@@ -703,6 +710,46 @@ void InitializeMasterArm() {
     }
     return input;
   });
+}
+
+void StartRecording(const std::string& file_path) {
+  if (record_file) {
+    return;
+  }
+
+  // Make File
+  record_file = std::make_shared<HighFive::File>(file_path, HighFive::File::Overwrite);
+
+  // Create Dataset
+  for (int i = 0; i < kCameraN; i++) {
+    record_depth_dataset[i] = std::make_unique<HighFive::DataSet>(CreateDataSet<std::uint16_t>(
+        record_file, "/observations/images/cam" + std::to_string(i) + "_depth", kWidth * kHeight, kCompressionLevel));
+    record_depth[i] = Mat(Size(kWidth, kHeight), CV_16FC1);
+
+    record_rgb_dataset[i] = std::make_unique<HighFive::DataSet>(CreateDataSet<std::uint8_t>(
+        record_file, "/observations/images/cam" + std::to_string(i) + "_rgb", kWidth * kHeight * 3, kCompressionLevel));
+    record_rgb[i] = Mat(Size(kWidth, kHeight), CV_8UC3);
+  }
+  record_action_dataset =
+      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/action", kRobotDOF + kGripperDOF));
+  record_qpos_dataset = std::make_unique<HighFive::DataSet>(
+      CreateDataSet<double>(record_file, "/observations/qpos", kRobotDOF + kGripperDOF));
+  record_qvel_dataset = std::make_unique<HighFive::DataSet>(
+      CreateDataSet<double>(record_file, "/observations/qvel", kRobotDOF + kGripperDOF));
+  record_ft_dataset =
+      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/observations/ft_sensor", 6 * 2));
+
+  data_len = 0;
+}
+
+void StopRecording() {
+  if(!record_file) {
+    return;
+  }
+
+  record_file->flush();
+  record_file.reset();
+  record_file = nullptr;
 }
 
 template <typename T>

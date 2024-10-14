@@ -150,6 +150,7 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
               if (state_.operation_mode(i) == DynamixelBus::kCurrentControlMode) {
                 id_torque.emplace_back(i, input.target_torque(i));
               } else if (state_.operation_mode(i) == DynamixelBus::kCurrentBasedPositionControlMode) {
+                id_torque.emplace_back(i, kMaximumTorque);
                 id_position.emplace_back(i, input.target_position(i));
               }
             }

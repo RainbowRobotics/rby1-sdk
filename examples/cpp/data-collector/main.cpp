@@ -92,9 +92,16 @@ Eigen::Vector<double, kRobotDOF + kGripperDOF> record_qpos;
 Eigen::Vector<double, kRobotDOF + kGripperDOF> record_qvel;
 Eigen::Vector<double, kRobotDOF + kGripperDOF> record_torque;
 Eigen::Vector<double, 6 * 2> record_ft;
-std::atomic<int> data_len = 0;
+std::atomic<int> data_count = 0;
+
+/**
+ * Tele-operation
+ */
+//bool to_right, to_left;
+//Eigen::Vector<double, kRobotDOF + kGripperDOF> to_qref;
 
 EventLoop publisher_ev, service_ev, robot_ev, cm_ev, camera_ev, record_ev;
+std::future<void> image_future;
 
 bool is_camera_failed{false};
 bool is_started{false};
@@ -108,10 +115,12 @@ bool master_arm_connected{false};
 bool power{false};
 bool servo{false};
 bool control_manager{false};
+bool recording{false};
 std::string control_manager_detail;
 unsigned long storage_free{0};
 unsigned long storage_available{0};
 unsigned long storage_capacity{0};
+std::array<Mat, kCameraN> rgb_images, depth_images;
 
 void SignalHandler(int signum);
 void InitializeService();
@@ -128,7 +137,7 @@ void RobotPowerOn();
 void RobotServoOn();
 void RobotControlManagerInit();
 void InitializeCamera();
-//void InitializeMasterArm();
+void InitializeMasterArm();
 void StartRecording(const std::string& file_path);
 void StopRecording();
 template <typename T>
@@ -151,7 +160,7 @@ int main(int argc, char** argv) {
   service_ev.DoTask([] { InitializeService(); });
   robot_ev.DoTask([=] { InitializeRobot(upc_address); });
   camera_ev.DoTask([] { InitializeCamera(); });
-  // InitializeMasterArm();
+  InitializeMasterArm();
 
   publisher_ev.PushTask([] { master_arm_connected = (master_arm != nullptr); });
 
@@ -171,8 +180,10 @@ int main(int argc, char** argv) {
           p = false;
         }
         publisher_ev.PushTask([p] { robot_connected = p; });
+
+        // Teleoperation();
       },
-      100us);
+      10ms);
   cm_ev.PushCyclicTask(
       [] {
         if (!robot) {
@@ -239,17 +250,20 @@ int main(int argc, char** argv) {
           if (pipe.poll_for_frames(&fs)) {
             rs2::frame color_frame = fs.get_color_frame();
             rs2::frame depth_frame = fs.get_depth_frame();
-            // rs2::frame f = rs2::colorizer().process(color_frame)
-            // rs2::frame f = rs2::colorizer().process(depth_frame)
             record_ev.PushTask(
-                [rgb = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)color_frame.get_data(), Mat::AUTO_STEP), id] {
-                  record_rgb_init |= (1 << id);
+                [rgb = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)color_frame.get_data(), Mat::AUTO_STEP),
+                 depth = Mat(Size(kWidth, kHeight), CV_16FC1, (void*)depth_frame.get_data(), Mat::AUTO_STEP), id] {
                   record_rgb[id] = rgb;
-                });
-            record_ev.PushTask(
-                [depth = Mat(Size(kWidth, kHeight), CV_16FC1, (void*)depth_frame.get_data(), Mat::AUTO_STEP), id] {
-                  record_depth_init |= (1 << id);
                   record_depth[id] = depth;
+                });
+
+            rs2::frame colored_rgb = rs2::colorizer().process(color_frame);
+            rs2::frame colored_depth = rs2::colorizer().process(depth_frame);
+            publisher.PushTask(
+                [rgb = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)colored_rgb.get_data(), Mat::AUTO_STEP),
+                 depth = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)colored_depth.get_data(), Mat::AUTO_STEP), id] {
+                  rgb_images[id] = rgb;
+                  depth_images[id] = depth;
                 });
           }
           id++;
@@ -260,6 +274,8 @@ int main(int argc, char** argv) {
   record_ev.PushCyclicTask(
       [] {
         auto start = steady_clock::now();
+
+        publisher_ev.PushTask([r = (record_file != nullptr)] { recording = r; });
 
         if (!record_file) {
           return;
@@ -272,15 +288,16 @@ int main(int argc, char** argv) {
         AddDataIntoDataSet(record_action_dataset, kRobotDOF + kGripperDOF, record_action.data());
         AddDataIntoDataSet(record_qpos_dataset, kRobotDOF + kGripperDOF, record_qpos.data());
         AddDataIntoDataSet(record_qvel_dataset, kRobotDOF + kGripperDOF, record_qvel.data());
+        AddDataIntoDataSet(record_torque_dataset, kRobotDOF + kGripperDOF, record_torque.data());
         AddDataIntoDataSet(record_ft_dataset, 6 * 2, record_ft.data());
-        data_len++;
+        data_count++;
 
         auto end = steady_clock::now();
 
         double d = (double)duration_cast<nanoseconds>(end - start).count() / 1.e9;
         stat_duration.add(d);
         if (stat_duration.count() >= kFrequency) {
-          std::cout << "[" << data_len.load() << "] " << "Count: " << stat_duration.count()
+          std::cout << "[" << data_count.load() << "] " << "Count: " << stat_duration.count()
                     << ", Avg: " << stat_duration.avg() * 1e3 << " ms, Min: " << stat_duration.min() * 1e3
                     << " ms, Max: " << stat_duration.max() * 1e3 << " ms" << std::endl;
           stat_duration.reset();
@@ -378,6 +395,11 @@ void DoService() {
 void InitializePublisher() {
   pub_sock = zmq::socket_t(zmq_ctx, zmq::socket_type::pub);
   pub_sock.bind("tcp://*:5001");
+
+  for (int i = 0; i < kCameraN; i++) {
+    rgb_images[i] = Mat(Size(kWidth, kHeight), CV_8UC3);
+    depth_images[i] = Mat(Size(kWidth, kHeight), CV_8UC3);
+  }
 }
 
 void UpdateStat() {
@@ -404,10 +426,44 @@ void Publish() {
   j["control_manager"]["state"] = control_manager;
   j["control_manager"]["detail"] = control_manager_detail;
 
-  j["recording"] = false;
-  j["recording_len"] = data_len.load();
+  j["recording"] = recording;
+  j["recording_count"] = data_count.load();
 
   zmq::send_multipart(pub_sock, std::array<zmq::const_buffer, 2>{zmq::str_buffer("data"), zmq::buffer(j.dump())});
+
+  static auto image_pub_time = steady_clock::now();
+  auto current_time = steady_clock::now();
+  double d = (double)duration_cast<nanoseconds>(current_time - image_pub_time).count() / 1.e9;
+  if (d >= 0.5 /* s */) {
+    image_pub_time = current_time;
+
+    bool done = true;
+    if (image_future.valid()) {
+      if (image_future.wait_for(0s) == std::future_status::timeout) {
+        done = false;
+      }
+    }
+
+    if (done) {
+      image_future = std::async([_rgb_images = rgb_images, _depth_images = depth_images] {
+        std::vector<uint8_t> buf;
+
+        nlohmann::json image_j;
+        for (int i = 0; i < kCameraN; i++) {
+          cv::imencode(".jpg", _rgb_images[i], buf);
+          image_j["cam" + std::to_string(i) + "_rgb"] = nlohmann::json::binary_t(buf);
+
+          cv::imencode(".jpg", _depth_images[i], buf);
+          image_j["cam" + std::to_string(i) + "_depth"] = nlohmann::json::binary_t(buf);
+        }
+
+        publisher_ev.PushTask([=] {
+          zmq::send_multipart(pub_sock,
+                              std::array<zmq::const_buffer, 2>{zmq::str_buffer("image"), zmq::buffer(image_j.dump())});
+        });
+      });
+    }
+  }
 }
 
 void InitializeRobot(const std::string& address) {
@@ -423,17 +479,15 @@ void InitializeRobot(const std::string& address) {
 
   robot->StartStateUpdate(
       [](const rb::RobotState<rb::y1_model::A>& state) {
-        record_ev.PushTask([p = state.position, v = state.velocity, ref_p = state.target_position,
-                            ft_right_force = state.ft_sensor_right.force,
-                            ft_right_torque = state.ft_sensor_right.torque, ft_left_force = state.ft_sensor_left.force,
-                            ft_left_torque = state.ft_sensor_left.torque] {
-          record_qpos.head<kRobotDOF>() = p;
-          record_qvel.head<kRobotDOF>() = v;
-          record_action.head<kRobotDOF>() = ref_p;
-          record_ft.block(0, 0, 3, 1) = ft_right_torque;
-          record_ft.block(3, 0, 3, 1) = ft_right_force;
-          record_ft.block(6, 0, 3, 1) = ft_left_torque;
-          record_ft.block(9, 0, 3, 1) = ft_left_force;
+        record_ev.PushTask([s = state] {
+          record_qpos.head<kRobotDOF>() = s.position;
+          record_qvel.head<kRobotDOF>() = s.velocity;
+          record_action.head<kRobotDOF>() = s.target_position;
+          record_torque.head<kRobotDOF>() = s.torque;
+          record_ft.block(0, 0, 3, 1) = s.ft_sensor_right.torque;
+          record_ft.block(3, 0, 3, 1) = s.ft_sensor_right.force;
+          record_ft.block(6, 0, 3, 1) = s.ft_sensor_left.torque;
+          record_ft.block(9, 0, 3, 1) = s.ft_sensor_left.force;
         });
 
         publisher_ev.PushTask([s = state] {
@@ -669,9 +723,20 @@ void InitializeMasterArm() {
   }
 
   master_arm = std::make_shared<upc::MasterArm>(MASTER_ARM_DEV);
-
   master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
-  master_arm->SetControlPeriod(0.02);
+  master_arm->SetControlPeriod(0.01);
+
+  Eigen::Vector<double, upc::MasterArm::kDOF> qmin;
+  Eigen::Vector<double, upc::MasterArm::kDOF> qmax;
+  Eigen::Vector<double, upc::MasterArm::kDOF> torque_limit;
+  qmin << -360, -360, 0, -135, -90, 0, -360,  //
+      -360, 10, -90, -135, -90, 0, -360;
+  qmax << 360, -10, 90, -20, 90, 90, 360,  //
+      360, 360, 0, -20, 90, 90, 360;
+  qmin *= M_PI / 180.;
+  qmax *= M_PI / 180.;
+  torque_limit.setConstant(0.3);
+  torque_limit(5) = torque_limit(7 + 5) = 0.5;
 
   auto active_ids = master_arm->Initialize();
   if (active_ids.size() != upc::MasterArm::kDOF + 2) {
@@ -693,7 +758,12 @@ void InitializeMasterArm() {
 
     if (state.button_right.button == 1) {
       input.target_operation_mode(Eigen::seq(0, 6)).setConstant(DynamixelBus::kCurrentControlMode);
-      input.target_torque(Eigen::seq(0, 6)) = state.gravity_term(Eigen::seq(0, 6));
+      input.target_torque(Eigen::seq(0, 6)) =
+          state.gravity_term(Eigen::seq(0, 6)) +
+          ((qmin(Eigen::seq(0, 6)) - state.q_joint(Eigen::seq(0, 6)).cwiseMax(0)) * 6 +
+           (qmax(Eigen::seq(0, 6)) - state.q_joint(Eigen::seq(0, 6)).cwiseMin(0)) * 6)
+              .cwiseMin(torque_limit(Eigen::seq(0, 6)))
+              .cwiseMax(-torque_limit(Eigen::seq(0, 6)));
       q_right = state.q_joint(Eigen::seq(0, 6));
     } else {
       input.target_operation_mode(Eigen::seq(0, 6)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
@@ -702,7 +772,12 @@ void InitializeMasterArm() {
 
     if (state.button_left.button == 1) {
       input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentControlMode);
-      input.target_torque(Eigen::seq(7, 13)) = state.gravity_term(Eigen::seq(7, 13));
+      input.target_torque(Eigen::seq(7, 13)) =
+          state.gravity_term(Eigen::seq(0, 6)) +
+          ((qmin(Eigen::seq(7, 13)) - state.q_joint(Eigen::seq(7, 13)).cwiseMax(0)) * 6 +
+           (qmax(Eigen::seq(7, 13)) - state.q_joint(Eigen::seq(7, 13)).cwiseMin(0)) * 6)
+              .cwiseMin(torque_limit(Eigen::seq(7, 13)))
+              .cwiseMax(-torque_limit(Eigen::seq(7, 13)));
       q_left = state.q_joint(Eigen::seq(7, 13));
     } else {
       input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
@@ -736,14 +811,16 @@ void StartRecording(const std::string& file_path) {
       CreateDataSet<double>(record_file, "/observations/qpos", kRobotDOF + kGripperDOF));
   record_qvel_dataset = std::make_unique<HighFive::DataSet>(
       CreateDataSet<double>(record_file, "/observations/qvel", kRobotDOF + kGripperDOF));
+  record_torque_dataset = std::make_unique<HighFive::DataSet>(
+      CreateDataSet<double>(record_file, "/observations/torque", kRobotDOF + kGripperDOF));
   record_ft_dataset =
       std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/observations/ft_sensor", 6 * 2));
 
-  data_len = 0;
+  data_count = 0;
 }
 
 void StopRecording() {
-  if(!record_file) {
+  if (!record_file) {
     return;
   }
 

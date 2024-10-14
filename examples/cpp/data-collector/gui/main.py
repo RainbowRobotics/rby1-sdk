@@ -4,11 +4,14 @@ import signal
 import argparse
 import asyncio
 import json
+import numpy as np
+import cv2
 
 from ui_form import Ui_MainWindow
 # from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QMessageBox
 from PySide6.QtCore import QSocketNotifier
+from PySide6.QtGui import QIntValidator
 
 import zmq
 
@@ -35,6 +38,8 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
     def setupUi(self, main_windows):
         super(DataCollectorGui, self).setupUi(self)
 
+        self.LE_EpisodeNumber.setValidator(QIntValidator(bottom=0, parent=self))
+
         self.PB_Close.clicked.connect(self.quit)
         self.PB_Zero.clicked.connect(self.zero)
         self.PB_Ready.clicked.connect(self.ready)
@@ -46,6 +51,9 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
         self.PB_StopMotion.clicked.connect(self.stop_motion)
         self.PB_PositionZero.clicked.connect(self.position_zero)
         self.PB_RotationZero.clicked.connect(self.rotation_zero)
+        self.PB_StartRecording.clicked.connect(self.start_recording)
+        self.PB_StopRecording.clicked.connect(self.stop_recording)
+        self.PB_EpisodeNumberReset.clicked.connect(lambda: self.LE_EpisodeNumber.setText('0'))
         self.S_Yaw.sliderReleased.connect(lambda: self.S_Yaw.setValue(0))
         self.S_Yaw.actionTriggered.connect(lambda e: self.S_Yaw.setValue(0) if 0 < e < 7 else 0)
         self.S_Pitch.sliderReleased.connect(lambda: self.S_Pitch.setValue(0))
@@ -61,13 +69,13 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
         self.ctx = zmq.Context.instance()
 
         cmd_url = f"tcp://{self.address}:{self.cmd_port}"
-        print(cmd_url)
+        # print(cmd_url)
         self.dealer = self.ctx.socket(zmq.DEALER)
         self.dealer.setsockopt(zmq.IDENTITY, b'client')
         self.dealer.connect(cmd_url)
 
         sub_url = f"tcp://{self.address}:{self.data_port}"
-        print(sub_url)
+        # print(sub_url)
         self.sub = self.ctx.socket(zmq.SUB)
         self.sub.connect(sub_url)
         self.sub.setsockopt(zmq.SUBSCRIBE, b'')
@@ -160,6 +168,30 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
                     if data["master_arm"] is not None:
                         self.set_background_color(self.LE_MasterArm, COLOR_GREEN if data["master_arm"] else COLOR_RED)
 
+                    if data["storage_available"] is not None:
+                        self.LE_StorageAvailable.setText(f"{data['storage_available']} MB")
+
+                    if data["storage_free"] is not None:
+                        self.LE_StorageFree.setText(f"{data['storage_free']} MB")
+
+                    if data["storage_capacity"] is not None:
+                        self.LE_StorageCapacity.setText(f"{data['storage_capacity']} MB")
+
+                    if data["recording"] is not None:
+                        self.set_background_color(self.LE_Recording, COLOR_GREEN if data["recording"] else COLOR_RED)
+
+                    if data["recording_count"] is not None:
+                        self.L_RecordingCount.setText(f"{data['recording_count']}")
+
+                if topic == b"image":
+                    data = json.loads(msg)
+
+                    if data["cam0_rgb"] is not None:
+                        nparr = np.frombuffer(bytes(data["cam0_rgb"]['bytes']), dtype=np.uint8)
+                        img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                        # cv2.imshow("a", img_np)
+                        # cv2.waitKey(1)
+
                 # print("[Socket] zmq.POLLIN")
                 # print("[Socket] received: " + repr(msg))
             # elif flags & zmq.POLLOUT:
@@ -175,13 +207,39 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
 
         self.notifier.setEnabled(True)
 
+    def start_recording(self):
+        if self.LE_EpisodeName.text() == "":
+            self.LE_EpisodeName.setText('episode')
+
+        if self.LE_EpisodeNumber.text() == "":
+            self.LE_EpisodeNumber.setText('0')
+
+        if self.dealer is None:
+            return  # ZMQ is not initialized yet
+
+        name = f"{self.LE_EpisodeName.text()}_{self.LE_EpisodeNumber.text()}"
+        command = {'command': 'start_recording', 'name': name}
+        self.dealer.send_multipart([json.dumps(command).encode('utf-8')])
+
+    def stop_recording(self):
+        if self.dealer is None:
+            return  # ZMQ is not initialized yet
+
+        command = {'command': 'stop_recording'}
+        self.dealer.send_multipart([json.dumps(command).encode('utf-8')])
+
+        if self.LE_EpisodeNumber.text() == "":
+            self.LE_EpisodeNumber.setText('0')
+        else:
+            self.LE_EpisodeNumber.setText(f"{int(self.LE_EpisodeNumber.text()) + 1}")
+
     @staticmethod
     def set_background_color(le, color):
         le.setStyleSheet(f"background-color: {color}")
 
 
 if __name__ == '__main__':
-    os.environ["QT_IM_MODULE"] = "qtvirtualkeyboard"
+    # os.environ["QT_IM_MODULE"] = "qtvirtualkeyboard"
 
     parser = argparse.ArgumentParser(description="data_collector_gui")
     parser.add_argument('--address', type=str, required=True, help="UPC address")

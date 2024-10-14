@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QHBoxLayout,
-    QLabel, QLineEdit, QMainWindow, QPushButton,
-    QSizePolicy, QSlider, QSpacerItem, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QGroupBox,
+    QHBoxLayout, QLabel, QLineEdit, QMainWindow,
+    QPushButton, QSizePolicy, QSlider, QSpacerItem,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -170,19 +170,37 @@ class Ui_MainWindow(object):
         self.frame_3.setObjectName(u"frame_3")
         self.frame_3.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame_3.setFrameShadow(QFrame.Shadow.Sunken)
-        self.gridLayout_3 = QGridLayout(self.frame_3)
-        self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.LE_MasterArm = QLineEdit(self.frame_3)
-        self.LE_MasterArm.setObjectName(u"LE_MasterArm")
+        self.verticalLayout_4 = QVBoxLayout(self.frame_3)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.label_13 = QLabel(self.frame_3)
+        self.label_13.setObjectName(u"label_13")
+        font = QFont()
+        font.setBold(True)
+        self.label_13.setFont(font)
+        self.label_13.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_5.addWidget(self.label_13)
+
+        self.LE_Robot = QLineEdit(self.frame_3)
+        self.LE_Robot.setObjectName(u"LE_Robot")
         sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.LE_MasterArm.sizePolicy().hasHeightForWidth())
-        self.LE_MasterArm.setSizePolicy(sizePolicy2)
-        self.LE_MasterArm.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.LE_MasterArm.setReadOnly(True)
+        sizePolicy2.setHeightForWidth(self.LE_Robot.sizePolicy().hasHeightForWidth())
+        self.LE_Robot.setSizePolicy(sizePolicy2)
+        self.LE_Robot.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.LE_Robot.setReadOnly(True)
 
-        self.gridLayout_3.addWidget(self.LE_MasterArm, 0, 5, 1, 1)
+        self.horizontalLayout_5.addWidget(self.LE_Robot)
+
+        self.label_15 = QLabel(self.frame_3)
+        self.label_15.setObjectName(u"label_15")
+        self.label_15.setFont(font)
+        self.label_15.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_5.addWidget(self.label_15)
 
         self.LE_Camera = QLineEdit(self.frame_3)
         self.LE_Camera.setObjectName(u"LE_Camera")
@@ -191,52 +209,79 @@ class Ui_MainWindow(object):
         self.LE_Camera.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.LE_Camera.setReadOnly(True)
 
-        self.gridLayout_3.addWidget(self.LE_Camera, 0, 3, 1, 1)
-
-        self.label_13 = QLabel(self.frame_3)
-        self.label_13.setObjectName(u"label_13")
-        font = QFont()
-        font.setBold(True)
-        self.label_13.setFont(font)
-        self.label_13.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_3.addWidget(self.label_13, 0, 0, 1, 1)
-
-        self.label_15 = QLabel(self.frame_3)
-        self.label_15.setObjectName(u"label_15")
-        self.label_15.setFont(font)
-        self.label_15.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.gridLayout_3.addWidget(self.label_15, 0, 2, 1, 1)
+        self.horizontalLayout_5.addWidget(self.LE_Camera)
 
         self.label_16 = QLabel(self.frame_3)
         self.label_16.setObjectName(u"label_16")
         self.label_16.setFont(font)
         self.label_16.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout_3.addWidget(self.label_16, 0, 4, 1, 1)
+        self.horizontalLayout_5.addWidget(self.label_16)
 
-        self.LE_Robot = QLineEdit(self.frame_3)
-        self.LE_Robot.setObjectName(u"LE_Robot")
-        sizePolicy2.setHeightForWidth(self.LE_Robot.sizePolicy().hasHeightForWidth())
-        self.LE_Robot.setSizePolicy(sizePolicy2)
-        self.LE_Robot.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.LE_Robot.setReadOnly(True)
+        self.LE_MasterArm = QLineEdit(self.frame_3)
+        self.LE_MasterArm.setObjectName(u"LE_MasterArm")
+        sizePolicy2.setHeightForWidth(self.LE_MasterArm.sizePolicy().hasHeightForWidth())
+        self.LE_MasterArm.setSizePolicy(sizePolicy2)
+        self.LE_MasterArm.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.LE_MasterArm.setReadOnly(True)
 
-        self.gridLayout_3.addWidget(self.LE_Robot, 0, 1, 1, 1)
+        self.horizontalLayout_5.addWidget(self.LE_MasterArm)
+
+
+        self.verticalLayout_4.addLayout(self.horizontalLayout_5)
+
+        self.groupBox = QGroupBox(self.frame_3)
+        self.groupBox.setObjectName(u"groupBox")
+        self.horizontalLayout_3 = QHBoxLayout(self.groupBox)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.label_11 = QLabel(self.groupBox)
+        self.label_11.setObjectName(u"label_11")
+
+        self.horizontalLayout_3.addWidget(self.label_11)
+
+        self.LE_StorageFree = QLineEdit(self.groupBox)
+        self.LE_StorageFree.setObjectName(u"LE_StorageFree")
+        self.LE_StorageFree.setReadOnly(True)
+
+        self.horizontalLayout_3.addWidget(self.LE_StorageFree)
+
+        self.label_22 = QLabel(self.groupBox)
+        self.label_22.setObjectName(u"label_22")
+
+        self.horizontalLayout_3.addWidget(self.label_22)
+
+        self.LE_StorageAvailable = QLineEdit(self.groupBox)
+        self.LE_StorageAvailable.setObjectName(u"LE_StorageAvailable")
+        self.LE_StorageAvailable.setReadOnly(True)
+
+        self.horizontalLayout_3.addWidget(self.LE_StorageAvailable)
+
+        self.label_23 = QLabel(self.groupBox)
+        self.label_23.setObjectName(u"label_23")
+
+        self.horizontalLayout_3.addWidget(self.label_23)
+
+        self.LE_StorageCapacity = QLineEdit(self.groupBox)
+        self.LE_StorageCapacity.setObjectName(u"LE_StorageCapacity")
+        self.LE_StorageCapacity.setReadOnly(True)
+
+        self.horizontalLayout_3.addWidget(self.LE_StorageCapacity)
+
+
+        self.verticalLayout_4.addWidget(self.groupBox)
 
 
         self.gridLayout_2.addWidget(self.frame_3, 0, 0, 1, 3)
 
-        self.lineEdit = QLineEdit(self.centralwidget)
-        self.lineEdit.setObjectName(u"lineEdit")
+        self.LE_EpisodeName = QLineEdit(self.centralwidget)
+        self.LE_EpisodeName.setObjectName(u"LE_EpisodeName")
 
-        self.gridLayout_2.addWidget(self.lineEdit, 1, 1, 1, 2)
+        self.gridLayout_2.addWidget(self.LE_EpisodeName, 1, 1, 1, 2)
 
-        self.lineEdit_2 = QLineEdit(self.centralwidget)
-        self.lineEdit_2.setObjectName(u"lineEdit_2")
+        self.LE_EpisodeNumber = QLineEdit(self.centralwidget)
+        self.LE_EpisodeNumber.setObjectName(u"LE_EpisodeNumber")
 
-        self.gridLayout_2.addWidget(self.lineEdit_2, 2, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.LE_EpisodeNumber, 2, 1, 1, 1)
 
         self.label_4 = QLabel(self.centralwidget)
         self.label_4.setObjectName(u"label_4")
@@ -250,10 +295,10 @@ class Ui_MainWindow(object):
 
         self.gridLayout_2.addWidget(self.PB_Close, 0, 3, 3, 1)
 
-        self.pushButton_2 = QPushButton(self.centralwidget)
-        self.pushButton_2.setObjectName(u"pushButton_2")
+        self.PB_EpisodeNumberReset = QPushButton(self.centralwidget)
+        self.PB_EpisodeNumberReset.setObjectName(u"PB_EpisodeNumberReset")
 
-        self.gridLayout_2.addWidget(self.pushButton_2, 2, 2, 1, 1)
+        self.gridLayout_2.addWidget(self.PB_EpisodeNumberReset, 2, 2, 1, 1)
 
         self.gridLayout_2.setColumnStretch(0, 1)
         self.gridLayout_2.setColumnStretch(1, 2)
@@ -343,11 +388,11 @@ class Ui_MainWindow(object):
 
         self.gridLayout_4.addItem(self.verticalSpacer, 4, 1, 1, 1)
 
-        self.lineEdit_11 = QLineEdit(self.frame_5)
-        self.lineEdit_11.setObjectName(u"lineEdit_11")
-        self.lineEdit_11.setReadOnly(True)
+        self.LE_Yaw = QLineEdit(self.frame_5)
+        self.LE_Yaw.setObjectName(u"LE_Yaw")
+        self.LE_Yaw.setReadOnly(True)
 
-        self.gridLayout_4.addWidget(self.lineEdit_11, 3, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.LE_Yaw, 3, 1, 1, 1)
 
         self.S_Pitch = QSlider(self.frame_5)
         self.S_Pitch.setObjectName(u"S_Pitch")
@@ -370,11 +415,11 @@ class Ui_MainWindow(object):
 
         self.gridLayout_4.addWidget(self.label_17, 3, 0, 1, 1)
 
-        self.lineEdit_10 = QLineEdit(self.frame_5)
-        self.lineEdit_10.setObjectName(u"lineEdit_10")
-        self.lineEdit_10.setReadOnly(True)
+        self.LE_Pitch = QLineEdit(self.frame_5)
+        self.LE_Pitch.setObjectName(u"LE_Pitch")
+        self.LE_Pitch.setReadOnly(True)
 
-        self.gridLayout_4.addWidget(self.lineEdit_10, 2, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.LE_Pitch, 2, 1, 1, 1)
 
         self.line_3 = QFrame(self.frame_5)
         self.line_3.setObjectName(u"line_3")
@@ -551,9 +596,15 @@ class Ui_MainWindow(object):
         self.label_13.setText(QCoreApplication.translate("MainWindow", u"Robot", None))
         self.label_15.setText(QCoreApplication.translate("MainWindow", u"Camera", None))
         self.label_16.setText(QCoreApplication.translate("MainWindow", u"MasterArm", None))
+        self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"UPC Storage", None))
+        self.label_11.setText(QCoreApplication.translate("MainWindow", u"Free", None))
+        self.label_22.setText(QCoreApplication.translate("MainWindow", u"Available", None))
+        self.label_23.setText(QCoreApplication.translate("MainWindow", u"Capacity", None))
+        self.LE_EpisodeName.setText(QCoreApplication.translate("MainWindow", u"episode", None))
+        self.LE_EpisodeNumber.setText(QCoreApplication.translate("MainWindow", u"0", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"# of ep.", None))
         self.PB_Close.setText(QCoreApplication.translate("MainWindow", u"Close", None))
-        self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
+        self.PB_EpisodeNumberReset.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
         self.PB_StartRecording.setText(QCoreApplication.translate("MainWindow", u"Start\n"
 "Recording", None))
         self.PB_StopRecording.setText(QCoreApplication.translate("MainWindow", u"Stop\n"

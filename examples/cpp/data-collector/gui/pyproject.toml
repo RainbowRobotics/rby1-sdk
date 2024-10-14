@@ -6,6 +6,7 @@ python = ">=3.10,<3.13"
 pyside6 = "^6.8.0"
 numpy = "^2.1.2"
 pyzmq = "^26.2.0"
+opencv-python = "^4.10.0.84"
 
 [build-system]
 requires = ["poetry-core"]

@@ -19,6 +19,7 @@ class DynamixelBusImpl {
 
   ~DynamixelBusImpl() {
     port_handler_->closePort();
+    port_handler_->clearPort();
 
     delete port_handler_;
     delete packet_handler_;
@@ -59,7 +60,7 @@ class DynamixelBusImpl {
 
   void SendTorqueEnable(int id, int onoff) {
     packet_handler_->write1ByteTxOnly(port_handler_, id, DynamixelBus::kAddrTorqueEnable, onoff);
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(500us);
   }
 
   std::optional<int> ReadTorqueEnable(int id) {
@@ -88,7 +89,7 @@ class DynamixelBusImpl {
 
   void SendGoalPosition(int id, int goal_position) {
     packet_handler_->write4ByteTxOnly(port_handler_, id, DynamixelBus::kAddrGoalPosition, goal_position);
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(500us);
   }
 
   std::optional<int> ReadOperationMode(int id) {
@@ -106,7 +107,7 @@ class DynamixelBusImpl {
   bool SendOperationMode(int id, int operation_mode) {
     int dxl_comm_result =
         packet_handler_->write1ByteTxOnly(port_handler_, id, DynamixelBus::kAddrOperatingMode, operation_mode);
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(500us);
     return dxl_comm_result == COMM_SUCCESS;
   }
 
@@ -143,6 +144,8 @@ class DynamixelBusImpl {
         }
       }
     }
+
+    std::this_thread::sleep_for(500us);
 
     if (rv.empty()) {
       return {};
@@ -293,7 +296,7 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(500us);
   }
 
   void BulkWriteTorqueEnable(const std::vector<int>& ids, int enable) {
@@ -312,7 +315,7 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(500us);
   }
 
   void BulkWriteOperationMode(const std::vector<std::pair<int, int>>& id_and_mode_vector) {
@@ -331,7 +334,7 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(500us);
   }
 
   void BulkWriteSendPosition(const std::vector<std::pair<int, double>>& id_and_position_vector) {
@@ -353,7 +356,7 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(500us);
   }
 
   void BulkWriteSendTorque(const std::vector<std::pair<int, double>>& id_and_torque_vector) {
@@ -373,13 +376,13 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(500us);
   }
 
   void SendVibration(int id, int level) {
     if (id > 0x80) {
       packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrGoalVibrationLevel, level);
-      std::this_thread::sleep_for(50us);
+      std::this_thread::sleep_for(500us);
     }
   }
 

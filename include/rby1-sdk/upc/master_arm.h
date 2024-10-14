@@ -21,6 +21,8 @@ class MasterArm {
 
   struct State {
     Eigen::Vector<double, kDOF> q_joint;
+    Eigen::Vector<double, kDOF> qvel_joint;
+    Eigen::Vector<double, kDOF> torque_joint;
     Eigen::Vector<double, kDOF> gravity_term;
 
     Eigen::Vector<int, kDOF> operation_mode;
@@ -55,6 +57,7 @@ class MasterArm {
  private:
   EventLoop ev_;
   double control_period_;  // (sec)
+  std::vector<double> torque_constant_;
 
   std::shared_ptr<DynamixelBus> handler_;
   std::shared_ptr<dyn::Robot<kDOF>> dyn_robot_;

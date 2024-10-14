@@ -55,8 +55,9 @@ std::vector<int> MasterArm::Initialize() {
     exit(1);
   }
 
-  handler_->SetTorqueConstant(
-      {1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043, 1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043});
+  torque_constant_ = {1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043,
+                      1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043};
+  handler_->SetTorqueConstant(torque_constant_);
 
   active_ids_ = active_ids;
   return active_ids;
@@ -117,12 +118,27 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
           }
         }
 
-        std::optional<std::vector<std::pair<int, double>>> temp_q_joint_vector = handler_->BulkReadEncoder(active_ids_);
-        if (temp_q_joint_vector.has_value()) {
-          for (auto const& ret : temp_q_joint_vector.value()) {
-            state_.q_joint(ret.first) = ret.second;
+        // std::optional<std::vector<std::pair<int, double>>> temp_q_joint_vector = handler_->BulkReadEncoder(active_ids_);
+        // if (temp_q_joint_vector.has_value()) {
+        //   for (auto const& ret : temp_q_joint_vector.value()) {
+        //     state_.q_joint(ret.first) = ret.second;
+        //   }
+        //   state_updated_ = true;
+        // } else {
+        //   return;
+        // }
+
+        std::optional<std::vector<std::pair<int, DynamixelBus::MotorState>>> temp_ms_vector =
+            handler_->BulkReadMotorState(active_ids_);
+        if (temp_ms_vector.has_value()) {
+          for (auto const& ret : temp_ms_vector.value()) {
+            state_.q_joint(ret.first) = ret.second.position;
+            state_.qvel_joint(ret.first) = ret.second.velocity;
+            state_.torque_joint(ret.first) = ret.second.current * torque_constant_[ret.first] / kTorqueScaling;
           }
           state_updated_ = true;
+        } else {
+          return;
         }
 
         dyn_state_->SetQ(state_.q_joint);

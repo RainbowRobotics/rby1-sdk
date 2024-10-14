@@ -32,9 +32,12 @@ using namespace cv;
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-const double kFrequency = 50;   // (Hz) = Framerate
+const double kFrequency = 60;   // (Hz) = Framerate
 const std::string kAll = ".*";  // NOLINT
+const double kMasterArmLimitGain = 0.01;
 const std::string MASTER_ARM_DEV = "/dev/rby1_master_arm";
+const std::string GRIPPER_DEV = "/dev/rby1_gripper";
+const double kGripperControlFrequency = 100;  // (Hz)
 const std::string COMMAND_POWER_OFF = "power_off";
 const std::string COMMAND_POWER_ON = "power_on";
 const std::string COMMAND_SERVO_ON = "servo_on";
@@ -67,8 +70,9 @@ const std::map<std::string, std::size_t> rs_serials = {{"233522071632", 0}, {"21
 #ifdef REALSENSE2
 rs2::context rs_ctx;
 std::array<rs2::pipeline, kCameraN> rs_pipelines;
+std::array<rs2::colorizer, kCameraN> rs_colorizer;
 #endif
-bool camera_error = false;
+bool camera_error = true;
 
 /**
  * HDF5
@@ -97,10 +101,33 @@ std::atomic<int> data_count = 0;
 /**
  * Tele-operation
  */
-//bool to_right, to_left;
-//Eigen::Vector<double, kRobotDOF + kGripperDOF> to_qref;
+Eigen::Vector<double, upc::MasterArm::kDOF> ma_qmin;
+Eigen::Vector<double, upc::MasterArm::kDOF> ma_qmax;
+Eigen::Vector<double, upc::MasterArm::kDOF> ma_torque_limit;
+Eigen::Vector<double, upc::MasterArm::kDOF> ma_viscous_term;
+bool ma_init = false;
+Eigen::Vector<double, upc::MasterArm::kDOF / 2> ma_q_right, ma_q_left;
+bool tele_right_button, tele_left_button;
+Eigen::Vector<double, upc::MasterArm::kDOF> tele_q;
+std::shared_ptr<rb::dyn::Robot<rb::y1_model::A::kRobotDOF>> robot_dyn;
+std::shared_ptr<rb::dyn::State<rb::y1_model::A::kRobotDOF>> robot_dyn_state;
+Eigen::Vector<double, rb::y1_model::A::kRobotDOF> q_lower_limit, q_upper_limit;
+Eigen::Vector<double, rb::y1_model::A::kRobotDOF> q_joint_ref;
 
-EventLoop publisher_ev, service_ev, robot_ev, cm_ev, camera_ev, record_ev;
+/**
+ * Gripper
+ */
+std::unique_ptr<rb::DynamixelBus> gripper;
+int gripper_init_step{0};
+steady_clock::time_point gripper_step_start_time;
+Eigen::Vector<int, 2> gripper_operation_mode;
+Eigen::Vector<double, 2> gripper_torque_command;
+Eigen::Vector<double, 2> gripper_position_command;
+Eigen::Vector<double, 2> gripper_position_command_prev;
+std::vector<double> gripper_torque_constant;
+Eigen::Vector<double, 2> gripper_min, gripper_max;
+
+EventLoop publisher_ev, service_ev, robot_ev, cm_ev, camera_ev, record_ev, gripper_ev;
 std::future<void> image_future;
 
 bool is_camera_failed{false};
@@ -136,10 +163,13 @@ void RobotPowerOff();
 void RobotPowerOn();
 void RobotServoOn();
 void RobotControlManagerInit();
+void InitializeGripper();
+void ControlGripper();
 void InitializeCamera();
 void InitializeMasterArm();
 void StartRecording(const std::string& file_path);
 void StopRecording();
+void StartTeleoperation();
 template <typename T>
 void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, std::size_t len, T* data);
 template <typename T>
@@ -156,10 +186,20 @@ int main(int argc, char** argv) {
 
   signal(SIGINT, SignalHandler);
 
+  //
+  try {
+    // Latency timer setting
+    upc::InitializeDevice(GRIPPER_DEV);
+  } catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+    exit(1);
+  }
+
   publisher_ev.DoTask([] { InitializePublisher(); });
   service_ev.DoTask([] { InitializeService(); });
   robot_ev.DoTask([=] { InitializeRobot(upc_address); });
   camera_ev.DoTask([] { InitializeCamera(); });
+  gripper_ev.DoTask([] { InitializeGripper(); });
   InitializeMasterArm();
 
   publisher_ev.PushTask([] { master_arm_connected = (master_arm != nullptr); });
@@ -181,9 +221,77 @@ int main(int argc, char** argv) {
         }
         publisher_ev.PushTask([p] { robot_connected = p; });
 
-        // Teleoperation();
+        if (rcs_handler) {
+
+          if (rcs_handler->IsDone()) {
+            rcs_handler = nullptr;
+            return;
+          }
+
+          static double right_arm_minimum_time = 1., left_arm_minimum_time = 1.;
+          static double lpf_update_ratio = 0.1;
+
+          if (tele_right_button) {
+            //right hand position control mode
+            q_joint_ref.block(0, 0, 7, 1) =
+                q_joint_ref.block(0, 0, 7, 1) * (1 - lpf_update_ratio) + tele_q.block(0, 0, 7, 1) * lpf_update_ratio;
+          } else {
+            right_arm_minimum_time = 1.0;
+          }
+
+          if (tele_left_button) {
+            //left hand position control mode
+            q_joint_ref.block(7, 0, 7, 1) =
+                q_joint_ref.block(7, 0, 7, 1) * (1 - lpf_update_ratio) + tele_q.block(7, 0, 7, 1) * lpf_update_ratio;
+          } else {
+            left_arm_minimum_time = 1.0;
+          }
+
+          for (int i = 0; i < 14; i++) {
+            q_joint_ref(i) = std::clamp(q_joint_ref(i), q_lower_limit(i), q_upper_limit(i));
+          }
+
+          Eigen::Vector<double, 7> target_position_left = q_joint_ref.block(7, 0, 7, 1);
+          Eigen::Vector<double, 7> target_position_right = q_joint_ref.block(0, 0, 7, 1);
+          Eigen::Vector<double, 7> acc_limit, vel_limit;
+
+          acc_limit.setConstant(1200.0);
+          acc_limit *= M_PI / 180.;
+
+          vel_limit << 160, 160, 160, 160, 330, 330, 330;
+          vel_limit *= M_PI / 180.;
+
+          right_arm_minimum_time *= 0.99;
+          right_arm_minimum_time = std::max(right_arm_minimum_time, 0.01);
+
+          left_arm_minimum_time *= 0.99;
+          left_arm_minimum_time = std::max(left_arm_minimum_time, 0.01);
+
+          try {
+            RobotCommandBuilder command_builder;
+
+            command_builder.SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
+                BodyComponentBasedCommandBuilder()
+                    .SetRightArmCommand(JointPositionCommandBuilder()
+                                            .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
+                                            .SetMinimumTime(right_arm_minimum_time)
+                                            .SetPosition(target_position_right)
+                                            .SetVelocityLimit(vel_limit)
+                                            .SetAccelerationLimit(acc_limit))
+                    .SetLeftArmCommand(JointPositionCommandBuilder()
+                                           .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
+                                           .SetMinimumTime(left_arm_minimum_time)
+                                           .SetPosition(target_position_left)
+                                           .SetVelocityLimit(vel_limit)
+                                           .SetAccelerationLimit(acc_limit))));
+
+            rcs_handler->SendCommand(command_builder);
+
+          } catch (...) {}
+        }
       },
-      10ms);
+      5ms);
+  gripper_ev.PushCyclicTask([] { ControlGripper(); }, nanoseconds((long)(1e9 / kGripperControlFrequency)));
   cm_ev.PushCyclicTask(
       [] {
         if (!robot) {
@@ -244,29 +352,39 @@ int main(int argc, char** argv) {
         }
 
 #ifdef REALSENSE2
-        int id = 0;
+        std::vector<rs2::frame> new_frames;
         for (auto&& pipe : rs_pipelines) {
           rs2::frameset fs;
           if (pipe.poll_for_frames(&fs)) {
-            rs2::frame color_frame = fs.get_color_frame();
-            rs2::frame depth_frame = fs.get_depth_frame();
-            record_ev.PushTask(
-                [rgb = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)color_frame.get_data(), Mat::AUTO_STEP),
-                 depth = Mat(Size(kWidth, kHeight), CV_16FC1, (void*)depth_frame.get_data(), Mat::AUTO_STEP), id] {
-                  record_rgb[id] = rgb;
-                  record_depth[id] = depth;
-                });
+            for (const rs2::frame& f : fs)
+              new_frames.emplace_back(f);
+          }
+        }
 
-            rs2::frame colored_rgb = rs2::colorizer().process(color_frame);
-            rs2::frame colored_depth = rs2::colorizer().process(depth_frame);
-            publisher.PushTask(
-                [rgb = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)colored_rgb.get_data(), Mat::AUTO_STEP),
-                 depth = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)colored_depth.get_data(), Mat::AUTO_STEP), id] {
-                  rgb_images[id] = rgb;
+        for (const auto& frame : new_frames) {
+          auto serial = rs2::sensor_from_frame(frame)->get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
+          if (rs_serials.find(serial) == rs_serials.end()) {
+            continue;
+          }
+          int id = rs_serials.find(serial)->second;
+
+          rs2_stream stream_type = frame.get_profile().stream_type();
+          if (stream_type == RS2_STREAM_COLOR) {
+            record_ev.PushTask([rgb = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)frame.get_data(), Mat::AUTO_STEP),
+                                id] { record_rgb[id] = rgb; });
+            publisher_ev.PushTask([rgb = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)frame.get_data(), Mat::AUTO_STEP),
+                                   id] { rgb_images[id] = rgb; });
+          } else if (stream_type == RS2_STREAM_DEPTH) {
+            rs2::depth_frame depth = frame.as<rs2::depth_frame>();
+
+            record_ev.PushTask([depth = Mat(Size(kWidth, kHeight), CV_16FC1, (void*)depth.get_data(), Mat::AUTO_STEP),
+                                id] { record_depth[id] = depth; });
+            rs2::frame colored_depth = rs_colorizer[id].process(depth);
+            publisher_ev.PushTask(
+                [depth = Mat(Size(kWidth, kHeight), CV_8UC3, (void*)colored_depth.get_data(), Mat::AUTO_STEP), id] {
                   depth_images[id] = depth;
                 });
           }
-          id++;
         }
 #endif
       },
@@ -311,6 +429,15 @@ int main(int argc, char** argv) {
 }
 
 void SignalHandler(int signum) {
+  robot_ev.DoTask([=] {
+    if (!robot) {
+      return;
+    }
+
+    robot->PowerOff("12v");
+  });
+  robot_ev.Stop();
+
   record_ev.DoTask([] {
     if (record_file) {
       record_file->flush();
@@ -318,14 +445,19 @@ void SignalHandler(int signum) {
       record_file = nullptr;
     }
   });
+  record_ev.Stop();
 
   camera_ev.DoTask([] {
     if (!camera_error) {
       // TODO: close rs pipelines
+      for (auto&& pipe : rs_pipelines) {
+        pipe.stop();
+      }
     }
 
     camera_error = true;
   });
+  camera_ev.Stop();
 
   std::cout << "Exit" << std::endl;
 
@@ -376,6 +508,8 @@ void DoService() {
       robot_ev.PushTask([=] { RobotServoOn(); });
     } else if (command == COMMAND_CONTROL_MANAGER_INIT) {
       robot_ev.PushTask([=] { RobotControlManagerInit(); });
+    } else if (command == COMMAND_START_TELEOPERATION) {
+      robot_ev.PushTask([=] { StartTeleoperation(); });
     } else if (command == COMMAND_STOP_MOTION) {
       robot_ev.PushTask([=] { StopMotion(); });
     } else if (command == COMMAND_START_RECORDING) {
@@ -477,6 +611,8 @@ void InitializeRobot(const std::string& address) {
   }
   std::cout << "Successfully connected to the robot." << std::endl;
 
+  robot->PowerOn("12v");  // TODO
+
   robot->StartStateUpdate(
       [](const rb::RobotState<rb::y1_model::A>& state) {
         record_ev.PushTask([s = state] {
@@ -498,11 +634,25 @@ void InitializeRobot(const std::string& address) {
 
           servo = true;
           for (const auto& j : s.joint_states) {
-            servo &= j.is_ready;
+            servo &= (j.time_since_last_update.tv_sec < 1. && j.is_ready);
           }
+        });
+
+        robot_ev.PushTask([s = state] {
+          if (rcs_handler) {
+            return;
+          }
+
+          q_joint_ref = s.position.block(2 + 6, 0, 14, 1);
         });
       },
       100 /* Hz */);
+
+  robot_dyn = robot->GetDynamics();
+  robot_dyn_state = robot_dyn->MakeState({"base"}, y1_model::A::kRobotJointNames);
+
+  q_upper_limit = robot_dyn->GetLimitQUpper(robot_dyn_state).block(2 + 6, 0, 14, 1);
+  q_lower_limit = robot_dyn->GetLimitQLower(robot_dyn_state).block(2 + 6, 0, 14, 1);
 }
 
 void GoPose(const Eigen::Vector<double, 20>& body, const Eigen::Vector<double, 2>& head, double minimum_time) {
@@ -560,7 +710,11 @@ void RobotPowerOff() {
     return;
   }
 
-  robot->PowerOff(kAll);
+  if (!IsMotionDone()) {
+    StopMotion();
+  }
+
+  robot->PowerOff("^((?!12v)).*");
   std::cout << "Robot powered off." << std::endl;
 }
 
@@ -571,9 +725,9 @@ void RobotPowerOn() {
   }
 
   std::cout << "Checking power status..." << std::endl;
-  if (!robot->IsPowerOn(kAll)) {
+  if (!robot->IsPowerOn("^((?!12v)).*")) {
     std::cout << "Power is currently OFF. Attempting to power on..." << std::endl;
-    if (!robot->PowerOn(kAll)) {
+    if (!robot->PowerOn("^((?!12v)).*")) {
       std::cerr << "Error: Failed to power on the robot." << std::endl;
       robot = nullptr;
       return;
@@ -582,6 +736,8 @@ void RobotPowerOn() {
   } else {
     std::cout << "Power is already ON." << std::endl;
   }
+
+  std::this_thread::sleep_for(500ms);
 
   try {
     if (robot->IsPowerOn("48v")) {
@@ -605,7 +761,6 @@ void RobotServoOn() {
     std::cout << "Servo is currently OFF. Attempting to activate servo..." << std::endl;
     if (!robot->ServoOn(kAll)) {
       std::cerr << "Error: Failed to activate servo." << std::endl;
-      robot = nullptr;
       return;
     }
     std::cout << "Servo activated successfully." << std::endl;
@@ -646,7 +801,24 @@ void RobotControlManagerInit() {
   std::cout << "Control Manager enabled successfully." << std::endl;
 }
 
+void StartTeleoperation() {
+  if (!robot) {
+    std::cerr << "[Robot] Robot is not initialized" << std::endl;
+    return;
+  }
+
+  if (!IsMotionDone()) {
+    std::cerr << "[Robot] Robot is already moving" << std::endl;
+    return;
+  }
+
+  rcs_handler = robot->CreateCommandStream();
+  tele_right_button = tele_left_button = false;
+}
+
 void InitializeCamera() {
+  camera_error = true;
+
 #ifdef REALSENSE2
   std::size_t dev_id;
   std::vector<std::string> serials;
@@ -706,10 +878,13 @@ void InitializeCamera() {
     rs2::config cfg;
     cfg.enable_device(serial);
     cfg.enable_stream(RS2_STREAM_DEPTH, kWidth, kHeight, RS2_FORMAT_Z16, (int)kFrequency);
-    cfg.enable_stream(RS2_STREAM_COLOR, kWidth, kHeight, RS2_FORMAT_RGB8, (int)kFrequency);
+    cfg.enable_stream(RS2_STREAM_COLOR, kWidth, kHeight, RS2_FORMAT_BGR8, (int)kFrequency);
     pipe.start(cfg);
     rs_pipelines[dev_id] = pipe;
+    rs_colorizer[dev_id] = rs2::colorizer();
   }
+
+  camera_error = false;
 #endif
 }
 
@@ -726,63 +901,86 @@ void InitializeMasterArm() {
   master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
   master_arm->SetControlPeriod(0.01);
 
-  Eigen::Vector<double, upc::MasterArm::kDOF> qmin;
-  Eigen::Vector<double, upc::MasterArm::kDOF> qmax;
-  Eigen::Vector<double, upc::MasterArm::kDOF> torque_limit;
-  qmin << -360, -360, 0, -135, -90, 0, -360,  //
+  ma_qmin << -360, -90, 0, -135, -90, 0, -360,  //
       -360, 10, -90, -135, -90, 0, -360;
-  qmax << 360, -10, 90, -20, 90, 90, 360,  //
-      360, 360, 0, -20, 90, 90, 360;
-  qmin *= M_PI / 180.;
-  qmax *= M_PI / 180.;
-  torque_limit.setConstant(0.3);
-  torque_limit(5) = torque_limit(7 + 5) = 0.5;
+  ma_qmax << 360, -10, 90, -20, 90, 80, 360,  //
+      360, 90, 0, -20, 90, 80, 360;
+  ma_qmin *= M_PI / 180.;
+  ma_qmax *= M_PI / 180.;
+  ma_torque_limit.setConstant(3);
+  ma_viscous_term << 0.01, 0.01, 0.01, 0.01, 0.005, 0.005, 0.001,  //
+      0.01, 0.01, 0.01, 0.01, 0.005, 0.005, 0.001;
 
   auto active_ids = master_arm->Initialize();
   if (active_ids.size() != upc::MasterArm::kDOF + 2) {
     exit(1);
   }
 
-  bool init = false;
-  Eigen::Vector<double, upc::MasterArm::kDOF / 2> q_right, q_left;
-  q_right.setZero();
-  q_left.setZero();
-  master_arm->StartControl([&](const upc::MasterArm::State& state) {
+  ma_init = false;
+  ma_q_right.setZero();
+  ma_q_left.setZero();
+  master_arm->StartControl([](const upc::MasterArm::State& state) {
     upc::MasterArm::ControlInput input;
 
-    if (!init) {
-      q_right = state.q_joint(Eigen::seq(0, 6));
-      q_left = state.q_joint(Eigen::seq(7, 13));
-      init = true;
+    if (!ma_init) {
+      ma_q_right = state.q_joint(Eigen::seq(0, 6));
+      ma_q_left = state.q_joint(Eigen::seq(7, 13));
+      ma_init = true;
     }
 
     if (state.button_right.button == 1) {
       input.target_operation_mode(Eigen::seq(0, 6)).setConstant(DynamixelBus::kCurrentControlMode);
       input.target_torque(Eigen::seq(0, 6)) =
-          state.gravity_term(Eigen::seq(0, 6)) +
-          ((qmin(Eigen::seq(0, 6)) - state.q_joint(Eigen::seq(0, 6)).cwiseMax(0)) * 6 +
-           (qmax(Eigen::seq(0, 6)) - state.q_joint(Eigen::seq(0, 6)).cwiseMin(0)) * 6)
-              .cwiseMin(torque_limit(Eigen::seq(0, 6)))
-              .cwiseMax(-torque_limit(Eigen::seq(0, 6)));
-      q_right = state.q_joint(Eigen::seq(0, 6));
+          (state.gravity_term(Eigen::seq(0, 6)) +
+           (ma_qmin(Eigen::seq(0, 6)) - state.q_joint(Eigen::seq(0, 6))).cwiseMax(0) * kMasterArmLimitGain +
+           (ma_qmax(Eigen::seq(0, 6)) - state.q_joint(Eigen::seq(0, 6))).cwiseMin(0) * kMasterArmLimitGain +
+           (state.qvel_joint(Eigen::seq(0, 6)).array() * ma_viscous_term(Eigen::seq(0, 6)).array()).matrix())
+              .cwiseMin(ma_torque_limit(Eigen::seq(0, 6)))
+              .cwiseMax(-ma_torque_limit(Eigen::seq(0, 6)));
+      ma_q_right = state.q_joint(Eigen::seq(0, 6));
     } else {
       input.target_operation_mode(Eigen::seq(0, 6)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
-      input.target_position(Eigen::seq(0, 6)) = q_right;
+      input.target_position(Eigen::seq(0, 6)) = ma_q_right;
     }
 
     if (state.button_left.button == 1) {
       input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentControlMode);
       input.target_torque(Eigen::seq(7, 13)) =
-          state.gravity_term(Eigen::seq(0, 6)) +
-          ((qmin(Eigen::seq(7, 13)) - state.q_joint(Eigen::seq(7, 13)).cwiseMax(0)) * 6 +
-           (qmax(Eigen::seq(7, 13)) - state.q_joint(Eigen::seq(7, 13)).cwiseMin(0)) * 6)
-              .cwiseMin(torque_limit(Eigen::seq(7, 13)))
-              .cwiseMax(-torque_limit(Eigen::seq(7, 13)));
-      q_left = state.q_joint(Eigen::seq(7, 13));
+          (state.gravity_term(Eigen::seq(7, 13)) +
+           (ma_qmin(Eigen::seq(7, 13)) - state.q_joint(Eigen::seq(7, 13))).cwiseMax(0) * kMasterArmLimitGain +
+           (ma_qmax(Eigen::seq(7, 13)) - state.q_joint(Eigen::seq(7, 13))).cwiseMin(0) * kMasterArmLimitGain +
+           (state.qvel_joint(Eigen::seq(7, 13)).array() * ma_viscous_term(Eigen::seq(7, 13)).array()).matrix())
+              .cwiseMin(ma_torque_limit(Eigen::seq(7, 13)))
+              .cwiseMax(-ma_torque_limit(Eigen::seq(7, 13)));
+      ma_q_left = state.q_joint(Eigen::seq(7, 13));
     } else {
       input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
-      input.target_position(Eigen::seq(7, 13)) = q_left;
+      input.target_position(Eigen::seq(7, 13)) = ma_q_left;
     }
+
+    gripper_ev.PushTask([r = state.button_right.trigger, l = state.button_left.trigger] {
+      if (gripper_init_step < 4)
+        return;
+
+      gripper_operation_mode << DynamixelBus::kCurrentBasedPositionControlMode,
+          DynamixelBus::kCurrentBasedPositionControlMode;
+      gripper_position_command =
+          (Eigen::Vector2d{1. - r / 1000., 1. - l / 1000.}.array() * (gripper_max - gripper_min).array()).matrix() +
+          gripper_min;
+    });
+
+    robot_ev.PushTask([rb = state.button_right.button, lb = state.button_left.button,
+                       r = state.q_joint(Eigen::seq(0, 6)), l = state.q_joint(Eigen::seq(7, 13))] {
+      if (!rcs_handler) {
+        return;
+      }
+
+      tele_right_button = rb;
+      tele_left_button = lb;
+      tele_q.head<7>() = r;
+      tele_q.tail<7>() = l;
+    });
+
     return input;
   });
 }
@@ -827,6 +1025,130 @@ void StopRecording() {
   record_file->flush();
   record_file.reset();
   record_file = nullptr;
+}
+
+void InitializeGripper() {
+  gripper_torque_constant = {1.6591, 1.6591};
+  gripper_min.setConstant(100);
+  gripper_max.setConstant(-100);
+
+  gripper = std::make_unique<rb::DynamixelBus>(GRIPPER_DEV);
+
+  if (!gripper->OpenPort()) {
+    std::cerr << "[Gripper] Failed to initialize" << std::endl;
+    return;
+  }
+
+  if (!gripper->SetBaudRate(DynamixelBus::kDefaultBaudrate)) {
+    std::cerr << "[Gripper] Failed to initialize" << std::endl;
+    return;
+  }
+
+  gripper->SetTorqueConstant(gripper_torque_constant);
+}
+
+void ControlGripper() {
+  if (gripper_init_step == 0) {
+    static int success = 0;
+    for (int id = 0; id < 2; id++) {
+      if (!gripper->Ping(id)) {
+        success = 0;
+        return;
+      }
+    }
+    if (success++ >= 20) {
+      for (int id = 0; id < 2; id++) {
+        if (!gripper->SendOperationMode(id, DynamixelBus::kCurrentControlMode))
+          ;
+        gripper->SendTorqueEnable(id, DynamixelBus::kTorqueEnable);
+      }
+
+      gripper_init_step = 1;
+      gripper_step_start_time = steady_clock::now();
+      return;
+    }
+  } else if (gripper_init_step == 1) {
+    gripper_operation_mode = {DynamixelBus::kCurrentControlMode, DynamixelBus::kCurrentControlMode};
+    gripper_torque_command = {1, 1};
+
+    double d = duration_cast<nanoseconds>(steady_clock::now() - gripper_step_start_time).count() / 1e9;
+    if (d > 2.) {
+      gripper_init_step = 2;
+      gripper_step_start_time = steady_clock::now();
+    }
+  } else if (gripper_init_step == 2) {
+    gripper_operation_mode = {DynamixelBus::kCurrentControlMode, DynamixelBus::kCurrentControlMode};
+    gripper_torque_command = {-1, -1};
+
+    double d = duration_cast<nanoseconds>(steady_clock::now() - gripper_step_start_time).count() / 1e9;
+    if (d > 2.) {
+      gripper_init_step = 3;
+      gripper_step_start_time = steady_clock::now();
+    }
+  } else if (gripper_init_step == 3) {
+    gripper_operation_mode = {DynamixelBus::kCurrentControlMode, DynamixelBus::kCurrentControlMode};
+    gripper_torque_command = {0, 0};
+    gripper_init_step = 4;
+  }
+
+  Eigen::Vector<int, 2> operation_mode;
+  Eigen::Vector<double, 2> q, qvel, torque;
+
+  auto temp_operation_mode_vector = gripper->BulkReadOperationMode({0, 1});
+  if (temp_operation_mode_vector.has_value()) {
+    for (auto const& ret : temp_operation_mode_vector.value()) {
+      operation_mode[ret.first] = ret.second;
+    }
+  } else {
+    return;
+  }
+
+  auto temp_ms_vector = gripper->BulkReadMotorState({0, 1});
+  if (temp_ms_vector.has_value()) {
+    for (auto const& ret : temp_ms_vector.value()) {
+      q[ret.first] = ret.second.position;
+      qvel[ret.first] = ret.second.velocity;
+      torque[ret.first] = ret.second.current * gripper_torque_constant[ret.first];
+    }
+  } else {
+    return;
+  }
+
+  std::vector<std::pair<int, int>> changed_id_mode;
+  std::vector<int> changed_id;
+
+  std::vector<std::pair<int, double>> id_position;
+  std::vector<std::pair<int, double>> id_torque;
+
+  for (int i = 0; i < 2; i++) {
+    if (operation_mode[i] != gripper_operation_mode[i]) {
+      changed_id.push_back(i);
+      changed_id_mode.emplace_back(i, gripper_operation_mode[i]);
+
+      if (gripper_operation_mode[i] == DynamixelBus::kCurrentBasedPositionControlMode) {
+        gripper_position_command_prev[i] = q[i];
+      }
+    } else {
+      if (operation_mode[i] == DynamixelBus::kCurrentControlMode) {
+        id_torque.emplace_back(i, gripper_torque_command[i]);
+      } else if (operation_mode[i] == DynamixelBus::kCurrentBasedPositionControlMode) {
+        gripper_position_command_prev[i] = 0.8 * gripper_position_command_prev[i] + 0.2 * gripper_position_command[i];
+
+        id_torque.emplace_back(i, 1.0);
+        id_position.emplace_back(i, gripper_position_command_prev[i]);
+      }
+    }
+  }
+
+  gripper_min = gripper_min.cwiseMin(q);
+  gripper_max = gripper_max.cwiseMax(q);
+
+  gripper->BulkWriteTorqueEnable(changed_id, 0);
+  gripper->BulkWriteOperationMode(changed_id_mode);
+  gripper->BulkWriteTorqueEnable(changed_id, 1);
+
+  gripper->BulkWriteSendTorque(id_torque);
+  gripper->BulkWriteSendPosition(id_position);
 }
 
 template <typename T>

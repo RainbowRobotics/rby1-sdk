@@ -441,41 +441,41 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.gridLayout = QGridLayout()
         self.gridLayout.setObjectName(u"gridLayout")
-        self.label_7 = QLabel(self.frame_2)
-        self.label_7.setObjectName(u"label_7")
-        self.label_7.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.L_Cam2RGB = QLabel(self.frame_2)
+        self.L_Cam2RGB.setObjectName(u"L_Cam2RGB")
+        self.L_Cam2RGB.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_7, 0, 2, 1, 1)
+        self.gridLayout.addWidget(self.L_Cam2RGB, 0, 2, 1, 1)
 
-        self.label_5 = QLabel(self.frame_2)
-        self.label_5.setObjectName(u"label_5")
-        self.label_5.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.L_Cam0RGB = QLabel(self.frame_2)
+        self.L_Cam0RGB.setObjectName(u"L_Cam0RGB")
+        self.L_Cam0RGB.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_5, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.L_Cam0RGB, 0, 0, 1, 1)
 
-        self.label_6 = QLabel(self.frame_2)
-        self.label_6.setObjectName(u"label_6")
-        self.label_6.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.L_Cam1RGB = QLabel(self.frame_2)
+        self.L_Cam1RGB.setObjectName(u"L_Cam1RGB")
+        self.L_Cam1RGB.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_6, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.L_Cam1RGB, 0, 1, 1, 1)
 
-        self.label_8 = QLabel(self.frame_2)
-        self.label_8.setObjectName(u"label_8")
-        self.label_8.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.L_Cam0Depth = QLabel(self.frame_2)
+        self.L_Cam0Depth.setObjectName(u"L_Cam0Depth")
+        self.L_Cam0Depth.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_8, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.L_Cam0Depth, 1, 0, 1, 1)
 
-        self.label_9 = QLabel(self.frame_2)
-        self.label_9.setObjectName(u"label_9")
-        self.label_9.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.L_Cam1Depth = QLabel(self.frame_2)
+        self.L_Cam1Depth.setObjectName(u"L_Cam1Depth")
+        self.L_Cam1Depth.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_9, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.L_Cam1Depth, 1, 1, 1, 1)
 
-        self.label_10 = QLabel(self.frame_2)
-        self.label_10.setObjectName(u"label_10")
-        self.label_10.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.L_Cam2Depth = QLabel(self.frame_2)
+        self.L_Cam2Depth.setObjectName(u"L_Cam2Depth")
+        self.L_Cam2Depth.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_10, 1, 2, 1, 1)
+        self.gridLayout.addWidget(self.L_Cam2Depth, 1, 2, 1, 1)
 
 
         self.verticalLayout_3.addLayout(self.gridLayout)
@@ -616,12 +616,12 @@ class Ui_MainWindow(object):
 "LEFT\n"
 "", None))
         self.label_17.setText(QCoreApplication.translate("MainWindow", u"Yaw", None))
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
-        self.label_9.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
-        self.label_10.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
+        self.L_Cam2RGB.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
+        self.L_Cam0RGB.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
+        self.L_Cam1RGB.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
+        self.L_Cam0Depth.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
+        self.L_Cam1Depth.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
+        self.L_Cam2Depth.setText(QCoreApplication.translate("MainWindow", u"Image Placeholder", None))
         self.label_20.setText(QCoreApplication.translate("MainWindow", u"Z", None))
         self.label_19.setText(QCoreApplication.translate("MainWindow", u"Y", None))
         self.label_21.setText(QCoreApplication.translate("MainWindow", u"\n"

@@ -8,10 +8,9 @@ import numpy as np
 import cv2
 
 from ui_form import Ui_MainWindow
-# from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QMainWindow, QApplication, QMessageBox
 from PySide6.QtCore import QSocketNotifier
-from PySide6.QtGui import QIntValidator
+from PySide6.QtGui import QIntValidator, QPixmap, Qt
 
 import zmq
 
@@ -187,10 +186,40 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
                     data = json.loads(msg)
 
                     if data["cam0_rgb"] is not None:
-                        nparr = np.frombuffer(bytes(data["cam0_rgb"]['bytes']), dtype=np.uint8)
-                        img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                        # cv2.imshow("a", img_np)
-                        # cv2.waitKey(1)
+                        pixmap = QPixmap()
+                        pixmap.loadFromData(bytes(data["cam0_rgb"]['bytes']))
+                        scaled_pixmap = pixmap.scaled(self.L_Cam0RGB.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        self.L_Cam0RGB.setPixmap(scaled_pixmap)
+
+                    if data["cam1_rgb"] is not None:
+                        pixmap = QPixmap()
+                        pixmap.loadFromData(bytes(data["cam1_rgb"]['bytes']))
+                        scaled_pixmap = pixmap.scaled(self.L_Cam1RGB.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        self.L_Cam1RGB.setPixmap(scaled_pixmap)
+
+                    if data["cam2_rgb"] is not None:
+                        pixmap = QPixmap()
+                        pixmap.loadFromData(bytes(data["cam2_rgb"]['bytes']))
+                        scaled_pixmap = pixmap.scaled(self.L_Cam2RGB.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        self.L_Cam2RGB.setPixmap(scaled_pixmap)
+
+                    if data["cam0_depth"] is not None:
+                        pixmap = QPixmap()
+                        pixmap.loadFromData(bytes(data["cam0_depth"]['bytes']))
+                        scaled_pixmap = pixmap.scaled(self.L_Cam0Depth.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        self.L_Cam0Depth.setPixmap(scaled_pixmap)
+
+                    if data["cam1_depth"] is not None:
+                        pixmap = QPixmap()
+                        pixmap.loadFromData(bytes(data["cam1_depth"]['bytes']))
+                        scaled_pixmap = pixmap.scaled(self.L_Cam1Depth.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        self.L_Cam1Depth.setPixmap(scaled_pixmap)
+
+                    if data["cam2_depth"] is not None:
+                        pixmap = QPixmap()
+                        pixmap.loadFromData(bytes(data["cam2_depth"]['bytes']))
+                        scaled_pixmap = pixmap.scaled(self.L_Cam2Depth.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        self.L_Cam2Depth.setPixmap(scaled_pixmap)
 
                 # print("[Socket] zmq.POLLIN")
                 # print("[Socket] received: " + repr(msg))

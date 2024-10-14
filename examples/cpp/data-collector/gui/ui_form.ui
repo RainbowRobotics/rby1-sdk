@@ -635,7 +635,7 @@ LEFT
            <item>
             <layout class="QGridLayout" name="gridLayout">
              <item row="0" column="2">
-              <widget class="QLabel" name="label_7">
+              <widget class="QLabel" name="L_Cam2RGB">
                <property name="text">
                 <string>Image Placeholder</string>
                </property>
@@ -645,7 +645,7 @@ LEFT
               </widget>
              </item>
              <item row="0" column="0">
-              <widget class="QLabel" name="label_5">
+              <widget class="QLabel" name="L_Cam0RGB">
                <property name="text">
                 <string>Image Placeholder</string>
                </property>
@@ -655,7 +655,7 @@ LEFT
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLabel" name="label_6">
+              <widget class="QLabel" name="L_Cam1RGB">
                <property name="text">
                 <string>Image Placeholder</string>
                </property>
@@ -665,7 +665,7 @@ LEFT
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label_8">
+              <widget class="QLabel" name="L_Cam0Depth">
                <property name="text">
                 <string>Image Placeholder</string>
                </property>
@@ -675,7 +675,7 @@ LEFT
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLabel" name="label_9">
+              <widget class="QLabel" name="L_Cam1Depth">
                <property name="text">
                 <string>Image Placeholder</string>
                </property>
@@ -685,7 +685,7 @@ LEFT
               </widget>
              </item>
              <item row="1" column="2">
-              <widget class="QLabel" name="label_10">
+              <widget class="QLabel" name="L_Cam2Depth">
                <property name="text">
                 <string>Image Placeholder</string>
                </property>

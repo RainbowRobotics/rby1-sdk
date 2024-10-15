@@ -49,6 +49,7 @@ class ButtonGrid(QWidget):
         layout.addWidget(button, row, col, 1, col_span)
 
     def start_process(self, key, command):
+        self.cleanup_process(key)  
         """특정 key에 해당하는 프로세스를 시작."""
         if key not in self.processes or self.processes[key] is None:
             process = subprocess.Popen(
@@ -58,6 +59,14 @@ class ButtonGrid(QWidget):
             self.processes[key] = process
             print(f"{key} started")
 
+    def cleanup_process(self, key):
+        """종료된 프로세스를 딕셔너리에서 제거."""
+        if key in self.processes and self.processes[key] is not None:
+            process = self.processes[key]
+            if process.poll() is not None:  # 프로세스가 종료된 경우
+                print(f"{key} process finished. Cleaning up.")
+                del self.processes[key]  # 딕셔너리에서 제거
+                
     def stop_process(self, key):
         """특정 key에 해당하는 프로세스를 종료."""
         process = self.processes.get(key)
@@ -68,16 +77,17 @@ class ButtonGrid(QWidget):
             print(f"{key} stopped")
 
     def start_process_with_sudo(self, key, command):
-            """특정 key에 해당하는 프로세스를 sudo로 실행."""
-            if key not in self.processes or self.processes[key] is None:
-                # sudo 비밀번호를 묻지 않고 명령을 실행
-                sudo_command = ['sudo'] + command
-                process = subprocess.Popen(
-                    sudo_command,
-                    cwd=".",  # 현재 경로 기준으로 실행
-                )
-                self.processes[key] = process
-                print(f"{key} started with sudo")
+        self.cleanup_process(key)  
+        """특정 key에 해당하는 프로세스를 sudo로 실행."""
+        if key not in self.processes or self.processes[key] is None:
+            # sudo 비밀번호를 묻지 않고 명령을 실행
+            sudo_command = ['sudo'] + command
+            process = subprocess.Popen(
+                sudo_command,
+                cwd=".",  # 현재 경로 기준으로 실행
+            )
+            self.processes[key] = process
+            print(f"{key} started with sudo")
 
     def stop_process_with_sudo(self, key):
         """특정 key에 해당하는 sudo로 실행된 프로세스를 종료."""

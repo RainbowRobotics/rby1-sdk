@@ -752,6 +752,7 @@ def main(address, power_device, servo):
     robot.set_parameter("joint_position_command.cutoff_frequency", "5")
     robot.set_parameter("cartesian_command.cutoff_frequency", "5")
     robot.set_parameter("default.linear_acceleration_limit", "5")
+    # robot.set_time_scale(1.0)
 
     print("parameters setting is done")
 

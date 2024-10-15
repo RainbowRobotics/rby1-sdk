@@ -4,11 +4,12 @@ import subprocess
 import argparse
 
 class ButtonGrid(QWidget):
-    def __init__(self, address):
+    def __init__(self, address, device):
         super().__init__()
         # 각 프로세스를 관리할 딕셔너리
         self.processes = {}
         self.address = address
+        self.device = device
 
         # Layout 설정
         layout = QGridLayout()
@@ -50,12 +51,11 @@ class ButtonGrid(QWidget):
     def start_process(self, key, command):
         """특정 key에 해당하는 프로세스를 시작."""
         if key not in self.processes or self.processes[key] is None:
-            self.processes[key] = subprocess.Popen(
+            process = subprocess.Popen(
                 command,
                 cwd=".",  # 현재 경로 기준으로 실행
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
             )
+            self.processes[key] = process
             print(f"{key} started")
 
     def stop_process(self, key):
@@ -66,13 +66,36 @@ class ButtonGrid(QWidget):
             process.wait()  # 프로세스가 완전히 종료될 때까지 대기
             self.processes[key] = None
             print(f"{key} stopped")
+
+    def start_process_with_sudo(self, key, command):
+            """특정 key에 해당하는 프로세스를 sudo로 실행."""
+            if key not in self.processes or self.processes[key] is None:
+                # sudo 비밀번호를 묻지 않고 명령을 실행
+                sudo_command = ['sudo'] + command
+                process = subprocess.Popen(
+                    sudo_command,
+                    cwd=".",  # 현재 경로 기준으로 실행
+                )
+                self.processes[key] = process
+                print(f"{key} started with sudo")
+
+    def stop_process_with_sudo(self, key):
+        """특정 key에 해당하는 sudo로 실행된 프로세스를 종료."""
+        process = self.processes.get(key)
+        if process:
+            sudo_kill_command = f"sudo kill -9 {process.pid}"
+            subprocess.run(sudo_kill_command, shell=True)
+            process.wait()  # 프로세스가 완전히 종료될 때까지 대기
+            self.processes[key] = None
+            print(f"{key} stopped with sudo")
+
     @Slot()
     def zero_pose(self):
         self.start_process("zero_pose", ["python", "examples/python/08_zero_pose.py", "--address", self.address])
 
     @Slot()
     def demo_motion_start(self):
-        self.start_process("demo_motion", ["./build/examples/cpp/example_demo_motion", self.address])
+        self.start_process("demo_motion", ["python", "examples/python/09_demo_motion.py", "--address", self.address])
 
     @Slot()
     def demo_motion_stop(self):
@@ -80,11 +103,11 @@ class ButtonGrid(QWidget):
 
     @Slot()
     def teleoperation_start(self):
-        self.start_process("teleoperation", ["./build/examples/cpp/example_teleoperation_with_joint_mapping", self.address])
+        self.start_process_with_sudo("teleoperation", ["./build/examples/cpp/example_teleoperation_with_joint_mapping", self.address])
 
     @Slot()
     def teleoperation_stop(self):
-        self.stop_process("teleoperation")
+        self.stop_process_with_sudo("teleoperation")
 
     @Slot()
     def teleoperation_record_start(self):
@@ -118,9 +141,10 @@ class ButtonGrid(QWidget):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="quick_ui")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
+    parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     args = parser.parse_args()
     
     app = QApplication([])
-    window = ButtonGrid(address=args.address)
+    window = ButtonGrid(address=args.address, device=args.device)
     window.show()
     app.exec()

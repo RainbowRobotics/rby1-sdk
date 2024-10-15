@@ -785,12 +785,17 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if (argc < 2) {
-    std::cerr << "Usage: " << argv[0] << " <server address>" << std::endl;
+  if (argc < 2) {  
+    std::cerr << "Usage: " << argv[0] << " <server address> [servo]" << std::endl;
     return 1;
   }
 
   std::string address{argv[1]};
+  std::string servo = ".*"; // 기본값
+
+  if (argc >= 3) {
+    servo = argv[2];
+  }
 
   auto robot = rb::Robot<y1_model::A>::Create(address);
 
@@ -831,9 +836,9 @@ int main(int argc, char** argv) {
   }
 
   std::cout << "Checking servo status..." << std::endl;
-  if (!robot->IsServoOn(kAll)) {
+  if (!robot->IsServoOn(servo)) {
     std::cout << "Servo is currently OFF. Attempting to activate servo..." << std::endl;
-    if (!robot->ServoOn(kAll)) {
+    if (!robot->ServoOn(servo)) {
       std::cerr << "Error: Failed to activate servo." << std::endl;
       return 1;
     }

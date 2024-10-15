@@ -3,8 +3,8 @@ import grpc
 import asyncio
 import PySide6.QtAsyncio as QtAsyncio
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QLineEdit, QDoubleSpinBox, QPushButton, QApplication, QTextEdit
+from PySide6.QtCore import Qt, Slot, QTimer
 import os, sys, time, math
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'generated', 'python'))
 import rb.api.power_pb2 as power_pb2

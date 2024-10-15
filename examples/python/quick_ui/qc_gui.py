@@ -3,7 +3,7 @@ import grpc
 import asyncio
 import PySide6.QtAsyncio as QtAsyncio
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QLineEdit, QDoubleSpinBox, QPushButton, QApplication, QTextEdit
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel, QLineEdit, QDoubleSpinBox, QPushButton, QApplication, QTextEdit, QMessageBox
 from PySide6.QtCore import Qt, Slot, QTimer
 import os, sys, time, math
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'generated', 'python'))
@@ -92,7 +92,8 @@ class ButtonGrid(QWidget):
 
         # 다리 관련 버튼 (reset, servo on)
         
-        self.create_button(self.layout, "다리 전체 Servo On", 6, 0, self.leg_servo_on, col_span=4, background_color="#589FEF")
+        self.create_button(self.layout, "다리 전체 Servo On(순차)", 6, 0, self.leg_servo_on, col_span=2, background_color="#589FEF")
+        self.create_button(self.layout, "다리 전체 Servo On(한번에)", 6, 2, self.leg_servo_on2, col_span=2, background_color="#589FEF")
 
         # 다리 플러스/마이너스 버튼 (T0, T1, ...)
         # 다리 플러스/마이너스 버튼 (T0, T1, ...)
@@ -119,7 +120,8 @@ class ButtonGrid(QWidget):
         arm_title.setStyleSheet(TITLE_STYLE_SHEET)
         self.layout.addWidget(arm_title, 14, 0, 1, 4)
         
-        self.create_button(self.layout, "팔 전체 Servo On", 15, 0, self.arm_servo_on, col_span=4, background_color="#589FEF")
+        self.create_button(self.layout, "팔 전체 Servo On(순차)", 15, 0, self.arm_servo_on, col_span=2, background_color="#589FEF")
+        self.create_button(self.layout, "팔 전체 Servo On(한번에)", 15, 2, self.arm_servo_on2, col_span=2, background_color="#589FEF")
                     
         # 오른팔 플러스/마이너스 버튼 (R0, R1, ...)
         right_arm_buttons = [
@@ -468,7 +470,12 @@ class ButtonGrid(QWidget):
     def leg_servo_on(self):
         for i in range(6):
             self.robot.servo_on(f"torso_{i}")
-            time.sleep(0.2)
+            # time.sleep(0.2)
+        print("Leg Servo ON clicked")
+        
+    @Slot()
+    def leg_servo_on2(self):
+        self.robot.servo_on(f"^(torso_[0-5])$")
         print("Leg Servo ON clicked")
 
     @Slot()
@@ -483,10 +490,15 @@ class ButtonGrid(QWidget):
     def arm_servo_on(self):
         for i in range(7):
             self.robot.servo_on(f"right_arm_{i}")
-            time.sleep(0.2)
+            # time.sleep(0.2)
         for i in range(7):
             self.robot.servo_on(f"left_arm_{i}")
-            time.sleep(0.2)
+            # time.sleep(0.2)
+        print("Arm Servo ON clicked")
+        
+    @Slot()
+    def arm_servo_on2(self):
+        self.robot.servo_on(f"^(right_arm_[0-6]|left_arm_[0-6])$")
         print("Arm Servo ON clicked")
     
     @Slot()

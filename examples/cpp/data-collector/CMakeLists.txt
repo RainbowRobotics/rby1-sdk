@@ -21,7 +21,8 @@ target_link_libraries(data-collector PUBLIC
         cppzmq
         $<${realsense2_FOUND}:realsense2>
         ${OpenCV_LIBRARIES}
-        hdf5
+#        hdf5
+        HDF5::HDF5
         HighFive
         nlohmann_json::nlohmann_json
         Boost::filesystem

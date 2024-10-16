@@ -3,6 +3,8 @@
 #undef __ARM_NEON__
 #endif
 
+#define NO_TELEOP
+
 #include <csignal>
 #include <iostream>
 #include <map>
@@ -171,10 +173,10 @@ void StartRecording(const std::string& file_path);
 void StopRecording();
 void StartTeleoperation();
 template <typename T>
-void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, std::size_t len, T* data);
+void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, const std::vector<std::size_t>& shape, T* data);
 template <typename T>
-HighFive::DataSet CreateDataSet(const std::shared_ptr<HighFive::File>& file, const std::string& name, size_t len,
-                                int compression_level = 0);
+HighFive::DataSet CreateDataSet(const std::shared_ptr<HighFive::File>& file, const std::string& name,
+                                const std::vector<std::size_t>& shape, int compression_level = 0);
 
 int main(int argc, char** argv) {
   if (argc < 3) {
@@ -186,7 +188,7 @@ int main(int argc, char** argv) {
 
   signal(SIGINT, SignalHandler);
 
-  //
+#ifndef NO_TELEOP
   try {
     // Latency timer setting
     upc::InitializeDevice(GRIPPER_DEV);
@@ -194,13 +196,16 @@ int main(int argc, char** argv) {
     std::cerr << e.what() << std::endl;
     exit(1);
   }
+#endif
 
   publisher_ev.DoTask([] { InitializePublisher(); });
   service_ev.DoTask([] { InitializeService(); });
   robot_ev.DoTask([=] { InitializeRobot(upc_address); });
   camera_ev.DoTask([] { InitializeCamera(); });
+#ifndef NO_TELEOP
   gripper_ev.DoTask([] { InitializeGripper(); });
   InitializeMasterArm();
+#endif
 
   publisher_ev.PushTask([] { master_arm_connected = (master_arm != nullptr); });
 
@@ -291,7 +296,9 @@ int main(int argc, char** argv) {
         }
       },
       5ms);
+#ifndef NO_TELEOP
   gripper_ev.PushCyclicTask([] { ControlGripper(); }, nanoseconds((long)(1e9 / kGripperControlFrequency)));
+#endif
   cm_ev.PushCyclicTask(
       [] {
         if (!robot) {
@@ -400,14 +407,14 @@ int main(int argc, char** argv) {
         }
 
         for (int i = 0; i < kCameraN; i++) {
-          AddDataIntoDataSet(record_depth_dataset[i], kWidth * kHeight, record_depth[i].data);
-          AddDataIntoDataSet(record_rgb_dataset[i], kWidth * kHeight * 3, record_rgb[i].data);
+          AddDataIntoDataSet(record_depth_dataset[i], {kHeight, kWidth}, record_depth[i].data);
+          AddDataIntoDataSet(record_rgb_dataset[i], {kHeight, kWidth, 3}, record_rgb[i].data);
         }
-        AddDataIntoDataSet(record_action_dataset, kRobotDOF + kGripperDOF, record_action.data());
-        AddDataIntoDataSet(record_qpos_dataset, kRobotDOF + kGripperDOF, record_qpos.data());
-        AddDataIntoDataSet(record_qvel_dataset, kRobotDOF + kGripperDOF, record_qvel.data());
-        AddDataIntoDataSet(record_torque_dataset, kRobotDOF + kGripperDOF, record_torque.data());
-        AddDataIntoDataSet(record_ft_dataset, 6 * 2, record_ft.data());
+        AddDataIntoDataSet(record_action_dataset, {kRobotDOF + kGripperDOF}, record_action.data());
+        AddDataIntoDataSet(record_qpos_dataset, {kRobotDOF + kGripperDOF}, record_qpos.data());
+        AddDataIntoDataSet(record_qvel_dataset, {kRobotDOF + kGripperDOF}, record_qvel.data());
+        AddDataIntoDataSet(record_torque_dataset, {kRobotDOF + kGripperDOF}, record_torque.data());
+        AddDataIntoDataSet(record_ft_dataset, {6 * 2}, record_ft.data());
         data_count++;
 
         auto end = steady_clock::now();
@@ -450,9 +457,11 @@ void SignalHandler(int signum) {
   camera_ev.DoTask([] {
     if (!camera_error) {
       // TODO: close rs pipelines
+#ifdef REALSENSE2
       for (auto&& pipe : rs_pipelines) {
         pipe.stop();
       }
+#endif
     }
 
     camera_error = true;
@@ -993,26 +1002,28 @@ void StartRecording(const std::string& file_path) {
   // Make File
   record_file = std::make_shared<HighFive::File>(file_path, HighFive::File::Overwrite);
 
+  record_file->createAttribute("frequency", kFrequency);
+
   // Create Dataset
   for (int i = 0; i < kCameraN; i++) {
     record_depth_dataset[i] = std::make_unique<HighFive::DataSet>(CreateDataSet<std::uint16_t>(
-        record_file, "/observations/images/cam" + std::to_string(i) + "_depth", kWidth * kHeight, kCompressionLevel));
+        record_file, "/observations/images/cam" + std::to_string(i) + "_depth", {kHeight, kWidth}, kCompressionLevel));
     record_depth[i] = Mat(Size(kWidth, kHeight), CV_16FC1);
 
     record_rgb_dataset[i] = std::make_unique<HighFive::DataSet>(CreateDataSet<std::uint8_t>(
-        record_file, "/observations/images/cam" + std::to_string(i) + "_rgb", kWidth * kHeight * 3, kCompressionLevel));
+        record_file, "/observations/images/cam" + std::to_string(i) + "_rgb", {kHeight, kWidth, 3}, kCompressionLevel));
     record_rgb[i] = Mat(Size(kWidth, kHeight), CV_8UC3);
   }
   record_action_dataset =
-      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/action", kRobotDOF + kGripperDOF));
+      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/action", {kRobotDOF + kGripperDOF}));
   record_qpos_dataset = std::make_unique<HighFive::DataSet>(
-      CreateDataSet<double>(record_file, "/observations/qpos", kRobotDOF + kGripperDOF));
+      CreateDataSet<double>(record_file, "/observations/qpos", {kRobotDOF + kGripperDOF}));
   record_qvel_dataset = std::make_unique<HighFive::DataSet>(
-      CreateDataSet<double>(record_file, "/observations/qvel", kRobotDOF + kGripperDOF));
+      CreateDataSet<double>(record_file, "/observations/qvel", {kRobotDOF + kGripperDOF}));
   record_torque_dataset = std::make_unique<HighFive::DataSet>(
-      CreateDataSet<double>(record_file, "/observations/torque", kRobotDOF + kGripperDOF));
+      CreateDataSet<double>(record_file, "/observations/torque", {kRobotDOF + kGripperDOF}));
   record_ft_dataset =
-      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/observations/ft_sensor", 6 * 2));
+      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/observations/ft_sensor", {6 * 2}));
 
   data_count = 0;
 }
@@ -1149,24 +1160,48 @@ void ControlGripper() {
 
   gripper->BulkWriteSendTorque(id_torque);
   gripper->BulkWriteSendPosition(id_position);
+
+  //
+
+  record_ev.PushTask([q, qvel, torque, operation_mode, id_position] {
+    record_qpos.tail<kGripperDOF>() = q;
+    record_qvel.tail<kGripperDOF>() = qvel;
+    record_torque.tail<kGripperDOF>() = torque;
+    record_action.tail<kGripperDOF>() = q;
+    for (const auto& id : id_position) {
+      record_action.tail<kGripperDOF>()(id.first) = id.second;
+    }
+  });
 }
 
 template <typename T>
-void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, std::size_t len, T* data) {
+void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, const std::vector<std::size_t>& shape, T* data) {
   auto current_dims = dataset->getSpace().getDimensions();
   size_t current_rows = current_dims[0];
   size_t new_rows = current_rows + 1;
-  dataset->resize({new_rows, len});
-  dataset->select({current_rows, 0}, {1, len}).write(data);
+  std::vector<std::size_t> resize = {new_rows}, offset = {current_rows}, count = {1};
+  for (const auto& l : shape) {
+    resize.push_back(l);
+    offset.push_back(0);
+    count.push_back(l);
+  }
+  dataset->resize(resize);
+  dataset->select(offset, count).write_raw(data);
 }
 
 template <typename T>
-HighFive::DataSet CreateDataSet(const std::shared_ptr<HighFive::File>& file, const std::string& name, size_t len,
-                                int compression_level) {
-  std::vector<size_t> dims = {0, len};
-  std::vector<size_t> max_dims = {HighFive::DataSpace::UNLIMITED, len};
+HighFive::DataSet CreateDataSet(const std::shared_ptr<HighFive::File>& file, const std::string& name,
+                                const std::vector<std::size_t>& shape, int compression_level) {
+  std::vector<size_t> dims = {0};
+  std::vector<size_t> max_dims = {HighFive::DataSpace::UNLIMITED};
+  std::vector<hsize_t> chunk_size = {1};
+  for (const auto& l : shape) {
+    dims.push_back(l);
+    max_dims.push_back(l);
+    chunk_size.push_back(l);
+  }
   HighFive::DataSetCreateProps props;
-  props.add(HighFive::Chunking(std::vector<hsize_t>{1, len}));
+  props.add(HighFive::Chunking(chunk_size));
   if (compression_level != 0) {
     props.add(HighFive::Deflate(compression_level));
   }

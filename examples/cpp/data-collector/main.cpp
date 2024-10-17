@@ -3,7 +3,7 @@
 #undef __ARM_NEON__
 #endif
 
-#define NO_TELEOP
+//#define NO_TELEOP
 
 #include <csignal>
 #include <iostream>
@@ -312,12 +312,8 @@ int main(int argc, char** argv) {
           } catch (...) {}
         }
       },
-<<<<<<< Updated upstream
-      5ms);
-#ifndef NO_TELEOP
-=======
       10ms);
->>>>>>> Stashed changes
+#ifndef NO_TELEOP
   gripper_ev.PushCyclicTask([] { ControlGripper(); }, nanoseconds((long)(1e9 / kGripperControlFrequency)));
 #endif
   cm_ev.PushCyclicTask(

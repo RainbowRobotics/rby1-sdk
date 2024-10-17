@@ -3,253 +3,253 @@
 
 ## Table of Contents
 
-- [rb/api/arm_command.proto](#rb/api/arm_command.proto)
-    - [ArmCommand](#ArmCommand)
-    - [ArmCommand.Feedback](#ArmCommand.Feedback)
-    - [ArmCommand.Request](#ArmCommand.Request)
+- [rb/api/arm_command.proto](#rb_api_arm_command-proto)
+    - [ArmCommand](#rb-api-ArmCommand)
+    - [ArmCommand.Feedback](#rb-api-ArmCommand-Feedback)
+    - [ArmCommand.Request](#rb-api-ArmCommand-Request)
   
-- [rb/api/basic_command.proto](#rb/api/basic_command.proto)
-    - [CartesianCommand](#CartesianCommand)
-    - [CartesianCommand.Feedback](#CartesianCommand.Feedback)
-    - [CartesianCommand.Request](#CartesianCommand.Request)
-    - [CartesianCommand.SE3PoseTarget](#CartesianCommand.SE3PoseTarget)
-    - [CartesianCommand.TrackingError](#CartesianCommand.TrackingError)
-    - [GravityCompensationCommand](#GravityCompensationCommand)
-    - [GravityCompensationCommand.Feedback](#GravityCompensationCommand.Feedback)
-    - [GravityCompensationCommand.Request](#GravityCompensationCommand.Request)
-    - [ImpedanceControlCommand](#ImpedanceControlCommand)
-    - [ImpedanceControlCommand.Feedback](#ImpedanceControlCommand.Feedback)
-    - [ImpedanceControlCommand.Request](#ImpedanceControlCommand.Request)
-    - [ImpedanceControlCommand.TrackingError](#ImpedanceControlCommand.TrackingError)
-    - [JogCommand](#JogCommand)
-    - [JogCommand.Feedback](#JogCommand.Feedback)
-    - [JogCommand.Request](#JogCommand.Request)
-    - [JointPositionCommand](#JointPositionCommand)
-    - [JointPositionCommand.Feedback](#JointPositionCommand.Feedback)
-    - [JointPositionCommand.Request](#JointPositionCommand.Request)
-    - [JointVelocityCommand](#JointVelocityCommand)
-    - [JointVelocityCommand.Feedback](#JointVelocityCommand.Feedback)
-    - [JointVelocityCommand.Request](#JointVelocityCommand.Request)
-    - [OptimalControlCommand](#OptimalControlCommand)
-    - [OptimalControlCommand.CartesianCost](#OptimalControlCommand.CartesianCost)
-    - [OptimalControlCommand.CenterOfMassCost](#OptimalControlCommand.CenterOfMassCost)
-    - [OptimalControlCommand.Feedback](#OptimalControlCommand.Feedback)
-    - [OptimalControlCommand.JointPositionCost](#OptimalControlCommand.JointPositionCost)
-    - [OptimalControlCommand.Request](#OptimalControlCommand.Request)
-    - [RealTimeControlCommand](#RealTimeControlCommand)
-    - [RealTimeControlCommand.Feedback](#RealTimeControlCommand.Feedback)
-    - [RealTimeControlCommand.Request](#RealTimeControlCommand.Request)
-    - [SE2VelocityCommand](#SE2VelocityCommand)
-    - [SE2VelocityCommand.Feedback](#SE2VelocityCommand.Feedback)
-    - [SE2VelocityCommand.Request](#SE2VelocityCommand.Request)
-    - [StopCommand](#StopCommand)
-    - [StopCommand.Feedback](#StopCommand.Feedback)
-    - [StopCommand.Request](#StopCommand.Request)
+- [rb/api/basic_command.proto](#rb_api_basic_command-proto)
+    - [CartesianCommand](#rb-api-CartesianCommand)
+    - [CartesianCommand.Feedback](#rb-api-CartesianCommand-Feedback)
+    - [CartesianCommand.Request](#rb-api-CartesianCommand-Request)
+    - [CartesianCommand.SE3PoseTarget](#rb-api-CartesianCommand-SE3PoseTarget)
+    - [CartesianCommand.TrackingError](#rb-api-CartesianCommand-TrackingError)
+    - [GravityCompensationCommand](#rb-api-GravityCompensationCommand)
+    - [GravityCompensationCommand.Feedback](#rb-api-GravityCompensationCommand-Feedback)
+    - [GravityCompensationCommand.Request](#rb-api-GravityCompensationCommand-Request)
+    - [ImpedanceControlCommand](#rb-api-ImpedanceControlCommand)
+    - [ImpedanceControlCommand.Feedback](#rb-api-ImpedanceControlCommand-Feedback)
+    - [ImpedanceControlCommand.Request](#rb-api-ImpedanceControlCommand-Request)
+    - [ImpedanceControlCommand.TrackingError](#rb-api-ImpedanceControlCommand-TrackingError)
+    - [JogCommand](#rb-api-JogCommand)
+    - [JogCommand.Feedback](#rb-api-JogCommand-Feedback)
+    - [JogCommand.Request](#rb-api-JogCommand-Request)
+    - [JointPositionCommand](#rb-api-JointPositionCommand)
+    - [JointPositionCommand.Feedback](#rb-api-JointPositionCommand-Feedback)
+    - [JointPositionCommand.Request](#rb-api-JointPositionCommand-Request)
+    - [JointVelocityCommand](#rb-api-JointVelocityCommand)
+    - [JointVelocityCommand.Feedback](#rb-api-JointVelocityCommand-Feedback)
+    - [JointVelocityCommand.Request](#rb-api-JointVelocityCommand-Request)
+    - [OptimalControlCommand](#rb-api-OptimalControlCommand)
+    - [OptimalControlCommand.CartesianCost](#rb-api-OptimalControlCommand-CartesianCost)
+    - [OptimalControlCommand.CenterOfMassCost](#rb-api-OptimalControlCommand-CenterOfMassCost)
+    - [OptimalControlCommand.Feedback](#rb-api-OptimalControlCommand-Feedback)
+    - [OptimalControlCommand.JointPositionCost](#rb-api-OptimalControlCommand-JointPositionCost)
+    - [OptimalControlCommand.Request](#rb-api-OptimalControlCommand-Request)
+    - [RealTimeControlCommand](#rb-api-RealTimeControlCommand)
+    - [RealTimeControlCommand.Feedback](#rb-api-RealTimeControlCommand-Feedback)
+    - [RealTimeControlCommand.Request](#rb-api-RealTimeControlCommand-Request)
+    - [SE2VelocityCommand](#rb-api-SE2VelocityCommand)
+    - [SE2VelocityCommand.Feedback](#rb-api-SE2VelocityCommand-Feedback)
+    - [SE2VelocityCommand.Request](#rb-api-SE2VelocityCommand-Request)
+    - [StopCommand](#rb-api-StopCommand)
+    - [StopCommand.Feedback](#rb-api-StopCommand-Feedback)
+    - [StopCommand.Request](#rb-api-StopCommand-Request)
   
-- [rb/api/body_command.proto](#rb/api/body_command.proto)
-    - [BodyCommand](#BodyCommand)
-    - [BodyCommand.Feedback](#BodyCommand.Feedback)
-    - [BodyCommand.Request](#BodyCommand.Request)
+- [rb/api/body_command.proto](#rb_api_body_command-proto)
+    - [BodyCommand](#rb-api-BodyCommand)
+    - [BodyCommand.Feedback](#rb-api-BodyCommand-Feedback)
+    - [BodyCommand.Request](#rb-api-BodyCommand-Request)
   
-- [rb/api/body_component_based_command.proto](#rb/api/body_component_based_command.proto)
-    - [BodyComponentBasedCommand](#BodyComponentBasedCommand)
-    - [BodyComponentBasedCommand.Feedback](#BodyComponentBasedCommand.Feedback)
-    - [BodyComponentBasedCommand.Request](#BodyComponentBasedCommand.Request)
+- [rb/api/body_component_based_command.proto](#rb_api_body_component_based_command-proto)
+    - [BodyComponentBasedCommand](#rb-api-BodyComponentBasedCommand)
+    - [BodyComponentBasedCommand.Feedback](#rb-api-BodyComponentBasedCommand-Feedback)
+    - [BodyComponentBasedCommand.Request](#rb-api-BodyComponentBasedCommand-Request)
   
-- [rb/api/command_header.proto](#rb/api/command_header.proto)
-    - [CommandHeader](#CommandHeader)
-    - [CommandHeader.Feedback](#CommandHeader.Feedback)
-    - [CommandHeader.Request](#CommandHeader.Request)
-    - [CommandHeader.Request.InertialsEntry](#CommandHeader.Request.InertialsEntry)
+- [rb/api/command_header.proto](#rb_api_command_header-proto)
+    - [CommandHeader](#rb-api-CommandHeader)
+    - [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback)
+    - [CommandHeader.Request](#rb-api-CommandHeader-Request)
+    - [CommandHeader.Request.InertialsEntry](#rb-api-CommandHeader-Request-InertialsEntry)
   
-- [rb/api/component_based_command.proto](#rb/api/component_based_command.proto)
-    - [ComponentBasedCommand](#ComponentBasedCommand)
-    - [ComponentBasedCommand.Feedback](#ComponentBasedCommand.Feedback)
-    - [ComponentBasedCommand.Request](#ComponentBasedCommand.Request)
+- [rb/api/component_based_command.proto](#rb_api_component_based_command-proto)
+    - [ComponentBasedCommand](#rb-api-ComponentBasedCommand)
+    - [ComponentBasedCommand.Feedback](#rb-api-ComponentBasedCommand-Feedback)
+    - [ComponentBasedCommand.Request](#rb-api-ComponentBasedCommand-Request)
   
-- [rb/api/control_manager.proto](#rb/api/control_manager.proto)
-    - [ControlManagerCommandRequest](#ControlManagerCommandRequest)
-    - [ControlManagerCommandResponse](#ControlManagerCommandResponse)
-    - [ControlManagerState](#ControlManagerState)
-    - [GetTimeScaleRequest](#GetTimeScaleRequest)
-    - [GetTimeScaleResponse](#GetTimeScaleResponse)
-    - [SetTimeScaleRequest](#SetTimeScaleRequest)
-    - [SetTimeScaleResponse](#SetTimeScaleResponse)
+- [rb/api/control_manager.proto](#rb_api_control_manager-proto)
+    - [ControlManagerCommandRequest](#rb-api-ControlManagerCommandRequest)
+    - [ControlManagerCommandResponse](#rb-api-ControlManagerCommandResponse)
+    - [ControlManagerState](#rb-api-ControlManagerState)
+    - [GetTimeScaleRequest](#rb-api-GetTimeScaleRequest)
+    - [GetTimeScaleResponse](#rb-api-GetTimeScaleResponse)
+    - [SetTimeScaleRequest](#rb-api-SetTimeScaleRequest)
+    - [SetTimeScaleResponse](#rb-api-SetTimeScaleResponse)
   
-    - [ControlManagerCommandRequest.Command](#ControlManagerCommandRequest.Command)
-    - [ControlManagerState.ControlState](#ControlManagerState.ControlState)
-    - [ControlManagerState.State](#ControlManagerState.State)
+    - [ControlManagerCommandRequest.Command](#rb-api-ControlManagerCommandRequest-Command)
+    - [ControlManagerState.ControlState](#rb-api-ControlManagerState-ControlState)
+    - [ControlManagerState.State](#rb-api-ControlManagerState-State)
   
-- [rb/api/control_manager_service.proto](#rb/api/control_manager_service.proto)
-    - [ControlManagerService](#ControlManagerService)
+- [rb/api/control_manager_service.proto](#rb_api_control_manager_service-proto)
+    - [ControlManagerService](#rb-api-ControlManagerService)
   
-- [rb/api/gamepad.proto](#rb/api/gamepad.proto)
-    - [Gamepad](#Gamepad)
-    - [UploadGamepadDataRequest](#UploadGamepadDataRequest)
-    - [UploadGamepadDataResponse](#UploadGamepadDataResponse)
+- [rb/api/gamepad.proto](#rb_api_gamepad-proto)
+    - [Gamepad](#rb-api-Gamepad)
+    - [UploadGamepadDataRequest](#rb-api-UploadGamepadDataRequest)
+    - [UploadGamepadDataResponse](#rb-api-UploadGamepadDataResponse)
   
-- [rb/api/gamepad_service.proto](#rb/api/gamepad_service.proto)
-    - [GamepadService](#GamepadService)
+- [rb/api/gamepad_service.proto](#rb_api_gamepad_service-proto)
+    - [GamepadService](#rb-api-GamepadService)
   
-- [rb/api/geometry.proto](#rb/api/geometry.proto)
-    - [EulerAngleZYX](#EulerAngleZYX)
-    - [Inertia](#Inertia)
-    - [Inertial](#Inertial)
-    - [Quaternion](#Quaternion)
-    - [SE2Pose](#SE2Pose)
-    - [SE2Velocity](#SE2Velocity)
-    - [SE3Pose](#SE3Pose)
-    - [Vec2](#Vec2)
-    - [Vec3](#Vec3)
+- [rb/api/geometry.proto](#rb_api_geometry-proto)
+    - [EulerAngleZYX](#rb-api-EulerAngleZYX)
+    - [Inertia](#rb-api-Inertia)
+    - [Inertial](#rb-api-Inertial)
+    - [Quaternion](#rb-api-Quaternion)
+    - [SE2Pose](#rb-api-SE2Pose)
+    - [SE2Velocity](#rb-api-SE2Velocity)
+    - [SE3Pose](#rb-api-SE3Pose)
+    - [Vec2](#rb-api-Vec2)
+    - [Vec3](#rb-api-Vec3)
   
-- [rb/api/gripper_command.proto](#rb/api/gripper_command.proto)
-    - [GripperInitializationRequest](#GripperInitializationRequest)
-    - [GripperInitializationResponse](#GripperInitializationResponse)
-    - [GripperMoveRequest](#GripperMoveRequest)
-    - [GripperMoveResponse](#GripperMoveResponse)
+- [rb/api/gripper_command.proto](#rb_api_gripper_command-proto)
+    - [GripperInitializationRequest](#rb-api-GripperInitializationRequest)
+    - [GripperInitializationResponse](#rb-api-GripperInitializationResponse)
+    - [GripperMoveRequest](#rb-api-GripperMoveRequest)
+    - [GripperMoveResponse](#rb-api-GripperMoveResponse)
   
-- [rb/api/gripper_command_service.proto](#rb/api/gripper_command_service.proto)
-    - [GripperCommandService](#GripperCommandService)
+- [rb/api/gripper_command_service.proto](#rb_api_gripper_command_service-proto)
+    - [GripperCommandService](#rb-api-GripperCommandService)
   
-- [rb/api/head_command.proto](#rb/api/head_command.proto)
-    - [HeadCommand](#HeadCommand)
-    - [HeadCommand.Feedback](#HeadCommand.Feedback)
-    - [HeadCommand.Request](#HeadCommand.Request)
+- [rb/api/head_command.proto](#rb_api_head_command-proto)
+    - [HeadCommand](#rb-api-HeadCommand)
+    - [HeadCommand.Feedback](#rb-api-HeadCommand-Feedback)
+    - [HeadCommand.Request](#rb-api-HeadCommand-Request)
   
-- [rb/api/header.proto](#rb/api/header.proto)
-    - [CommonError](#CommonError)
-    - [RequestHeader](#RequestHeader)
-    - [ResponseHeader](#ResponseHeader)
+- [rb/api/header.proto](#rb_api_header-proto)
+    - [CommonError](#rb-api-CommonError)
+    - [RequestHeader](#rb-api-RequestHeader)
+    - [ResponseHeader](#rb-api-ResponseHeader)
   
-    - [CommonError.Code](#CommonError.Code)
+    - [CommonError.Code](#rb-api-CommonError-Code)
   
-- [rb/api/log.proto](#rb/api/log.proto)
-    - [GetLastLogRequest](#GetLastLogRequest)
-    - [GetLastLogResponse](#GetLastLogResponse)
-    - [GetLogStreamRequest](#GetLogStreamRequest)
-    - [GetLogStreamResponse](#GetLogStreamResponse)
-    - [Log](#Log)
-    - [SetLogLevelRequest](#SetLogLevelRequest)
-    - [SetLogLevelResponse](#SetLogLevelResponse)
+- [rb/api/log.proto](#rb_api_log-proto)
+    - [GetLastLogRequest](#rb-api-GetLastLogRequest)
+    - [GetLastLogResponse](#rb-api-GetLastLogResponse)
+    - [GetLogStreamRequest](#rb-api-GetLogStreamRequest)
+    - [GetLogStreamResponse](#rb-api-GetLogStreamResponse)
+    - [Log](#rb-api-Log)
+    - [SetLogLevelRequest](#rb-api-SetLogLevelRequest)
+    - [SetLogLevelResponse](#rb-api-SetLogLevelResponse)
   
-    - [Log.Level](#Log.Level)
+    - [Log.Level](#rb-api-Log-Level)
   
-- [rb/api/log_service.proto](#rb/api/log_service.proto)
-    - [LogService](#LogService)
+- [rb/api/log_service.proto](#rb_api_log_service-proto)
+    - [LogService](#rb-api-LogService)
   
-- [rb/api/mobility_command.proto](#rb/api/mobility_command.proto)
-    - [MobilityCommand](#MobilityCommand)
-    - [MobilityCommand.Feedback](#MobilityCommand.Feedback)
-    - [MobilityCommand.Request](#MobilityCommand.Request)
+- [rb/api/mobility_command.proto](#rb_api_mobility_command-proto)
+    - [MobilityCommand](#rb-api-MobilityCommand)
+    - [MobilityCommand.Feedback](#rb-api-MobilityCommand-Feedback)
+    - [MobilityCommand.Request](#rb-api-MobilityCommand-Request)
   
-- [rb/api/parameter.proto](#rb/api/parameter.proto)
-    - [GetParameterListRequest](#GetParameterListRequest)
-    - [GetParameterListResponse](#GetParameterListResponse)
-    - [GetParameterListResponse.ParameterType](#GetParameterListResponse.ParameterType)
-    - [GetParameterRequest](#GetParameterRequest)
-    - [GetParameterResponse](#GetParameterResponse)
-    - [ResetAllParametersToDefaultRequest](#ResetAllParametersToDefaultRequest)
-    - [ResetAllParametersToDefaultResponse](#ResetAllParametersToDefaultResponse)
-    - [ResetParameterToDefaultRequest](#ResetParameterToDefaultRequest)
-    - [ResetParameterToDefaultResponse](#ResetParameterToDefaultResponse)
-    - [SetParameterRequest](#SetParameterRequest)
-    - [SetParameterResponse](#SetParameterResponse)
+- [rb/api/parameter.proto](#rb_api_parameter-proto)
+    - [GetParameterListRequest](#rb-api-GetParameterListRequest)
+    - [GetParameterListResponse](#rb-api-GetParameterListResponse)
+    - [GetParameterListResponse.ParameterType](#rb-api-GetParameterListResponse-ParameterType)
+    - [GetParameterRequest](#rb-api-GetParameterRequest)
+    - [GetParameterResponse](#rb-api-GetParameterResponse)
+    - [ResetAllParametersToDefaultRequest](#rb-api-ResetAllParametersToDefaultRequest)
+    - [ResetAllParametersToDefaultResponse](#rb-api-ResetAllParametersToDefaultResponse)
+    - [ResetParameterToDefaultRequest](#rb-api-ResetParameterToDefaultRequest)
+    - [ResetParameterToDefaultResponse](#rb-api-ResetParameterToDefaultResponse)
+    - [SetParameterRequest](#rb-api-SetParameterRequest)
+    - [SetParameterResponse](#rb-api-SetParameterResponse)
   
-- [rb/api/parameter_service.proto](#rb/api/parameter_service.proto)
-    - [ParameterService](#ParameterService)
+- [rb/api/parameter_service.proto](#rb_api_parameter_service-proto)
+    - [ParameterService](#rb-api-ParameterService)
   
-- [rb/api/ping.proto](#rb/api/ping.proto)
-    - [PingRequest](#PingRequest)
-    - [PingResponse](#PingResponse)
+- [rb/api/ping.proto](#rb_api_ping-proto)
+    - [PingRequest](#rb-api-PingRequest)
+    - [PingResponse](#rb-api-PingResponse)
   
-- [rb/api/ping_service.proto](#rb/api/ping_service.proto)
-    - [PingService](#PingService)
+- [rb/api/ping_service.proto](#rb_api_ping_service-proto)
+    - [PingService](#rb-api-PingService)
   
-- [rb/api/power.proto](#rb/api/power.proto)
-    - [JointCommandRequest](#JointCommandRequest)
-    - [JointCommandResponse](#JointCommandResponse)
-    - [PowerCommandRequest](#PowerCommandRequest)
-    - [PowerCommandResponse](#PowerCommandResponse)
-    - [ToolFlangePowerCommandRequest](#ToolFlangePowerCommandRequest)
-    - [ToolFlangePowerCommandResponse](#ToolFlangePowerCommandResponse)
+- [rb/api/power.proto](#rb_api_power-proto)
+    - [JointCommandRequest](#rb-api-JointCommandRequest)
+    - [JointCommandResponse](#rb-api-JointCommandResponse)
+    - [PowerCommandRequest](#rb-api-PowerCommandRequest)
+    - [PowerCommandResponse](#rb-api-PowerCommandResponse)
+    - [ToolFlangePowerCommandRequest](#rb-api-ToolFlangePowerCommandRequest)
+    - [ToolFlangePowerCommandResponse](#rb-api-ToolFlangePowerCommandResponse)
   
-    - [JointCommandRequest.Command](#JointCommandRequest.Command)
-    - [JointCommandResponse.Status](#JointCommandResponse.Status)
-    - [PowerCommandRequest.Command](#PowerCommandRequest.Command)
-    - [PowerCommandResponse.Status](#PowerCommandResponse.Status)
-    - [ToolFlangePowerCommandRequest.Command](#ToolFlangePowerCommandRequest.Command)
+    - [JointCommandRequest.Command](#rb-api-JointCommandRequest-Command)
+    - [JointCommandResponse.Status](#rb-api-JointCommandResponse-Status)
+    - [PowerCommandRequest.Command](#rb-api-PowerCommandRequest-Command)
+    - [PowerCommandResponse.Status](#rb-api-PowerCommandResponse-Status)
+    - [ToolFlangePowerCommandRequest.Command](#rb-api-ToolFlangePowerCommandRequest-Command)
   
-- [rb/api/power_service.proto](#rb/api/power_service.proto)
-    - [PowerService](#PowerService)
+- [rb/api/power_service.proto](#rb_api_power_service-proto)
+    - [PowerService](#rb-api-PowerService)
   
-- [rb/api/robot_command.proto](#rb/api/robot_command.proto)
-    - [RobotCommand](#RobotCommand)
-    - [RobotCommand.Feedback](#RobotCommand.Feedback)
-    - [RobotCommand.Request](#RobotCommand.Request)
-    - [RobotCommandRequest](#RobotCommandRequest)
-    - [RobotCommandResponse](#RobotCommandResponse)
+- [rb/api/robot_command.proto](#rb_api_robot_command-proto)
+    - [RobotCommand](#rb-api-RobotCommand)
+    - [RobotCommand.Feedback](#rb-api-RobotCommand-Feedback)
+    - [RobotCommand.Request](#rb-api-RobotCommand-Request)
+    - [RobotCommandRequest](#rb-api-RobotCommandRequest)
+    - [RobotCommandResponse](#rb-api-RobotCommandResponse)
   
-    - [RobotCommand.Feedback.FinishCode](#RobotCommand.Feedback.FinishCode)
-    - [RobotCommand.Feedback.Status](#RobotCommand.Feedback.Status)
+    - [RobotCommand.Feedback.FinishCode](#rb-api-RobotCommand-Feedback-FinishCode)
+    - [RobotCommand.Feedback.Status](#rb-api-RobotCommand-Feedback-Status)
   
-- [rb/api/robot_command_service.proto](#rb/api/robot_command_service.proto)
-    - [RobotCommandService](#RobotCommandService)
+- [rb/api/robot_command_service.proto](#rb_api_robot_command_service-proto)
+    - [RobotCommandService](#rb-api-RobotCommandService)
   
-- [rb/api/robot_info.proto](#rb/api/robot_info.proto)
-    - [BatteryInfo](#BatteryInfo)
-    - [EMOInfo](#EMOInfo)
-    - [GetRobotInfoRequest](#GetRobotInfoRequest)
-    - [GetRobotInfoResponse](#GetRobotInfoResponse)
-    - [GetRobotModelRequest](#GetRobotModelRequest)
-    - [GetRobotModelResponse](#GetRobotModelResponse)
-    - [ImportRobotModelRequest](#ImportRobotModelRequest)
-    - [ImportRobotModelResponse](#ImportRobotModelResponse)
-    - [JointInfo](#JointInfo)
-    - [PowerInfo](#PowerInfo)
-    - [RobotInfo](#RobotInfo)
+- [rb/api/robot_info.proto](#rb_api_robot_info-proto)
+    - [BatteryInfo](#rb-api-BatteryInfo)
+    - [EMOInfo](#rb-api-EMOInfo)
+    - [GetRobotInfoRequest](#rb-api-GetRobotInfoRequest)
+    - [GetRobotInfoResponse](#rb-api-GetRobotInfoResponse)
+    - [GetRobotModelRequest](#rb-api-GetRobotModelRequest)
+    - [GetRobotModelResponse](#rb-api-GetRobotModelResponse)
+    - [ImportRobotModelRequest](#rb-api-ImportRobotModelRequest)
+    - [ImportRobotModelResponse](#rb-api-ImportRobotModelResponse)
+    - [JointInfo](#rb-api-JointInfo)
+    - [PowerInfo](#rb-api-PowerInfo)
+    - [RobotInfo](#rb-api-RobotInfo)
   
-- [rb/api/robot_info_service.proto](#rb/api/robot_info_service.proto)
-    - [RobotInfoService](#RobotInfoService)
+- [rb/api/robot_info_service.proto](#rb_api_robot_info_service-proto)
+    - [RobotInfoService](#rb-api-RobotInfoService)
   
-- [rb/api/robot_state.proto](#rb/api/robot_state.proto)
-    - [BatteryState](#BatteryState)
-    - [Collision](#Collision)
-    - [EMOState](#EMOState)
-    - [FTSensorData](#FTSensorData)
-    - [GetControlManagerStateRequest](#GetControlManagerStateRequest)
-    - [GetControlManagerStateResponse](#GetControlManagerStateResponse)
-    - [GetRobotStateRequest](#GetRobotStateRequest)
-    - [GetRobotStateResponse](#GetRobotStateResponse)
-    - [GetRobotStateStreamRequest](#GetRobotStateStreamRequest)
-    - [GetRobotStateStreamResponse](#GetRobotStateStreamResponse)
-    - [JointState](#JointState)
-    - [PowerState](#PowerState)
-    - [ResetOdometryRequest](#ResetOdometryRequest)
-    - [ResetOdometryResponse](#ResetOdometryResponse)
-    - [RobotState](#RobotState)
-    - [SystemStat](#SystemStat)
-    - [ToolFlangeState](#ToolFlangeState)
+- [rb/api/robot_state.proto](#rb_api_robot_state-proto)
+    - [BatteryState](#rb-api-BatteryState)
+    - [Collision](#rb-api-Collision)
+    - [EMOState](#rb-api-EMOState)
+    - [FTSensorData](#rb-api-FTSensorData)
+    - [GetControlManagerStateRequest](#rb-api-GetControlManagerStateRequest)
+    - [GetControlManagerStateResponse](#rb-api-GetControlManagerStateResponse)
+    - [GetRobotStateRequest](#rb-api-GetRobotStateRequest)
+    - [GetRobotStateResponse](#rb-api-GetRobotStateResponse)
+    - [GetRobotStateStreamRequest](#rb-api-GetRobotStateStreamRequest)
+    - [GetRobotStateStreamResponse](#rb-api-GetRobotStateStreamResponse)
+    - [JointState](#rb-api-JointState)
+    - [PowerState](#rb-api-PowerState)
+    - [ResetOdometryRequest](#rb-api-ResetOdometryRequest)
+    - [ResetOdometryResponse](#rb-api-ResetOdometryResponse)
+    - [RobotState](#rb-api-RobotState)
+    - [SystemStat](#rb-api-SystemStat)
+    - [ToolFlangeState](#rb-api-ToolFlangeState)
   
-    - [EMOState.State](#EMOState.State)
-    - [JointState.FETState](#JointState.FETState)
-    - [JointState.InitializationState](#JointState.InitializationState)
-    - [JointState.RunState](#JointState.RunState)
-    - [PowerState.State](#PowerState.State)
+    - [EMOState.State](#rb-api-EMOState-State)
+    - [JointState.FETState](#rb-api-JointState-FETState)
+    - [JointState.InitializationState](#rb-api-JointState-InitializationState)
+    - [JointState.RunState](#rb-api-JointState-RunState)
+    - [PowerState.State](#rb-api-PowerState-State)
   
-- [rb/api/robot_state_service.proto](#rb/api/robot_state_service.proto)
-    - [RobotStateService](#RobotStateService)
+- [rb/api/robot_state_service.proto](#rb_api_robot_state_service-proto)
+    - [RobotStateService](#rb-api-RobotStateService)
   
-- [rb/api/torso_command.proto](#rb/api/torso_command.proto)
-    - [TorsoCommand](#TorsoCommand)
-    - [TorsoCommand.Feedback](#TorsoCommand.Feedback)
-    - [TorsoCommand.Request](#TorsoCommand.Request)
+- [rb/api/torso_command.proto](#rb_api_torso_command-proto)
+    - [TorsoCommand](#rb-api-TorsoCommand)
+    - [TorsoCommand.Feedback](#rb-api-TorsoCommand-Feedback)
+    - [TorsoCommand.Request](#rb-api-TorsoCommand-Request)
   
-- [rb/api/whole_body_command.proto](#rb/api/whole_body_command.proto)
-    - [WholeBodyCommand](#WholeBodyCommand)
-    - [WholeBodyCommand.Feedback](#WholeBodyCommand.Feedback)
-    - [WholeBodyCommand.Request](#WholeBodyCommand.Request)
+- [rb/api/whole_body_command.proto](#rb_api_whole_body_command-proto)
+    - [WholeBodyCommand](#rb-api-WholeBodyCommand)
+    - [WholeBodyCommand.Feedback](#rb-api-WholeBodyCommand-Feedback)
+    - [WholeBodyCommand.Request](#rb-api-WholeBodyCommand-Request)
   
-- [Scalar Value Types](#Scalar Value Types)
+- [Scalar Value Types](#scalar-value-types)
 
 
 
@@ -278,11 +278,11 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| joint_position_command_feedback | [JointPositionCommand.Feedback](#JointPositionCommand.Feedback) |  |  |
-| gravity_compensation_command_feedback | [GravityCompensationCommand.Feedback](#GravityCompensationCommand.Feedback) |  |  |
-| cartesian_command_feedback | [CartesianCommand.Feedback](#CartesianCommand.Feedback) |  |  |
-| impedance_control_command_feedback | [ImpedanceControlCommand.Feedback](#ImpedanceControlCommand.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| joint_position_command_feedback | [JointPositionCommand.Feedback](#rb-api-JointPositionCommand-Feedback) |  |  |
+| gravity_compensation_command_feedback | [GravityCompensationCommand.Feedback](#rb-api-GravityCompensationCommand-Feedback) |  |  |
+| cartesian_command_feedback | [CartesianCommand.Feedback](#rb-api-CartesianCommand-Feedback) |  |  |
+| impedance_control_command_feedback | [ImpedanceControlCommand.Feedback](#rb-api-ImpedanceControlCommand-Feedback) |  |  |
 
 
 
@@ -297,11 +297,11 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| joint_position_command | [JointPositionCommand.Request](#JointPositionCommand.Request) |  |  |
-| gravity_compensation_command | [GravityCompensationCommand.Request](#GravityCompensationCommand.Request) |  |  |
-| cartesian_command | [CartesianCommand.Request](#CartesianCommand.Request) |  |  |
-| impedance_control_command | [ImpedanceControlCommand.Request](#ImpedanceControlCommand.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| joint_position_command | [JointPositionCommand.Request](#rb-api-JointPositionCommand-Request) |  |  |
+| gravity_compensation_command | [GravityCompensationCommand.Request](#rb-api-GravityCompensationCommand-Request) |  |  |
+| cartesian_command | [CartesianCommand.Request](#rb-api-CartesianCommand-Request) |  |  |
+| impedance_control_command | [ImpedanceControlCommand.Request](#rb-api-ImpedanceControlCommand-Request) |  |  |
 
 
 
@@ -342,8 +342,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| tracking_errors | [CartesianCommand.TrackingError](#CartesianCommand.TrackingError) | repeated |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| tracking_errors | [CartesianCommand.TrackingError](#rb-api-CartesianCommand-TrackingError) | repeated |  |
 
 
 
@@ -358,11 +358,11 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| minimum_time | [google.protobuf.Duration](#google.protobuf.Duration) |  |  |
-| targets | [CartesianCommand.SE3PoseTarget](#CartesianCommand.SE3PoseTarget) | repeated |  |
-| stop_position_tracking_error | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  |  |
-| stop_orientation_tracking_error | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| minimum_time | [google.protobuf.Duration](#google-protobuf-Duration) |  |  |
+| targets | [CartesianCommand.SE3PoseTarget](#rb-api-CartesianCommand-SE3PoseTarget) | repeated |  |
+| stop_position_tracking_error | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  |  |
+| stop_orientation_tracking_error | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  |  |
 
 
 
@@ -379,10 +379,10 @@
 | ----- | ---- | ----- | ----------- |
 | ref_link_name | [string](#string) |  |  |
 | link_name | [string](#string) |  |  |
-| T | [SE3Pose](#SE3Pose) |  |  |
-| linear_velocity_limit | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  | (m/s) |
-| angular_velocity_limit | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  | (rad/s) |
-| acceleration_limit_scaling | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  | default.linear_acceleration_limit * acceleration_limit_scaling default.angular_acceleration_limit * acceleration_limit_scaling
+| T | [SE3Pose](#rb-api-SE3Pose) |  |  |
+| linear_velocity_limit | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  | (m/s) |
+| angular_velocity_limit | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  | (rad/s) |
+| acceleration_limit_scaling | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  | default.linear_acceleration_limit * acceleration_limit_scaling default.angular_acceleration_limit * acceleration_limit_scaling
 
 `(0, 1]` |
 
@@ -425,7 +425,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
 
 
 
@@ -440,7 +440,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
 | on | [bool](#bool) |  |  |
 
 
@@ -466,8 +466,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| tracking_error | [ImpedanceControlCommand.TrackingError](#ImpedanceControlCommand.TrackingError) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| tracking_error | [ImpedanceControlCommand.TrackingError](#rb-api-ImpedanceControlCommand-TrackingError) |  |  |
 
 
 
@@ -482,12 +482,12 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
 | ref_link_name | [string](#string) |  |  |
 | link_name | [string](#string) |  |  |
-| T | [SE3Pose](#SE3Pose) |  |  |
-| translation_weight | [Vec3](#Vec3) |  |  |
-| rotation_weight | [Vec3](#Vec3) |  |  |
+| T | [SE3Pose](#rb-api-SE3Pose) |  |  |
+| translation_weight | [Vec3](#rb-api-Vec3) |  |  |
+| rotation_weight | [Vec3](#rb-api-Vec3) |  |  |
 
 
 
@@ -528,7 +528,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
 | target_joint_name | [string](#string) |  |  |
 
 
@@ -544,10 +544,10 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
 | joint_name | [string](#string) |  |  |
-| velocity_limit | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  | (rad/s) (optional) |
-| acceleration_limit | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  | (rad/s^2) (optional) |
+| velocity_limit | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  | (rad/s) (optional) |
+| acceleration_limit | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  | (rad/s^2) (optional) |
 | absolute_position | [double](#double) |  | (rad) |
 | relative_position | [double](#double) |  | (rad) current position &#43; relative position |
 | one_step | [bool](#bool) |  | 5 deg, true is positive move, false is negative move |
@@ -575,7 +575,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
 
 
 
@@ -590,12 +590,12 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| minimum_time | [google.protobuf.Duration](#google.protobuf.Duration) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| minimum_time | [google.protobuf.Duration](#google-protobuf-Duration) |  |  |
 | position | [double](#double) | repeated |  |
 | velocity_limit | [double](#double) | repeated |  |
 | acceleration_limit | [double](#double) | repeated |  |
-| cutoff_frequency | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  |  |
+| cutoff_frequency | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  |  |
 
 
 
@@ -620,7 +620,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
 
 
 
@@ -635,8 +635,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| minimum_time | [google.protobuf.Duration](#google.protobuf.Duration) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| minimum_time | [google.protobuf.Duration](#google-protobuf-Duration) |  |  |
 | velocity | [double](#double) | repeated |  |
 | acceleration_limit | [double](#double) | repeated |  |
 
@@ -665,7 +665,7 @@
 | ----- | ---- | ----- | ----------- |
 | ref_link_name | [string](#string) |  |  |
 | link_name | [string](#string) |  |  |
-| T | [SE3Pose](#SE3Pose) |  |  |
+| T | [SE3Pose](#rb-api-SE3Pose) |  |  |
 | translation_weight | [double](#double) |  | default = 1 |
 | rotation_weight | [double](#double) |  | default = 1 |
 
@@ -683,7 +683,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | ref_link_name | [string](#string) |  |  |
-| pose | [Vec3](#Vec3) |  |  |
+| pose | [Vec3](#rb-api-Vec3) |  |  |
 | weight | [double](#double) |  | default = 1 |
 
 
@@ -699,7 +699,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
 | total_cost | [double](#double) |  |  |
 | cartesian_costs | [double](#double) | repeated |  |
 | center_of_mass_cost | [double](#double) |  |  |
@@ -735,15 +735,15 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| cartesian_costs | [OptimalControlCommand.CartesianCost](#OptimalControlCommand.CartesianCost) | repeated |  |
-| center_of_mass_cost | [OptimalControlCommand.CenterOfMassCost](#OptimalControlCommand.CenterOfMassCost) |  |  |
-| joint_position_costs | [OptimalControlCommand.JointPositionCost](#OptimalControlCommand.JointPositionCost) | repeated |  |
-| velocity_limit_scaling | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  | velocity scaling factor: qdot_limit * default.velocity_limit_scaling * velocity_limit_scaling default: 1.0, range: (0, 1] |
-| velocity_tracking_gain | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  | velocity tracking gain default: default.optimal_control_command.velocity_tracking_gain, range: (0, 1] |
-| stop_cost | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  | stop cost default: default.optimal_control_command.stop_cost, range: (0, ∞) |
-| min_delta_cost | [google.protobuf.DoubleValue](#google.protobuf.DoubleValue) |  | minimum delta cost range: (0, ∞) |
-| patience | [google.protobuf.Int32Value](#google.protobuf.Int32Value) |  | patience parameter range: (0, ∞) |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| cartesian_costs | [OptimalControlCommand.CartesianCost](#rb-api-OptimalControlCommand-CartesianCost) | repeated |  |
+| center_of_mass_cost | [OptimalControlCommand.CenterOfMassCost](#rb-api-OptimalControlCommand-CenterOfMassCost) |  |  |
+| joint_position_costs | [OptimalControlCommand.JointPositionCost](#rb-api-OptimalControlCommand-JointPositionCost) | repeated |  |
+| velocity_limit_scaling | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  | velocity scaling factor: qdot_limit * default.velocity_limit_scaling * velocity_limit_scaling default: 1.0, range: (0, 1] |
+| velocity_tracking_gain | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  | velocity tracking gain default: default.optimal_control_command.velocity_tracking_gain, range: (0, 1] |
+| stop_cost | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  | stop cost default: default.optimal_control_command.stop_cost, range: (0, ∞) |
+| min_delta_cost | [google.protobuf.DoubleValue](#google-protobuf-DoubleValue) |  | minimum delta cost range: (0, ∞) |
+| patience | [google.protobuf.Int32Value](#google-protobuf-Int32Value) |  | patience parameter range: (0, ∞) |
 
 
 
@@ -768,7 +768,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
 
 
 
@@ -783,7 +783,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
 | port | [uint32](#uint32) |  |  |
 
 
@@ -809,7 +809,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
 
 
 
@@ -824,10 +824,10 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| minimum_time | [google.protobuf.Duration](#google.protobuf.Duration) |  |  |
-| velocity | [SE2Velocity](#SE2Velocity) |  |  |
-| acceleration_limit | [SE2Velocity](#SE2Velocity) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| minimum_time | [google.protobuf.Duration](#google-protobuf-Duration) |  |  |
+| velocity | [SE2Velocity](#rb-api-SE2Velocity) |  |  |
+| acceleration_limit | [SE2Velocity](#rb-api-SE2Velocity) |  |  |
 
 
 
@@ -852,7 +852,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
 
 
 
@@ -867,7 +867,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
 
 
 
@@ -908,12 +908,12 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| joint_position_command_feedback | [JointPositionCommand.Feedback](#JointPositionCommand.Feedback) |  |  |
-| optimal_control_command_feedback | [OptimalControlCommand.Feedback](#OptimalControlCommand.Feedback) |  |  |
-| gravity_compensation_command_feedback | [GravityCompensationCommand.Feedback](#GravityCompensationCommand.Feedback) |  |  |
-| cartesian_command_feedback | [CartesianCommand.Feedback](#CartesianCommand.Feedback) |  |  |
-| body_component_based_command_feedback | [BodyComponentBasedCommand.Feedback](#BodyComponentBasedCommand.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| joint_position_command_feedback | [JointPositionCommand.Feedback](#rb-api-JointPositionCommand-Feedback) |  |  |
+| optimal_control_command_feedback | [OptimalControlCommand.Feedback](#rb-api-OptimalControlCommand-Feedback) |  |  |
+| gravity_compensation_command_feedback | [GravityCompensationCommand.Feedback](#rb-api-GravityCompensationCommand-Feedback) |  |  |
+| cartesian_command_feedback | [CartesianCommand.Feedback](#rb-api-CartesianCommand-Feedback) |  |  |
+| body_component_based_command_feedback | [BodyComponentBasedCommand.Feedback](#rb-api-BodyComponentBasedCommand-Feedback) |  |  |
 
 
 
@@ -928,12 +928,12 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| joint_position_command | [JointPositionCommand.Request](#JointPositionCommand.Request) |  |  |
-| optimal_control_command | [OptimalControlCommand.Request](#OptimalControlCommand.Request) |  |  |
-| gravity_compensation_command | [GravityCompensationCommand.Request](#GravityCompensationCommand.Request) |  |  |
-| cartesian_command | [CartesianCommand.Request](#CartesianCommand.Request) |  |  |
-| body_component_based_command | [BodyComponentBasedCommand.Request](#BodyComponentBasedCommand.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| joint_position_command | [JointPositionCommand.Request](#rb-api-JointPositionCommand-Request) |  |  |
+| optimal_control_command | [OptimalControlCommand.Request](#rb-api-OptimalControlCommand-Request) |  |  |
+| gravity_compensation_command | [GravityCompensationCommand.Request](#rb-api-GravityCompensationCommand-Request) |  |  |
+| cartesian_command | [CartesianCommand.Request](#rb-api-CartesianCommand-Request) |  |  |
+| body_component_based_command | [BodyComponentBasedCommand.Request](#rb-api-BodyComponentBasedCommand-Request) |  |  |
 
 
 
@@ -974,10 +974,10 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| right_arm_command_feedback | [ArmCommand.Feedback](#ArmCommand.Feedback) |  |  |
-| left_arm_command_feedback | [ArmCommand.Feedback](#ArmCommand.Feedback) |  |  |
-| torso_command_feedback | [TorsoCommand.Feedback](#TorsoCommand.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| right_arm_command_feedback | [ArmCommand.Feedback](#rb-api-ArmCommand-Feedback) |  |  |
+| left_arm_command_feedback | [ArmCommand.Feedback](#rb-api-ArmCommand-Feedback) |  |  |
+| torso_command_feedback | [TorsoCommand.Feedback](#rb-api-TorsoCommand-Feedback) |  |  |
 
 
 
@@ -992,10 +992,10 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| right_arm_command | [ArmCommand.Request](#ArmCommand.Request) |  |  |
-| left_arm_command | [ArmCommand.Request](#ArmCommand.Request) |  |  |
-| torso_command | [TorsoCommand.Request](#TorsoCommand.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| right_arm_command | [ArmCommand.Request](#rb-api-ArmCommand-Request) |  |  |
+| left_arm_command | [ArmCommand.Request](#rb-api-ArmCommand-Request) |  |  |
+| torso_command | [TorsoCommand.Request](#rb-api-TorsoCommand-Request) |  |  |
 
 
 
@@ -1051,9 +1051,9 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| control_hold_time | [google.protobuf.Duration](#google.protobuf.Duration) |  |  |
-| gravity | [Vec3](#Vec3) |  |  |
-| inertials | [CommandHeader.Request.InertialsEntry](#CommandHeader.Request.InertialsEntry) | repeated |  |
+| control_hold_time | [google.protobuf.Duration](#google-protobuf-Duration) |  |  |
+| gravity | [Vec3](#rb-api-Vec3) |  |  |
+| inertials | [CommandHeader.Request.InertialsEntry](#rb-api-CommandHeader-Request-InertialsEntry) | repeated |  |
 
 
 
@@ -1069,7 +1069,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | key | [string](#string) |  |  |
-| value | [Inertial](#Inertial) |  |  |
+| value | [Inertial](#rb-api-Inertial) |  |  |
 
 
 
@@ -1110,10 +1110,10 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| mobility_command_feedback | [MobilityCommand.Feedback](#MobilityCommand.Feedback) |  |  |
-| body_command_feedback | [BodyCommand.Feedback](#BodyCommand.Feedback) |  |  |
-| head_command_feedback | [HeadCommand.Feedback](#HeadCommand.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| mobility_command_feedback | [MobilityCommand.Feedback](#rb-api-MobilityCommand-Feedback) |  |  |
+| body_command_feedback | [BodyCommand.Feedback](#rb-api-BodyCommand-Feedback) |  |  |
+| head_command_feedback | [HeadCommand.Feedback](#rb-api-HeadCommand-Feedback) |  |  |
 
 
 
@@ -1128,10 +1128,10 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| mobility_command | [MobilityCommand.Request](#MobilityCommand.Request) |  |  |
-| body_command | [BodyCommand.Request](#BodyCommand.Request) |  |  |
-| head_command | [HeadCommand.Request](#HeadCommand.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| mobility_command | [MobilityCommand.Request](#rb-api-MobilityCommand-Request) |  |  |
+| body_command | [BodyCommand.Request](#rb-api-BodyCommand-Request) |  |  |
+| head_command | [HeadCommand.Request](#rb-api-HeadCommand-Request) |  |  |
 
 
 
@@ -1162,9 +1162,9 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  | Request header |
-| command | [ControlManagerCommandRequest.Command](#ControlManagerCommandRequest.Command) |  |  |
-| unlimited_mode_enabled | [google.protobuf.BoolValue](#google.protobuf.BoolValue) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  | Request header |
+| command | [ControlManagerCommandRequest.Command](#rb-api-ControlManagerCommandRequest-Command) |  |  |
+| unlimited_mode_enabled | [google.protobuf.BoolValue](#google-protobuf-BoolValue) |  |  |
 
 
 
@@ -1179,8 +1179,8 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  | Response header |
-| control_manager_state | [ControlManagerState](#ControlManagerState) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  | Response header |
+| control_manager_state | [ControlManagerState](#rb-api-ControlManagerState) |  |  |
 
 
 
@@ -1195,9 +1195,9 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| state | [ControlManagerState.State](#ControlManagerState.State) |  |  |
+| state | [ControlManagerState.State](#rb-api-ControlManagerState-State) |  |  |
 | time_scale | [double](#double) |  |  |
-| control_state | [ControlManagerState.ControlState](#ControlManagerState.ControlState) |  |  |
+| control_state | [ControlManagerState.ControlState](#rb-api-ControlManagerState-ControlState) |  |  |
 | enabled_joint_idx | [uint32](#uint32) | repeated |  |
 | unlimited_mode_enabled | [bool](#bool) |  |  |
 
@@ -1214,7 +1214,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  | Request header |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  | Request header |
 
 
 
@@ -1229,7 +1229,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  | Response header |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  | Response header |
 | time_scale | [double](#double) |  |  |
 
 
@@ -1245,7 +1245,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  | Request header |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  | Request header |
 | time_scale | [double](#double) |  |  |
 
 
@@ -1261,7 +1261,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  | Response header |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  | Response header |
 | current_time_scale | [double](#double) |  |  |
 
 
@@ -1341,9 +1341,9 @@ Control manager command
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| ControlManagerCommand | [ControlManagerCommandRequest](#ControlManagerCommandRequest) | [ControlManagerCommandResponse](#ControlManagerCommandResponse) |  |
-| GetTimeScale | [GetTimeScaleRequest](#GetTimeScaleRequest) | [GetTimeScaleResponse](#GetTimeScaleResponse) |  |
-| SetTimeScale | [SetTimeScaleRequest](#SetTimeScaleRequest) | [SetTimeScaleResponse](#SetTimeScaleResponse) |  |
+| ControlManagerCommand | [ControlManagerCommandRequest](#rb-api-ControlManagerCommandRequest) | [ControlManagerCommandResponse](#rb-api-ControlManagerCommandResponse) |  |
+| GetTimeScale | [GetTimeScaleRequest](#rb-api-GetTimeScaleRequest) | [GetTimeScaleResponse](#rb-api-GetTimeScaleResponse) |  |
+| SetTimeScale | [SetTimeScaleRequest](#rb-api-SetTimeScaleRequest) | [SetTimeScaleResponse](#rb-api-SetTimeScaleResponse) |  |
 
  
 
@@ -1380,8 +1380,8 @@ Control manager command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
-| data | [Gamepad](#Gamepad) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
+| data | [Gamepad](#rb-api-Gamepad) |  |  |
 
 
 
@@ -1396,7 +1396,7 @@ Control manager command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 
 
 
@@ -1432,7 +1432,7 @@ Control manager command
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| UploadGamepadData | [Gamepad](#Gamepad) stream | [UploadGamepadDataResponse](#UploadGamepadDataResponse) |  |
+| UploadGamepadData | [Gamepad](#rb-api-Gamepad) stream | [UploadGamepadDataResponse](#rb-api-UploadGamepadDataResponse) |  |
 
  
 
@@ -1491,8 +1491,8 @@ Inertia tensor components (kg*m^2)
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | mass | [double](#double) |  | Mass (kg) |
-| center_of_mass | [Vec3](#Vec3) |  | Center of mass (m) |
-| inertia | [Inertia](#Inertia) |  | Inertia tensor |
+| center_of_mass | [Vec3](#rb-api-Vec3) |  | Center of mass (m) |
+| inertia | [Inertia](#rb-api-Inertia) |  | Inertia tensor |
 
 
 
@@ -1525,7 +1525,7 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| position | [Vec2](#Vec2) |  | (m) |
+| position | [Vec2](#rb-api-Vec2) |  | (m) |
 | angle | [double](#double) |  | (rad) |
 
 
@@ -1541,7 +1541,7 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| linear | [Vec2](#Vec2) |  | (m/s) |
+| linear | [Vec2](#rb-api-Vec2) |  | (m/s) |
 | angular | [double](#double) |  | (rad/s) |
 
 
@@ -1557,9 +1557,9 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| position | [Vec3](#Vec3) |  | (m) |
-| quaternion | [Quaternion](#Quaternion) |  |  |
-| euler | [EulerAngleZYX](#EulerAngleZYX) |  |  |
+| position | [Vec3](#rb-api-Vec3) |  | (m) |
+| quaternion | [Quaternion](#rb-api-Quaternion) |  |  |
+| euler | [EulerAngleZYX](#rb-api-EulerAngleZYX) |  |  |
 
 
 
@@ -1623,7 +1623,7 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  | Request header |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  | Request header |
 | name | [string](#string) |  |  |
 
 
@@ -1639,7 +1639,7 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  | Response header |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  | Response header |
 
 
 
@@ -1654,7 +1654,7 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  | Request header |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  | Request header |
 | name | [string](#string) |  |  |
 | position | [int32](#int32) |  |  |
 | velocity | [int32](#int32) |  |  |
@@ -1673,7 +1673,7 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  | Response header |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  | Response header |
 
 
 
@@ -1709,8 +1709,8 @@ Inertia tensor components (kg*m^2)
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| GripperInitialization | [GripperInitializationRequest](#GripperInitializationRequest) | [GripperInitializationResponse](#GripperInitializationResponse) |  |
-| GripperMove | [GripperMoveRequest](#GripperMoveRequest) | [GripperMoveResponse](#GripperMoveResponse) | Joint command |
+| GripperInitialization | [GripperInitializationRequest](#rb-api-GripperInitializationRequest) | [GripperInitializationResponse](#rb-api-GripperInitializationResponse) |  |
+| GripperMove | [GripperMoveRequest](#rb-api-GripperMoveRequest) | [GripperMoveResponse](#rb-api-GripperMoveResponse) | Joint command |
 
  
 
@@ -1741,8 +1741,8 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| joint_position_command_feedback | [JointPositionCommand.Feedback](#JointPositionCommand.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| joint_position_command_feedback | [JointPositionCommand.Feedback](#rb-api-JointPositionCommand-Feedback) |  |  |
 
 
 
@@ -1757,8 +1757,8 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| joint_position_command | [JointPositionCommand.Request](#JointPositionCommand.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| joint_position_command | [JointPositionCommand.Request](#rb-api-JointPositionCommand-Request) |  |  |
 
 
 
@@ -1789,7 +1789,7 @@ Inertia tensor components (kg*m^2)
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| code | [CommonError.Code](#CommonError.Code) |  | Error code |
+| code | [CommonError.Code](#rb-api-CommonError-Code) |  | Error code |
 | message | [string](#string) |  | Human-readable error message |
 
 
@@ -1805,7 +1805,7 @@ Standard request header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_timestamp | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  | Client local system clock |
+| request_timestamp | [google.protobuf.Timestamp](#google-protobuf-Timestamp) |  | Client local system clock |
 
 
 
@@ -1820,10 +1820,10 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  | Echo |
-| request_received_timestamp | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  | Robot clock |
-| response_timestamp | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  | Robot clock |
-| error | [CommonError](#CommonError) |  | If set, there is error |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  | Echo |
+| request_received_timestamp | [google.protobuf.Timestamp](#google-protobuf-Timestamp) |  | Robot clock |
+| response_timestamp | [google.protobuf.Timestamp](#google-protobuf-Timestamp) |  | Robot clock |
+| error | [CommonError](#rb-api-CommonError) |  | If set, there is error |
 
 
 
@@ -1868,7 +1868,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 | log_count | [int32](#int32) |  |  |
 
 
@@ -1884,8 +1884,8 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
-| logs | [Log](#Log) | repeated |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
+| logs | [Log](#rb-api-Log) | repeated |  |
 
 
 
@@ -1900,7 +1900,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 | update_rate | [double](#double) |  | Hz |
 
 
@@ -1916,8 +1916,8 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
-| logs | [Log](#Log) | repeated |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
+| logs | [Log](#rb-api-Log) | repeated |  |
 
 
 
@@ -1932,9 +1932,9 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| timestamp | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  |  |
-| robot_system_timestamp | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  |  |
-| level | [Log.Level](#Log.Level) |  |  |
+| timestamp | [google.protobuf.Timestamp](#google-protobuf-Timestamp) |  |  |
+| robot_system_timestamp | [google.protobuf.Timestamp](#google-protobuf-Timestamp) |  |  |
+| level | [Log.Level](#rb-api-Log-Level) |  |  |
 | message | [string](#string) |  |  |
 
 
@@ -1950,8 +1950,8 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
-| level | [Log.Level](#Log.Level) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
+| level | [Log.Level](#rb-api-Log-Level) |  |  |
 
 
 
@@ -1966,7 +1966,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 
 
 
@@ -2018,9 +2018,9 @@ Standard response header
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| GetLastLog | [GetLastLogRequest](#GetLastLogRequest) | [GetLastLogResponse](#GetLastLogResponse) |  |
-| GetLogStream | [GetLogStreamRequest](#GetLogStreamRequest) | [GetLogStreamResponse](#GetLogStreamResponse) stream |  |
-| SetLogLevel | [SetLogLevelRequest](#SetLogLevelRequest) | [SetLogLevelResponse](#SetLogLevelResponse) |  |
+| GetLastLog | [GetLastLogRequest](#rb-api-GetLastLogRequest) | [GetLastLogResponse](#rb-api-GetLastLogResponse) |  |
+| GetLogStream | [GetLogStreamRequest](#rb-api-GetLogStreamRequest) | [GetLogStreamResponse](#rb-api-GetLogStreamResponse) stream |  |
+| SetLogLevel | [SetLogLevelRequest](#rb-api-SetLogLevelRequest) | [SetLogLevelResponse](#rb-api-SetLogLevelResponse) |  |
 
  
 
@@ -2051,9 +2051,9 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| joint_velocity_command_feedback | [JointVelocityCommand.Feedback](#JointVelocityCommand.Feedback) |  |  |
-| se2_velocity_command_feedback | [SE2VelocityCommand.Feedback](#SE2VelocityCommand.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| joint_velocity_command_feedback | [JointVelocityCommand.Feedback](#rb-api-JointVelocityCommand-Feedback) |  |  |
+| se2_velocity_command_feedback | [SE2VelocityCommand.Feedback](#rb-api-SE2VelocityCommand-Feedback) |  |  |
 
 
 
@@ -2068,9 +2068,9 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| joint_velocity_command | [JointVelocityCommand.Request](#JointVelocityCommand.Request) |  |  |
-| se2_velocity_command | [SE2VelocityCommand.Request](#SE2VelocityCommand.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| joint_velocity_command | [JointVelocityCommand.Request](#rb-api-JointVelocityCommand-Request) |  |  |
+| se2_velocity_command | [SE2VelocityCommand.Request](#rb-api-SE2VelocityCommand-Request) |  |  |
 
 
 
@@ -2101,7 +2101,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 
 
 
@@ -2116,8 +2116,8 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
-| parameters | [GetParameterListResponse.ParameterType](#GetParameterListResponse.ParameterType) | repeated |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
+| parameters | [GetParameterListResponse.ParameterType](#rb-api-GetParameterListResponse-ParameterType) | repeated |  |
 
 
 
@@ -2148,7 +2148,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 | name | [string](#string) |  |  |
 
 
@@ -2164,7 +2164,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 | parameter | [string](#string) |  |  |
 
 
@@ -2180,7 +2180,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 
 
 
@@ -2195,7 +2195,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 
 
 
@@ -2210,7 +2210,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 | name | [string](#string) |  |  |
 
 
@@ -2226,7 +2226,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 
 
 
@@ -2241,7 +2241,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 | name | [string](#string) |  |  |
 | parameter | [string](#string) |  |  |
 
@@ -2258,7 +2258,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 
 
 
@@ -2294,11 +2294,11 @@ Standard response header
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| ResetAllParametersToDefault | [ResetAllParametersToDefaultRequest](#ResetAllParametersToDefaultRequest) | [ResetAllParametersToDefaultResponse](#ResetAllParametersToDefaultResponse) |  |
-| ResetParameterToDefault | [ResetParameterToDefaultRequest](#ResetParameterToDefaultRequest) | [ResetParameterToDefaultResponse](#ResetParameterToDefaultResponse) |  |
-| GetParameter | [GetParameterRequest](#GetParameterRequest) | [GetParameterResponse](#GetParameterResponse) |  |
-| SetParameter | [SetParameterRequest](#SetParameterRequest) | [SetParameterResponse](#SetParameterResponse) |  |
-| GetParameterList | [GetParameterListRequest](#GetParameterListRequest) | [GetParameterListResponse](#GetParameterListResponse) |  |
+| ResetAllParametersToDefault | [ResetAllParametersToDefaultRequest](#rb-api-ResetAllParametersToDefaultRequest) | [ResetAllParametersToDefaultResponse](#rb-api-ResetAllParametersToDefaultResponse) |  |
+| ResetParameterToDefault | [ResetParameterToDefaultRequest](#rb-api-ResetParameterToDefaultRequest) | [ResetParameterToDefaultResponse](#rb-api-ResetParameterToDefaultResponse) |  |
+| GetParameter | [GetParameterRequest](#rb-api-GetParameterRequest) | [GetParameterResponse](#rb-api-GetParameterResponse) |  |
+| SetParameter | [SetParameterRequest](#rb-api-SetParameterRequest) | [SetParameterResponse](#rb-api-SetParameterResponse) |  |
+| GetParameterList | [GetParameterListRequest](#rb-api-GetParameterListRequest) | [GetParameterListResponse](#rb-api-GetParameterListResponse) |  |
 
  
 
@@ -2319,7 +2319,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 
 
 
@@ -2334,7 +2334,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 
 
 
@@ -2370,7 +2370,7 @@ Standard response header
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Ping | [PingRequest](#PingRequest) | [PingResponse](#PingResponse) |  |
+| Ping | [PingRequest](#rb-api-PingRequest) | [PingResponse](#rb-api-PingResponse) |  |
 
  
 
@@ -2391,9 +2391,9 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  | Request header |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  | Request header |
 | name | [string](#string) |  | Motor ID |
-| command | [JointCommandRequest.Command](#JointCommandRequest.Command) |  |  |
+| command | [JointCommandRequest.Command](#rb-api-JointCommandRequest-Command) |  |  |
 
 
 
@@ -2408,8 +2408,8 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  | Response header |
-| status | [JointCommandResponse.Status](#JointCommandResponse.Status) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  | Response header |
+| status | [JointCommandResponse.Status](#rb-api-JointCommandResponse-Status) |  |  |
 | message | [string](#string) |  | Human-readable message for status |
 
 
@@ -2425,9 +2425,9 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  | Request header |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  | Request header |
 | name | [string](#string) |  | Power ID |
-| command | [PowerCommandRequest.Command](#PowerCommandRequest.Command) |  |  |
+| command | [PowerCommandRequest.Command](#rb-api-PowerCommandRequest-Command) |  |  |
 
 
 
@@ -2442,8 +2442,8 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  | Response header |
-| status | [PowerCommandResponse.Status](#PowerCommandResponse.Status) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  | Response header |
+| status | [PowerCommandResponse.Status](#rb-api-PowerCommandResponse-Status) |  |  |
 | message | [string](#string) |  | Human-readable message for status |
 
 
@@ -2459,9 +2459,9 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  | Request header |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  | Request header |
 | name | [string](#string) |  | Tool Flange name |
-| command | [ToolFlangePowerCommandRequest.Command](#ToolFlangePowerCommandRequest.Command) |  |  |
+| command | [ToolFlangePowerCommandRequest.Command](#rb-api-ToolFlangePowerCommandRequest-Command) |  |  |
 
 
 
@@ -2476,7 +2476,7 @@ Standard response header
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  | Response header |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  | Response header |
 
 
 
@@ -2580,9 +2580,9 @@ Power command
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| PowerCommand | [PowerCommandRequest](#PowerCommandRequest) | [PowerCommandResponse](#PowerCommandResponse) | Control power of the robot |
-| JointCommand | [JointCommandRequest](#JointCommandRequest) | [JointCommandResponse](#JointCommandResponse) | Joint command |
-| ToolFlangePowerCommand | [ToolFlangePowerCommandRequest](#ToolFlangePowerCommandRequest) | [ToolFlangePowerCommandResponse](#ToolFlangePowerCommandResponse) | Tool Flange |
+| PowerCommand | [PowerCommandRequest](#rb-api-PowerCommandRequest) | [PowerCommandResponse](#rb-api-PowerCommandResponse) | Control power of the robot |
+| JointCommand | [JointCommandRequest](#rb-api-JointCommandRequest) | [JointCommandResponse](#rb-api-JointCommandResponse) | Joint command |
+| ToolFlangePowerCommand | [ToolFlangePowerCommandRequest](#rb-api-ToolFlangePowerCommandRequest) | [ToolFlangePowerCommandResponse](#rb-api-ToolFlangePowerCommandResponse) | Tool Flange |
 
  
 
@@ -2613,12 +2613,12 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| whole_body_command_feedback | [WholeBodyCommand.Feedback](#WholeBodyCommand.Feedback) |  |  |
-| component_based_command_feedback | [ComponentBasedCommand.Feedback](#ComponentBasedCommand.Feedback) |  |  |
-| jog_command_feedback | [JogCommand.Feedback](#JogCommand.Feedback) |  |  |
-| status | [RobotCommand.Feedback.Status](#RobotCommand.Feedback.Status) |  |  |
-| finish_code | [RobotCommand.Feedback.FinishCode](#RobotCommand.Feedback.FinishCode) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| whole_body_command_feedback | [WholeBodyCommand.Feedback](#rb-api-WholeBodyCommand-Feedback) |  |  |
+| component_based_command_feedback | [ComponentBasedCommand.Feedback](#rb-api-ComponentBasedCommand-Feedback) |  |  |
+| jog_command_feedback | [JogCommand.Feedback](#rb-api-JogCommand-Feedback) |  |  |
+| status | [RobotCommand.Feedback.Status](#rb-api-RobotCommand-Feedback-Status) |  |  |
+| finish_code | [RobotCommand.Feedback.FinishCode](#rb-api-RobotCommand-Feedback-FinishCode) |  |  |
 
 
 
@@ -2633,10 +2633,10 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| whole_body_command | [WholeBodyCommand.Request](#WholeBodyCommand.Request) |  |  |
-| component_based_command | [ComponentBasedCommand.Request](#ComponentBasedCommand.Request) |  |  |
-| jog_command | [JogCommand.Request](#JogCommand.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| whole_body_command | [WholeBodyCommand.Request](#rb-api-WholeBodyCommand-Request) |  |  |
+| component_based_command | [ComponentBasedCommand.Request](#rb-api-ComponentBasedCommand-Request) |  |  |
+| jog_command | [JogCommand.Request](#rb-api-JogCommand-Request) |  |  |
 
 
 
@@ -2651,8 +2651,8 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
-| robot_command | [RobotCommand.Request](#RobotCommand.Request) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
+| robot_command | [RobotCommand.Request](#rb-api-RobotCommand-Request) |  |  |
 | priority | [int32](#int32) |  |  |
 
 
@@ -2668,8 +2668,8 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
-| feedback | [RobotCommand.Feedback](#RobotCommand.Feedback) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
+| feedback | [RobotCommand.Feedback](#rb-api-RobotCommand-Feedback) |  |  |
 
 
 
@@ -2737,8 +2737,8 @@ Power command
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| RobotCommand | [RobotCommandRequest](#RobotCommandRequest) | [RobotCommandResponse](#RobotCommandResponse) | In case of sending and receiving a single command |
-| RobotCommandStream | [RobotCommandRequest](#RobotCommandRequest) stream | [RobotCommandResponse](#RobotCommandResponse) stream | In case of sending and receiving commands continuously |
+| RobotCommand | [RobotCommandRequest](#rb-api-RobotCommandRequest) | [RobotCommandResponse](#rb-api-RobotCommandResponse) | In case of sending and receiving a single command |
+| RobotCommandStream | [RobotCommandRequest](#rb-api-RobotCommandRequest) stream | [RobotCommandResponse](#rb-api-RobotCommandResponse) stream | In case of sending and receiving commands continuously |
 
  
 
@@ -2784,7 +2784,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 
 
 
@@ -2799,8 +2799,8 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
-| robot_info | [RobotInfo](#RobotInfo) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
+| robot_info | [RobotInfo](#rb-api-RobotInfo) |  |  |
 
 
 
@@ -2815,7 +2815,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 
 
 
@@ -2830,7 +2830,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 | model | [string](#string) |  |  |
 
 
@@ -2846,7 +2846,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 | name | [string](#string) |  |  |
 | model | [string](#string) |  |  |
 
@@ -2863,7 +2863,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 
 
 
@@ -2911,11 +2911,11 @@ Power command
 | ----- | ---- | ----- | ----------- |
 | robot_version | [string](#string) |  |  |
 | sdk_commit_id | [string](#string) |  |  |
-| battery_info | [BatteryInfo](#BatteryInfo) |  |  |
-| power_infos | [PowerInfo](#PowerInfo) | repeated |  |
-| emo_infos | [EMOInfo](#EMOInfo) | repeated |  |
+| battery_info | [BatteryInfo](#rb-api-BatteryInfo) |  |  |
+| power_infos | [PowerInfo](#rb-api-PowerInfo) | repeated |  |
+| emo_infos | [EMOInfo](#rb-api-EMOInfo) | repeated |  |
 | degree_of_freedom | [int32](#int32) |  |  |
-| joint_infos | [JointInfo](#JointInfo) | repeated |  |
+| joint_infos | [JointInfo](#rb-api-JointInfo) | repeated |  |
 | mobility_joint_idx | [uint32](#uint32) | repeated |  |
 | body_joint_idx | [uint32](#uint32) | repeated |  |
 | head_joint_idx | [uint32](#uint32) | repeated |  |
@@ -2954,9 +2954,9 @@ Power command
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| GetRobotInfo | [GetRobotInfoRequest](#GetRobotInfoRequest) | [GetRobotInfoResponse](#GetRobotInfoResponse) |  |
-| GetRobotModel | [GetRobotModelRequest](#GetRobotModelRequest) | [GetRobotModelResponse](#GetRobotModelResponse) |  |
-| ImportRobotModel | [ImportRobotModelRequest](#ImportRobotModelRequest) | [ImportRobotModelResponse](#ImportRobotModelResponse) |  |
+| GetRobotInfo | [GetRobotInfoRequest](#rb-api-GetRobotInfoRequest) | [GetRobotInfoResponse](#rb-api-GetRobotInfoResponse) |  |
+| GetRobotModel | [GetRobotModelRequest](#rb-api-GetRobotModelRequest) | [GetRobotModelResponse](#rb-api-GetRobotModelResponse) |  |
+| ImportRobotModel | [ImportRobotModelRequest](#rb-api-ImportRobotModelRequest) | [ImportRobotModelResponse](#rb-api-ImportRobotModelResponse) |  |
 
  
 
@@ -2996,8 +2996,8 @@ Power command
 | ----- | ---- | ----- | ----------- |
 | link1 | [string](#string) |  |  |
 | link2 | [string](#string) |  |  |
-| position1 | [Vec3](#Vec3) |  |  |
-| position2 | [Vec3](#Vec3) |  |  |
+| position1 | [Vec3](#rb-api-Vec3) |  |  |
+| position2 | [Vec3](#rb-api-Vec3) |  |  |
 | distance | [double](#double) |  |  |
 
 
@@ -3013,7 +3013,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| state | [EMOState.State](#EMOState.State) |  |  |
+| state | [EMOState.State](#rb-api-EMOState-State) |  |  |
 
 
 
@@ -3028,9 +3028,9 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| time_since_last_update | [google.protobuf.Duration](#google.protobuf.Duration) |  |  |
-| force | [Vec3](#Vec3) |  |  |
-| torque | [Vec3](#Vec3) |  |  |
+| time_since_last_update | [google.protobuf.Duration](#google-protobuf-Duration) |  |  |
+| force | [Vec3](#rb-api-Vec3) |  |  |
+| torque | [Vec3](#rb-api-Vec3) |  |  |
 
 
 
@@ -3045,7 +3045,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 
 
 
@@ -3060,8 +3060,8 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
-| control_manager_state | [ControlManagerState](#ControlManagerState) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
+| control_manager_state | [ControlManagerState](#rb-api-ControlManagerState) |  |  |
 
 
 
@@ -3076,7 +3076,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 
 
 
@@ -3091,9 +3091,9 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
-| robot_state | [RobotState](#RobotState) |  |  |
-| control_manager_state | [ControlManagerState](#ControlManagerState) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
+| robot_state | [RobotState](#rb-api-RobotState) |  |  |
+| control_manager_state | [ControlManagerState](#rb-api-ControlManagerState) |  |  |
 
 
 
@@ -3108,7 +3108,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
 | update_rate | [double](#double) |  | Hz |
 
 
@@ -3124,9 +3124,9 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
-| robot_state | [RobotState](#RobotState) |  |  |
-| control_manager_state | [ControlManagerState](#ControlManagerState) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
+| robot_state | [RobotState](#rb-api-RobotState) |  |  |
+| control_manager_state | [ControlManagerState](#rb-api-ControlManagerState) |  |  |
 
 
 
@@ -3142,12 +3142,12 @@ Power command
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | is_ready | [bool](#bool) |  |  |
-| fet_state | [JointState.FETState](#JointState.FETState) |  |  |
-| run_state | [JointState.RunState](#JointState.RunState) |  |  |
-| init_state | [JointState.InitializationState](#JointState.InitializationState) |  |  |
+| fet_state | [JointState.FETState](#rb-api-JointState-FETState) |  |  |
+| run_state | [JointState.RunState](#rb-api-JointState-RunState) |  |  |
+| init_state | [JointState.InitializationState](#rb-api-JointState-InitializationState) |  |  |
 | motor_type | [uint32](#uint32) |  | MOTOR STATE |
 | motor_state | [uint64](#uint64) |  |  |
-| time_since_last_update | [google.protobuf.Duration](#google.protobuf.Duration) |  |  |
+| time_since_last_update | [google.protobuf.Duration](#google-protobuf-Duration) |  |  |
 | power_on | [bool](#bool) |  |  |
 | position | [double](#double) |  |  |
 | velocity | [double](#double) |  |  |
@@ -3171,7 +3171,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| state | [PowerState.State](#PowerState.State) |  |  |
+| state | [PowerState.State](#rb-api-PowerState-State) |  |  |
 | voltage | [double](#double) |  |  |
 
 
@@ -3187,8 +3187,8 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| request_header | [RequestHeader](#RequestHeader) |  |  |
-| initial_pose | [SE2Pose](#SE2Pose) |  |  |
+| request_header | [RequestHeader](#rb-api-RequestHeader) |  |  |
+| initial_pose | [SE2Pose](#rb-api-SE2Pose) |  |  |
 
 
 
@@ -3203,7 +3203,7 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| response_header | [ResponseHeader](#ResponseHeader) |  |  |
+| response_header | [ResponseHeader](#rb-api-ResponseHeader) |  |  |
 
 
 
@@ -3218,16 +3218,16 @@ Power command
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| timestamp | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  |  |
-| system_stat | [SystemStat](#SystemStat) |  | System Statistic |
-| battery_state | [BatteryState](#BatteryState) |  | Battery State |
-| power_states | [PowerState](#PowerState) | repeated | Power State |
-| emo_states | [EMOState](#EMOState) | repeated | EMO state |
-| joint_states | [JointState](#JointState) | repeated | Joint State |
-| tool_flange_right | [ToolFlangeState](#ToolFlangeState) |  | Tool Flange State |
-| tool_flange_left | [ToolFlangeState](#ToolFlangeState) |  |  |
-| ft_sensor_right | [FTSensorData](#FTSensorData) |  | Force Torque Sensor |
-| ft_sensor_left | [FTSensorData](#FTSensorData) |  |  |
+| timestamp | [google.protobuf.Timestamp](#google-protobuf-Timestamp) |  |  |
+| system_stat | [SystemStat](#rb-api-SystemStat) |  | System Statistic |
+| battery_state | [BatteryState](#rb-api-BatteryState) |  | Battery State |
+| power_states | [PowerState](#rb-api-PowerState) | repeated | Power State |
+| emo_states | [EMOState](#rb-api-EMOState) | repeated | EMO state |
+| joint_states | [JointState](#rb-api-JointState) | repeated | Joint State |
+| tool_flange_right | [ToolFlangeState](#rb-api-ToolFlangeState) |  | Tool Flange State |
+| tool_flange_left | [ToolFlangeState](#rb-api-ToolFlangeState) |  |  |
+| ft_sensor_right | [FTSensorData](#rb-api-FTSensorData) |  | Force Torque Sensor |
+| ft_sensor_left | [FTSensorData](#rb-api-FTSensorData) |  |  |
 | is_ready | [double](#double) | repeated |  |
 | position | [double](#double) | repeated |  |
 | velocity | [double](#double) | repeated |  |
@@ -3237,11 +3237,11 @@ Power command
 | target_velocity | [double](#double) | repeated |  |
 | target_feedback_gain | [uint32](#uint32) | repeated |  |
 | target_feedforward_torque | [double](#double) | repeated |  |
-| odometry | [SE2Pose](#SE2Pose) |  | Mobility State |
-| center_of_mass | [Vec3](#Vec3) |  | Center Of Mass
+| odometry | [SE2Pose](#rb-api-SE2Pose) |  | Mobility State |
+| center_of_mass | [Vec3](#rb-api-Vec3) |  | Center Of Mass
 
 Position of center of mass with respect t base link |
-| collisions | [Collision](#Collision) | repeated | Collisions |
+| collisions | [Collision](#rb-api-Collision) | repeated | Collisions |
 
 
 
@@ -3274,9 +3274,9 @@ Position of center of mass with respect t base link |
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| time_since_last_update | [google.protobuf.Duration](#google.protobuf.Duration) |  |  |
-| gyro | [Vec3](#Vec3) |  |  |
-| acceleration | [Vec3](#Vec3) |  |  |
+| time_since_last_update | [google.protobuf.Duration](#google-protobuf-Duration) |  |  |
+| gyro | [Vec3](#rb-api-Vec3) |  |  |
+| acceleration | [Vec3](#rb-api-Vec3) |  |  |
 | switch_A | [bool](#bool) |  |  |
 | output_voltage | [int32](#int32) |  |  |
 
@@ -3378,10 +3378,10 @@ Position of center of mass with respect t base link |
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| GetRobotState | [GetRobotStateRequest](#GetRobotStateRequest) | [GetRobotStateResponse](#GetRobotStateResponse) |  |
-| GetRobotStateStream | [GetRobotStateStreamRequest](#GetRobotStateStreamRequest) | [GetRobotStateStreamResponse](#GetRobotStateStreamResponse) stream |  |
-| GetControlManagerState | [GetControlManagerStateRequest](#GetControlManagerStateRequest) | [GetControlManagerStateResponse](#GetControlManagerStateResponse) |  |
-| ResetOdometry | [ResetOdometryRequest](#ResetOdometryRequest) | [ResetOdometryResponse](#ResetOdometryResponse) |  |
+| GetRobotState | [GetRobotStateRequest](#rb-api-GetRobotStateRequest) | [GetRobotStateResponse](#rb-api-GetRobotStateResponse) |  |
+| GetRobotStateStream | [GetRobotStateStreamRequest](#rb-api-GetRobotStateStreamRequest) | [GetRobotStateStreamResponse](#rb-api-GetRobotStateStreamResponse) stream |  |
+| GetControlManagerState | [GetControlManagerStateRequest](#rb-api-GetControlManagerStateRequest) | [GetControlManagerStateResponse](#rb-api-GetControlManagerStateResponse) |  |
+| ResetOdometry | [ResetOdometryRequest](#rb-api-ResetOdometryRequest) | [ResetOdometryResponse](#rb-api-ResetOdometryResponse) |  |
 
  
 
@@ -3412,12 +3412,12 @@ Position of center of mass with respect t base link |
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| joint_position_command_feedback | [JointPositionCommand.Feedback](#JointPositionCommand.Feedback) |  |  |
-| gravity_compensation_command_feedback | [GravityCompensationCommand.Feedback](#GravityCompensationCommand.Feedback) |  |  |
-| cartesian_command_feedback | [CartesianCommand.Feedback](#CartesianCommand.Feedback) |  |  |
-| impedance_control_command_feedback | [ImpedanceControlCommand.Feedback](#ImpedanceControlCommand.Feedback) |  |  |
-| optimal_control_command_feedback | [OptimalControlCommand.Feedback](#OptimalControlCommand.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| joint_position_command_feedback | [JointPositionCommand.Feedback](#rb-api-JointPositionCommand-Feedback) |  |  |
+| gravity_compensation_command_feedback | [GravityCompensationCommand.Feedback](#rb-api-GravityCompensationCommand-Feedback) |  |  |
+| cartesian_command_feedback | [CartesianCommand.Feedback](#rb-api-CartesianCommand-Feedback) |  |  |
+| impedance_control_command_feedback | [ImpedanceControlCommand.Feedback](#rb-api-ImpedanceControlCommand-Feedback) |  |  |
+| optimal_control_command_feedback | [OptimalControlCommand.Feedback](#rb-api-OptimalControlCommand-Feedback) |  |  |
 
 
 
@@ -3432,12 +3432,12 @@ Position of center of mass with respect t base link |
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| joint_position_command | [JointPositionCommand.Request](#JointPositionCommand.Request) |  |  |
-| gravity_compensation_command | [GravityCompensationCommand.Request](#GravityCompensationCommand.Request) |  |  |
-| cartesian_command | [CartesianCommand.Request](#CartesianCommand.Request) |  |  |
-| impedance_control_command | [ImpedanceControlCommand.Request](#ImpedanceControlCommand.Request) |  |  |
-| optimal_control_command | [OptimalControlCommand.Request](#OptimalControlCommand.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| joint_position_command | [JointPositionCommand.Request](#rb-api-JointPositionCommand-Request) |  |  |
+| gravity_compensation_command | [GravityCompensationCommand.Request](#rb-api-GravityCompensationCommand-Request) |  |  |
+| cartesian_command | [CartesianCommand.Request](#rb-api-CartesianCommand-Request) |  |  |
+| impedance_control_command | [ImpedanceControlCommand.Request](#rb-api-ImpedanceControlCommand-Request) |  |  |
+| optimal_control_command | [OptimalControlCommand.Request](#rb-api-OptimalControlCommand-Request) |  |  |
 
 
 
@@ -3478,9 +3478,9 @@ Position of center of mass with respect t base link |
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header_feedback | [CommandHeader.Feedback](#CommandHeader.Feedback) |  |  |
-| stop_command_feedback | [StopCommand.Feedback](#StopCommand.Feedback) |  |  |
-| real_time_control_command_feedback | [RealTimeControlCommand.Feedback](#RealTimeControlCommand.Feedback) |  |  |
+| command_header_feedback | [CommandHeader.Feedback](#rb-api-CommandHeader-Feedback) |  |  |
+| stop_command_feedback | [StopCommand.Feedback](#rb-api-StopCommand-Feedback) |  |  |
+| real_time_control_command_feedback | [RealTimeControlCommand.Feedback](#rb-api-RealTimeControlCommand-Feedback) |  |  |
 
 
 
@@ -3495,9 +3495,9 @@ Position of center of mass with respect t base link |
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| command_header | [CommandHeader.Request](#CommandHeader.Request) |  |  |
-| stop_command | [StopCommand.Request](#StopCommand.Request) |  |  |
-| real_time_control_command | [RealTimeControlCommand.Request](#RealTimeControlCommand.Request) |  |  |
+| command_header | [CommandHeader.Request](#rb-api-CommandHeader-Request) |  |  |
+| stop_command | [StopCommand.Request](#rb-api-StopCommand-Request) |  |  |
+| real_time_control_command | [RealTimeControlCommand.Request](#rb-api-RealTimeControlCommand-Request) |  |  |
 
 
 

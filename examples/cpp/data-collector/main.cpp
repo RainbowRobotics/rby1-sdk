@@ -36,10 +36,10 @@ using namespace std::chrono_literals;
 
 const double kFrequency = 60;   // (Hz) = Framerate
 const std::string kAll = ".*";  // NOLINT
-const double kMasterArmLimitGain = 0.01;
+const double kMasterArmLimitGain = 0.5;
 const std::string MASTER_ARM_DEV = "/dev/rby1_master_arm";
 const std::string GRIPPER_DEV = "/dev/rby1_gripper";
-const double kGripperControlFrequency = 100;  // (Hz)
+const double kGripperControlFrequency = 50;  // (Hz)
 const std::string COMMAND_POWER_OFF = "power_off";
 const std::string COMMAND_POWER_ON = "power_on";
 const std::string COMMAND_SERVO_ON = "servo_on";
@@ -234,7 +234,7 @@ int main(int argc, char** argv) {
           }
 
           static double right_arm_minimum_time = 1., left_arm_minimum_time = 1.;
-          static double lpf_update_ratio = 0.1;
+          static double lpf_update_ratio = 0.05;
 
           if (tele_right_button) {
             //right hand position control mode
@@ -260,6 +260,15 @@ int main(int argc, char** argv) {
           Eigen::Vector<double, 7> target_position_right = q_joint_ref.block(0, 0, 7, 1);
           Eigen::Vector<double, 7> acc_limit, vel_limit;
 
+          robot_dyn->ComputeForwardKinematics(robot_dyn_state);
+          auto T_12 = robot_dyn->ComputeTransformation(robot_dyn_state, 1, 2);
+          auto T_13 = robot_dyn->ComputeTransformation(robot_dyn_state, 1, 3);
+          Eigen::Vector3d center = (rb::math::SE3::GetPosition(T_12) + rb::math::SE3::GetPosition(T_13)) / 2.;
+          double yaw = atan2(center(1), center(0));
+          double pitch = atan2(-center(2), center(0)) + 10 * M_PI / 180.;
+          yaw = std::clamp(yaw, -0.523, 0.523);
+          pitch = std::clamp(pitch, -0.35, 1.57);
+
           acc_limit.setConstant(1200.0);
           acc_limit *= M_PI / 180.;
 
@@ -267,36 +276,48 @@ int main(int argc, char** argv) {
           vel_limit *= M_PI / 180.;
 
           right_arm_minimum_time *= 0.99;
-          right_arm_minimum_time = std::max(right_arm_minimum_time, 0.01);
+          right_arm_minimum_time = std::max(right_arm_minimum_time, 0.015);
 
           left_arm_minimum_time *= 0.99;
-          left_arm_minimum_time = std::max(left_arm_minimum_time, 0.01);
+          left_arm_minimum_time = std::max(left_arm_minimum_time, 0.015);
 
           try {
             RobotCommandBuilder command_builder;
 
-            command_builder.SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
-                BodyComponentBasedCommandBuilder()
-                    .SetRightArmCommand(JointPositionCommandBuilder()
-                                            .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
-                                            .SetMinimumTime(right_arm_minimum_time)
-                                            .SetPosition(target_position_right)
-                                            .SetVelocityLimit(vel_limit)
-                                            .SetAccelerationLimit(acc_limit))
-                    .SetLeftArmCommand(JointPositionCommandBuilder()
-                                           .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
-                                           .SetMinimumTime(left_arm_minimum_time)
-                                           .SetPosition(target_position_left)
-                                           .SetVelocityLimit(vel_limit)
-                                           .SetAccelerationLimit(acc_limit))));
+            command_builder.SetCommand(
+                ComponentBasedCommandBuilder()
+                    .SetHeadCommand(JointPositionCommandBuilder()
+                                        .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
+                                        .SetMinimumTime(0)
+                                        .SetPosition(Eigen::Vector2d{yaw, pitch})
+                                        .SetVelocityLimit(vel_limit / 10)
+                                        .SetAccelerationLimit(acc_limit / 10))
+                    .SetBodyCommand(
+                        BodyComponentBasedCommandBuilder()
+                            .SetRightArmCommand(JointPositionCommandBuilder()
+                                                    .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
+                                                    .SetMinimumTime(right_arm_minimum_time)
+                                                    .SetPosition(target_position_right)
+                                                    .SetVelocityLimit(vel_limit)
+                                                    .SetAccelerationLimit(acc_limit))
+                            .SetLeftArmCommand(JointPositionCommandBuilder()
+                                                   .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
+                                                   .SetMinimumTime(left_arm_minimum_time)
+                                                   .SetPosition(target_position_left)
+                                                   .SetVelocityLimit(vel_limit)
+                                                   .SetAccelerationLimit(acc_limit))));
 
             rcs_handler->SendCommand(command_builder);
 
           } catch (...) {}
         }
       },
+<<<<<<< Updated upstream
       5ms);
 #ifndef NO_TELEOP
+=======
+      10ms);
+>>>>>>> Stashed changes
   gripper_ev.PushCyclicTask([] { ControlGripper(); }, nanoseconds((long)(1e9 / kGripperControlFrequency)));
 #endif
   cm_ev.PushCyclicTask(
@@ -501,7 +522,7 @@ void DoService() {
     if (command == COMMAND_READY_POSE) {
       Eigen::Vector<double, 20> body_ready;
       Eigen::Vector<double, 2> head_ready;
-      body_ready << 0, 35, -70, 35, 0, 0, -30, -10, 0, -100, 0, 40, 0, -30, 10, 0, -100, 0, 40, 0;
+      body_ready << 0, 40, -70, 30, 0, 0, -30, -10, 0, -100, 0, 40, 0, -30, 10, 0, -100, 0, 40, 0;
       head_ready << 0, 0;
       body_ready *= M_PI / 180.;
       head_ready *= M_PI / 180.;
@@ -577,7 +598,7 @@ void Publish() {
   static auto image_pub_time = steady_clock::now();
   auto current_time = steady_clock::now();
   double d = (double)duration_cast<nanoseconds>(current_time - image_pub_time).count() / 1.e9;
-  if (d >= 0.5 /* s */) {
+  if (d >= 0.3 /* s */) {
     image_pub_time = current_time;
 
     bool done = true;
@@ -648,6 +669,8 @@ void InitializeRobot(const std::string& address) {
         });
 
         robot_ev.PushTask([s = state] {
+          robot_dyn_state->SetQ(s.position);
+
           if (rcs_handler) {
             return;
           }
@@ -656,9 +679,12 @@ void InitializeRobot(const std::string& address) {
         });
       },
       100 /* Hz */);
+      
+  robot->SetParameter("joint_position_command.cutoff_frequency", "20.0");
 
   robot_dyn = robot->GetDynamics();
-  robot_dyn_state = robot_dyn->MakeState({"base"}, y1_model::A::kRobotJointNames);
+  robot_dyn_state = robot_dyn->MakeState({"base", "link_head_0", "ee_right", "ee_left"}, y1_model::A::kRobotJointNames);
+  robot_dyn_state->SetGravity({0, 0, 0, 0, 0, -9.81});
 
   q_upper_limit = robot_dyn->GetLimitQUpper(robot_dyn_state).block(2 + 6, 0, 14, 1);
   q_lower_limit = robot_dyn->GetLimitQLower(robot_dyn_state).block(2 + 6, 0, 14, 1);

@@ -8,15 +8,63 @@ import numpy as np
 import cv2
 
 from ui_form import Ui_MainWindow
-from PySide6.QtWidgets import QMainWindow, QApplication, QMessageBox
-from PySide6.QtCore import QSocketNotifier
-from PySide6.QtGui import QIntValidator, QPixmap, Qt
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QMainWindow, QApplication, QMessageBox, \
+    QGraphicsOpacityEffect
+from PySide6.QtCore import QSocketNotifier, QTimer
+from PySide6.QtGui import QIntValidator, QPixmap, Qt, QFont, QPainter, QColor
 
 import zmq
 
 COLOR_GREEN = '#55a194'
 COLOR_BLUE = '#1e85f7'
 COLOR_RED = '#f16a6f'
+
+
+class CountdownOverlay(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setWindowModality(Qt.ApplicationModal)  # 다른 창 비활성화
+
+        self.label = QLabel("", self)
+        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setStyleSheet("color: red;")
+        self.label.setFont(QFont('Arial', 100))
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+        self.setLayout(layout)
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_countdown)
+        self.count = -1
+
+    def start_countdown(self):
+        self.count = 5
+        self.label.setText(str(self.count))
+        self.resize(self.parent().size())
+        self.show()
+        self.timer.start(1000)
+
+    def update_countdown(self):
+        if self.count > 0:
+            self.count -= 1
+            self.label.setText(str(self.count))
+        else:
+            self.timer.stop()
+            self.hide()
+            self.parent().execute_task()
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+
+        if self.count >= 0:
+            # 검은색 반투명 배경 그리기
+            painter = QPainter(self)
+            painter.setBrush(QColor(0, 0, 0, 150))  # 알파값을 설정하여 투명도 조절
+            painter.setPen(Qt.NoPen)
+            painter.drawRect(self.rect())
 
 
 class DataCollectorGui(QMainWindow, Ui_MainWindow):
@@ -33,6 +81,8 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
         self.dealer = None
         self.notifier = None
         self.setupZMQ()
+
+        self.overlay_count = CountdownOverlay(self)
 
     def setupUi(self, main_windows):
         super(DataCollectorGui, self).setupUi(self)
@@ -62,7 +112,7 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
         self.S_Z.sliderReleased.connect(lambda: self.S_Z.setValue(0))
         self.S_Z.actionTriggered.connect(lambda e: self.S_Z.setValue(0) if 0 < e < 7 else 0)
 
-        # self.showFullScreen()
+        self.showFullScreen()
 
     def setupZMQ(self):
         self.ctx = zmq.Context.instance()
@@ -158,6 +208,15 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
                         self.set_background_color(self.LE_ControlManager, COLOR_GREEN if s else COLOR_RED)
                         self.LE_ControlManager.setText(detail)
 
+                        if "Idle" in detail:
+                            self.PB_Zero.setEnabled(True)
+                            self.PB_Ready.setEnabled(True)
+                            self.PB_StartTeleoperation.setEnabled(True)
+                        else:
+                            self.PB_Zero.setEnabled(False)
+                            self.PB_Ready.setEnabled(False)
+                            self.PB_StartTeleoperation.setEnabled(False)
+
                     if data["robot"] is not None:
                         self.set_background_color(self.LE_Robot, COLOR_GREEN if data["robot"] else COLOR_RED)
 
@@ -177,7 +236,17 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
                         self.LE_StorageCapacity.setText(f"{data['storage_capacity']} MB")
 
                     if data["recording"] is not None:
-                        self.set_background_color(self.LE_Recording, COLOR_GREEN if data["recording"] else COLOR_RED)
+                        recording = data["recording"]
+
+                        if recording:
+                            self.set_background_color(self.LE_Recording, COLOR_GREEN)
+                            self.PB_StartRecording.setEnabled(False)
+                            self.PB_StopRecording.setEnabled(True)
+                        else:
+                            self.set_background_color(self.LE_Recording, COLOR_RED)
+                            self.PB_StartRecording.setEnabled(True)
+                            self.PB_StopRecording.setEnabled(False)
+                        # self.set_background_color(self.LE_Recording, COLOR_GREEN if data["recording"] else COLOR_RED)
 
                     if data["recording_count"] is not None:
                         self.L_RecordingCount.setText(f"{data['recording_count']}")
@@ -188,37 +257,43 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
                     if data["cam0_rgb"] is not None:
                         pixmap = QPixmap()
                         pixmap.loadFromData(bytes(data["cam0_rgb"]['bytes']))
-                        scaled_pixmap = pixmap.scaled(self.L_Cam0RGB.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        scaled_pixmap = pixmap.scaled(self.L_Cam0RGB.size(), Qt.KeepAspectRatio,
+                                                      Qt.SmoothTransformation)
                         self.L_Cam0RGB.setPixmap(scaled_pixmap)
 
                     if data["cam1_rgb"] is not None:
                         pixmap = QPixmap()
                         pixmap.loadFromData(bytes(data["cam1_rgb"]['bytes']))
-                        scaled_pixmap = pixmap.scaled(self.L_Cam1RGB.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        scaled_pixmap = pixmap.scaled(self.L_Cam1RGB.size(), Qt.KeepAspectRatio,
+                                                      Qt.SmoothTransformation)
                         self.L_Cam1RGB.setPixmap(scaled_pixmap)
 
                     if data["cam2_rgb"] is not None:
                         pixmap = QPixmap()
                         pixmap.loadFromData(bytes(data["cam2_rgb"]['bytes']))
-                        scaled_pixmap = pixmap.scaled(self.L_Cam2RGB.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        scaled_pixmap = pixmap.scaled(self.L_Cam2RGB.size(), Qt.KeepAspectRatio,
+                                                      Qt.SmoothTransformation)
                         self.L_Cam2RGB.setPixmap(scaled_pixmap)
 
                     if data["cam0_depth"] is not None:
                         pixmap = QPixmap()
                         pixmap.loadFromData(bytes(data["cam0_depth"]['bytes']))
-                        scaled_pixmap = pixmap.scaled(self.L_Cam0Depth.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        scaled_pixmap = pixmap.scaled(self.L_Cam0Depth.size(), Qt.KeepAspectRatio,
+                                                      Qt.SmoothTransformation)
                         self.L_Cam0Depth.setPixmap(scaled_pixmap)
 
                     if data["cam1_depth"] is not None:
                         pixmap = QPixmap()
                         pixmap.loadFromData(bytes(data["cam1_depth"]['bytes']))
-                        scaled_pixmap = pixmap.scaled(self.L_Cam1Depth.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        scaled_pixmap = pixmap.scaled(self.L_Cam1Depth.size(), Qt.KeepAspectRatio,
+                                                      Qt.SmoothTransformation)
                         self.L_Cam1Depth.setPixmap(scaled_pixmap)
 
                     if data["cam2_depth"] is not None:
                         pixmap = QPixmap()
                         pixmap.loadFromData(bytes(data["cam2_depth"]['bytes']))
-                        scaled_pixmap = pixmap.scaled(self.L_Cam2Depth.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        scaled_pixmap = pixmap.scaled(self.L_Cam2Depth.size(), Qt.KeepAspectRatio,
+                                                      Qt.SmoothTransformation)
                         self.L_Cam2Depth.setPixmap(scaled_pixmap)
 
                 # print("[Socket] zmq.POLLIN")
@@ -246,9 +321,7 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
         if self.dealer is None:
             return  # ZMQ is not initialized yet
 
-        name = f"{self.LE_EpisodeName.text()}_{self.LE_EpisodeNumber.text()}"
-        command = {'command': 'start_recording', 'name': name}
-        self.dealer.send_multipart([json.dumps(command).encode('utf-8')])
+        self.overlay_count.start_countdown()
 
     def stop_recording(self):
         if self.dealer is None:
@@ -261,6 +334,11 @@ class DataCollectorGui(QMainWindow, Ui_MainWindow):
             self.LE_EpisodeNumber.setText('0')
         else:
             self.LE_EpisodeNumber.setText(f"{int(self.LE_EpisodeNumber.text()) + 1}")
+
+    def execute_task(self):
+        name = f"{self.LE_EpisodeName.text()}_{self.LE_EpisodeNumber.text()}"
+        command = {'command': 'start_recording', 'name': name}
+        self.dealer.send_multipart([json.dumps(command).encode('utf-8')])
 
     @staticmethod
     def set_background_color(le, color):

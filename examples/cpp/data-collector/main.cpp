@@ -80,7 +80,7 @@ bool camera_error = true;
 /**
  * HDF5
  */
-std::shared_ptr<HighFive::File> record_file{nullptr};
+std::unique_ptr<HighFive::File> record_file{nullptr};
 std::array<std::unique_ptr<HighFive::DataSet>, kCameraN> record_depth_dataset;
 std::array<std::unique_ptr<HighFive::DataSet>, kCameraN> record_rgb_dataset;
 std::unique_ptr<HighFive::DataSet> record_action_dataset;
@@ -178,7 +178,7 @@ void StartTeleoperation();
 template <typename T>
 void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, const std::vector<std::size_t>& shape, T* data);
 template <typename T>
-HighFive::DataSet CreateDataSet(const std::shared_ptr<HighFive::File>& file, const std::string& name,
+HighFive::DataSet CreateDataSet(HighFive::File& file, const std::string& name,
                                 const std::vector<std::size_t>& shape, int compression_level = 0);
 
 std::array<Mat, kCameraN> CloneMatArray(const std::array<Mat, kCameraN>& sourceArray) {
@@ -390,12 +390,13 @@ int main(int argc, char** argv) {
       },
       500ms);
   camera_ev->PushCyclicTask(
-      [=] {
+      [] {
 #ifndef REALSENSE2
         camera_error = true;
 #endif
-        publisher_ev->PushTask([=] { camera_connected = !camera_error; });
+        publisher_ev->PushTask([] { camera_connected = !camera_error; });
         if (camera_error) {
+          std::cerr << "Camera error" << std::endl;
           service_ev->PushTask([] { is_camera_failed = camera_error; });
           std::this_thread::sleep_for(10ms);
           return;
@@ -512,8 +513,11 @@ void SignalHandler(int signum) {
     }
 
     robot->PowerOff("12v");
+    robot = nullptr;
   });
   robot_ev->Stop();
+
+  std::cout << "Disconnect robot" << std::endl;
 
   record_ev->DoTask([] {
     if (record_file) {
@@ -526,12 +530,15 @@ void SignalHandler(int signum) {
   });
   record_ev->Stop();
 
+  std::cout << "Finish record" << std::endl;
+
   camera_ev->DoTask([] {
     if (!camera_error) {
       // TODO: close rs pipelines
+      std::cout << "Close realsense pipelines" << std::endl;
 #ifdef REALSENSE2
       for (auto&& pipe : rs_pipelines) {
-        pipe.stop();
+        // pipe.stop();
       }
 #endif
     }
@@ -599,7 +606,7 @@ void DoService() {
         name = j["name"];
       }
       record_ev->PushTask(
-          [=] { record_helper_ev->PushTask([=] { StartRecording(save_folder_path + "/" + name + ".h5"); }); });
+          [=] { record_helper_ev->PushTask([=] { record_ev->DoTask([=] { StartRecording(save_folder_path + "/" + name + ".h5"); }); }); });
     } else if (command == COMMAND_STOP_RECORDING) {
       record_ev->PushTask([] { StopRecording(); });
     }
@@ -994,10 +1001,10 @@ void InitializeMasterArm() {
   master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
   master_arm->SetControlPeriod(0.01);
 
-  ma_qmin << -360, -90, 0, -135, -90, 0, -360,  //
-      -360, 10, -90, -135, -90, 0, -360;
-  ma_qmax << 360, -10, 90, -20, 90, 80, 360,  //
-      360, 90, 0, -20, 90, 80, 360;
+  ma_qmin << -360, -30, 0, -135, -90, 35, -360,  //
+      -360, 10, -90, -135, -90, 35, -360;
+  ma_qmax << 360, -10, 90, -60, 90, 80, 360,  //
+      360, 30, 0, -60, 90, 80, 360;
   ma_qmin *= M_PI / 180.;
   ma_qmax *= M_PI / 180.;
   ma_torque_limit.setConstant(3);
@@ -1084,31 +1091,31 @@ void StartRecording(const std::string& file_path) {
   }
 
   // Make File
-  record_file = std::make_shared<HighFive::File>(file_path, HighFive::File::Overwrite);
+  record_file = std::make_unique<HighFive::File>(file_path, HighFive::File::Overwrite);
 
   record_file->createAttribute("frequency", kFrequency);
 
   // Create Dataset
   for (int i = 0; i < kCameraN; i++) {
     record_depth_dataset[i] = std::make_unique<HighFive::DataSet>(CreateDataSet<std::uint16_t>(
-        record_file, "/observations/images/cam" + std::to_string(i) + "_depth", {kHeight, kWidth}, kCompressionLevel));
+        *record_file, "/observations/images/cam" + std::to_string(i) + "_depth", {kHeight, kWidth}, kCompressionLevel));
     record_depth_dataset[i]->createAttribute("depth_scale", rs_depth_scales[i]);
     record_depth[i] = Mat(Size(kWidth, kHeight), CV_16UC1);
 
     record_rgb_dataset[i] = std::make_unique<HighFive::DataSet>(CreateDataSet<std::uint8_t>(
-        record_file, "/observations/images/cam" + std::to_string(i) + "_rgb", {kHeight, kWidth, 3}, kCompressionLevel));
+        *record_file, "/observations/images/cam" + std::to_string(i) + "_rgb", {kHeight, kWidth, 3}, kCompressionLevel));
     record_rgb[i] = Mat(Size(kWidth, kHeight), CV_8UC3);
   }
   record_action_dataset =
-      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/action", {kRobotDOF + kGripperDOF}));
+      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(*record_file, "/action", {kRobotDOF + kGripperDOF}));
   record_qpos_dataset = std::make_unique<HighFive::DataSet>(
-      CreateDataSet<double>(record_file, "/observations/qpos", {kRobotDOF + kGripperDOF}));
+      CreateDataSet<double>(*record_file, "/observations/qpos", {kRobotDOF + kGripperDOF}));
   record_qvel_dataset = std::make_unique<HighFive::DataSet>(
-      CreateDataSet<double>(record_file, "/observations/qvel", {kRobotDOF + kGripperDOF}));
+      CreateDataSet<double>(*record_file, "/observations/qvel", {kRobotDOF + kGripperDOF}));
   record_torque_dataset = std::make_unique<HighFive::DataSet>(
-      CreateDataSet<double>(record_file, "/observations/torque", {kRobotDOF + kGripperDOF}));
+      CreateDataSet<double>(*record_file, "/observations/torque", {kRobotDOF + kGripperDOF}));
   record_ft_dataset =
-      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(record_file, "/observations/ft_sensor", {6 * 2}));
+      std::make_unique<HighFive::DataSet>(CreateDataSet<double>(*record_file, "/observations/ft_sensor", {6 * 2}));
 
   data_count = 0;
   push_data_count = 0;
@@ -1278,7 +1285,7 @@ void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, const std::
 }
 
 template <typename T>
-HighFive::DataSet CreateDataSet(const std::shared_ptr<HighFive::File>& file, const std::string& name,
+HighFive::DataSet CreateDataSet(HighFive::File& file, const std::string& name,
                                 const std::vector<std::size_t>& shape, int compression_level) {
   std::vector<size_t> dims = {0};
   std::vector<size_t> max_dims = {HighFive::DataSpace::UNLIMITED};
@@ -1293,5 +1300,5 @@ HighFive::DataSet CreateDataSet(const std::shared_ptr<HighFive::File>& file, con
   if (compression_level != 0) {
     props.add(HighFive::Deflate(compression_level));
   }
-  return file->createDataSet<T>(name, HighFive::DataSpace(dims, max_dims), props);
+  return file.createDataSet<T>(name, HighFive::DataSpace(dims, max_dims), props);
 }

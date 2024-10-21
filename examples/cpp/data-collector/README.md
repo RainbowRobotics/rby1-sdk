@@ -48,6 +48,6 @@ sudo apt-get install librealsense2-dkms librealsense2-utils librealsense2-dev li
 1. Run ``data-collector`` program in UPC.
 
 ```bash
-data-collector 192.168.30.1:50051 ./
+sudo ./build/examples/cpp/data-collector/data-collector 192.168.30.1:50051 /media/nvidia/e1d056ab-9417-421c-b3cf-1923cfc1b9a9
 # data-collector <rpc address> <save file directory>
 ```

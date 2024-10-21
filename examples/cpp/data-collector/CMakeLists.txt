@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(data-collector)
 
+find_package(Threads REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cppzmq REQUIRED)
 find_package(HDF5 REQUIRED)
@@ -8,6 +9,8 @@ find_package(HighFive REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(realsense2 QUIET)
 find_package(Boost COMPONENTS filesystem REQUIRED)
+
+message(${realsense2_FOUND})
 
 add_executable(data-collector
         main.cpp
@@ -26,6 +29,7 @@ target_link_libraries(data-collector PUBLIC
         HighFive
         nlohmann_json::nlohmann_json
         Boost::filesystem
+        Threads::Threads
 )
 target_compile_definitions(data-collector PUBLIC
         -DMODELS_PATH="${CMAKE_SOURCE_DIR}/models/"

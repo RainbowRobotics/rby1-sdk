@@ -34,12 +34,12 @@ using namespace cv;
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-const double kFrequency = 50;   // (Hz) = Framerate
+const double kFrequency = 50;    // (Hz) = Framerate
 const std::string kAll = ".*";  // NOLINT
 const double kMasterArmLimitGain = 0.5;
 const std::string MASTER_ARM_DEV = "/dev/rby1_master_arm";
 const std::string GRIPPER_DEV = "/dev/rby1_gripper";
-const double kGripperControlFrequency = 50;  // (Hz)
+const double kGripperControlFrequency = 30;  // (Hz)
 const std::string COMMAND_POWER_OFF = "power_off";
 const std::string COMMAND_POWER_ON = "power_on";
 const std::string COMMAND_SERVO_ON = "servo_on";
@@ -235,13 +235,15 @@ int main(int argc, char** argv) {
 
   publisher_ev->PushTask([] { master_arm_connected = (master_arm != nullptr); });
 
-  publisher_ev->PushCyclicTask(
-      [] {
-        UpdateStat();
-        Publish();
-      },
-      100ms);
-  service_ev->PushCyclicTask([] { DoService(); }, 1ms);
+  publisher_ev->PushLoopTask([] {
+    UpdateStat();
+    Publish();
+    std::this_thread::sleep_for(10ms);
+  });
+  service_ev->PushLoopTask([] {
+    DoService();
+    std::this_thread::sleep_for(10ms);
+  });
 #ifndef NO_TELEOP
   gripper_ev->PushCyclicTask([] { ControlGripper(); }, nanoseconds((long)(1e9 / kGripperControlFrequency)));
 #endif
@@ -354,12 +356,11 @@ int main(int argc, char** argv) {
         }
 #endif
       },
-      10us);
+      nanoseconds((long)(1e9 / 60)));
   record_ev->PushCyclicTask(
       [] {
         record_action.head<kRobotDOF>() = robot_ev->DoTask([c_tele_right_button = tele_right_button,
-                                                            c_tele_left_button = tele_left_button,
-                                                            c_tele_q = tele_q] {
+                                                            c_tele_left_button = tele_left_button, c_tele_q = tele_q] {
           bool p;
           if (robot) {
             p = robot->IsConnected();
@@ -376,7 +377,9 @@ int main(int argc, char** argv) {
 
             else {
               static double right_arm_minimum_time = 1., left_arm_minimum_time = 1.;
-              static double lpf_update_ratio = 0.05;
+              static double cutoff_frequency = 3; /* Hz */
+              static double lpf_update_ratio = 0.5 * (2 * math::kPi * cutoff_frequency * 1. / kFrequency) / (1 + 2 * math::kPi * cutoff_frequency * 1. / kFrequency);
+              // double lpf_gain = (2 * math::kPi * cutoff_frequency_ * dt) / (1 + 2 * math::kPi * cutoff_frequency_ * dt);
 
               if (c_tele_right_button) {
                 //right hand position control mode
@@ -417,15 +420,22 @@ int main(int argc, char** argv) {
 
               acc_limit.setConstant(1200.0);
               acc_limit *= M_PI / 180.;
+              acc_limit *= 1.5;
+              // acc_limit *= 0.9;
+              // acc_limit(0) *= 0.4;
+              // acc_limit(1) *= 0.4;
+              // acc_limit(2) *= 0.7;
+              // acc_limit(3) *= 0.7;
 
               vel_limit << 160, 160, 160, 160, 330, 330, 330;
               vel_limit *= M_PI / 180.;
+              vel_limit *= 0.9;
 
-              right_arm_minimum_time *= 0.99;
-              right_arm_minimum_time = std::max(right_arm_minimum_time, 1. / kFrequency * 1.01);
+              right_arm_minimum_time *= 0.95;
+              right_arm_minimum_time = std::max(right_arm_minimum_time, 1. / kFrequency * 1.1);
 
-              left_arm_minimum_time *= 0.99;
-              left_arm_minimum_time = std::max(left_arm_minimum_time, 1. / kFrequency * 1.01);
+              left_arm_minimum_time *= 0.95;
+              left_arm_minimum_time = std::max(left_arm_minimum_time, 1. / kFrequency * 1.1);
 
               try {
                 RobotCommandBuilder command_builder;
@@ -503,17 +513,6 @@ int main(int argc, char** argv) {
 }
 
 void SignalHandler(int signum) {
-  robot_ev->DoTask([=] {
-    if (!robot) {
-      return;
-    }
-
-    robot->PowerOff("12v");
-    robot = nullptr;
-  });
-  robot_ev->Stop();
-
-  std::cout << "Disconnect robot" << std::endl;
 
   record_ev->DoTask([] {
     if (record_file) {
@@ -527,6 +526,18 @@ void SignalHandler(int signum) {
   record_ev->Stop();
 
   std::cout << "Finish record" << std::endl;
+
+  robot_ev->DoTask([=] {
+    if (!robot) {
+      return;
+    }
+
+    robot->PowerOff("12v");
+    robot = nullptr;
+  });
+  robot_ev->Stop();
+
+  std::cout << "Disconnect robot" << std::endl;
 
   camera_ev->DoTask([] {
     if (!camera_error) {
@@ -581,9 +592,9 @@ void DoService() {
       body_ready *= M_PI / 180.;
       head_ready *= M_PI / 180.;
 
-      robot_ev->PushTask([=] { GoPose(body_ready, head_ready, 5.0); });
+      robot_ev->PushTask([=] { GoPose(body_ready, head_ready, 3.0); });
     } else if (command == COMMAND_ZERO_POSE) {
-      robot_ev->PushTask([=] { GoPose(Eigen::Vector<double, 20>::Zero(), Eigen::Vector<double, 2>::Zero(), 5.0); });
+      robot_ev->PushTask([=] { GoPose(Eigen::Vector<double, 20>::Zero(), Eigen::Vector<double, 2>::Zero(), 3.0); });
     } else if (command == COMMAND_POWER_OFF) {
       robot_ev->PushTask([=] { RobotPowerOff(); });
     } else if (command == COMMAND_POWER_ON) {
@@ -740,7 +751,8 @@ void InitializeRobot(const std::string& address) {
       },
       100 /* Hz */);
 
-  robot->SetParameter("joint_position_command.cutoff_frequency", "20.0");
+  robot->ResetAllParametersToDefault();
+  robot->SetParameter("joint_position_command.cutoff_frequency", "4.0");
 
   robot_dyn = robot->GetDynamics();
   robot_dyn_state = robot_dyn->MakeState({"base", "link_head_0", "ee_right", "ee_left"}, y1_model::A::kRobotJointNames);
@@ -838,6 +850,7 @@ void RobotPowerOn() {
     if (robot->IsPowerOn("48v")) {
       robot->SetToolFlangeOutputVoltage("left", 12);
       robot->SetToolFlangeOutputVoltage("right", 12);
+      std::cout << "Tool flange power on" << std::endl;
     }
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
@@ -907,8 +920,10 @@ void StartTeleoperation() {
     return;
   }
 
-  record_ev->DoTask([] { tele_right_button = tele_left_button = false; });
-  rcs_handler = robot->CreateCommandStream();
+  record_ev->PushTask([] {
+    tele_right_button = tele_left_button = false;
+    robot_ev->DoTask([] { rcs_handler = robot->CreateCommandStream(); });
+  });
 }
 
 void InitializeCamera() {
@@ -998,7 +1013,7 @@ void InitializeMasterArm() {
 
   master_arm = std::make_shared<upc::MasterArm>(MASTER_ARM_DEV);
   master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
-  master_arm->SetControlPeriod(0.01);
+  master_arm->SetControlPeriod(0.05);
 
   ma_qmin << -360, -30, 0, -135, -90, 35, -360,  //
       -360, 10, -90, -135, -90, 35, -360;
@@ -1151,9 +1166,16 @@ void InitializeGripper() {
   }
 
   gripper->SetTorqueConstant(gripper_torque_constant);
+
+  std::cout << "[Gripper] Success to initialize devices" << std::endl;
 }
 
-void ControlGripper() {
+void ControlGripper() { //power
+  if(!power) {
+    gripper_init_step = 0;
+    return;
+  }
+
   if (gripper_init_step == 0) {
     static int success = 0;
     for (int id = 0; id < 2; id++) {
@@ -1258,7 +1280,7 @@ void ControlGripper() {
 
   //
 
-  record_ev->PushTask([q, qvel, torque, operation_mode, id_position] { // TODO
+  record_ev->PushTask([q, qvel, torque, operation_mode, id_position] {  // TODO
     record_qpos.tail<kGripperDOF>() = q;
     record_qvel.tail<kGripperDOF>() = qvel;
     record_torque.tail<kGripperDOF>() = torque;

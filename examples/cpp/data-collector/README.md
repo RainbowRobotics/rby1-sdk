@@ -27,12 +27,12 @@ sudo apt install libhdf5-dev libopencv libzmq3-dev nlohmann-json3-dev libboost-s
 # cppzmq
 wget https://github.com/zeromq/cppzmq/archive/refs/tags/v4.10.0.tar.gz
 tar -xvf v4.10.0.tar.gz
-cd cppzmq-4.10.0 && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=Release .. && sudo make install -j 4 
+cd cppzmq-4.10.0 && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=Release .. && sudo make install -j 4 && cd ../..
 
 # HighFive
 wget https://github.com/BlueBrain/HighFive/archive/refs/tags/v2.10.0.tar.gz
 tar -xvf v2.10.0.tar.gz
-cd HighFive-2.10.0 && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=Release .. && sudo make install -j 4 
+cd HighFive-2.10.0 && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=Release .. && sudo make install -j 4  && cd ../..
 
 # Realsense
 sudo mkdir -p /etc/apt/keyrings
@@ -40,7 +40,18 @@ curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | sudo tee /etc
 echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsense.intel.com/Debian/apt-repo `lsb_release -cs` main" | \
 sudo tee /etc/apt/sources.list.d/librealsense.list
 sudo apt-get update
-sudo apt-get install librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg
+sudo apt-get install librealsense2-utils librealsense2-dev
+
+# AWS Client
+curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+```
+
+```bash
+conan install . -s build_type=Release -b missing -of build
+cmake --preset conan-release -D BUILD_EXAMPLES=ON -D BUILD_DATA_COLLECTOR=ON
+cmake --build --preset conan-release --target data-collector
 ```
 
 ## Step

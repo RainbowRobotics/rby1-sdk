@@ -3,6 +3,7 @@
 #include <condition_variable>
 #include <functional>
 #include <future>
+#include <iostream>
 #include <memory>
 #include <queue>
 #include "rby1-sdk/base/thread.h"
@@ -48,6 +49,15 @@ class EventLoop {
     };
 
     const auto& cyclic_task = [=](struct timespec next_wakeup_time, const auto& self) -> void {
+      struct timespec ts {};
+      clock_gettime(CLOCK_MONOTONIC, &ts);
+      uint64_t c = (ts.tv_sec * 1000000000) + ts.tv_nsec;
+      uint64_t next_c = (next_wakeup_time.tv_sec * 1000000000) + next_wakeup_time.tv_nsec;
+      if(c > next_c) {
+        std::cerr << period_ns << ", " << c << ", " << next_c << std::endl;
+        next_wakeup_time = ts;
+      }
+
       clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_wakeup_time, nullptr);
       next_wakeup_time = get_next_wakeup_time(next_wakeup_time);
       if (cb) {

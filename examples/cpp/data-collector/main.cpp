@@ -178,8 +178,8 @@ void StartTeleoperation();
 template <typename T>
 void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, const std::vector<std::size_t>& shape, T* data);
 template <typename T>
-HighFive::DataSet CreateDataSet(HighFive::File& file, const std::string& name,
-                                const std::vector<std::size_t>& shape, int compression_level = 0);
+HighFive::DataSet CreateDataSet(HighFive::File& file, const std::string& name, const std::vector<std::size_t>& shape,
+                                int compression_level = 0);
 
 std::array<Mat, kCameraN> CloneMatArray(const std::array<Mat, kCameraN>& sourceArray) {
   std::array<cv::Mat, kCameraN> destinationArray;
@@ -242,103 +242,6 @@ int main(int argc, char** argv) {
       },
       100ms);
   service_ev->PushCyclicTask([] { DoService(); }, 1ms);
-  robot_ev->PushCyclicTask(
-      [] {
-        bool p;
-        if (robot) {
-          p = robot->IsConnected();
-        } else {
-          p = false;
-        }
-        publisher_ev->PushTask([p] { robot_connected = p; });
-
-        if (rcs_handler) {
-
-          if (rcs_handler->IsDone()) {
-            rcs_handler = nullptr;
-            return;
-          }
-
-          static double right_arm_minimum_time = 1., left_arm_minimum_time = 1.;
-          static double lpf_update_ratio = 0.05;
-
-          if (tele_right_button) {
-            //right hand position control mode
-            q_joint_ref.block(0, 0, 7, 1) =
-                q_joint_ref.block(0, 0, 7, 1) * (1 - lpf_update_ratio) + tele_q.block(0, 0, 7, 1) * lpf_update_ratio;
-          } else {
-            right_arm_minimum_time = 1.0;
-          }
-
-          if (tele_left_button) {
-            //left hand position control mode
-            q_joint_ref.block(7, 0, 7, 1) =
-                q_joint_ref.block(7, 0, 7, 1) * (1 - lpf_update_ratio) + tele_q.block(7, 0, 7, 1) * lpf_update_ratio;
-          } else {
-            left_arm_minimum_time = 1.0;
-          }
-
-          for (int i = 0; i < 14; i++) {
-            q_joint_ref(i) = std::clamp(q_joint_ref(i), q_lower_limit(i), q_upper_limit(i));
-          }
-
-          Eigen::Vector<double, 7> target_position_left = q_joint_ref.block(7, 0, 7, 1);
-          Eigen::Vector<double, 7> target_position_right = q_joint_ref.block(0, 0, 7, 1);
-          Eigen::Vector<double, 7> acc_limit, vel_limit;
-
-          robot_dyn->ComputeForwardKinematics(robot_dyn_state);
-          auto T_12 = robot_dyn->ComputeTransformation(robot_dyn_state, 1, 2);
-          auto T_13 = robot_dyn->ComputeTransformation(robot_dyn_state, 1, 3);
-          Eigen::Vector3d center = (rb::math::SE3::GetPosition(T_12) + rb::math::SE3::GetPosition(T_13)) / 2.;
-          double yaw = atan2(center(1), center(0));
-          double pitch = atan2(-center(2), center(0)) + 15 * M_PI / 180.;
-          yaw = std::clamp(yaw, -0.523, 0.523);
-          pitch = std::clamp(pitch, -0.35, 1.57);
-
-          acc_limit.setConstant(1200.0);
-          acc_limit *= M_PI / 180.;
-
-          vel_limit << 160, 160, 160, 160, 330, 330, 330;
-          vel_limit *= M_PI / 180.;
-
-          right_arm_minimum_time *= 0.99;
-          right_arm_minimum_time = std::max(right_arm_minimum_time, 0.015);
-
-          left_arm_minimum_time *= 0.99;
-          left_arm_minimum_time = std::max(left_arm_minimum_time, 0.015);
-
-          try {
-            RobotCommandBuilder command_builder;
-
-            command_builder.SetCommand(
-                ComponentBasedCommandBuilder()
-                    .SetHeadCommand(JointPositionCommandBuilder()
-                                        .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
-                                        .SetMinimumTime(0)
-                                        .SetPosition(Eigen::Vector2d{yaw, pitch})
-                                        .SetVelocityLimit(vel_limit / 10)
-                                        .SetAccelerationLimit(acc_limit / 10))
-                    .SetBodyCommand(
-                        BodyComponentBasedCommandBuilder()
-                            .SetRightArmCommand(JointPositionCommandBuilder()
-                                                    .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
-                                                    .SetMinimumTime(right_arm_minimum_time)
-                                                    .SetPosition(target_position_right)
-                                                    .SetVelocityLimit(vel_limit)
-                                                    .SetAccelerationLimit(acc_limit))
-                            .SetLeftArmCommand(JointPositionCommandBuilder()
-                                                   .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
-                                                   .SetMinimumTime(left_arm_minimum_time)
-                                                   .SetPosition(target_position_left)
-                                                   .SetVelocityLimit(vel_limit)
-                                                   .SetAccelerationLimit(acc_limit))));
-
-            rcs_handler->SendCommand(command_builder);
-
-          } catch (...) {}
-        }
-      },
-      10ms);
 #ifndef NO_TELEOP
   gripper_ev->PushCyclicTask([] { ControlGripper(); }, nanoseconds((long)(1e9 / kGripperControlFrequency)));
 #endif
@@ -454,7 +357,110 @@ int main(int argc, char** argv) {
       10us);
   record_ev->PushCyclicTask(
       [] {
-        // auto start = steady_clock::now();
+        record_action.head<kRobotDOF>() = robot_ev->DoTask([c_tele_right_button = tele_right_button,
+                                                            c_tele_left_button = tele_left_button,
+                                                            c_tele_q = tele_q] {
+          bool p;
+          if (robot) {
+            p = robot->IsConnected();
+          } else {
+            p = false;
+          }
+          publisher_ev->PushTask([p] { robot_connected = p; });
+
+          if (rcs_handler) {
+
+            if (rcs_handler->IsDone()) {
+              rcs_handler = nullptr;
+            }
+
+            else {
+              static double right_arm_minimum_time = 1., left_arm_minimum_time = 1.;
+              static double lpf_update_ratio = 0.05;
+
+              if (c_tele_right_button) {
+                //right hand position control mode
+                q_joint_ref.block(2 + 6, 0, 7, 1) = q_joint_ref.block(2 + 6, 0, 7, 1) * (1 - lpf_update_ratio) +
+                                                    c_tele_q.block(0, 0, 7, 1) * lpf_update_ratio;
+              } else {
+                right_arm_minimum_time = 1.0;
+              }
+
+              if (c_tele_left_button) {
+                //left hand position control mode
+                q_joint_ref.block(2 + 6 + 7, 0, 7, 1) = q_joint_ref.block(2 + 6 + 7, 0, 7, 1) * (1 - lpf_update_ratio) +
+                                                        c_tele_q.block(7, 0, 7, 1) * lpf_update_ratio;
+              } else {
+                left_arm_minimum_time = 1.0;
+              }
+
+              Eigen::Vector<double, 7> acc_limit, vel_limit;
+
+              robot_dyn->ComputeForwardKinematics(robot_dyn_state);
+              auto T_12 = robot_dyn->ComputeTransformation(robot_dyn_state, 1, 2);
+              auto T_13 = robot_dyn->ComputeTransformation(robot_dyn_state, 1, 3);
+              Eigen::Vector3d center = (rb::math::SE3::GetPosition(T_12) + rb::math::SE3::GetPosition(T_13)) / 2.;
+              double yaw = atan2(center(1), center(0));
+              double pitch = atan2(-center(2), center(0)) + 15 * M_PI / 180.;
+              yaw = std::clamp(yaw, -0.523, 0.523);  // TODO
+              pitch = std::clamp(pitch, -0.35, 1.57);
+              q_joint_ref.block(2 + 6 + 7 + 7, 0, 2, 1) = Eigen::Vector<double, 2>{yaw, pitch};
+
+              for (int i = 0; i < 14 + 2; i++) {
+                q_joint_ref(2 + 6 + i) =
+                    std::clamp(q_joint_ref(2 + 6 + i), q_lower_limit(2 + 6 + i), q_upper_limit(2 + 6 + i));
+              }
+
+              Eigen::Vector<double, 7> target_position_right = q_joint_ref.block(2 + 6, 0, 7, 1);
+              Eigen::Vector<double, 7> target_position_left = q_joint_ref.block(2 + 6 + 7, 0, 7, 1);
+              Eigen::Vector<double, 2> target_position_head = q_joint_ref.block(2 + 6 + 7 + 7, 0, 2, 1);
+
+              acc_limit.setConstant(1200.0);
+              acc_limit *= M_PI / 180.;
+
+              vel_limit << 160, 160, 160, 160, 330, 330, 330;
+              vel_limit *= M_PI / 180.;
+
+              right_arm_minimum_time *= 0.99;
+              right_arm_minimum_time = std::max(right_arm_minimum_time, 1. / kFrequency * 1.01);
+
+              left_arm_minimum_time *= 0.99;
+              left_arm_minimum_time = std::max(left_arm_minimum_time, 1. / kFrequency * 1.01);
+
+              try {
+                RobotCommandBuilder command_builder;
+
+                command_builder.SetCommand(
+                    ComponentBasedCommandBuilder()
+                        .SetHeadCommand(JointPositionCommandBuilder()
+                                            .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
+                                            .SetMinimumTime(1. / kFrequency)
+                                            .SetPosition(target_position_head)
+                                            .SetVelocityLimit(vel_limit / 10)
+                                            .SetAccelerationLimit(acc_limit / 10))
+                        .SetBodyCommand(
+                            BodyComponentBasedCommandBuilder()
+                                .SetRightArmCommand(JointPositionCommandBuilder()
+                                                        .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
+                                                        .SetMinimumTime(right_arm_minimum_time)
+                                                        .SetPosition(target_position_right)
+                                                        .SetVelocityLimit(vel_limit)
+                                                        .SetAccelerationLimit(acc_limit))
+                                .SetLeftArmCommand(JointPositionCommandBuilder()
+                                                       .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(4.))
+                                                       .SetMinimumTime(left_arm_minimum_time)
+                                                       .SetPosition(target_position_left)
+                                                       .SetVelocityLimit(vel_limit)
+                                                       .SetAccelerationLimit(acc_limit))));
+
+                rcs_handler->SendCommand(command_builder);
+
+              } catch (...) {}
+            }
+          }
+
+          return q_joint_ref;
+        });
 
         publisher_ev->PushTask([r = (record_file != nullptr)] { recording = r; });
 
@@ -485,16 +491,6 @@ int main(int argc, char** argv) {
 
         push_data_count++;
 
-        auto end = steady_clock::now();
-
-        // double d = (double)duration_cast<nanoseconds>(end - start).count() / 1.e9;
-        // stat_duration.add(d);
-        // if (stat_duration.count() >= kFrequency) {
-        //   std::cout << "[" << data_count.load() << "] " << "Count: " << stat_duration.count()
-        //             << ", Avg: " << stat_duration.avg() * 1e3 << " ms, Min: " << stat_duration.min() * 1e3
-        //             << " ms, Max: " << stat_duration.max() * 1e3 << " ms" << std::endl;
-        //   stat_duration.reset();
-        // }
         if (push_data_count % 100 == 0) {
           std::cout << "[Record] Progress: " << data_count.load() << "/" << push_data_count.load() << std::endl;
         }
@@ -605,8 +601,10 @@ void DoService() {
       if (j.contains("name")) {
         name = j["name"];
       }
-      record_ev->PushTask(
-          [=] { record_helper_ev->PushTask([=] { record_ev->DoTask([=] { StartRecording(save_folder_path + "/" + name + ".h5"); }); }); });
+      record_ev->PushTask([=] {
+        record_helper_ev->PushTask(
+            [=] { record_ev->DoTask([=] { StartRecording(save_folder_path + "/" + name + ".h5"); }); });
+      });
     } else if (command == COMMAND_STOP_RECORDING) {
       record_ev->PushTask([] { StopRecording(); });
     }
@@ -707,9 +705,10 @@ void InitializeRobot(const std::string& address) {
   robot->StartStateUpdate(
       [](const rb::RobotState<rb::y1_model::A>& state) {
         record_ev->PushTask([s = state] {
-          record_qpos.head<kRobotDOF>() = s.position;
+          // record_qpos.head<kRobotDOF>() = s.position;
+          record_qpos.head<kRobotDOF>() = s.target_position;
           record_qvel.head<kRobotDOF>() = s.velocity;
-          record_action.head<kRobotDOF>() = s.target_position;
+          // record_action.head<kRobotDOF>() = s.target_position;
           record_torque.head<kRobotDOF>() = s.torque;
           record_ft.block(0, 0, 3, 1) = s.ft_sensor_right.torque;
           record_ft.block(3, 0, 3, 1) = s.ft_sensor_right.force;
@@ -736,7 +735,7 @@ void InitializeRobot(const std::string& address) {
             return;
           }
 
-          q_joint_ref = s.position.block(2 + 6, 0, 14, 1);
+          q_joint_ref = s.position;
         });
       },
       100 /* Hz */);
@@ -747,8 +746,8 @@ void InitializeRobot(const std::string& address) {
   robot_dyn_state = robot_dyn->MakeState({"base", "link_head_0", "ee_right", "ee_left"}, y1_model::A::kRobotJointNames);
   robot_dyn_state->SetGravity({0, 0, 0, 0, 0, -9.81});
 
-  q_upper_limit = robot_dyn->GetLimitQUpper(robot_dyn_state).block(2 + 6, 0, 14, 1);
-  q_lower_limit = robot_dyn->GetLimitQLower(robot_dyn_state).block(2 + 6, 0, 14, 1);
+  q_upper_limit = robot_dyn->GetLimitQUpper(robot_dyn_state);
+  q_lower_limit = robot_dyn->GetLimitQLower(robot_dyn_state);
 }
 
 void GoPose(const Eigen::Vector<double, 20>& body, const Eigen::Vector<double, 2>& head, double minimum_time) {
@@ -908,8 +907,8 @@ void StartTeleoperation() {
     return;
   }
 
+  record_ev->DoTask([] { tele_right_button = tele_left_button = false; });
   rcs_handler = robot->CreateCommandStream();
-  tele_right_button = tele_left_button = false;
 }
 
 void InitializeCamera() {
@@ -1069,8 +1068,8 @@ void InitializeMasterArm() {
           gripper_min;
     });
 
-    robot_ev->PushTask([rb = state.button_right.button, lb = state.button_left.button,
-                        r = state.q_joint(Eigen::seq(0, 6)), l = state.q_joint(Eigen::seq(7, 13))] {
+    record_ev->PushTask([rb = state.button_right.button, lb = state.button_left.button,
+                         r = state.q_joint(Eigen::seq(0, 6)), l = state.q_joint(Eigen::seq(7, 13))] {
       if (!rcs_handler) {
         return;
       }
@@ -1102,8 +1101,9 @@ void StartRecording(const std::string& file_path) {
     record_depth_dataset[i]->createAttribute("depth_scale", rs_depth_scales[i]);
     record_depth[i] = Mat(Size(kWidth, kHeight), CV_16UC1);
 
-    record_rgb_dataset[i] = std::make_unique<HighFive::DataSet>(CreateDataSet<std::uint8_t>(
-        *record_file, "/observations/images/cam" + std::to_string(i) + "_rgb", {kHeight, kWidth, 3}, kCompressionLevel));
+    record_rgb_dataset[i] = std::make_unique<HighFive::DataSet>(
+        CreateDataSet<std::uint8_t>(*record_file, "/observations/images/cam" + std::to_string(i) + "_rgb",
+                                    {kHeight, kWidth, 3}, kCompressionLevel));
     record_rgb[i] = Mat(Size(kWidth, kHeight), CV_8UC3);
   }
   record_action_dataset =
@@ -1258,7 +1258,7 @@ void ControlGripper() {
 
   //
 
-  record_ev->PushTask([q, qvel, torque, operation_mode, id_position] {
+  record_ev->PushTask([q, qvel, torque, operation_mode, id_position] { // TODO
     record_qpos.tail<kGripperDOF>() = q;
     record_qvel.tail<kGripperDOF>() = qvel;
     record_torque.tail<kGripperDOF>() = torque;
@@ -1285,8 +1285,8 @@ void AddDataIntoDataSet(std::unique_ptr<HighFive::DataSet>& dataset, const std::
 }
 
 template <typename T>
-HighFive::DataSet CreateDataSet(HighFive::File& file, const std::string& name,
-                                const std::vector<std::size_t>& shape, int compression_level) {
+HighFive::DataSet CreateDataSet(HighFive::File& file, const std::string& name, const std::vector<std::size_t>& shape,
+                                int compression_level) {
   std::vector<size_t> dims = {0};
   std::vector<size_t> max_dims = {HighFive::DataSpace::UNLIMITED};
   std::vector<hsize_t> chunk_size = {1};

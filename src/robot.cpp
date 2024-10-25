@@ -537,7 +537,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     api::JointCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(dev_name);
-    req.set_command(api::JointCommandRequest::COMMAND_BRAKE_ENGAGE);
+    req.set_command(api::JointCommandRequest::COMMAND_BRAKE_RELEASE);
 
     api::JointCommandResponse res;
     grpc::ClientContext context;

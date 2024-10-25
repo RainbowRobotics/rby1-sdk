@@ -19,6 +19,7 @@ class DynamixelBusImpl {
 
   ~DynamixelBusImpl() {
     port_handler_->closePort();
+    port_handler_->clearPort();
 
     delete port_handler_;
     delete packet_handler_;

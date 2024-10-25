@@ -132,7 +132,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("power_on", &Robot<T>::PowerOn, "dev_name"_a, py::call_guard<py::gil_scoped_release>())
       .def("power_off", &Robot<T>::PowerOff, "dev_name"_a, py::call_guard<py::gil_scoped_release>())
       .def("is_power_on", &Robot<T>::IsPowerOn, "dev_name"_a)
-      .def("servo_on", &Robot<T>::ServoOn, "dev_name"_a)
+      .def("servo_on", &Robot<T>::ServoOn, "dev_name"_a, py::call_guard<py::gil_scoped_release>())
       .def("is_servo_on", &Robot<T>::IsServoOn, "dev_name"_a)
       .def("break_engage", &Robot<T>::BreakEngage, "dev_name"_a)
       .def("break_release", &Robot<T>::BreakRelease, "dev_name"_a)
@@ -143,7 +143,23 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("reset_fault_control_manager", &Robot<T>::ResetFaultControlManager, py::call_guard<py::gil_scoped_release>())
       .def("set_tool_flange_output_voltage", &Robot<T>::SetToolFlangeOutputVoltage,
            py::call_guard<py::gil_scoped_release>())
-      .def("start_state_update", &Robot<T>::StartStateUpdate, "cb"_a, "rate"_a)
+      .def(
+          "start_state_update",
+          [](Robot<T>& self, py::function& cb, double rate) {
+            pybind11::module inspect_module = pybind11::module::import("inspect");
+            pybind11::object result = inspect_module.attr("signature")(cb).attr("parameters");
+            auto num_params = pybind11::len(result);
+
+            if (num_params == 1) {
+              self.StartStateUpdate(py::cast<const std::function<void(const RobotState<T>&)>>(cb), rate);
+            } else if (num_params == 2) {
+              self.StartStateUpdate(
+                  py::cast<const std::function<void(const RobotState<T>&, const ControlManagerState&)>>(cb), rate);
+            } else {
+              throw std::invalid_argument("The number of arguments of 'cb' can be one or two.");
+            }
+          },
+          "cb"_a, "rate"_a)
       .def("stop_state_update", &Robot<T>::StopStateUpdate, py::call_guard<py::gil_scoped_release>())
       .def("start_log_stream", &Robot<T>::StartLogStream, "cb"_a, "rate"_a)
       .def("stop_log_stream", &Robot<T>::StopLogStream)

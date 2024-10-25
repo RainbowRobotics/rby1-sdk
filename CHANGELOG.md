@@ -1,3 +1,9 @@
+## v0.2.0 (2024-10-02)
+
+### ✨ Features
+
+- support dynamics in python
+
 ## v0.1.11 (2024-09-30)
 
 ### 🐛 Fixes

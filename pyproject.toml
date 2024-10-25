@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rby1-sdk"
-version = "0.1.11"
+version = "0.2.0"
 description = ""
 authors = ["Keunjun Choi <keunjun.choi@rainbow-robotics.com>"]
 license = "Apache-2.0"

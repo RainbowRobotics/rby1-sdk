@@ -90,6 +90,8 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   void StartStateUpdate(const std::function<void(const RobotState<T>&)>& cb, double rate);
 
+  void StartStateUpdate(const std::function<void(const RobotState<T>&, const ControlManagerState&)>& cb, double rate);
+
   void StopStateUpdate();
 
   void StartLogStream(const std::function<void(const std::vector<Log>&)>& cb, double rate);

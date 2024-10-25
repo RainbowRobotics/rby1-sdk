@@ -4,8 +4,14 @@ import rby1_sdk
 import argparse
 
 
-def callback(robot_state: rby1_sdk.RobotState_A):
+def callback(robot_state: rby1_sdk.RobotState_A, control_manager_state: rby1_sdk.ControlManagerState):
     print(robot_state)
+    print(control_manager_state)
+
+
+# or
+# def callback(robot_state: rby1_sdk.RobotState_A):
+#     print(robot_state)
 
 
 def main(address, power_device):

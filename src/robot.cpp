@@ -638,7 +638,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return true;
   }
 
-  void StartStateUpdate(const std::function<void(const RobotState<T>&)>& cb, double rate) {
+  void StartStateUpdate(const std::function<void(const RobotState<T>&, const ControlManagerState&)>& cb, double rate) {
     if (state_reader_) {
       return;
     }
@@ -1088,7 +1088,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
     explicit StateReader(std::shared_ptr<RobotImpl<T>> robot, api::RobotStateService::Stub* stub,
-                         const std::function<void(const RobotState<T>&)>& cb, double rate)
+                         const std::function<void(const RobotState<T>&, const ControlManagerState&)>& cb, double rate)
         : robot_(std::move(robot)) {
       cb_ = cb;
 
@@ -1117,7 +1117,8 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     void OnReadDone(bool ok) override {
       if (ok) {
         if (res_.has_robot_state() && cb_) {
-          cb_(robot_->ProtoToRobotState(res_.robot_state()));
+          cb_(robot_->ProtoToRobotState(res_.robot_state()),
+              api::ProtoToControlManagerState(res_.control_manager_state()));
         }
         StartRead(&res_);
       }
@@ -1133,7 +1134,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
    private:
     std::shared_ptr<RobotImpl<T>> robot_;
     grpc::ClientContext context_;
-    std::function<void(const RobotState<T>&)> cb_;
+    std::function<void(const RobotState<T>&, const ControlManagerState&)> cb_;
     api::GetRobotStateStreamResponse res_;
     std::mutex mtx_;
     std::condition_variable cv_;
@@ -1602,6 +1603,12 @@ bool Robot<T>::SetToolFlangeOutputVoltage(const std::string& name, int voltage) 
 
 template <typename T>
 void Robot<T>::StartStateUpdate(const std::function<void(const RobotState<T>&)>& cb, double rate) {
+  StartStateUpdate([cb](const RobotState<T>& rs, const ControlManagerState&) { cb(rs); }, rate);
+}
+
+template <typename T>
+void Robot<T>::StartStateUpdate(const std::function<void(const RobotState<T>&, const ControlManagerState&)>& cb,
+                                double rate) {
   impl_->StartStateUpdate(cb, rate);
 }
 

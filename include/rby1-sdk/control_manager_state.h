@@ -13,11 +13,11 @@ struct ControlManagerState {
 
   enum class ControlState { kUnknown = 0, kIdle, kExecuting, kSwitching };
 
-  State state;
-  double time_scale;
-  ControlState control_state;
-  std::vector<unsigned int> enabled_joint_idx;
-  bool unlimited_mode_enabled;
+  State state{State::kUnknown};
+  double time_scale{0.};
+  ControlState control_state{ControlState::kUnknown};
+  std::vector<unsigned int> enabled_joint_idx{};
+  bool unlimited_mode_enabled{false};
 };
 
 inline std::string to_string(ControlManagerState::State s) {

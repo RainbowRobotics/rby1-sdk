@@ -14,7 +14,7 @@ class MasterArm {
  public:
   static constexpr int kDOF = 14;
   static constexpr double kTorqueScaling = 0.5;
-  static constexpr double kMaximumTorque = 4.; // 3.0 Nm
+  static constexpr double kMaximumTorque = 4.;  // 3.0 Nm
 
   static constexpr int kRightToolId = 0x80;
   static constexpr int kLeftToolId = 0x81;

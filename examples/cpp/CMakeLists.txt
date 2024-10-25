@@ -27,6 +27,8 @@ set(EXAMPLES
 
         rtcomm_protocol
         stop_command
+
+        break_test
 )
 
 foreach (SRC IN LISTS EXAMPLES)

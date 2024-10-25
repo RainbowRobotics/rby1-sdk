@@ -74,6 +74,12 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool IsServoOn(const std::string& dev_name) const;
 
+  bool BreakEngage(const std::string& dev_name) const;
+
+  bool BreakRelease(const std::string& dev_name) const;
+
+  bool HomeOffsetReset(const std::string& dev_name) const;
+
   bool EnableControlManager(bool unlimited_mode_enabled = false) const;
 
   bool DisableControlManager() const;

@@ -134,6 +134,9 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("is_power_on", &Robot<T>::IsPowerOn, "dev_name"_a)
       .def("servo_on", &Robot<T>::ServoOn, "dev_name", py::call_guard<py::gil_scoped_release>())
       .def("is_servo_on", &Robot<T>::IsServoOn, "dev_name"_a)
+      .def("break_engage", &Robot<T>::BreakEngage, "dev_name"_a)
+      .def("break_release", &Robot<T>::BreakRelease, "dev_name"_a)
+      .def("home_offset_reset", &Robot<T>::HomeOffsetReset, "dev_name"_a)
       .def("enable_control_manager", &Robot<T>::EnableControlManager, py::arg("unlimited_mode_enabled") = false,
            py::call_guard<py::gil_scoped_release>())
       .def("disable_control_manager", &Robot<T>::DisableControlManager, py::call_guard<py::gil_scoped_release>())

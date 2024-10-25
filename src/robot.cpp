@@ -517,6 +517,54 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return true;
   }
 
+  bool BreakEngage(const std::string& dev_name) const {
+    api::JointCommandRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(dev_name);
+    req.set_command(api::JointCommandRequest::COMMAND_BRAKE_ENGAGE);
+
+    api::JointCommandResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = power_service_->JointCommand(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
+  }
+
+  bool BreakRelease(const std::string& dev_name) const {
+    api::JointCommandRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(dev_name);
+    req.set_command(api::JointCommandRequest::COMMAND_BRAKE_RELEASE);
+
+    api::JointCommandResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = power_service_->JointCommand(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
+  }
+
+  bool HomeOffsetReset(const std::string& dev_name) const {
+    api::JointCommandRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(dev_name);
+    req.set_command(api::JointCommandRequest::COMMAND_HOME_OFFSET_RST);
+
+    api::JointCommandResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = power_service_->JointCommand(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
+  }
+
   bool EnableControlManager(bool unlimited_mode_enabled) const {
     api::ControlManagerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
@@ -1515,6 +1563,21 @@ bool Robot<T>::ServoOn(const std::string& dev_name) const {
 template <typename T>
 bool Robot<T>::IsServoOn(const std::string& dev_name) const {
   return impl_->IsServoOn(dev_name);
+}
+
+template <typename T>
+bool Robot<T>::BreakEngage(const std::string& dev_name) const {
+  return impl_->BreakEngage(dev_name);
+}
+
+template <typename T>
+bool Robot<T>::BreakRelease(const std::string& dev_name) const {
+  return impl_->BreakRelease(dev_name);
+}
+
+template <typename T>
+bool Robot<T>::HomeOffsetReset(const std::string& dev_name) const {
+  return impl_->HomeOffsetReset(dev_name);
 }
 
 template <typename T>

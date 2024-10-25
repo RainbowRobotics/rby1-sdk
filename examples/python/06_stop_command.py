@@ -19,6 +19,7 @@ def main(address):
         print("Robot is not connected")
         exit(1)
     robot.send_command(rby1_sdk.RobotCommandBuilder().set_command(rby1_sdk.WholeBodyCommandBuilder().set_command(rby1_sdk.StopCommandBuilder())), priority=99).get()
+    robot.servo_on
     robot.power_off(".*")
 
 

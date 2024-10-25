@@ -73,7 +73,7 @@ Eigen::Matrix<double, 2, 1> hand_controller_button = Eigen::Matrix<double, 2, 1>
 std::vector<Eigen::Matrix<double, 2, 1>> hand_controller_trigger_min_max = {Eigen::Matrix<double, 2, 1>({0, 1000}),
                                                                             Eigen::Matrix<double, 2, 1>({0, 1000})};
 int gripper_direction = 0;
-bool ma_info_verbose = true;
+bool ma_info_verbose = false;
 
 std::vector<double> torque_constant = {1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043,
                                        1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043};
@@ -785,12 +785,17 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if (argc < 2) {
-    std::cerr << "Usage: " << argv[0] << " <server address>" << std::endl;
+  if (argc < 2) {  
+    std::cerr << "Usage: " << argv[0] << " <server address> [servo]" << std::endl;
     return 1;
   }
 
   std::string address{argv[1]};
+  std::string servo = ".*"; // 기본값
+
+  if (argc >= 3) {
+    servo = argv[2];
+  }
 
   auto robot = rb::Robot<y1_model::A>::Create(address);
 
@@ -831,9 +836,9 @@ int main(int argc, char** argv) {
   }
 
   std::cout << "Checking servo status..." << std::endl;
-  if (!robot->IsServoOn(kAll)) {
+  if (!robot->IsServoOn(servo)) {
     std::cout << "Servo is currently OFF. Attempting to activate servo..." << std::endl;
-    if (!robot->ServoOn(kAll)) {
+    if (!robot->ServoOn(servo)) {
       std::cerr << "Error: Failed to activate servo." << std::endl;
       return 1;
     }
@@ -1027,13 +1032,34 @@ int main(int argc, char** argv) {
 
     std::cout << "Start to send command to robot." << std::endl;
 
+    Eigen::Matrix<double, 20, 1> q_joint_ref_20x1;
+    q_joint_ref_20x1.setZero();
+    q_joint_ref_20x1.block(0, 0, 6, 1) << 0, 30, -60, 30, 0, 0;
+    q_joint_ref_20x1 *= D2R;
+
     while (1) {
       {
         std::lock_guard<std::mutex> lg(mtx_q_joint_ma_info);
         {
           std::lock_guard<std::mutex> lg(mtx_hand_controller_info);
 
-          if (hand_controller_button(0)) {
+          q_joint_ref_20x1.block(6, 0, 14, 1) =
+              q_joint_ref_20x1.block(6, 0, 14, 1) * (1 - lpf_update_ratio) + q_joint_ma * lpf_update_ratio;
+
+          Eigen::Matrix<double, 24, 1> q_joint_rby1;
+          q_joint_rby1.setZero();
+          q_joint_rby1.block(2, 0, 20, 1) = q_joint_ref_20x1;
+
+          dyn_state->SetQ(q_joint_rby1);
+          dyn->ComputeForwardKinematics(dyn_state);
+          auto res_col = dyn->DetectCollisionsOrNearestLinks(dyn_state, 1);
+          bool is_coliision = false;
+
+          if (res_col[0].distance < 0.02) {
+            is_coliision = true;
+          }
+
+          if (hand_controller_button(0) && !is_coliision) {
             //right hand position control mode
             q_joint_ref.block(0, 0, 7, 1) = q_joint_ref.block(0, 0, 7, 1) * (1 - lpf_update_ratio) +
                                             q_joint_ma.block(0, 0, 7, 1) * lpf_update_ratio;
@@ -1041,7 +1067,7 @@ int main(int argc, char** argv) {
             right_arm_minimum_time = 1.0;
           }
 
-          if (hand_controller_button(1)) {
+          if (hand_controller_button(1) && !is_coliision) {
             //left hand position control mode
             q_joint_ref.block(7, 0, 7, 1) = q_joint_ref.block(7, 0, 7, 1) * (1 - lpf_update_ratio) +
                                             q_joint_ma.block(7, 0, 7, 1) * lpf_update_ratio;
@@ -1054,7 +1080,6 @@ int main(int argc, char** argv) {
       for (int i = 0; i < 14; i++) {
         q_joint_ref(i) = std::clamp(q_joint_ref(i), q_lower_limit(i), q_upper_limit(i));
       }
-
       Eigen::Vector<double, 7> target_position_left = q_joint_ref.block(7, 0, 7, 1);
       Eigen::Vector<double, 7> target_position_right = q_joint_ref.block(0, 0, 7, 1);
       Eigen::Vector<double, 7> acc_limit, vel_limit;

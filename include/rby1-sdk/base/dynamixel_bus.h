@@ -25,6 +25,11 @@ class DynamixelBus {
   static constexpr uint16_t kAddrPresentButtonState = 132;
   static constexpr uint16_t kAddrGoalVibrationLevel = 102;
 
+  static constexpr uint16_t kAddrPositionPGain = 84;
+  static constexpr uint16_t kAddrPositionIGain = 82;
+  static constexpr uint16_t kAddrPositionDGain = 80;
+
+
   static constexpr int kTorqueEnable = 1;
   static constexpr int kTorqueDisable = 0;
 
@@ -60,6 +65,13 @@ class DynamixelBus {
   std::optional<std::pair<int /* id */, ButtonState>> ReadButtonStatus(int id);
 
   void SendTorqueEnable(int id, int onoff);
+
+  void SetPositionGain(int id, 
+                      std::optional<uint16_t> p_gain = std::nullopt, 
+                      std::optional<uint16_t> i_gain = std::nullopt, 
+                      std::optional<uint16_t> d_gain = std::nullopt);
+
+  std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> GetPositionGain(int id);
 
   std::optional<int> ReadTorqueEnable(int id);
 

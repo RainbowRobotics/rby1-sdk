@@ -2,6 +2,7 @@
 
 #include <condition_variable>
 #include <functional>
+#include <optional>
 #include <string>
 
 #include "control_manager_state.h"
@@ -73,6 +74,15 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool ServoOn(const std::string& dev_name) const;
 
   bool IsServoOn(const std::string& dev_name) const;
+
+  bool SetPositionGain(const std::string& dev_name, std::optional<uint16_t> p_gain = std::nullopt,
+                       std::optional<uint16_t> i_gain = std::nullopt,
+                       std::optional<uint16_t> d_gain = std::nullopt) const;
+
+  std::optional<std::tuple<std::vector<uint16_t>, std::vector<uint16_t>, std::vector<uint16_t>>> GetTorsoPositionGain() const;
+  std::optional<std::tuple<std::vector<uint16_t>, std::vector<uint16_t>, std::vector<uint16_t>>> GetRightArmPositionGain() const;
+  std::optional<std::tuple<std::vector<uint16_t>, std::vector<uint16_t>, std::vector<uint16_t>>> GetLeftArmPositionGain() const;
+  std::optional<std::tuple<std::vector<uint16_t>, std::vector<uint16_t>, std::vector<uint16_t>>> GetHeadPositionGain() const;
 
   bool BreakEngage(const std::string& dev_name) const;
 

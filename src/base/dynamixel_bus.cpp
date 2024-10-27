@@ -62,6 +62,53 @@ class DynamixelBusImpl {
     std::this_thread::sleep_for(50us);
   }
 
+  void SetPositionGain(int id, std::optional<uint16_t> p_gain = std::nullopt,
+                       std::optional<uint16_t> i_gain = std::nullopt, std::optional<uint16_t> d_gain = std::nullopt) {
+    if (!p_gain.has_value() && !i_gain.has_value() && !d_gain.has_value()) {
+      return;
+    }
+
+    SendTorqueEnable(id, true);
+    if (p_gain.has_value()) {
+      packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionPGain, p_gain.value());
+    }
+    if (i_gain.has_value()) {
+      packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionIGain, i_gain.value());
+    }
+    if (d_gain.has_value()) {
+      packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionDGain, d_gain.value());
+    }
+  }
+
+  std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> GetPositionGain(int id) {
+    std::optional<uint16_t> p_gain;
+    std::optional<uint16_t> i_gain;
+    std::optional<uint16_t> d_gain;
+
+    uint16_t read_value;
+    uint8_t dxl_error;
+
+    int dxl_comm_result =
+        packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionPGain, &read_value, &dxl_error);
+    if (dxl_comm_result == COMM_SUCCESS) {
+      p_gain = read_value;
+    }
+
+    dxl_comm_result =
+        packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionIGain, &read_value, &dxl_error);
+    if (dxl_comm_result == COMM_SUCCESS) {
+      i_gain = read_value;
+    }
+
+    dxl_comm_result =
+        packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionDGain, &read_value, &dxl_error);
+    if (dxl_comm_result == COMM_SUCCESS) {
+      d_gain = read_value;
+    }
+
+    return std::make_tuple(p_gain, i_gain, d_gain);
+  }
+
   std::optional<int> ReadTorqueEnable(int id) {
     int8_t onoff = -1;
     uint8_t dxl_error = 0;
@@ -416,6 +463,16 @@ std::optional<std::pair<int, DynamixelBus::ButtonState>> DynamixelBus::ReadButto
 
 void DynamixelBus::SendTorqueEnable(int id, int onoff) {
   impl_->SendTorqueEnable(id, onoff);
+}
+
+void DynamixelBus::SetPositionGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain,
+                                   std::optional<uint16_t> d_gain) {
+  impl_->SetPositionGain(id, p_gain, i_gain, d_gain);
+}
+
+std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> DynamixelBus::GetPositionGain(
+    int id) {
+  return impl_->GetPositionGain(id);
 }
 
 std::optional<int> DynamixelBus::ReadTorqueEnable(int id) {

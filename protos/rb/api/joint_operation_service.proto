@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/joint_operation.proto";
+
+service JointOperationService {
+  // Joint command
+  rpc JointOperation(JointOperationRequest) returns (JointOperationResponse) {}
+
+  rpc GetPositionGain(GetPositionGainRequest) returns (GetPositionGainResponse) {}
+
+}

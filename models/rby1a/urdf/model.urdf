@@ -663,7 +663,7 @@
     <child link="link_torso_0" />
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.2805" />
     <axis xyz="1 0 0" />
-    <limit effort="1000.0" lower="-0.34906585" upper="0.34906585" velocity="3.14159265"
+    <limit effort="1000.0" lower="-0.34906585" upper="0.34906585" velocity="2.09439510"
       acceleration="1.5" />
   </joint>
 
@@ -672,7 +672,7 @@
     <child link="link_torso_1" />
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
     <axis xyz="0 1 0" />
-    <limit effort="1000.0" lower="-1.04719755" upper="1.52173048" velocity="3.14159265"
+    <limit effort="1000.0" lower="-1.04719755" upper="1.52173048" velocity="2.09439510"
       acceleration="1.5" />
   </joint>
 
@@ -825,7 +825,7 @@
     <child link="link_left_arm_5" />
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
     <axis xyz="0 1 0" />
-    <limit effort="1000.0" lower="-1.74532925" upper="2.00712864" velocity="30.14159265"
+    <limit effort="1000.0" lower="-1.74532925" upper="2.00712864" velocity="3.14159265"
       acceleration="3.141592" />
   </joint>
 

@@ -22,7 +22,6 @@ class DynamixelBusImpl {
     port_handler_->clearPort();
 
     delete port_handler_;
-    delete packet_handler_;
   }
 
   void SetTorqueConstant(const std::vector<double>& torque_constant) { torque_constant_ = torque_constant; }

@@ -31,6 +31,8 @@ class DynamixelBus {
   static constexpr int kCurrentControlMode = 0;
   static constexpr int kCurrentBasedPositionControlMode = 5;
 
+  static constexpr int kAddrCurrentTeperature = 146;
+
   struct ButtonState {  // RB Gripper
     int button;
     int trigger;
@@ -43,6 +45,8 @@ class DynamixelBus {
     double velocity;
     double current;
     double torque;
+
+    int temperature;
   };
 
   explicit DynamixelBus(const std::string& dev_name);
@@ -74,6 +78,8 @@ class DynamixelBus {
   void SendTorque(int id, double joint_torque);
 
   void SendCurrent(int id, double current);
+
+  std::optional<int> ReadTemperature(int id);
 
   std::optional<std::vector<std::pair<int, int>>> BulkRead(const std::vector<int>& ids, int addr, int len);
 

@@ -1331,6 +1331,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       js.target_velocity = s.target_velocity();
       js.target_feedback_gain = s.target_feedback_gain();
       js.target_feedforward_torque = s.target_feedforward_torque();
+      js.temperature = s.temperature();
     }
 
     if (msg.is_ready_size() != T::kRobotDOF) {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "rby1-sdk/base/dynamixel_bus.h"
 #include "rby1-sdk/base/event_loop.h"
 #include "rby1-sdk/base/thread.h"
@@ -69,6 +71,8 @@ class MasterArm {
   std::vector<int> active_ids_;
   bool state_updated_;
   State state_;
+
+  std::function<ControlInput(const State& state)> control_;
 };
 
 }  // namespace rb::upc

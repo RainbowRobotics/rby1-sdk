@@ -6,5 +6,6 @@ services:
       - DISPLAY=${DISPLAY}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-    ports:
-      - "50051:50051"
+    network_mode: host
+    # ports:
+    #   - "50051:50051"

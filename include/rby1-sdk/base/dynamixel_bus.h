@@ -75,7 +75,7 @@ class DynamixelBus {
   void SetPositionPGain(int id, uint16_t p_gain);
   void SetPositionIGain(int id, uint16_t i_gain);
   void SetPositionDGain(int id, uint16_t d_gain);
-  void SetPositionPIDGain(int id, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain);
+  void SetPositionPIDGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain, std::optional<uint16_t> d_gain);
   void SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain);
 
 

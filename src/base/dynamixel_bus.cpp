@@ -87,21 +87,29 @@ class DynamixelBusImpl {
 
     uint16_t read_value;
     uint8_t dxl_error;
-
+    std::this_thread::sleep_for(50ms);
     int dxl_comm_result =
         packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionPGain, &read_value, &dxl_error);
+    std::cout << "ID: " << id << ", dxl_result(p): " << dxl_comm_result << std::endl;
+    std::cout << "ID: " << id << ", dxl_error(p): " << dxl_error << std::endl;
     if (dxl_comm_result == COMM_SUCCESS) {
       p_gain = read_value;
     }
 
+    std::this_thread::sleep_for(50ms);
     dxl_comm_result =
         packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionIGain, &read_value, &dxl_error);
+    std::cout << "ID: " << id << ", dxl_result(i): " << dxl_comm_result << std::endl;
+    std::cout << "ID: " << id << ", dxl_error(i): " << dxl_error << std::endl;
     if (dxl_comm_result == COMM_SUCCESS) {
       i_gain = read_value;
     }
 
+    std::this_thread::sleep_for(50ms);
     dxl_comm_result =
         packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionDGain, &read_value, &dxl_error);
+    std::cout << "ID: " << id << ", dxl_result(d): " << dxl_comm_result << std::endl;
+    std::cout << "ID: " << id << ", dxl_error(d): " << dxl_error << std::endl;
     if (dxl_comm_result == COMM_SUCCESS) {
       d_gain = read_value;
     }
@@ -477,7 +485,7 @@ void DynamixelBus::SetPositionDGain(int id, uint16_t d_gain) {
   impl_->SetPositionGain(id, std::nullopt, std::nullopt, d_gain);
 }
 
-void DynamixelBus::SetPositionPIDGain(int id, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) {
+void DynamixelBus::SetPositionPIDGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain, std::optional<uint16_t> d_gain) {
   impl_->SetPositionGain(id, p_gain, i_gain, d_gain);
 }
 

@@ -23,24 +23,56 @@ int main(int argc, char** argv) {
   }
 
   std::this_thread::sleep_for(1s);
-  robot->PowerOn(".*");
+  if(!robot->IsPowerOn(".*")){
+    robot->PowerOn(".*");
+    std::this_thread::sleep_for(1s);
+  }
 
-  //HEAD TEST
-  auto gain_list = robot->GetHeadPositionPIDGains();
+  std::cout<<std::endl<<" >>> Using Component Name"<<std::endl;
+  auto gain_list = robot->GetTorsoPositionPIDGains();
   for (auto i = 0; i < gain_list.size(); i++) {
-    std::cout << "[head_" << i << "] p gain: " << gain_list[i].p_gain << "i gain: " << gain_list[i].i_gain
-              << "d gain: " << gain_list[i].d_gain << std::endl;
+    std::cout << "[torso_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
+              << ", d gain: " << gain_list[i].d_gain << std::endl;
   }
 
   gain_list = robot->GetRightArmPositionPIDGains();
   for (auto i = 0; i < gain_list.size(); i++) {
-    std::cout << "[right_arm_" << i << "] p gain: " << gain_list[i].p_gain << "i gain: " << gain_list[i].i_gain
-              << "d gain: " << gain_list[i].d_gain << std::endl;
+    std::cout << "[right_arm_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
+              << ", d gain: " << gain_list[i].d_gain << std::endl;
   }
 
-  auto gain = robot->GetPositionPIDGain("left_arm_0");
-  std::cout << "[left_arm_0] p gain: " << gain.p_gain << "i gain: " << gain.i_gain
-          << "d gain: " << gain.d_gain << std::endl;
+  gain_list = robot->GetLeftArmPositionPIDGains();
+  for (auto i = 0; i < gain_list.size(); i++) {
+    std::cout << "[left_arm_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
+              << ", d gain: " << gain_list[i].d_gain << std::endl;
+  }
+
+  // gain_list = robot->GetHeadPositionPIDGains();
+  // for (auto i = 0; i < gain_list.size(); i++) {
+  //   std::cout << "[head_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
+  //             << ", d gain: " << gain_list[i].d_gain << std::endl;
+  // }
+
+  std::cout<<std::endl<<" >>> Using Joint Name"<<std::endl;
+  auto taregt_joint_name = "torso_0";
+  auto gain = robot->GetPositionPIDGain(taregt_joint_name);
+  std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+
+  taregt_joint_name = "right_arm_0";
+  gain = robot->GetPositionPIDGain(taregt_joint_name);
+  std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+
+  taregt_joint_name = "left_arm_0";
+  gain = robot->GetPositionPIDGain(taregt_joint_name);
+  std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+
+  // taregt_joint_name = "head_0";
+  // gain = robot->GetPositionPIDGain(taregt_joint_name);
+  // std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+  //         << ", d gain: " << gain.d_gain << std::endl<<std::endl;
 
   return 0;
 }

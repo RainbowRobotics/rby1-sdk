@@ -7,29 +7,17 @@ import "google/protobuf/wrappers.proto";
 
 import "rb/api/header.proto";
 
-message JointOperationRequest {
+
+
+message ServoOnRequest {
   // Request header
   RequestHeader request_header = 1;
 
   string name = 2;
-
-  // Modes for joint/motor command
-  enum Operation {
-    OPERATION_UNKNOWN = 0;
-    OPERATION_SERVO_ON = 1;
-    OPERATION_BRAKE_ENGAGE = 2;
-    OPERATION_BRAKE_RELEASE = 3;
-    OPERATION_HOME_OFFSET_RST = 4;
-    OPERATION_SET_GAIN = 5;
-  }
-  Operation operation = 3;
-
-  google.protobuf.UInt32Value p_gain = 4;
-  google.protobuf.UInt32Value i_gain = 5;
-  google.protobuf.UInt32Value d_gain = 6;
 }
 
-message JointOperationResponse {
+
+message ServoOnResponse {
   // Response header
   ResponseHeader response_header = 1;
 
@@ -44,14 +32,112 @@ message JointOperationResponse {
   string message = 3;
 }
 
-message PositionGain {
-  google.protobuf.Timestamp timestamp = 1;
-  repeated uint32 p_gain = 2;
-  repeated uint32 i_gain = 3;
-  repeated uint32 d_gain = 4;
+message BrakeEngageRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
 }
 
-message GetPositionGainRequest {
+
+message BrakeEngageResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+
+message BrakeReleaseRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+
+message BrakeReleaseResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+
+message HomeOffsetResetRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+
+message HomeOffsetResetResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+message SetPositionPIDGainRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+
+  google.protobuf.UInt32Value p_gain = 3;
+  google.protobuf.UInt32Value i_gain = 4;
+  google.protobuf.UInt32Value d_gain = 5;
+}
+
+
+message SetPositionPIDGainResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+message PositionPIDGain {
+  google.protobuf.Timestamp timestamp = 1;
+  uint32 p_gain = 2;
+  uint32 i_gain = 3;
+  uint32 d_gain = 4;
+}
+
+message GetPositionPIDGainRequest {
   RequestHeader request_header = 1;
   enum TargetComponent {
     UNKNOWN = 0;
@@ -60,10 +146,13 @@ message GetPositionGainRequest {
     LEFT_ARM = 3;
     HEAD = 4;
   }
-  TargetComponent target_component = 2;
+  oneof command {  
+    string dev_name = 2;  
+    TargetComponent target_component = 3;  
+  }  
 }
 
-message GetPositionGainResponse {
+message GetPositionPIDGainResponse {
   ResponseHeader response_header = 1;
-  PositionGain position_gain = 2;
+  repeated PositionPIDGain position_gain = 2;
 }

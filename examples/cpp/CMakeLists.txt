@@ -29,7 +29,7 @@ set(EXAMPLES
         stop_command
 
         break_test
-        gain_test
+        get_pid_gain
 )
 
 foreach (SRC IN LISTS EXAMPLES)

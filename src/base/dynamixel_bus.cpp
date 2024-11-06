@@ -68,7 +68,7 @@ class DynamixelBusImpl {
       return;
     }
 
-    SendTorqueEnable(id, true);
+    SendTorqueEnable(id, false);
     if (p_gain.has_value()) {
       packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionPGain, p_gain.value());
     }
@@ -465,15 +465,57 @@ void DynamixelBus::SendTorqueEnable(int id, int onoff) {
   impl_->SendTorqueEnable(id, onoff);
 }
 
-void DynamixelBus::SetPositionGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain,
-                                   std::optional<uint16_t> d_gain) {
+void DynamixelBus::SetPositionPGain(int id, uint16_t p_gain) {
+  impl_->SetPositionGain(id, p_gain, std::nullopt, std::nullopt);
+}
+
+void DynamixelBus::SetPositionIGain(int id, uint16_t i_gain) {
+  impl_->SetPositionGain(id, std::nullopt, i_gain, std::nullopt);
+}
+
+void DynamixelBus::SetPositionDGain(int id, uint16_t d_gain) {
+  impl_->SetPositionGain(id, std::nullopt, std::nullopt, d_gain);
+}
+
+void DynamixelBus::SetPositionPIDGain(int id, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) {
   impl_->SetPositionGain(id, p_gain, i_gain, d_gain);
 }
 
-std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> DynamixelBus::GetPositionGain(
-    int id) {
-  return impl_->GetPositionGain(id);
+void DynamixelBus::SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain) {
+  impl_->SetPositionGain(id, pid_gain.p_gain, pid_gain.i_gain, pid_gain.d_gain);
 }
+
+std::optional<uint16_t> DynamixelBus::GetPositionPGain(int id) {
+  auto [p_gain, i_gain, d_gain] = impl_->GetPositionGain(id);
+  return p_gain;
+}
+
+std::optional<uint16_t> DynamixelBus::GetPositionIGain(int id) {
+  auto [p_gain, i_gain, d_gain] = impl_->GetPositionGain(id);
+  return i_gain;
+}
+
+std::optional<uint16_t> DynamixelBus::GetPositionDGain(int id) {
+  auto [p_gain, i_gain, d_gain] = impl_->GetPositionGain(id);
+  return d_gain;
+}
+
+std::optional<DynamixelBus::PIDGain> DynamixelBus::GetPositionPIDGain(int id) {
+  auto [p_gain, i_gain, d_gain] = impl_->GetPositionGain(id);
+
+  if (!p_gain.has_value() || !i_gain.has_value() || !d_gain.has_value()) {
+    return std::nullopt;
+  }
+
+  DynamixelBus::PIDGain pid_gain{p_gain.value(), i_gain.value(), d_gain.value()};
+
+  return pid_gain;
+}
+
+// std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> DynamixelBus::GetPositionGain(
+//     int id) {
+//   return impl_->GetPositionGain(id);
+// }
 
 std::optional<int> DynamixelBus::ReadTorqueEnable(int id) {
   return impl_->ReadTorqueEnable(id);

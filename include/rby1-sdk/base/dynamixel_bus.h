@@ -50,6 +50,12 @@ class DynamixelBus {
     double torque;
   };
 
+  struct PIDGain{
+    uint16_t p_gain;
+    uint16_t i_gain;
+    uint16_t d_gain;
+  };
+
   explicit DynamixelBus(const std::string& dev_name);
 
   ~DynamixelBus();
@@ -66,12 +72,17 @@ class DynamixelBus {
 
   void SendTorqueEnable(int id, int onoff);
 
-  void SetPositionGain(int id, 
-                      std::optional<uint16_t> p_gain = std::nullopt, 
-                      std::optional<uint16_t> i_gain = std::nullopt, 
-                      std::optional<uint16_t> d_gain = std::nullopt);
+  void SetPositionPGain(int id, uint16_t p_gain);
+  void SetPositionIGain(int id, uint16_t i_gain);
+  void SetPositionDGain(int id, uint16_t d_gain);
+  void SetPositionPIDGain(int id, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain);
+  void SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain);
 
-  std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> GetPositionGain(int id);
+
+  std::optional<uint16_t> GetPositionPGain(int id);
+  std::optional<uint16_t> GetPositionIGain(int id);
+  std::optional<uint16_t> GetPositionDGain(int id);
+  std::optional<DynamixelBus::PIDGain> GetPositionPIDGain(int id);
 
   std::optional<int> ReadTorqueEnable(int id);
 

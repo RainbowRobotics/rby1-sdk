@@ -580,8 +580,8 @@ class Robot {
         auto mb = std::static_pointer_cast<MobileBaseDifferential>(mobile_base_);
         double v_right = S(3) + mb->wheel_base / 2 * S(2);
         double v_left = S(3) - mb->wheel_base / 2 * S(2);
-        state->qdot(mb->right_wheel_idx) = v_right / mb->wheel_radius;
-        state->qdot(mb->left_wheel_idx) = v_left / mb->wheel_radius;
+        state->qdot(mb->right_wheel_idx) = -v_right / mb->wheel_radius;
+        state->qdot(mb->left_wheel_idx) = -v_left / mb->wheel_radius;
         break;
       }
       case MobileBaseType::kOmni: {
@@ -601,8 +601,8 @@ class Robot {
       }
       case MobileBaseType::kDifferential: {
         auto mb = std::static_pointer_cast<MobileBaseDifferential>(mobile_base_);
-        double w_r = state->qdot(mb->right_wheel_idx);
-        double w_l = state->qdot(mb->left_wheel_idx);
+        double w_r = -state->qdot(mb->right_wheel_idx);
+        double w_l = -state->qdot(mb->left_wheel_idx);
         S.block<3, 1>(2, 0) = math::se2v::MatrixType{(w_r - w_l) * mb->wheel_radius / mb->wheel_base,
                                                      (w_r + w_l) * mb->wheel_radius / 2, 0};
       }

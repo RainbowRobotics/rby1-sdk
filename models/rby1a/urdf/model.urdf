@@ -646,7 +646,7 @@
     <parent link="base" />
     <child link="wheel_r" />
     <origin rpy="0.0 0.0 0.0" xyz="0.228 -0.265 0.1" />
-    <axis xyz="0 1 0" />
+    <axis xyz="0 -1 0" />
     <limit velocity="3.14159265" acceleration="3.141592" />
   </joint>
 
@@ -654,7 +654,7 @@
     <parent link="base" />
     <child link="wheel_l" />
     <origin rpy="0.0 0.0 0.0" xyz="0.228 0.265 0.1" />
-    <axis xyz="0 1 0" />
+    <axis xyz="0 -1 0" />
     <limit velocity="3.14159265" acceleration="3.141592" />
   </joint>
 

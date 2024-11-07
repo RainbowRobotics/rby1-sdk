@@ -63,12 +63,12 @@
 
       <body name="wheel_r" pos="0.228 -0.265 0.1">
         <inertial pos="0 -0.00073938 0" quat="0.707107 0 0 0.707107" mass="1.37784" diaginertia="0.00811815 0.00426657 0.00426657" />
-        <joint name="right_wheel" pos="0 0 0" axis="0 1 0" limited="false" />
+        <joint name="right_wheel" pos="0 0 0" axis="0 -1 0" limited="false" />
         <include file="./assets/WHEEL/geoms.xml" />
       </body>
       <body name="wheel_l" pos="0.228 0.265 0.1">
         <inertial pos="0 0.00073938 0" quat="0.707107 0 0 0.707107" mass="1.37784" diaginertia="0.00811815 0.00426657 0.00426657" />
-        <joint name="left_wheel" pos="0 0 0" axis="0 1 0" limited="false" />
+        <joint name="left_wheel" pos="0 0 0" axis="0 -1 0" limited="false" />
         <include file="./assets/WHEEL/geoms.xml" />
       </body>
       <body name="link_torso_0" pos="0 0 0.2805">

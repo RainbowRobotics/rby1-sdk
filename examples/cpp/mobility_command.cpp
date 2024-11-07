@@ -95,10 +95,6 @@ int main(int argc, char** argv) {
   }
   std::cout << "Control Manager enabled successfully." << std::endl;
 
-  if (robot->IsPowerOn("48V")) {
-    robot->SetToolFlangeOutputVoltage("right", 12);
-  }
-
   robot->SetParameter("joint_position_command.cutoff_frequency", "5");
   std::cout << robot->GetParameter("joint_position_command.cutoff_frequency") << std::endl;
 
@@ -111,7 +107,7 @@ int main(int argc, char** argv) {
     std::cout << "mobility command example 1\n";
 
     Eigen::Vector<double, 2> wheel_velocity;
-    wheel_velocity << 31.41592, 31.41592;
+    wheel_velocity << 1.5, 1.5;
 
     Eigen::Vector<double, 2> wheel_acceleration_limit;
     wheel_acceleration_limit << 100, 100;
@@ -132,7 +128,7 @@ int main(int argc, char** argv) {
     std::this_thread::sleep_for(1s);
   }
 
-  if (1) {
+  if (0) {
 
     std::cout << "mobility command example 2\n";
 
@@ -157,7 +153,7 @@ int main(int argc, char** argv) {
 
     std::this_thread::sleep_for(1s);
   }
-  if (1) {
+  if (0) {
 
     std::cout << "mobility command example 1\n";
 
@@ -183,13 +179,13 @@ int main(int argc, char** argv) {
     std::this_thread::sleep_for(1s);
   }
 
-  if (1) {
+  if (0) {
 
     std::cout << "mobility command example 3\n";
 
-    double angular_velocity = 1.;
+    double angular_velocity = 0.;
     Eigen::Vector<double, 2> linear_velocity;
-    linear_velocity << 1, 1;
+    linear_velocity << 1, 0;
 
     double angular_acceleration_limit = 100.;
     Eigen::Vector<double, 2> linear_acceleration_limit;

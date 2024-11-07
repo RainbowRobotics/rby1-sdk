@@ -57,36 +57,36 @@ int main(int argc, char** argv) {
           << ", d gain: " << gain.d_gain << std::endl<<std::endl;
 
 
-  // target_joint_name = "head_0";
-  // std::cout<<">>> Before"<<std::endl;
-  // // Ensure PID Gain update compleation
-  // gain = robot->GetPositionPIDGain(target_joint_name);
-  // std::cout << "["<<target_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
-  //         << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+  target_joint_name = "head_0";
+  std::cout<<">>> Before"<<std::endl;
+  // Ensure PID Gain update compleation
+  gain = robot->GetPositionPIDGain(target_joint_name);
+  std::cout << "["<<target_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
   
-  // robot->SetPositionPIDGain(target_joint_name, 700, 0, 3500);
-  // std::cout<<">>> After"<<std::endl;
-  // // Ensure PID Gain update compleation
-  // std::this_thread::sleep_for(50ms);
-  // gain = robot->GetPositionPIDGain(target_joint_name);
-  // std::cout << "["<<target_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
-  //         << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+  robot->SetPositionPIDGain(target_joint_name, 700, 0, 3500);
+  std::cout<<">>> After"<<std::endl;
+  // Ensure PID Gain update compleation
+  std::this_thread::sleep_for(50ms);
+  gain = robot->GetPositionPIDGain(target_joint_name);
+  std::cout << "["<<target_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
 
 
-  // target_joint_name = "head_1";
-  // std::cout<<">>> Before"<<std::endl;
-  // // Ensure PID Gain update compleation
-  // gain = robot->GetPositionPIDGain(target_joint_name);
-  // std::cout << "["<<target_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
-  //         << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+  target_joint_name = "head_1";
+  std::cout<<">>> Before"<<std::endl;
+  // Ensure PID Gain update compleation
+  gain = robot->GetPositionPIDGain(target_joint_name);
+  std::cout << "["<<target_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
   
-  // robot->SetPositionPGain(target_joint_name, 300);
-  // std::cout<<">>> After"<<std::endl;
-  // // Ensure PID Gain update compleation
-  // std::this_thread::sleep_for(50ms);
-  // gain = robot->GetPositionPIDGain(target_joint_name);
-  // std::cout << "["<<target_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
-  //         << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+  robot->SetPositionPGain(target_joint_name, 300);
+  std::cout<<">>> After"<<std::endl;
+  // Ensure PID Gain update compleation
+  std::this_thread::sleep_for(50ms);
+  gain = robot->GetPositionPIDGain(target_joint_name);
+  std::cout << "["<<target_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
 
   return 0;
 }

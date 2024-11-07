@@ -47,11 +47,11 @@ int main(int argc, char** argv) {
               << ", d gain: " << gain_list[i].d_gain << std::endl;
   }
 
-  // gain_list = robot->GetHeadPositionPIDGains();
-  // for (auto i = 0; i < gain_list.size(); i++) {
-  //   std::cout << "[head_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
-  //             << ", d gain: " << gain_list[i].d_gain << std::endl;
-  // }
+  gain_list = robot->GetHeadPositionPIDGains();
+  for (auto i = 0; i < gain_list.size(); i++) {
+    std::cout << "[head_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
+              << ", d gain: " << gain_list[i].d_gain << std::endl;
+  }
 
   // Torso joints
   robot->SetPositionPIDGain("torso_0", 80, 15, 200);
@@ -81,8 +81,8 @@ int main(int argc, char** argv) {
   robot->SetPositionPIDGain("left_arm_6", 100, 5, 150);
 
   // Head joints
-  // robot->SetPositionPIDGain("head_0", 800, 0, 4000);
-  // robot->SetPositionPIDGain("head_1", 800, 0, 4000);
+  robot->SetPositionPIDGain("head_0", 800, 0, 4000);
+  robot->SetPositionPIDGain("head_1", 800, 0, 4000);
 
   // Ensure PID Gain update compleation
   std::this_thread::sleep_for(50ms);
@@ -106,10 +106,10 @@ int main(int argc, char** argv) {
               << ", d gain: " << gain_list[i].d_gain << std::endl;
   }
 
-  // gain_list = robot->GetHeadPositionPIDGains();
-  // for (auto i = 0; i < gain_list.size(); i++) {
-  //   std::cout << "[head_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
-  //             << ", d gain: " << gain_list[i].d_gain << std::endl;
-  // }
+  gain_list = robot->GetHeadPositionPIDGains();
+  for (auto i = 0; i < gain_list.size(); i++) {
+    std::cout << "[head_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
+              << ", d gain: " << gain_list[i].d_gain << std::endl;
+  }
   return 0;
 }

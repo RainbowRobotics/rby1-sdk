@@ -5,6 +5,7 @@
 #include <iostream>
 #include <thread>
 #include <unordered_map>
+#include <mutex>
 
 using namespace std::chrono_literals;
 
@@ -23,6 +24,9 @@ class DynamixelBusImpl {
     delete port_handler_;
     delete packet_handler_;
   }
+
+  //for bulk read & get position gain
+  std::mutex port_mutex;
 
   void SetTorqueConstant(const std::vector<double>& torque_constant) { torque_constant_ = torque_constant; }
 
@@ -67,7 +71,7 @@ class DynamixelBusImpl {
     if (!p_gain.has_value() && !i_gain.has_value() && !d_gain.has_value()) {
       return;
     }
-
+    std::lock_guard<std::mutex> lock(port_mutex);
     SendTorqueEnable(id, false);
     if (p_gain.has_value()) {
       packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionPGain, p_gain.value());
@@ -81,6 +85,7 @@ class DynamixelBusImpl {
   }
 
   std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> GetPositionGain(int id) {
+    std::lock_guard<std::mutex> lock(port_mutex);
     std::optional<uint16_t> p_gain;
     std::optional<uint16_t> i_gain;
     std::optional<uint16_t> d_gain;
@@ -278,6 +283,7 @@ class DynamixelBusImpl {
   }
 
   std::optional<std::vector<std::pair<int, DynamixelBus::MotorState>>> BulkReadMotorState(const std::vector<int>& ids) {
+    std::lock_guard<std::mutex> lock(port_mutex);
     std::vector<std::pair<int, DynamixelBus::MotorState>> ms;
     std::unordered_map<int, int> idx;
     for (const auto& id : ids) {

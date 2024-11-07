@@ -47,11 +47,11 @@ int main(int argc, char** argv) {
               << ", d gain: " << gain_list[i].d_gain << std::endl;
   }
 
-  // gain_list = robot->GetHeadPositionPIDGains();
-  // for (auto i = 0; i < gain_list.size(); i++) {
-  //   std::cout << "[head_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
-  //             << ", d gain: " << gain_list[i].d_gain << std::endl;
-  // }
+  gain_list = robot->GetHeadPositionPIDGains();
+  for (auto i = 0; i < gain_list.size(); i++) {
+    std::cout << "[head_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
+              << ", d gain: " << gain_list[i].d_gain << std::endl;
+  }
 
   std::cout<<std::endl<<" >>> Using Joint Name"<<std::endl;
   auto taregt_joint_name = "torso_0";
@@ -69,10 +69,10 @@ int main(int argc, char** argv) {
   std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
           << ", d gain: " << gain.d_gain << std::endl<<std::endl;
 
-  // taregt_joint_name = "head_0";
-  // gain = robot->GetPositionPIDGain(taregt_joint_name);
-  // std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
-  //         << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+  taregt_joint_name = "head_0";
+  gain = robot->GetPositionPIDGain(taregt_joint_name);
+  std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
 
   return 0;
 }

@@ -13,6 +13,7 @@ using namespace py::literals;
 void bind_pid_gain(pybind11::module_& m) {
   py::class_<PIDGain>(m, "PIDGain")
       .def(py::init<>())
+      .def(py::init<uint16_t, uint16_t, uint16_t>())
       .def_readonly("p_gain", &PIDGain::p_gain)
       .def_readonly("i_gain", &PIDGain::i_gain)
       .def_readonly("d_gain", &PIDGain::d_gain)

@@ -10,7 +10,7 @@ namespace py = pybind11;
 using namespace rb;
 using namespace py::literals;
 
-void bind_pid_gain(pybind11::module_& m){
+void bind_pid_gain(pybind11::module_& m) {
   py::class_<PIDGain>(m, "PIDGain")
       .def(py::init<>())
       .def_readonly("p_gain", &PIDGain::p_gain)
@@ -18,10 +18,10 @@ void bind_pid_gain(pybind11::module_& m){
       .def_readonly("d_gain", &PIDGain::d_gain)
       .def("__repr__", [](const PIDGain& self) {
         std::stringstream ss;
-        ss << "PIDGain("                                      //
-           << "p_gain=" << self.p_gain                     //
-           << ", i_gain=" << self.i_gain             //
-           << ", d_gain=" << self.d_gain  << ")";
+        ss << "PIDGain("                  //
+           << "p_gain=" << self.p_gain    //
+           << ", i_gain=" << self.i_gain  //
+           << ", d_gain=" << self.d_gain << ")";
         return ss.str();
       });
 }
@@ -196,17 +196,22 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)
       .def("set_position_d_gain", &Robot<T>::SetPositionDGain, "dev_name"_a, "d_gain"_a)
-      .def("set_position_pid_gain", &Robot<T>::SetPositionPIDGain, "dev_name"_a, "p_gain"_a, "i_gain"_a, "d_gain"_a)
-      .def("set_position_pid_gain", &Robot<T>::SetPositionPIDGain, "dev_name"_a, "pid_gain"_a)
+      .def("set_position_pid_gain",
+           static_cast<bool (Robot<T>::*)(const std::string&, uint16_t, uint16_t, uint16_t) const>(
+               &Robot<T>::SetPositionPIDGain),
+           "dev_name"_a, "p_gain"_a, "i_gain"_a, "d_gain"_a)
+      .def("set_position_pid_gain",
+           static_cast<bool (Robot<T>::*)(const std::string&, const rb::PIDGain&) const>(&Robot<T>::SetPositionPIDGain),
+           "dev_name"_a, "pid_gain"_a)
 
       .def("get_torso_position_pid_gains", &Robot<T>::GetTorsoPositionPIDGains)
       .def("get_right_arm_position_pid_gains", &Robot<T>::GetRightArmPositionPIDGains)
       .def("get_left_arm_position_pid_gains", &Robot<T>::GetLeftArmPositionPIDGains)
       .def("get_head_position_pid_gains", &Robot<T>::GetHeadPositionPIDGains)
-      .def("get_position_pid_gain", &Robot<T>::GetPositionPIDGain, "dev_name"_a)
-      ;
+      .def("get_position_pid_gain", &Robot<T>::GetPositionPIDGain, "dev_name"_a);
 }
 
 void pybind11_robot(py::module_& m) {
+  bind_pid_gain(m); 
   bind_robot<y1_model::A>(m, "Robot_A");
 }

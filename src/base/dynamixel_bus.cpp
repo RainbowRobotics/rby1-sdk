@@ -68,7 +68,7 @@ class DynamixelBusImpl {
     if (!p_gain.has_value() && !i_gain.has_value() && !d_gain.has_value()) {
       return;
     }
-    SendTorqueEnable(id, false);
+    // SendTorqueEnable(id, false);
     if (p_gain.has_value()) {
       packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionPGain, p_gain.value());
     }

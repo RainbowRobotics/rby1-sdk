@@ -1725,7 +1725,7 @@ bool Robot<T>::SetPositionPIDGain(const std::string& dev_name, const rb::PIDGain
 }
 template <typename T>
 std::vector<rb::PIDGain> Robot<T>::GetTorsoPositionPIDGains() const{
-  return impl_->GetLeftArmPositionPIDGains();
+  return impl_->GetTorsoPositionPIDGains();
 }
 
 template <typename T>

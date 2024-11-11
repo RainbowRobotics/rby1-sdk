@@ -25,9 +25,6 @@ class DynamixelBusImpl {
     delete packet_handler_;
   }
 
-  //for bulk read & get position gain
-  std::mutex port_mutex;
-
   void SetTorqueConstant(const std::vector<double>& torque_constant) { torque_constant_ = torque_constant; }
 
   bool OpenPort() { return port_handler_->openPort(); }
@@ -71,7 +68,6 @@ class DynamixelBusImpl {
     if (!p_gain.has_value() && !i_gain.has_value() && !d_gain.has_value()) {
       return;
     }
-    std::lock_guard<std::mutex> lock(port_mutex);
     SendTorqueEnable(id, false);
     if (p_gain.has_value()) {
       packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionPGain, p_gain.value());
@@ -85,7 +81,6 @@ class DynamixelBusImpl {
   }
 
   std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> GetPositionGain(int id) {
-    std::lock_guard<std::mutex> lock(port_mutex);
     std::optional<uint16_t> p_gain;
     std::optional<uint16_t> i_gain;
     std::optional<uint16_t> d_gain;
@@ -95,8 +90,7 @@ class DynamixelBusImpl {
     std::this_thread::sleep_for(50ms);
     int dxl_comm_result =
         packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionPGain, &read_value, &dxl_error);
-    std::cout << "ID: " << id << ", dxl_result(p): " << dxl_comm_result << std::endl;
-    std::cout << "ID: " << id << ", dxl_error(p): " << dxl_error << std::endl;
+
     if (dxl_comm_result == COMM_SUCCESS) {
       p_gain = read_value;
     }
@@ -104,8 +98,7 @@ class DynamixelBusImpl {
     std::this_thread::sleep_for(50ms);
     dxl_comm_result =
         packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionIGain, &read_value, &dxl_error);
-    std::cout << "ID: " << id << ", dxl_result(i): " << dxl_comm_result << std::endl;
-    std::cout << "ID: " << id << ", dxl_error(i): " << dxl_error << std::endl;
+
     if (dxl_comm_result == COMM_SUCCESS) {
       i_gain = read_value;
     }
@@ -113,8 +106,7 @@ class DynamixelBusImpl {
     std::this_thread::sleep_for(50ms);
     dxl_comm_result =
         packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionDGain, &read_value, &dxl_error);
-    std::cout << "ID: " << id << ", dxl_result(d): " << dxl_comm_result << std::endl;
-    std::cout << "ID: " << id << ", dxl_error(d): " << dxl_error << std::endl;
+
     if (dxl_comm_result == COMM_SUCCESS) {
       d_gain = read_value;
     }
@@ -283,7 +275,6 @@ class DynamixelBusImpl {
   }
 
   std::optional<std::vector<std::pair<int, DynamixelBus::MotorState>>> BulkReadMotorState(const std::vector<int>& ids) {
-    std::lock_guard<std::mutex> lock(port_mutex);
     std::vector<std::pair<int, DynamixelBus::MotorState>> ms;
     std::unordered_map<int, int> idx;
     for (const auto& id : ids) {

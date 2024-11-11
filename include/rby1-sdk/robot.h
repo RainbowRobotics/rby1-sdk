@@ -2,7 +2,6 @@
 
 #include <condition_variable>
 #include <functional>
-#include <optional>
 #include <string>
 
 #include "control_manager_state.h"

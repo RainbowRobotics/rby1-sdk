@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 package rb.api;
-import "google/protobuf/wrappers.proto";
 
 import "rb/api/header.proto";
 

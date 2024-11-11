@@ -10,6 +10,22 @@ namespace py = pybind11;
 using namespace rb;
 using namespace py::literals;
 
+void bind_pid_gain(pybind11::module_& m){
+  py::class_<PIDGain>(m, "PIDGain")
+      .def(py::init<>())
+      .def_readonly("p_gain", &PIDGain::p_gain)
+      .def_readonly("i_gain", &PIDGain::i_gain)
+      .def_readonly("d_gain", &PIDGain::d_gain)
+      .def("__repr__", [](const PIDGain& self) {
+        std::stringstream ss;
+        ss << "PIDGain("                                      //
+           << "p_gain=" << self.p_gain                     //
+           << ", i_gain=" << self.i_gain             //
+           << ", d_gain=" << self.d_gain  << ")";
+        return ss.str();
+      });
+}
+
 template <typename T>
 void bind_robot_command_handler(py::module_& m, const std::string& handler_name) {
   py::class_<RobotCommandHandler<T>>(m, handler_name.c_str())
@@ -175,7 +191,20 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("has_established_time_sync", &Robot<T>::HasEstablishedTimeSync)
       .def("start_time_sync", &Robot<T>::StartTimeSync, "period_sec"_a)
       .def("stop_time_sync", &Robot<T>::StopTimeSync, py::call_guard<py::gil_scoped_release>())
-      .def("get_dynamics", &Robot<T>::GetDynamics, "urdf_model"_a = "");
+      .def("get_dynamics", &Robot<T>::GetDynamics, "urdf_model"_a = "")
+
+      .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
+      .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)
+      .def("set_position_d_gain", &Robot<T>::SetPositionDGain, "dev_name"_a, "d_gain"_a)
+      .def("set_position_pid_gain", &Robot<T>::SetPositionPIDGain, "dev_name"_a, "p_gain"_a, "i_gain"_a, "d_gain"_a)
+      .def("set_position_pid_gain", &Robot<T>::SetPositionPIDGain, "dev_name"_a, "pid_gain"_a)
+
+      .def("get_torso_position_pid_gains", &Robot<T>::GetTorsoPositionPIDGains)
+      .def("get_right_arm_position_pid_gains", &Robot<T>::GetRightArmPositionPIDGains)
+      .def("get_left_arm_position_pid_gains", &Robot<T>::GetLeftArmPositionPIDGains)
+      .def("get_head_position_pid_gains", &Robot<T>::GetHeadPositionPIDGains)
+      .def("get_position_pid_gain", &Robot<T>::GetPositionPIDGain, "dev_name"_a)
+      ;
 }
 
 void pybind11_robot(py::module_& m) {

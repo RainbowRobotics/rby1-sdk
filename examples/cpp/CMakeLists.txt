@@ -29,6 +29,9 @@ set(EXAMPLES
         stop_command
 
         break_test
+        get_pid_gain
+        set_pid_gain
+        fatory_default_pid_gain
 )
 
 foreach (SRC IN LISTS EXAMPLES)

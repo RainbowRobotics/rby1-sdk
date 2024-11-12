@@ -39,6 +39,8 @@ struct ControlInput;
 template <typename T>
 struct ControlState;
 
+struct PIDGain;
+
 }  // namespace rb
 
 namespace rb {
@@ -73,6 +75,18 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool ServoOn(const std::string& dev_name) const;
 
   bool IsServoOn(const std::string& dev_name) const;
+
+  bool SetPositionPGain(const std::string& dev_name, uint16_t p_gain) const;
+  bool SetPositionIGain(const std::string& dev_name, uint16_t i_gain) const;  
+  bool SetPositionDGain(const std::string& dev_name, uint16_t d_gain) const;  
+  bool SetPositionPIDGain(const std::string& dev_name, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const;  
+  bool SetPositionPIDGain(const std::string& dev_name, const rb::PIDGain& pid_gain) const; 
+
+  std::vector<rb::PIDGain> GetTorsoPositionPIDGains() const;
+  std::vector<rb::PIDGain> GetRightArmPositionPIDGains() const;
+  std::vector<rb::PIDGain> GetLeftArmPositionPIDGains() const;
+  std::vector<rb::PIDGain> GetHeadPositionPIDGains() const;
+  rb::PIDGain GetPositionPIDGain(const std::string& dev_name) const;
 
   bool BreakEngage(const std::string& dev_name) const;
 
@@ -210,6 +224,12 @@ struct ControlState {
   Eigen::Vector<double, T::kRobotDOF> velocity{Eigen::Vector<double, T::kRobotDOF>::Zero()};
   Eigen::Vector<double, T::kRobotDOF> current{Eigen::Vector<double, T::kRobotDOF>::Zero()};
   Eigen::Vector<double, T::kRobotDOF> torque{Eigen::Vector<double, T::kRobotDOF>::Zero()};
+};
+
+struct PIDGain{
+  uint16_t p_gain;
+  uint16_t i_gain;
+  uint16_t d_gain;
 };
 
 }  // namespace rb

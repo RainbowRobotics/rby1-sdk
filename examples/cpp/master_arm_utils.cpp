@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
   }
 
   master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
-  master_arm->SetControlPeriod(0.02);
+  master_arm->SetControlPeriod(0.01);
 
   auto active_ids = master_arm->Initialize();
   if (active_ids.size() != upc::MasterArm::kDOF + 2) {
@@ -257,6 +257,10 @@ int main(int argc, char** argv) {
 
   Eigen::Matrix<double, 14, 1> q_joint_ref;
   q_joint_ref.setZero();
+  {
+    auto state = robot->GetState();
+    q_joint_ref = state.position.block(2 + 6, 0, 14, 1);
+  }
 
   auto dyn = robot->GetDynamics();
   auto dyn_state = dyn->MakeState({"base", "link_torso_5", "ee_right", "ee_left"}, y1_model::A::kRobotJointNames);
@@ -269,7 +273,7 @@ int main(int argc, char** argv) {
   double left_arm_minimum_time = 1.;
   double torso_minimum_time = 1.;
   double wheel_minimum_time = 1.;
-  double lpf_update_ratio = 0.1;
+  double lpf_update_ratio = 0.2;
 
   std::cout << "Start to send command to robot." << std::endl;
 
@@ -300,6 +304,8 @@ int main(int argc, char** argv) {
   Eigen::Vector<double, 3> add_pos = Eigen::Vector<double, 3>::Zero();
   Eigen::Vector<double, 3> add_ori = Eigen::Vector<double, 3>::Zero();
 
+  int control_cnt = 0;
+
   master_arm->StartControl([&](const upc::MasterArm::State& state) {
     upc::MasterArm::ControlInput input;
 
@@ -315,14 +321,7 @@ int main(int argc, char** argv) {
       update_ratio = 1.0;
 
       if (stream != nullptr) {
-        std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1"<<std::endl;
         stream.reset();
-        std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!2"<<std::endl;
-        // auto rv = robot
-        //               ->SendCommand(RobotCommandBuilder().SetCommand(WholeBodyCommandBuilder().SetCommand(
-        //                                 StopCommandBuilder().SetCommandHeader(CommandHeaderBuilder()))),
-        //                             99)
-        //               ->Get();
       }
 
       auto state = robot->GetState();
@@ -344,10 +343,7 @@ int main(int argc, char** argv) {
       left_arm_minimum_time = 1.0;
       torso_minimum_time = 1.0;
       wheel_minimum_time = 5.0;
-
-      // std::cout <<"T_torso: \n" << T_torso << std::endl;
-      // std::cout <<"T_right: \n" << T_right << std::endl;
-      // std::cout <<"T_left: \n" << T_left << std::endl;
+      control_cnt = 0;
     }
 
     control_mode_old = control_mode;
@@ -380,11 +376,12 @@ int main(int argc, char** argv) {
       q_joint_ref_20x1.block(6, 0, 14, 1) =
           q_joint_ref_20x1.block(6, 0, 14, 1) * (1 - lpf_update_ratio) + state.q_joint * lpf_update_ratio;
 
-      Eigen::Matrix<double, 24, 1> q_joint_rby1;
-      q_joint_rby1.setZero();
-      q_joint_rby1.block(2, 0, 20, 1) = q_joint_ref_20x1;
+      Eigen::Matrix<double, 24, 1> q_joint_for_collision;
+      q_joint_for_collision.setZero();
+      q_joint_for_collision.block(2, 0, 6, 1) = q_joint_ref_20x1.block(0, 0, 6, 1);
+      q_joint_for_collision.block(2 + 6, 0, 14, 1) = state.q_joint;
 
-      dyn_state->SetQ(q_joint_rby1);
+      dyn_state->SetQ(q_joint_for_collision);
       dyn->ComputeForwardKinematics(dyn_state);
       auto res_col = dyn->DetectCollisionsOrNearestLinks(dyn_state, 1);
       bool is_coliision = false;
@@ -397,6 +394,7 @@ int main(int argc, char** argv) {
         //right hand position control mode
         q_joint_ref.block(0, 0, 7, 1) =
             q_joint_ref.block(0, 0, 7, 1) * (1 - lpf_update_ratio) + state.q_joint.block(0, 0, 7, 1) * lpf_update_ratio;
+        // q_joint_ref.block(0, 0, 7, 1) = state.q_joint.block(0, 0, 7, 1);
       } else {
         right_arm_minimum_time = 1.0;
       }
@@ -405,6 +403,7 @@ int main(int argc, char** argv) {
         //left hand position control mode
         q_joint_ref.block(7, 0, 7, 1) =
             q_joint_ref.block(7, 0, 7, 1) * (1 - lpf_update_ratio) + state.q_joint.block(7, 0, 7, 1) * lpf_update_ratio;
+        // q_joint_ref.block(7, 0, 7, 1) = state.q_joint.block(7, 0, 7, 1);
       } else {
         left_arm_minimum_time = 1.0;
       }
@@ -466,59 +465,61 @@ int main(int argc, char** argv) {
       q_right = state.q_joint(Eigen::seq(0, 6));
       q_left = state.q_joint(Eigen::seq(7, 13));
 
-      auto ret =
-          calc_diff(master_arm->get_dny_robot(), master_arm->get_dyn_state(), input.target_position, q_right, q_left);
+      if (control_cnt++ > 30) {
+        control_cnt = 999;
+        auto ret =
+            calc_diff(master_arm->get_dny_robot(), master_arm->get_dyn_state(), input.target_position, q_right, q_left);
 
-      Eigen::Vector<double, 3> rpy_right = ret.first;
-      Eigen::Vector<double, 3> rpy_left = ret.second;
+        Eigen::Vector<double, 3> rpy_right = ret.first;
+        Eigen::Vector<double, 3> rpy_left = ret.second;
 
-      Eigen::Vector<double,3> temp_rpy_right;
-      temp_rpy_right(0) = -rpy_right(1);
-      temp_rpy_right(1) = rpy_right(0);
-      temp_rpy_right(2) = rpy_right(2);
-      
+        Eigen::Vector<double, 3> temp_rpy_right;
+        temp_rpy_right(0) = -rpy_right(1);
+        temp_rpy_right(1) = rpy_right(0);
+        temp_rpy_right(2) = rpy_right(2);
 
-      double lpf_update_ratio = 0.2;
-      add_pos = add_pos * (1. - lpf_update_ratio) + temp_rpy_right * 0.005 * lpf_update_ratio;
-      add_ori = add_ori * (1. - lpf_update_ratio) + rpy_left * 0.01 * lpf_update_ratio;
+        double lpf_update_ratio2 = 0.2;
+        add_pos = add_pos * (1. - lpf_update_ratio2) + temp_rpy_right * 0.005 * lpf_update_ratio2;
+        add_ori = add_ori * (1. - lpf_update_ratio2) + rpy_left * 0.01 * lpf_update_ratio2;
 
-      Eigen::Vector<double, 3> temp_ori = math::SO3::Log(T_torso.block(0, 0, 3, 3)) + add_ori;
-      Eigen::Vector<double, 3> temp_pos = T_torso.block(0, 3, 3, 1) + add_pos;
+        Eigen::Vector<double, 3> temp_ori = math::SO3::Log(T_torso.block(0, 0, 3, 3)) + add_ori;
+        Eigen::Vector<double, 3> temp_pos = T_torso.block(0, 3, 3, 1) + add_pos;
 
-      for (int i = 0; i < 3; i++) {
-        temp_ori(i) = std::min(std::max(temp_ori(i), -1.), 1.);
-        if (i == 2) {
-          temp_pos(i) = std::min(std::max(temp_pos(i), 0.9), 1.3);
-        } else {
-          temp_pos(i) = std::min(std::max(temp_pos(i), -0.2), 0.2);
+        for (int i = 0; i < 3; i++) {
+          temp_ori(i) = std::min(std::max(temp_ori(i), -1.), 1.);
+          if (i == 2) {
+            temp_pos(i) = std::min(std::max(temp_pos(i), 0.9), 1.3);
+          } else {
+            temp_pos(i) = std::min(std::max(temp_pos(i), -0.2), 0.2);
+          }
         }
-      }
 
-      T_torso.block(0, 0, 3, 3) = math::SO3::Exp(temp_ori);
-      T_torso.block(0, 3, 3, 1) = temp_pos;
-      T_torso.block(0, 3, 3, 1) = temp_pos;
+        T_torso.block(0, 0, 3, 3) = math::SO3::Exp(temp_ori);
+        T_torso.block(0, 3, 3, 1) = temp_pos;
+        T_torso.block(0, 3, 3, 1) = temp_pos;
 
-      torso_minimum_time *= 0.99;
-      torso_minimum_time = std::max(torso_minimum_time, 0.01);
+        torso_minimum_time *= 0.99;
+        torso_minimum_time = std::max(torso_minimum_time, 0.01);
 
-      try {
-        RobotCommandBuilder command_builder;
-        double stop_orientation_tracking_error = 1e-5;
-        double stop_position_tracking_error = 1e-5;
-        double minimum_time = 0.01;
+        try {
+          RobotCommandBuilder command_builder;
+          double stop_orientation_tracking_error = 1e-5;
+          double stop_position_tracking_error = 1e-5;
+          double minimum_time = 0.01;
 
-        command_builder.SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
-            BodyCommandBuilder().SetCommand(BodyComponentBasedCommandBuilder().SetTorsoCommand(
-                CartesianCommandBuilder()
-                    .AddTarget("base", "link_torso_5", T_torso, 1, 3.141592, 3)
-                    .SetMinimumTime(torso_minimum_time)
-                    .SetStopOrientationTrackingError(stop_orientation_tracking_error)
-                    .SetStopPositionTrackingError(stop_position_tracking_error)
-                    .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(100))))));
+          command_builder.SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
+              BodyCommandBuilder().SetCommand(BodyComponentBasedCommandBuilder().SetTorsoCommand(
+                  CartesianCommandBuilder()
+                      .AddTarget("base", "link_torso_5", T_torso, 1, 3.141592, 3)
+                      .SetMinimumTime(torso_minimum_time)
+                      .SetStopOrientationTrackingError(stop_orientation_tracking_error)
+                      .SetStopPositionTrackingError(stop_position_tracking_error)
+                      .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(100))))));
 
-        stream->SendCommand(command_builder);
-      } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+          stream->SendCommand(command_builder);
+        } catch (const std::exception& e) {
+          std::cerr << "Error: " << e.what() << std::endl;
+        }
       }
 
     } else if (control_mode == ControlMode::WHEEL) {
@@ -536,31 +537,35 @@ int main(int argc, char** argv) {
       q_right = state.q_joint(Eigen::seq(0, 6));
       q_left = state.q_joint(Eigen::seq(7, 13));
 
-      auto ret =
-          calc_diff(master_arm->get_dny_robot(), master_arm->get_dyn_state(), input.target_position, q_right, q_left);
+      if (control_cnt++ > 30) {
+        control_cnt = 999;
 
-      double v_ref_wheel_right = -ret.first(1);
-      double v_ref_wheel_left = -ret.second(1);
+        auto ret =
+            calc_diff(master_arm->get_dny_robot(), master_arm->get_dyn_state(), input.target_position, q_right, q_left);
 
-      Eigen::Vector<double, 2> wheel_velocity, wheel_acceleration;
-      wheel_velocity << v_ref_wheel_right * 3., v_ref_wheel_left * 3.;
-      wheel_acceleration.setConstant(100.);
+        double v_ref_wheel_right = -ret.first(1);
+        double v_ref_wheel_left = -ret.second(1);
 
-      wheel_minimum_time *= 0.99;
-      wheel_minimum_time = std::max(wheel_minimum_time, 0.01);
-      try {
-        RobotCommandBuilder command_builder;
-        command_builder.SetCommand(
-            ComponentBasedCommandBuilder().SetMobilityCommand(MobilityCommandBuilder().SetCommand(
-                JointVelocityCommandBuilder()
-                    .SetVelocity(wheel_velocity)
-                    .SetAccelerationLimit(wheel_acceleration)
-                    .SetMinimumTime(wheel_minimum_time)
-                    .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(100)))));
+        Eigen::Vector<double, 2> wheel_velocity, wheel_acceleration;
+        wheel_velocity << v_ref_wheel_right * 3.14 * 2., v_ref_wheel_left * 3.14 * 2.;
+        wheel_acceleration.setConstant(100.);
 
-        stream->SendCommand(command_builder);
-      } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        wheel_minimum_time *= 0.99;
+        wheel_minimum_time = std::max(wheel_minimum_time, 0.01);
+        try {
+          RobotCommandBuilder command_builder;
+          command_builder.SetCommand(
+              ComponentBasedCommandBuilder().SetMobilityCommand(MobilityCommandBuilder().SetCommand(
+                  JointVelocityCommandBuilder()
+                      .SetVelocity(wheel_velocity)
+                      .SetAccelerationLimit(wheel_acceleration)
+                      .SetMinimumTime(wheel_minimum_time)
+                      .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(100)))));
+
+          stream->SendCommand(command_builder);
+        } catch (const std::exception& e) {
+          std::cerr << "Error: " << e.what() << std::endl;
+        }
       }
     }
 

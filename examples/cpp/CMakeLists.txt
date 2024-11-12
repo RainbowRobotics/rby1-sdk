@@ -29,7 +29,10 @@ set(EXAMPLES
         stop_command
 
         break_test
+        master_arm_utils
 )
+
+find_package(Qt5Widgets REQUIRED)
 
 foreach (SRC IN LISTS EXAMPLES)
     set(EXECUTABLE_NAME example_${SRC})
@@ -41,9 +44,13 @@ foreach (SRC IN LISTS EXAMPLES)
         
             DynamixelSDK
             OsqpEigen::OsqpEigen
+            Qt5::Widgets
     )
     target_compile_definitions(${EXECUTABLE_NAME} PUBLIC
             -DPATH="${CMAKE_CURRENT_SOURCE_DIR}"
+            -DMODELS_PATH="${CMAKE_SOURCE_DIR}/models/"
     )
+ 
     message(STATUS ${EXECUTABLE_NAME})
+    
 endforeach ()

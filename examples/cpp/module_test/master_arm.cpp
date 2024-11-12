@@ -21,6 +21,7 @@ void signalHandler(int signum){
   exit(signum);
 }
 
+
 int main(int argc, char** argv) {
 
   if (argc < 2) {

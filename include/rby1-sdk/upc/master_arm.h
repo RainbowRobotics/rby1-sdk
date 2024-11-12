@@ -55,6 +55,14 @@ class MasterArm {
   void StartControl(const std::function<ControlInput(const State& state)>& control = nullptr);
 
   void StopControl();
+  std::shared_ptr<dyn::Robot<kDOF>> get_dny_robot(void){
+    return dyn_robot_;
+  }
+
+  std::shared_ptr<dyn::State<kDOF>> get_dyn_state(void){
+    return dyn_state_;
+  }
+
 
  private:
   EventLoop ev_;

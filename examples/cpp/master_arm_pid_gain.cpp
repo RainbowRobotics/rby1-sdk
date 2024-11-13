@@ -2,23 +2,16 @@
 
 #include <iostream>
 
-#include "rby1-sdk/model.h"
-#include "rby1-sdk/robot.h"
 #include <csignal>
 #include <cstdlib>
+#include "rby1-sdk/model.h"
+#include "rby1-sdk/robot.h"
 
 using namespace rb;
 using namespace std::chrono_literals;
 
 std::shared_ptr<Robot<y1_model::A>> robot;
 auto master_arm = std::make_shared<upc::MasterArm>("/dev/rby1_master_arm");
-
-void signalHandler(int signum){
-  
-  master_arm->StopControl();
-  robot->PowerOff("12v");
-  exit(signum);
-}
 
 int main(int argc, char** argv) {
 
@@ -28,7 +21,6 @@ int main(int argc, char** argv) {
   }
 
   std::string address{argv[1]};
-  signal(SIGINT, signalHandler);
   robot = Robot<y1_model::A>::Create(address);
 
   std::cout << "Attempting to connect to the robot..." << std::endl;
@@ -64,18 +56,29 @@ int main(int argc, char** argv) {
   }
 
   auto gain_list = master_arm->GetMasterRightArmPositionPIDGains();
-  for(auto i=0; gain_list.size(); i++){
-    std::cout<<"RIGHT [" << i << "]: " << gain_list[i].p_gain << ", " << gain_list[i].i_gain << ", " << gain_list[i].d_gain << std::endl;
+
+  for (auto i = 0; i < gain_list.size(); i++) {
+    std::cout << "RIGHT [" << i << "]: " << gain_list[i].p_gain << ", " << gain_list[i].i_gain << ", "
+              << gain_list[i].d_gain << std::endl;
   }
 
   gain_list = master_arm->GetMasterLeftArmPositionPIDGains();
-  for(auto i=0; gain_list.size(); i++){
-    std::cout<<"LEFT [" << i << "]: " << gain_list[i].p_gain << ", " << gain_list[i].i_gain << ", " << gain_list[i].d_gain << std::endl;
+  for (auto i = 0; i < gain_list.size(); i++) {
+    std::cout << "LEFT [" << i << "]: " << gain_list[i].p_gain << ", " << gain_list[i].i_gain << ", "
+              << gain_list[i].d_gain << std::endl;
   }
 
-  // master_arm->SetPositionPGain(0, 3500);
+  int target_id = 0;
+  master_arm->SetPositionPIDGain(target_id, 1000, 0, 7000);
+  auto gain = master_arm->GetPositionPIDGain(target_id);
+  std::cout << "master_arm_" << target_id << ": " << gain.p_gain << ", " << gain.i_gain << ", " << gain.d_gain
+            << std::endl;
 
-  robot->PowerOff("12v");
+  target_id = 7;
+  master_arm->SetPositionPIDGain(target_id, DynamixelBus::PIDGain{700, 0, 700});
+  gain = master_arm->GetPositionPIDGain(target_id);
+  std::cout << "master_arm_" << target_id << ": " << gain.p_gain << ", " << gain.i_gain << ", " << gain.d_gain
+            << std::endl;
 
   return 0;
 }

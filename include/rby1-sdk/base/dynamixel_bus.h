@@ -121,6 +121,7 @@ class DynamixelBus {
 
   void SendVibration(int id, int level);
 
+  void BulkWriteSendPIDGain(const std::vector<std::pair<int, DynamixelBus::PIDGain>>& id_and_pid_gain_vector);
  private:
   std::unique_ptr<DynamixelBusImpl> impl_;
 };

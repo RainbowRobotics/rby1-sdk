@@ -241,6 +241,18 @@ int main(int argc, char** argv) {
   if (active_ids.size() != upc::MasterArm::kDOF + 2) {
     return 1;
   }
+  auto gain_list = master_arm->GetMasterRightArmPositionPIDGains();
+
+  for (auto i = 0; i < gain_list.size(); i++) {
+    std::cout << "RIGHT [" << i << "]: " << gain_list[i].p_gain << ", " << gain_list[i].i_gain << ", "
+              << gain_list[i].d_gain << std::endl;
+  }
+
+  gain_list = master_arm->GetMasterLeftArmPositionPIDGains();
+  for (auto i = 0; i < gain_list.size(); i++) {
+    std::cout << "LEFT [" << i << "]: " << gain_list[i].p_gain << ", " << gain_list[i].i_gain << ", "
+              << gain_list[i].d_gain << std::endl;
+  }
 
   bool init = false;
   Eigen::Vector<double, upc::MasterArm::kDOF / 2> q_right, q_left;
@@ -450,9 +462,9 @@ int main(int argc, char** argv) {
                                         .SetVelocityLimit(vel_limit)
                                         .SetAccelerationLimit(acc_limit))));
 
-        std::cout<<"arm11111111111111111111111"<<std::endl;
+        // std::cout<<"arm11111111111111111111111"<<std::endl;
         stream->SendCommand(command_builder);
-        std::cout<<"arm22222222222222222222222"<<std::endl;
+        // std::cout<<"arm22222222222222222222222"<<std::endl;
       } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
       }
@@ -572,9 +584,9 @@ int main(int argc, char** argv) {
                       .SetMinimumTime(wheel_minimum_time)
                       .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(100)))));
 
-          std::cout<<"wheel11111111111111111111111"<<std::endl;
+          // std::cout<<"wheel11111111111111111111111"<<std::endl;
           stream->SendCommand(command_builder);
-          std::cout<<"wheel22222222222222222222222"<<std::endl;
+          // std::cout<<"wheel22222222222222222222222"<<std::endl;
 
         } catch (const std::exception& e) {
           std::cerr << "Error: " << e.what() << std::endl;

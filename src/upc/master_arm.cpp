@@ -163,11 +163,15 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
 
           std::vector<std::pair<int, double>> id_position;
           std::vector<std::pair<int, double>> id_torque;
+          std::vector<std::pair<int, DynamixelBus::PIDGain>> changed_mode_pid;
 
           for (int i = 0; i < kDOF; i++) {
             if (state_.operation_mode(i) != input.target_operation_mode(i)) {
               changed_id.push_back(i);
               changed_id_mode.emplace_back(i, input.target_operation_mode(i));
+              if(((i >= 0 && i <=2 ) || (i >=7 && i <= 9)) && (input.target_operation_mode(i) == DynamixelBus::kCurrentBasedPositionControlMode)){
+                changed_mode_pid.emplace_back(i, DynamixelBus::PIDGain{8000, 0, 15000});
+              }
             } else {
               if (state_.operation_mode(i) == DynamixelBus::kCurrentControlMode) {
                 id_torque.emplace_back(i, input.target_torque(i));
@@ -181,6 +185,8 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
           handler_->BulkWriteTorqueEnable(changed_id, 0);
           handler_->BulkWriteOperationMode(changed_id_mode);
           handler_->BulkWriteTorqueEnable(changed_id, 1);
+
+          handler_->BulkWriteSendPIDGain(changed_mode_pid);
 
           handler_->BulkWriteSendTorque(id_torque);
           handler_->BulkWriteSendPosition(id_position);
@@ -199,67 +205,69 @@ void MasterArm::StopControl() {
   dyn_state_ = nullptr;
   dyn_robot_ = nullptr;
 
-  for (int i=0; i< 10; i++){
-      for (int id : active_ids_) {
+  for (int i = 0; i < 10; i++) {
+    for (int id : active_ids_) {
       if (id < 0x80) {
         handler_->SendTorqueEnable(id, DynamixelBus::kTorqueDisable);
       }
     }
   }
-  
 
   is_running_ = false;
   control_ = nullptr;
 }
 
-void MasterArm::SetPositionPGain(int id, uint16_t p_gain) const{
+void MasterArm::SetPositionPGain(int id, uint16_t p_gain) const {
   handler_->SetPositionPGain(id, p_gain);
 }
-void MasterArm::SetPositionIGain(int id, uint16_t i_gain) const{
+
+void MasterArm::SetPositionIGain(int id, uint16_t i_gain) const {
   handler_->SetPositionIGain(id, i_gain);
 }
-void MasterArm::SetPositionDGain(int id, uint16_t d_gain) const{
+
+void MasterArm::SetPositionDGain(int id, uint16_t d_gain) const {
   handler_->SetPositionDGain(id, d_gain);
 }
-void MasterArm::SetPositionPIDGain(int id, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const{
+
+void MasterArm::SetPositionPIDGain(int id, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const {
   handler_->SetPositionPIDGain(id, p_gain, i_gain, d_gain);
 }
-void MasterArm::SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain) const{
+
+void MasterArm::SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain) const {
   handler_->SetPositionPIDGain(id, pid_gain.p_gain, pid_gain.i_gain, pid_gain.d_gain);
 }
 
-
-  std::vector<DynamixelBus::PIDGain> MasterArm::GetMasterRightArmPositionPIDGains() const{
-    std::vector<DynamixelBus::PIDGain> results;
-    for(auto id = 0;id<7; id++){
-      auto gain = handler_->GetPositionPIDGain(id);
-      if(!gain.has_value()){
-        throw std::runtime_error("Dynamixel device " + std::to_string(id) + " is busy; cannot retrieve PID gain.");
-      }
-      results.push_back(gain.value());
+std::vector<DynamixelBus::PIDGain> MasterArm::GetMasterRightArmPositionPIDGains() const {
+  std::vector<DynamixelBus::PIDGain> results;
+  for (auto id = 0; id < 7; id++) {
+    auto gain = handler_->GetPositionPIDGain(id);
+    if (!gain.has_value()) {
+      throw std::runtime_error("Dynamixel device " + std::to_string(id) + " is busy; cannot retrieve PID gain.");
     }
-    return results;
+    results.push_back(gain.value());
   }
-  std::vector<DynamixelBus::PIDGain> MasterArm::GetMasterLeftArmPositionPIDGains() const{
-    std::vector<DynamixelBus::PIDGain> results;
-    for(auto id = 7;id<14; id++){
-      auto gain = handler_->GetPositionPIDGain(id);
-      if(!gain.has_value()){
-        throw std::runtime_error("Dynamixel device " + std::to_string(id) + " is busy; cannot retrieve PID gain.");
-      }
-      results.push_back(gain.value());
+  return results;
+}
+
+std::vector<DynamixelBus::PIDGain> MasterArm::GetMasterLeftArmPositionPIDGains() const {
+  std::vector<DynamixelBus::PIDGain> results;
+  for (auto id = 7; id < 14; id++) {
+    auto gain = handler_->GetPositionPIDGain(id);
+    if (!gain.has_value()) {
+      throw std::runtime_error("Dynamixel device " + std::to_string(id) + " is busy; cannot retrieve PID gain.");
     }
-    return results;
-
+    results.push_back(gain.value());
   }
-  DynamixelBus::PIDGain MasterArm::GetPositionPIDGain(int id) const{
+  return results;
+}
 
-auto gain = handler_->GetPositionPIDGain(id);
-      if(!gain.has_value()){
-        throw std::runtime_error("Dynamixel device " + std::to_string(id) + " is busy; cannot retrieve PID gain.");
-      }
-      return gain.value();
+DynamixelBus::PIDGain MasterArm::GetPositionPIDGain(int id) const {
 
+  auto gain = handler_->GetPositionPIDGain(id);
+  if (!gain.has_value()) {
+    throw std::runtime_error("Dynamixel device " + std::to_string(id) + " is busy; cannot retrieve PID gain.");
   }
+  return gain.value();
+}
 
 }  // namespace rb::upc

@@ -331,6 +331,40 @@ class DynamixelBusImpl {
     return ms;
   }
 
+    void BulkWriteSendPIDGain(const std::vector<std::pair<int, DynamixelBus::PIDGain>>& id_and_pid_gain_vector) {
+    if (id_and_pid_gain_vector.empty())
+      return;
+
+    dynamixel::GroupBulkWrite groupBulkWrite(port_handler_, packet_handler_);
+
+
+    for (auto const& id_and_pid_gain : id_and_pid_gain_vector) {
+      auto id = id_and_pid_gain.first;
+      if (id < 0x80) {
+        
+        uint8_t param_p_gain[2];
+        uint8_t param_i_gain[2];
+        uint8_t param_d_gain[2];
+
+        param_p_gain[0] = DXL_LOBYTE(id_and_pid_gain.second.p_gain);
+        param_p_gain[1] = DXL_HIBYTE(id_and_pid_gain.second.p_gain);
+
+        param_i_gain[0] = DXL_LOBYTE(id_and_pid_gain.second.i_gain);
+        param_i_gain[1] = DXL_HIBYTE(id_and_pid_gain.second.i_gain);
+
+        param_d_gain[0] = DXL_LOBYTE(id_and_pid_gain.second.d_gain);
+        param_d_gain[1] = DXL_HIBYTE(id_and_pid_gain.second.d_gain);
+
+        auto dxl_add_result = groupBulkWrite.addParam(id, DynamixelBus::kAddrPositionPGain, 2,param_p_gain);
+        dxl_add_result = groupBulkWrite.addParam(id, DynamixelBus::kAddrPositionIGain, 2,param_i_gain);
+        dxl_add_result = groupBulkWrite.addParam(id, DynamixelBus::kAddrPositionDGain, 2,param_d_gain);
+      }
+    }
+
+    groupBulkWrite.txPacket();
+    std::this_thread::sleep_for(100us);
+  }
+
   void BulkWriteTorqueEnable(const std::vector<std::pair<int, int>>& id_and_enable_vector) {
     if (id_and_enable_vector.empty())
       return;
@@ -568,6 +602,10 @@ std::optional<std::vector<std::pair<int, int>>> DynamixelBus::BulkReadTorqueEnab
 std::optional<std::vector<std::pair<int, DynamixelBus::MotorState>>> DynamixelBus::BulkReadMotorState(
     const std::vector<int>& ids) {
   return impl_->BulkReadMotorState(ids);
+}
+void DynamixelBus::BulkWriteSendPIDGain(
+  const std::vector<std::pair<int, DynamixelBus::PIDGain>>& id_and_pid_gain_vector) {
+  impl_->BulkWriteSendPIDGain(id_and_pid_gain_vector);
 }
 
 void DynamixelBus::BulkWriteTorqueEnable(const std::vector<std::pair<int, int>>& id_and_enable_vector) {

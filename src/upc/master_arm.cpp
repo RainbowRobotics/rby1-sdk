@@ -199,11 +199,14 @@ void MasterArm::StopControl() {
   dyn_state_ = nullptr;
   dyn_robot_ = nullptr;
 
-  for (int id : active_ids_) {
-    if (id < 0x80) {
-      handler_->SendTorqueEnable(id, DynamixelBus::kTorqueDisable);
+  for (int i=0; i< 10; i++){
+      for (int id : active_ids_) {
+      if (id < 0x80) {
+        handler_->SendTorqueEnable(id, DynamixelBus::kTorqueDisable);
+      }
     }
   }
+  
 
   is_running_ = false;
   control_ = nullptr;

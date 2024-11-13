@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
   q_joint_ref_20x1.setZero();
   q_joint_ref_20x1.block(0, 0, 6, 1) << 0, 30, -60, 30, 0, 0;
   q_joint_ref_20x1 *= 3.141592 / 180.;
-
+  
   robot
       ->SendCommand(RobotCommandBuilder().SetCommand(
           ComponentBasedCommandBuilder().SetBodyCommand(BodyComponentBasedCommandBuilder().SetTorsoCommand(
@@ -290,6 +290,7 @@ int main(int argc, char** argv) {
                   .SetMinimumTime(5)
                   .SetPosition(q_joint_ref_20x1.topRows(6))))))
       ->Get();
+  
 
   double update_ratio = 0.;
   ControlMode control_mode_old = control_mode;
@@ -312,8 +313,8 @@ int main(int argc, char** argv) {
     if (!init) {
       q_right = state.q_joint(Eigen::seq(0, 6));
       q_left = state.q_joint(Eigen::seq(7, 13));
-      q_joint_ref.topRows(3) = q_right;
-      q_joint_ref.bottomRows(3) = q_left;
+      q_joint_ref.topRows(7) = q_right;
+      q_joint_ref.bottomRows(7) = q_left;
       init = true;
     }
 
@@ -372,6 +373,10 @@ int main(int argc, char** argv) {
         input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
         input.target_position(Eigen::seq(7, 13)) = q_left * (1. - update_ratio) + q_default_left * update_ratio;
       }
+
+            if (control_cnt++ > 30) {
+        control_cnt = 999;
+
 
       q_joint_ref_20x1.block(6, 0, 14, 1) =
           q_joint_ref_20x1.block(6, 0, 14, 1) * (1 - lpf_update_ratio) + state.q_joint * lpf_update_ratio;
@@ -445,10 +450,13 @@ int main(int argc, char** argv) {
                                         .SetVelocityLimit(vel_limit)
                                         .SetAccelerationLimit(acc_limit))));
 
+        std::cout<<"arm11111111111111111111111"<<std::endl;
         stream->SendCommand(command_builder);
+        std::cout<<"arm22222222222222222222222"<<std::endl;
       } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
       }
+            }
 
     } else if (control_mode == ControlMode::TORSO) {
       // torso control mode
@@ -516,7 +524,9 @@ int main(int argc, char** argv) {
                       .SetStopPositionTrackingError(stop_position_tracking_error)
                       .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(100))))));
 
+          std::cout<<"torso11111111111111111111111"<<std::endl;
           stream->SendCommand(command_builder);
+          std::cout<<"torso22222222222222222222222"<<std::endl;
         } catch (const std::exception& e) {
           std::cerr << "Error: " << e.what() << std::endl;
         }
@@ -543,12 +553,12 @@ int main(int argc, char** argv) {
         auto ret =
             calc_diff(master_arm->get_dny_robot(), master_arm->get_dyn_state(), input.target_position, q_right, q_left);
 
-        double v_ref_wheel_right = -ret.first(1);
-        double v_ref_wheel_left = -ret.second(1);
+        double v_ref_wheel_right = ret.first(1);
+        double v_ref_wheel_left = ret.second(1);
 
         Eigen::Vector<double, 2> wheel_velocity, wheel_acceleration;
         wheel_velocity << v_ref_wheel_right * 3.14 * 2., v_ref_wheel_left * 3.14 * 2.;
-        wheel_acceleration.setConstant(100.);
+        wheel_acceleration.setConstant(100./10.);
 
         wheel_minimum_time *= 0.99;
         wheel_minimum_time = std::max(wheel_minimum_time, 0.01);
@@ -562,7 +572,10 @@ int main(int argc, char** argv) {
                       .SetMinimumTime(wheel_minimum_time)
                       .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(100)))));
 
+          std::cout<<"wheel11111111111111111111111"<<std::endl;
           stream->SendCommand(command_builder);
+          std::cout<<"wheel22222222222222222222222"<<std::endl;
+
         } catch (const std::exception& e) {
           std::cerr << "Error: " << e.what() << std::endl;
         }

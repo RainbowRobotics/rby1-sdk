@@ -32,6 +32,8 @@ set(EXAMPLES
         get_pid_gain
         set_pid_gain
         fatory_default_pid_gain
+
+        master_arm_pid_gain_example
 )
 
 foreach (SRC IN LISTS EXAMPLES)

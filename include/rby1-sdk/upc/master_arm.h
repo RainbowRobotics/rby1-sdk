@@ -56,6 +56,16 @@ class MasterArm {
 
   void StopControl();
 
+  void SetPositionPGain(int id, uint16_t p_gain) const;
+  void SetPositionIGain(int id, uint16_t i_gain) const;
+  void SetPositionDGain(int id, uint16_t d_gain) const;
+  void SetPositionPIDGain(int id, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const;
+  void SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain) const;
+
+  std::vector<DynamixelBus::PIDGain> GetMasterRightArmPositionPIDGains() const;
+  std::vector<DynamixelBus::PIDGain> GetMasterLeftArmPositionPIDGains() const;
+  DynamixelBus::PIDGain GetPositionPIDGain(int id) const;
+
  private:
   EventLoop ev_;
   double control_period_;  // (sec)

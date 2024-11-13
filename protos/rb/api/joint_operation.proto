@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+import "rb/api/header.proto";
+
+
+
+message ServoOnRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+
+message ServoOnResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+message BrakeEngageRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+
+message BrakeEngageResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+
+message BrakeReleaseRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+
+message BrakeReleaseResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+
+message HomeOffsetResetRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+
+message HomeOffsetResetResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+message SetPositionPIDGainRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+
+  google.protobuf.UInt32Value p_gain = 3;
+  google.protobuf.UInt32Value i_gain = 4;
+  google.protobuf.UInt32Value d_gain = 5;
+}
+
+
+message SetPositionPIDGainResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
+  // Human-readable message for status
+  string message = 3;
+}
+
+message PositionPIDGain {
+  google.protobuf.Timestamp timestamp = 1;
+  uint32 p_gain = 2;
+  uint32 i_gain = 3;
+  uint32 d_gain = 4;
+}
+
+message GetPositionPIDGainRequest {
+  RequestHeader request_header = 1;
+  enum TargetComponent {
+    UNKNOWN = 0;
+    TORSO = 1;
+    RIGHT_ARM = 2;
+    LEFT_ARM = 3;
+    HEAD = 4;
+  }
+  oneof command {  
+    string dev_name = 2;  
+    TargetComponent target_component = 3;  
+  }  
+}
+
+message GetPositionPIDGainResponse {
+  ResponseHeader response_header = 1;
+  repeated PositionPIDGain position_gain = 2;
+}

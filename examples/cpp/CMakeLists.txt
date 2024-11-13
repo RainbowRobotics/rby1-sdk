@@ -30,6 +30,12 @@ set(EXAMPLES
 
         break_test
         master_arm_utils
+        get_pid_gain
+        set_pid_gain
+        fatory_default_pid_gain
+
+        master_arm_pid_gain
+        master_arm_set_default_position_pid_gains
 )
 
 find_package(Qt5Widgets REQUIRED)

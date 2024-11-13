@@ -11,6 +11,7 @@
 #include "rb/api/robot_state.pb.h"
 
 #include "rb/api/control_manager_service.grpc.pb.h"
+#include "rb/api/joint_operation_service.grpc.pb.h"
 #include "rb/api/log_service.grpc.pb.h"
 #include "rb/api/parameter_service.grpc.pb.h"
 #include "rb/api/ping_service.grpc.pb.h"
@@ -340,6 +341,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     channel_ = grpc::CreateCustomChannel(address_, grpc::InsecureChannelCredentials(), args);
     ping_service_ = api::PingService::NewStub(channel_);
     power_service_ = api::PowerService::NewStub(channel_);
+    joint_operation_service_ = api::JointOperationService::NewStub(channel_);
     control_manager_service_ = api::ControlManagerService::NewStub(channel_);
     robot_info_service_ = api::RobotInfoService::NewStub(channel_);
     robot_command_service_ = api::RobotCommandService::NewStub(channel_);
@@ -516,6 +518,137 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     }
     return true;
   }
+
+  bool SetPositionGain(const std::string& dev_name, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain,
+                       std::optional<uint16_t> d_gain) const {
+    api::SetPositionPIDGainRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(dev_name);
+    
+    if (p_gain.has_value()) {
+      req.mutable_p_gain()->set_value(static_cast<uint32_t>(p_gain.value()));
+    }
+    if (i_gain.has_value()) {
+      req.mutable_i_gain()->set_value(static_cast<uint32_t>(i_gain.value()));
+    }
+    if (d_gain.has_value()) {
+      req.mutable_d_gain()->set_value(static_cast<uint32_t>(d_gain.value()));
+    }
+
+    api::SetPositionPIDGainResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = joint_operation_service_->SetPositionPIDGain (&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    return res.status() == api::SetPositionPIDGainResponse::STATUS_SUCCESS;
+  }
+
+
+  std::vector<rb::PIDGain> GetTorsoPositionPIDGains() const{
+    api::GetPositionPIDGainRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    req.set_target_component(api::GetPositionPIDGainRequest::TORSO);
+    api::GetPositionPIDGainResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+    auto res_gains = res.position_gain();
+    std::vector<rb::PIDGain> result;
+
+    for (auto gain : res_gains) {
+      result.push_back(rb::PIDGain{static_cast<uint16_t>(gain.p_gain()), static_cast<uint16_t>(gain.i_gain()),
+                                   static_cast<uint16_t>(gain.d_gain())});
+    }
+
+    return result;
+  }
+  
+  std::vector<rb::PIDGain> GetRightArmPositionPIDGains() const{
+    api::GetPositionPIDGainRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    req.set_target_component(api::GetPositionPIDGainRequest::RIGHT_ARM);
+    api::GetPositionPIDGainResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+    auto res_gains = res.position_gain();
+    std::vector<rb::PIDGain> result;
+
+    for (auto gain : res_gains) {
+      result.push_back(rb::PIDGain{static_cast<uint16_t>(gain.p_gain()), static_cast<uint16_t>(gain.i_gain()),
+                                   static_cast<uint16_t>(gain.d_gain())});
+    }
+
+    return result;
+  }
+  
+  std::vector<rb::PIDGain> GetLeftArmPositionPIDGains() const{
+    api::GetPositionPIDGainRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    req.set_target_component(api::GetPositionPIDGainRequest::LEFT_ARM);
+    api::GetPositionPIDGainResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+    auto res_gains = res.position_gain();
+    std::vector<rb::PIDGain> result;
+
+    for (auto gain : res_gains) {
+      result.push_back(rb::PIDGain{static_cast<uint16_t>(gain.p_gain()), static_cast<uint16_t>(gain.i_gain()),
+                                   static_cast<uint16_t>(gain.d_gain())});
+    }
+    return result;
+  }
+
+  std::vector<rb::PIDGain> GetHeadPositionPIDGains() const{
+    api::GetPositionPIDGainRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    
+    req.set_target_component(api::GetPositionPIDGainRequest::HEAD);
+    api::GetPositionPIDGainResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
+    
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+    auto res_gains = res.position_gain();
+    std::vector<rb::PIDGain> result;
+
+    for (auto gain : res_gains) {
+      result.push_back(rb::PIDGain{static_cast<uint16_t>(gain.p_gain()), static_cast<uint16_t>(gain.i_gain()),
+                                   static_cast<uint16_t>(gain.d_gain())});
+    }
+    return result;
+  }
+
+  rb::PIDGain GetPositionPIDGain(const std::string& dev_name) const{
+    api::GetPositionPIDGainRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    req.set_dev_name(dev_name);
+    api::GetPositionPIDGainResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+    auto res_gains = res.position_gain();
+    auto result = rb::PIDGain{static_cast<uint16_t>(res_gains[0].p_gain()), static_cast<uint16_t>(res_gains[0].i_gain()),
+                                   static_cast<uint16_t>(res_gains[0].d_gain())};
+    return result;    
+  }  
 
   bool BreakEngage(const std::string& dev_name) const {
     api::JointCommandRequest req;
@@ -1475,6 +1608,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   std::shared_ptr<grpc::Channel> channel_;
   std::unique_ptr<api::PingService::Stub> ping_service_;
   std::unique_ptr<api::PowerService::Stub> power_service_;
+  std::unique_ptr<api::JointOperationService::Stub> joint_operation_service_;
   std::unique_ptr<api::ControlManagerService::Stub> control_manager_service_;
   std::unique_ptr<api::RobotInfoService::Stub> robot_info_service_;
   std::unique_ptr<api::RobotCommandService::Stub> robot_command_service_;
@@ -1564,6 +1698,55 @@ bool Robot<T>::ServoOn(const std::string& dev_name) const {
 template <typename T>
 bool Robot<T>::IsServoOn(const std::string& dev_name) const {
   return impl_->IsServoOn(dev_name);
+}
+
+template <typename T>
+bool Robot<T>::SetPositionPGain(const std::string& dev_name, uint16_t p_gain) const{
+  return impl_->SetPositionGain(dev_name, p_gain, std::nullopt, std::nullopt);
+}
+
+template <typename T>
+bool Robot<T>::SetPositionIGain(const std::string& dev_name, uint16_t i_gain) const{
+  return impl_->SetPositionGain(dev_name, std::nullopt, i_gain, std::nullopt);
+}  
+
+template <typename T>
+bool Robot<T>::SetPositionDGain(const std::string& dev_name, uint16_t d_gain) const{
+  return impl_->SetPositionGain(dev_name, std::nullopt, std::nullopt, d_gain);
+}
+
+template <typename T>
+bool Robot<T>::SetPositionPIDGain(const std::string& dev_name, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const{
+  return impl_->SetPositionGain(dev_name, p_gain, i_gain, d_gain);
+}
+
+template <typename T>
+bool Robot<T>::SetPositionPIDGain(const std::string& dev_name, const rb::PIDGain& pid_gain) const{
+  return impl_->SetPositionGain(dev_name, pid_gain.p_gain, pid_gain.i_gain, pid_gain.d_gain);
+}
+template <typename T>
+std::vector<rb::PIDGain> Robot<T>::GetTorsoPositionPIDGains() const{
+  return impl_->GetTorsoPositionPIDGains();
+}
+
+template <typename T>
+std::vector<rb::PIDGain> Robot<T>::GetRightArmPositionPIDGains() const{
+  return impl_->GetRightArmPositionPIDGains();
+}
+
+template <typename T>
+std::vector<rb::PIDGain> Robot<T>::GetLeftArmPositionPIDGains() const{
+  return impl_->GetLeftArmPositionPIDGains();
+}
+
+template <typename T>
+std::vector<rb::PIDGain> Robot<T>::GetHeadPositionPIDGains() const{
+  return impl_->GetHeadPositionPIDGains();
+}
+
+template <typename T>
+rb::PIDGain Robot<T>::GetPositionPIDGain(const std::string& dev_name) const{
+  return impl_->GetPositionPIDGain(dev_name);
 }
 
 template <typename T>

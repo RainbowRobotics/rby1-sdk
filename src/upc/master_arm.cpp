@@ -164,13 +164,16 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
           std::vector<std::pair<int, double>> id_position;
           std::vector<std::pair<int, double>> id_torque;
           std::vector<std::pair<int, DynamixelBus::PIDGain>> changed_mode_pid;
+          const std::array<uint16_t, 14> p_gains = {7500, 7500, 500, 5000, 500, 500, 500, 7500, 7500, 500, 5000, 500, 500, 500};
+          const std::array<uint16_t, 14> d_gains = {15000, 15000, 2000, 10000, 10000, 10000, 1000, 15000, 15000, 2000, 10000, 1000, 1000, 1000};
+
 
           for (int i = 0; i < kDOF; i++) {
             if (state_.operation_mode(i) != input.target_operation_mode(i)) {
               changed_id.push_back(i);
               changed_id_mode.emplace_back(i, input.target_operation_mode(i));
-              if(((i >= 0 && i <=2 ) || (i >=7 && i <= 9)) && (input.target_operation_mode(i) == DynamixelBus::kCurrentBasedPositionControlMode)){
-                changed_mode_pid.emplace_back(i, DynamixelBus::PIDGain{8000, 0, 15000});
+              if(input.target_operation_mode(i) == DynamixelBus::kCurrentBasedPositionControlMode){
+                changed_mode_pid.emplace_back(i, DynamixelBus::PIDGain{p_gains[i], 0, d_gains[i]});
               }
             } else {
               if (state_.operation_mode(i) == DynamixelBus::kCurrentControlMode) {
@@ -205,13 +208,13 @@ void MasterArm::StopControl() {
   dyn_state_ = nullptr;
   dyn_robot_ = nullptr;
 
-  for (int i = 0; i < 10; i++) {
-    for (int id : active_ids_) {
-      if (id < 0x80) {
-        handler_->SendTorqueEnable(id, DynamixelBus::kTorqueDisable);
-      }
-    }
-  }
+//   for (int i = 0; i < 10; i++) {
+//     for (int id : active_ids_) {
+//       if (id < 0x80) {
+//         handler_->SendTorqueEnable(id, DynamixelBus::kTorqueDisable);
+//       }
+//     }
+//   }
 
   is_running_ = false;
   control_ = nullptr;

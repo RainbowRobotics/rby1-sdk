@@ -217,10 +217,9 @@ int main(int argc, char** argv) {
   }
   std::cout << "Control Manager enabled successfully." << std::endl;
 
-  robot->SetParameter("joint_position_command.cutoff_frequency", "5");
+  robot->SetParameter("joint_position_command.cutoff_frequency", "10.0");
   std::cout << robot->GetParameter("joint_position_command.cutoff_frequency") << std::endl;
 
-  robot->SetParameter("default.acceleration_limit_scaling", "0.8");
 
   std::this_thread::sleep_for(1s);
 
@@ -334,16 +333,22 @@ int main(int argc, char** argv) {
       update_ratio = 1.0;
 
       if (stream != nullptr) {
+        std::cout<<"RESETRESETRESETRESETRESETRESETRESET111"<<std::endl;
         stream.reset();
+        std::cout<<"RESETRESETRESETRESETRESETRESETRESET222"<<std::endl;
       }
 
+      std::cout<<"GetState111"<<std::endl;
       auto state = robot->GetState();
-      q_joint_ref_20x1 = state.position.block(2, 0, 20, 1);
+      std::cout<<"GetState222"<<std::endl;
+      q_joint_ref_20x1 = state.position.block(2, 0, 20, 1).matrix();
       Eigen::Vector<double, 24> dyn_q;
       dyn_q.setZero();
       dyn_q.block(2, 0, 20, 1) = q_joint_ref_20x1;
       dyn_state->SetQ(dyn_q);
+      std::cout<<"ComputeForwardKinematics111"<<std::endl;
       dyn->ComputeForwardKinematics(dyn_state);
+      std::cout<<"ComputeForwardKinematics222"<<std::endl;
 
       T_torso = dyn->ComputeTransformation(dyn_state, 0, 1);
       T_right = dyn->ComputeTransformation(dyn_state, 0, 2);
@@ -363,9 +368,11 @@ int main(int argc, char** argv) {
 
     if (control_mode == ControlMode::DUAL_ARM) {
       // dual arm control mode
-
+      std::cout<<"DUAL_ARM START"<<std::endl;
       if (stream == nullptr || stream->IsDone()) {
+        std::cout<<"ArmStream11111111111111"<<std::endl;
         stream = robot->CreateCommandStream();
+        std::cout<<"ArmStream22222222222222"<<std::endl;
       }
 
       if (state.button_right.button == 1) {
@@ -462,9 +469,9 @@ int main(int argc, char** argv) {
                                         .SetVelocityLimit(vel_limit)
                                         .SetAccelerationLimit(acc_limit))));
 
-        // std::cout<<"arm11111111111111111111111"<<std::endl;
+        std::cout<<"arm11111111111111111111111"<<std::endl;
         stream->SendCommand(command_builder);
-        // std::cout<<"arm22222222222222222222222"<<std::endl;
+        std::cout<<"arm22222222222222222222222"<<std::endl;
       } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
       }
@@ -472,8 +479,11 @@ int main(int argc, char** argv) {
 
     } else if (control_mode == ControlMode::TORSO) {
       // torso control mode
+      std::cout<<"TORSO START"<<std::endl;
       if (stream == nullptr || stream->IsDone()) {
+        std::cout<<"TorsoStream11111111111111"<<std::endl;
         stream = robot->CreateCommandStream();
+        std::cout<<"TorsoStream2222222222222222"<<std::endl;
       }
 
       input.target_operation_mode(Eigen::seq(0, 6)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);

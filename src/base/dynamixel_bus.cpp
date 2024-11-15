@@ -340,24 +340,28 @@ class DynamixelBusImpl {
 
     for (auto const& id_and_pid_gain : id_and_pid_gain_vector) {
       auto id = id_and_pid_gain.first;
+      
       if (id < 0x80) {
         
-        uint8_t param_p_gain[2];
-        uint8_t param_i_gain[2];
-        uint8_t param_d_gain[2];
+        uint8_t param_gain[6];
+        int index=0;
+        // uint8_t param_p_gain[2];
+        // uint8_t param_i_gain[2];
+        // uint8_t param_d_gain[2];
 
-        param_p_gain[0] = DXL_LOBYTE(id_and_pid_gain.second.p_gain);
-        param_p_gain[1] = DXL_HIBYTE(id_and_pid_gain.second.p_gain);
+        param_gain[index++] = DXL_LOBYTE(id_and_pid_gain.second.d_gain);
+        param_gain[index++] = DXL_HIBYTE(id_and_pid_gain.second.d_gain);
 
-        param_i_gain[0] = DXL_LOBYTE(id_and_pid_gain.second.i_gain);
-        param_i_gain[1] = DXL_HIBYTE(id_and_pid_gain.second.i_gain);
+        param_gain[index++] = DXL_LOBYTE(id_and_pid_gain.second.i_gain);
+        param_gain[index++] = DXL_HIBYTE(id_and_pid_gain.second.i_gain);
 
-        param_d_gain[0] = DXL_LOBYTE(id_and_pid_gain.second.d_gain);
-        param_d_gain[1] = DXL_HIBYTE(id_and_pid_gain.second.d_gain);
+        param_gain[index++] = DXL_LOBYTE(id_and_pid_gain.second.p_gain);
+        param_gain[index++] = DXL_HIBYTE(id_and_pid_gain.second.p_gain);
 
-        auto dxl_add_result = groupBulkWrite.addParam(id, DynamixelBus::kAddrPositionPGain, 2,param_p_gain);
-        dxl_add_result = groupBulkWrite.addParam(id, DynamixelBus::kAddrPositionIGain, 2,param_i_gain);
-        dxl_add_result = groupBulkWrite.addParam(id, DynamixelBus::kAddrPositionDGain, 2,param_d_gain);
+        auto dxl_add_result = groupBulkWrite.addParam(id, DynamixelBus::kAddrPositionDGain, 6, param_gain);
+        std::cout<<"dxl_add_result["<<id<<"] pid_gain: "<<dxl_add_result<<", "<< DynamixelBus::kAddrPositionDGain <<std::endl;
+        
+        
       }
     }
 

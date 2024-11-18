@@ -315,6 +315,12 @@ class CartesianCommandBuilder {
                                      double acceleration_limit = 1.     // (0, 1]
   );
 
+  CartesianCommandBuilder& AddJointPositionTarget(const std::string& joint_name,  //
+                                                  double target_position,         //
+                                                  double velocity_limit,          //
+                                                  double acceleration_limit       //
+  );
+
   CartesianCommandBuilder& SetStopPositionTrackingError(double stop_position_tracking_error);
 
   CartesianCommandBuilder& SetStopOrientationTrackingError(double stop_orientation_tracking_error);

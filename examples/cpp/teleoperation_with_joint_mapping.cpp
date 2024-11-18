@@ -75,16 +75,18 @@ enum class ControlMode {
 };
 
 ControlMode control_mode = ControlMode::DUAL_ARM;
+ControlMode control_mode_old = ControlMode::DUAL_ARM;
 
 std::mutex mtx_q_joint_ma_info;
 Eigen::Matrix<double, 14, 1> q_joint_ma = Eigen::Matrix<double, 14, 1>::Zero();
+Eigen::Matrix<double, 14, 1> q_joint_rby1 = Eigen::Matrix<double, 14, 1>::Zero();
 
 std::mutex mtx_hand_controller_info;
 Eigen::Matrix<double, 2, 1> hand_controller_trigger = Eigen::Matrix<double, 2, 1>::Constant(0.5);
 Eigen::Matrix<double, 2, 1> hand_controller_button = Eigen::Matrix<double, 2, 1>::Constant(0);
 
 Eigen::Vector<double, 3> rpy_right = Eigen::Vector<double, 3>::Zero();
-Eigen::Vector<double, 3> rpy_left= Eigen::Vector<double, 3>::Zero();
+Eigen::Vector<double, 3> rpy_left = Eigen::Vector<double, 3>::Zero();
 
 //XXX: CAUTION CHECK YOUR TRIGGER FIRMWARE
 std::vector<Eigen::Matrix<double, 2, 1>> hand_controller_trigger_min_max = {Eigen::Matrix<double, 2, 1>({0, 1000}),
@@ -376,6 +378,24 @@ void BulkWriteTorqueEnable(dynamixel::PortHandler* portHandler, dynamixel::Packe
   std::this_thread::sleep_for(std::chrono::microseconds(500));
 }
 
+void BulkWriteGoalPosition(dynamixel::PortHandler* portHandler, dynamixel::PacketHandler* packetHandler,
+                           std::vector<std::pair<int, double>> id_and_q_vector) {
+
+  dynamixel::GroupBulkWrite groupBulkWrite(portHandler, packetHandler);
+
+  uint32_t param[1];
+
+  for (auto const& id_and_q : id_and_q_vector) {
+    if (id_and_q.first < 0x80) {
+      param[0] = (uint32_t)(id_and_q.second * 4096. / 3.141592 / 2.);
+      groupBulkWrite.addParam(id_and_q.first, ADDR_GOAL_POSITION, 4, reinterpret_cast<uint8_t*>(&param));
+    }
+  }
+
+  groupBulkWrite.txPacket();
+  std::this_thread::sleep_for(std::chrono::microseconds(500));
+}
+
 void BulkWriteOperationMode(dynamixel::PortHandler* portHandler, dynamixel::PacketHandler* packetHandler,
                             std::vector<std::pair<int, int>> id_and_mode_vector) {
 
@@ -634,8 +654,19 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
   button_info.setZero();
   trigger_info.setZero();
 
+  Eigen::Vector<double, 14> q_joint_default;
+  q_joint_default << 45, -30, 0, -135, -30, 90, 0, 45, 30, 0, -135, 30, 90, 0;
+  q_joint_default = q_joint_default * 3.141592 / 180.;
+  double init_cnt = 0.;
+  bool init_operation = false;
+
   while (true) {
     auto start = std::chrono::steady_clock::now();
+
+    if (control_mode_old != control_mode) {
+      init_cnt = 0.;
+      init_operation = false;
+    }
 
     button_status_vector.clear();
     operation_mode.setConstant(-1);
@@ -694,10 +725,64 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
     BulkWriteTorqueEnable(portHandler, packetHandler, id_and_enable_vector);
 
     std::vector<std::pair<int, int>> id_and_mode_vector;
+    std::vector<std::pair<int, double>> id_and_q_vector;
     std::vector<int> id_torque_onoff_vector;
     std::vector<std::pair<int, double>> id_send_torque_vector;
 
-    if (control_mode == ControlMode::DUAL_ARM) {
+    if (!init_operation) {
+      Eigen::Vector<double, 14> temp_q;
+
+      {
+        std::lock_guard<std::mutex> lg(mtx_q_joint_ma_info);
+
+        init_cnt += 0.001;
+
+        if (init_cnt > 1) {
+          init_operation = true;
+          init_cnt = 1.;
+        }
+      }
+
+      if (control_mode == ControlMode::DUAL_ARM) {
+        temp_q = q_joint_rby1 * init_cnt + q_joint_ma * (1. - init_cnt);
+      } else {
+        temp_q = q_joint_default * init_cnt + q_joint_ma * (1. - init_cnt);
+      }
+
+      // right arm
+      for (int id = 0; id < 7; id++) {
+        // position control
+        if (operation_mode(id) != CURRENT_BASED_POSITION_CONTROL_MODE) {
+          id_and_mode_vector.push_back(std::make_pair(id, CURRENT_BASED_POSITION_CONTROL_MODE));
+          id_torque_onoff_vector.push_back(id);
+          id_and_q_vector.push_back(std::make_pair(id, temp_q(id)));
+        } else {
+          id_and_q_vector.push_back(std::make_pair(id, temp_q(id)));
+        }
+      }
+
+      //left arm
+      for (int id = 7; id < 7 + 7; id++) {
+        // position control
+        if (operation_mode(id) != CURRENT_BASED_POSITION_CONTROL_MODE) {
+          id_and_mode_vector.push_back(std::make_pair(id, CURRENT_BASED_POSITION_CONTROL_MODE));
+          id_torque_onoff_vector.push_back(id);
+          id_and_q_vector.push_back(std::make_pair(id, temp_q(id)));
+        } else {
+          id_and_q_vector.push_back(std::make_pair(id, temp_q(id)));
+        }
+      }
+
+      BulkWriteTorqueEnable(portHandler, packetHandler, id_torque_onoff_vector, 0);
+      BulkWriteOperationMode(portHandler, packetHandler, id_and_mode_vector);
+      BulkWriteTorqueEnable(portHandler, packetHandler, id_torque_onoff_vector, 1);
+
+      BulkWriteGoalPosition(portHandler, packetHandler, id_and_q_vector);
+    }
+
+    if (control_mode == ControlMode::DUAL_ARM && init_operation) {
+      //master arm dual-arm command
+
       for (auto& button_status : button_status_vector) {
 
         if (button_status.has_value()) {
@@ -770,8 +855,8 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
       BulkWriteTorqueEnable(portHandler, packetHandler, id_torque_onoff_vector, 1);
 
       BulkWriteSendTorque(portHandler, packetHandler, id_send_torque_vector);
-    } else if (control_mode == ControlMode::TORSO) {
-      ;
+    } else if (control_mode == ControlMode::TORSO && init_operation) {
+      //master arm torso command
 
       std::optional<std::vector<std::pair<int, double>>> q_target_vector =
           BulkReadGoalPosition(portHandler, packetHandler, activeIDs);
@@ -786,12 +871,38 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
       rpy_right = ret.first;
       rpy_left = ret.second;
 
-      std::cout<<"RPY_RIGHT: "<< rpy_right <<std::endl;
-      std::cout<<"RPY_LEFT: "<< rpy_left <<std::endl;
+      std::cout << "RPY_RIGHT: " << rpy_right << std::endl;
+      std::cout << "RPY_LEFT: " << rpy_left << std::endl;
 
+      // right arm
+      for (int id = 0; id < 7; id++) {
+        // position control
+        if (operation_mode(id) != CURRENT_BASED_POSITION_CONTROL_MODE) {
+          id_and_mode_vector.push_back(std::make_pair(id, CURRENT_BASED_POSITION_CONTROL_MODE));
+          id_torque_onoff_vector.push_back(id);
+          id_and_q_vector.push_back(std::make_pair(id, q_joint_default(id)));
+        }
+      }
 
-    } else if (control_mode == ControlMode::WHEEL) {
-      ;
+      //left arm
+      for (int id = 7; id < 7 + 7; id++) {
+        // position control
+        if (operation_mode(id) != CURRENT_BASED_POSITION_CONTROL_MODE) {
+          id_and_mode_vector.push_back(std::make_pair(id, CURRENT_BASED_POSITION_CONTROL_MODE));
+          id_torque_onoff_vector.push_back(id);
+          id_and_q_vector.push_back(std::make_pair(id, q_joint_default(id)));
+        }
+      }
+
+      BulkWriteTorqueEnable(portHandler, packetHandler, id_torque_onoff_vector, 0);
+      BulkWriteOperationMode(portHandler, packetHandler, id_and_mode_vector);
+      BulkWriteTorqueEnable(portHandler, packetHandler, id_torque_onoff_vector, 1);
+
+      BulkWriteGoalPosition(portHandler, packetHandler, id_and_q_vector);
+
+    } else if (control_mode == ControlMode::WHEEL && init_operation) {
+      //master arm wheel command
+
       std::optional<std::vector<std::pair<int, double>>> q_target_vector =
           BulkReadGoalPosition(portHandler, packetHandler, activeIDs);
       if (q_target_vector.has_value()) {
@@ -804,8 +915,34 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
 
       rpy_right = ret.first;
       rpy_left = ret.second;
-      std::cout<<"RPY_RIGHT: "<< rpy_right <<std::endl;
-      std::cout<<"RPY_LEFT: "<< rpy_left <<std::endl;
+      std::cout << "RPY_RIGHT: " << rpy_right << std::endl;
+      std::cout << "RPY_LEFT: " << rpy_left << std::endl;
+
+      // right arm
+      for (int id = 0; id < 7; id++) {
+        // position control
+        if (operation_mode(id) != CURRENT_BASED_POSITION_CONTROL_MODE) {
+          id_and_mode_vector.push_back(std::make_pair(id, CURRENT_BASED_POSITION_CONTROL_MODE));
+          id_torque_onoff_vector.push_back(id);
+          id_and_q_vector.push_back(std::make_pair(id, q_joint_default(id)));
+        }
+      }
+
+      //left arm
+      for (int id = 7; id < 7 + 7; id++) {
+        // position control
+        if (operation_mode(id) != CURRENT_BASED_POSITION_CONTROL_MODE) {
+          id_and_mode_vector.push_back(std::make_pair(id, CURRENT_BASED_POSITION_CONTROL_MODE));
+          id_torque_onoff_vector.push_back(id);
+          id_and_q_vector.push_back(std::make_pair(id, q_joint_default(id)));
+        }
+      }
+
+      BulkWriteTorqueEnable(portHandler, packetHandler, id_torque_onoff_vector, 0);
+      BulkWriteOperationMode(portHandler, packetHandler, id_and_mode_vector);
+      BulkWriteTorqueEnable(portHandler, packetHandler, id_torque_onoff_vector, 1);
+
+      BulkWriteGoalPosition(portHandler, packetHandler, id_and_q_vector);
     }
 
     static int cnt = 0;
@@ -1013,15 +1150,19 @@ int main(int argc, char** argv) {
   std::cout << "Starting state update..." << std::endl;
 
   robot->StartStateUpdate(
-      [](const auto& state) {
-        std::cout << "State Update Received:" << std::endl;
-        std::cout << "  Timestamp: " << state.timestamp.tv_sec << ".";
-        std::cout << std::setw(9) << std::setfill('0') << state.timestamp.tv_nsec << std::endl;
-        std::cout << "  waist [deg]     : " << state.position.block(2, 0, 6, 1).transpose() * R2D << std::endl;
-        std::cout << "  right arm [deg] : " << state.position.block(2 + 6, 0, 7, 1).transpose() * R2D << std::endl;
-        std::cout << "  left arm [deg]  : " << state.position.block(2 + 6 + 7, 0, 7, 1).transpose() * R2D << std::endl;
+      [&](const auto& state) {
+        static int cnt_cout = 0;
+
+        if (cnt_cout++ > 10) {
+          std::cout << "  waist [deg]     : " << state.position.block(2, 0, 6, 1).transpose() * R2D << std::endl;
+          std::cout << "  right arm [deg] : " << state.position.block(2 + 6, 0, 7, 1).transpose() * R2D << std::endl;
+          std::cout << "  left arm [deg]  : " << state.position.block(2 + 6 + 7, 0, 7, 1).transpose() * R2D
+                    << std::endl;
+        }
+
+        q_joint_rby1 = state.position.block(2 + 6, 0, 14, 1);
       },
-      0.1 /* Hz */);
+      50 /* Hz */);
 
   std::cout << "!!\n";
 
@@ -1247,8 +1388,6 @@ int main(int argc, char** argv) {
     q_joint_ref_20x1.block(0, 0, 6, 1) << 0, 30, -60, 30, 0, 0;
     q_joint_ref_20x1 *= D2R;
 
-    ControlMode control_mode_old = control_mode;
-
     while (1) {
       //robot control loop
 
@@ -1286,7 +1425,7 @@ int main(int argc, char** argv) {
           stream = robot->CreateCommandStream();
         }
 
-        if (control_cnt++ > 30) {
+        if (control_cnt++ > 100) {
           control_cnt = 999;
 
           {
@@ -1297,11 +1436,11 @@ int main(int argc, char** argv) {
               q_joint_ref_20x1.block(6, 0, 14, 1) =
                   q_joint_ref_20x1.block(6, 0, 14, 1) * (1 - lpf_update_ratio) + q_joint_ma * lpf_update_ratio;
 
-              Eigen::Matrix<double, 24, 1> q_joint_rby1;
-              q_joint_rby1.setZero();
-              q_joint_rby1.block(2, 0, 20, 1) = q_joint_ref_20x1;
+              Eigen::Matrix<double, 24, 1> q_joint_rby1_col_model;
+              q_joint_rby1_col_model.setZero();
+              q_joint_rby1_col_model.block(2, 0, 20, 1) = q_joint_ref_20x1;
 
-              dyn_state->SetQ(q_joint_rby1);
+              dyn_state->SetQ(q_joint_rby1_col_model);
               dyn->ComputeForwardKinematics(dyn_state);
               auto res_col = dyn->DetectCollisionsOrNearestLinks(dyn_state, 1);
               bool is_coliision = false;
@@ -1372,8 +1511,8 @@ int main(int argc, char** argv) {
         }
         std::this_thread::sleep_for(5ms);
 
-      } 
-      
+      }
+
       else if (control_mode == ControlMode::TORSO) {
         // torso control mode
         std::cout << "TORSO START" << std::endl;
@@ -1381,13 +1520,8 @@ int main(int argc, char** argv) {
           stream = robot->CreateCommandStream();
         }
 
-        if (control_cnt++ > 30) {
+        if (control_cnt++ > 100) {
           control_cnt = 999;
-          // auto ret = calc_diff(master_arm->get_dny_robot(), master_arm->get_dyn_state(), input.target_position, q_right,
-          //                      q_left);
-
-          // Eigen::Vector<double, 3> rpy_right = ret.first;
-          // Eigen::Vector<double, 3> rpy_left = ret.second;
 
           Eigen::Vector<double, 3> temp_rpy_right;
           temp_rpy_right(0) = -rpy_right(1);
@@ -1395,8 +1529,8 @@ int main(int argc, char** argv) {
           temp_rpy_right(2) = rpy_right(2);
 
           double lpf_update_ratio2 = 0.2;
-          add_pos = add_pos * (1. - lpf_update_ratio2) + temp_rpy_right/10.0 * 0.005 * lpf_update_ratio2;
-          add_ori = add_ori * (1. - lpf_update_ratio2) + rpy_left/10.0 * 0.01 * lpf_update_ratio2;
+          add_pos = add_pos * (1. - lpf_update_ratio2) + temp_rpy_right / 10.0 * 0.005 * lpf_update_ratio2;
+          add_ori = add_ori * (1. - lpf_update_ratio2) + rpy_left / 10.0 * 0.01 * lpf_update_ratio2;
 
           Eigen::Vector<double, 3> temp_ori = math::SO3::Log(T_torso.block(0, 0, 3, 3)) + add_ori;
           Eigen::Vector<double, 3> temp_pos = T_torso.block(0, 3, 3, 1) + add_pos;
@@ -1446,14 +1580,11 @@ int main(int argc, char** argv) {
           stream = robot->CreateCommandStream();
         }
 
-        if (control_cnt++ > 30) {
+        if (control_cnt++ > 100) {
           control_cnt = 999;
 
-          // auto ret = calc_diff(master_arm->get_dny_robot(), master_arm->get_dyn_state(), input.target_position, q_right,
-          //                      q_left);
-
-          double v_ref_wheel_right = rpy_right(1)/5.0;
-          double v_ref_wheel_left = rpy_left(1)/5.0;
+          double v_ref_wheel_right = rpy_right(1) / 5.0;
+          double v_ref_wheel_left = rpy_left(1) / 5.0;
 
           Eigen::Vector<double, 2> wheel_velocity, wheel_acceleration;
           wheel_velocity << v_ref_wheel_right * 3.14 * 2., v_ref_wheel_left * 3.14 * 2.;

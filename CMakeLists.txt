@@ -19,7 +19,7 @@ if (NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
 endif ()
 message(STATUS "RBY1-SDK Version: " ${PROJECT_VERSION})
-
+       
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 ############################################################

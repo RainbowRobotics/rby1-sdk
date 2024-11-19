@@ -592,6 +592,22 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
       break;
     }
 
+    int ma_master_mode_trigger = -2;
+    for (auto& button_status : button_status_vector) {
+
+      if (button_status.has_value()) {
+        int id_hand_controlelr = button_status.value().first;
+        std::pair<int, int> temp_button_status = button_status.value().second;
+        int button = temp_button_status.first;
+        ma_master_mode_trigger += button;
+      }
+    }
+
+    if (ma_master_mode_trigger == 0) {
+      ma_master_mode = true;
+      init_cnt = 0;
+    }
+
     if (!ma_master_mode) {
       Eigen::Vector<double, 14> temp_q;
 
@@ -601,7 +617,6 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
         init_cnt += 0.005;
 
         if (init_cnt > 1) {
-          ma_master_mode = true;
           init_cnt = 1.;
         }
 

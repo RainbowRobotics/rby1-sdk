@@ -517,7 +517,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
   double minimum_time = 4.;
 
-  std::unique_ptr<RobotCommandStreamHandler<y1_model::A>> stream;
   double right_arm_minimum_time = 1.;
   double left_arm_minimum_time = 1.;
   double lpf_update_ratio = 0.1;
@@ -562,8 +561,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
   Eigen::Vector<double, 2> linear_acceleration_limit;
   linear_acceleration_limit << 100, 100;
 
-  stream = robot->CreateCommandStream();
-
   double control_hold_time = 1e6;
 
   {
@@ -590,12 +587,29 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
     q_joint_right_target = q_joint_right_target * 3.141592 / 180.;
     q_joint_left_target = q_joint_left_target * 3.141592 / 180.;
   }
+
+  std::unique_ptr<RobotCommandStreamHandler<y1_model::A>> stream;
+  stream = robot->CreateCommandStream();
+
+  bool flag_mode_change = false;
+
   while (1) {
+    auto joy_stick_data = network->GetJoyStickData();
+
+    if (joy_stick_data.buttons[6]) {
+      if (!flag_mode_change) {
+        redandancy_mode = !redandancy_mode;
+        flag_mode_change = true;
+      }
+    } else {
+      flag_mode_change = false;
+    }
+    std::cout << "mode: " << redandancy_mode << std::endl;
 
     // std::cout << "start !" << std::endl;
     MobilityCommandBuilder mobility_command;
-    JointPositionCommandBuilder right_arm_command;
-    JointPositionCommandBuilder left_arm_command;
+    CartesianCommandBuilder right_arm_command;
+    CartesianCommandBuilder left_arm_command;
     CartesianCommandBuilder torso_command;
 
     {
@@ -610,9 +624,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
         q_joint_rby1_24x1_col.block(2 + 6, 0, 14, 1) = q_joint_ma;
 
         dyn_state->SetQ(q_joint_rby1_24x1_col);
-
         dyn->ComputeForwardKinematics(dyn_state);
-
         auto res_col = dyn->DetectCollisionsOrNearestLinks(dyn_state, 1);
         bool is_coliision = false;
 
@@ -643,22 +655,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
     // q_joint_right_target *= 3.141592 / 180.;
     // q_joint_left_target *= 3.141592 / 180.;
-    auto joy_stick_data = network->GetJoyStickData();
-    static bool test_flag = false;
-
-    if(joy_stick_data.buttons[6]){
-      if(!test_flag){
-        redandancy_mode = !redandancy_mode;  
-        test_flag = true;
-        
-      }
-      
-    }
-    else{
-      test_flag = false;
-      
-    }
-    std::cout<<"mode: "<< redandancy_mode <<std::endl;
 
     linear_velocity << joy_stick_data.axisRightY / 2.0, 0;  // mobility command
     angular_velocity = -joy_stick_data.axisLeftX / 2.0;     // mobility command
@@ -667,7 +663,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
     dyn_state->SetQ(q_joint_rby1_24x1);
     dyn->ComputeForwardKinematics(dyn_state);
-
     T_torso = dyn->ComputeTransformation(dyn_state, 0, 1);
 
     Eigen::Vector<double, 3> torso_pos_command = Eigen::Vector<double, 3>::Zero();  // torso command
@@ -717,19 +712,61 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
       left_arm_minimum_time *= 0.99;
       left_arm_minimum_time = std::max(left_arm_minimum_time, 0.01);
 
-      right_arm_command.SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time))
-          .SetMinimumTime(right_arm_minimum_time)
-          .SetPosition(q_joint_right_target)
-          .SetVelocityLimit(arm_vel_limit)
-          .SetAccelerationLimit(arm_acc_limit);
-      // std::cout << "set right arm command\n";
+      Eigen::Vector<double, 24> q_joint_rby1_24x1_fk;
+      q_joint_rby1_24x1_fk.setZero();
 
-      left_arm_command.SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time))
-          .SetMinimumTime(left_arm_minimum_time)
-          .SetPosition(q_joint_left_target)
-          .SetVelocityLimit(arm_vel_limit)
-          .SetAccelerationLimit(arm_acc_limit);
-      // std::cout << "set left arm command\n";
+      q_joint_rby1_24x1_fk.block(2 + 0, 0, 6, 1) = q_joint_rby1_24x1.block(2, 0, 6, 1);
+      q_joint_rby1_24x1_fk.block(2 + 6, 0, 7, 1) = q_joint_right_target;
+      q_joint_rby1_24x1_fk.block(2 + 6 + 7, 0, 7, 1) = q_joint_left_target;
+
+      dyn_state->SetQ(q_joint_rby1_24x1_fk);
+
+      dyn->ComputeForwardKinematics(dyn_state);
+
+      Eigen::Matrix<double, 4, 4> T_right_from_torso, T_left_from_torso;
+      T_right_from_torso = dyn->ComputeTransformation(dyn_state, 1, 2);
+      T_left_from_torso = dyn->ComputeTransformation(dyn_state, 1, 3);
+
+      if (!redandancy_mode) {
+        right_arm_command.AddTarget("link_torso_5", "ee_right", T_right_from_torso, 1, 3.141592, 100)
+            .SetMinimumTime(right_arm_minimum_time)
+            .SetStopOrientationTrackingError(stop_orientation_tracking_error)
+            .SetStopPositionTrackingError(stop_position_tracking_error)
+            .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time));
+
+        left_arm_command.AddTarget("link_torso_5", "ee_left", T_left_from_torso, 1, 3.141592, 100)
+            .SetMinimumTime(left_arm_minimum_time)
+            .SetStopOrientationTrackingError(stop_orientation_tracking_error)
+            .SetStopPositionTrackingError(stop_position_tracking_error)
+            .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time));
+
+      } else {
+        right_arm_command.AddTarget("link_torso_5", "ee_right", T_right_from_torso, 1, 3.141592, 100)
+            .SetMinimumTime(right_arm_minimum_time)
+            .SetStopOrientationTrackingError(stop_orientation_tracking_error)
+            .SetStopPositionTrackingError(stop_position_tracking_error)
+            .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time));
+
+        left_arm_command.AddTarget("link_torso_5", "ee_left", T_left_from_torso, 1, 3.141592, 100)
+            .SetMinimumTime(left_arm_minimum_time)
+            .SetStopOrientationTrackingError(stop_orientation_tracking_error)
+            .SetStopPositionTrackingError(stop_position_tracking_error)
+            .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time));
+      }
+
+      // right_arm_command.SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time))
+      //     .SetMinimumTime(right_arm_minimum_time)
+      //     .SetPosition(q_joint_right_target)
+      //     .SetVelocityLimit(arm_vel_limit)
+      //     .SetAccelerationLimit(arm_acc_limit);
+      // // std::cout << "set right arm command\n";
+
+      // left_arm_command.SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time))
+      //     .SetMinimumTime(left_arm_minimum_time)
+      //     .SetPosition(q_joint_left_target)
+      //     .SetVelocityLimit(arm_vel_limit)
+      //     .SetAccelerationLimit(arm_acc_limit);
+      // // std::cout << "set left arm command\n";
     }
 
     {

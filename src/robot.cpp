@@ -211,7 +211,7 @@ class RobotCommandStreamHandlerImpl
     StartCall();
   }
 
-  ~RobotCommandStreamHandlerImpl() override { Cancel(); }
+  ~RobotCommandStreamHandlerImpl() override { if(!IsDone()) { Cancel(); Wait(); } }
 
   bool IsDone() const { return done_.load(); }
 
@@ -256,6 +256,7 @@ class RobotCommandStreamHandlerImpl
       if (!command_cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms),
                                 [this] { return write_done_.load() && read_done_.load(); })) {
         Cancel();
+        Wait();
         throw std::runtime_error("Timeout");
       }
 

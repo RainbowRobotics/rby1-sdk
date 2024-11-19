@@ -7,10 +7,10 @@
 #include <iostream>
 #include <thread>
 #include "dynamixel_sdk.h"  // Uses Dynamixel SDK library
+#include "network/Network.h"
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 #include "rby1-sdk/robot_command_builder.h"
-#include "network/Network.h"
 
 #include "rby1-sdk/upc/device.h"
 
@@ -48,7 +48,7 @@ using namespace std::chrono_literals;
 double m_sf = 0.4;
 
 double init_cnt = 0.;
-bool init_operation = false;
+bool ma_master_mode = false;
 
 using namespace rb::dyn;
 using namespace rb;
@@ -56,6 +56,7 @@ using namespace rb;
 #define MIN_INDEX 0
 #define MAX_INDEX 1
 
+bool is_first_init = false;
 std::mutex mtx_q_joint_ma_info;
 Eigen::Matrix<double, 14, 1> q_joint_ma = Eigen::Matrix<double, 14, 1>::Zero();
 
@@ -76,8 +77,7 @@ const std::string kAll = ".*";
 
 Network* network;
 
-Eigen::Vector<double, 24> q_joint_rby1_24x1 = Eigen::Vector<double,24>::Zero();
-
+Eigen::Vector<double, 24> q_joint_rby1_24x1 = Eigen::Vector<double, 24>::Zero();
 
 std::optional<std::pair<int, std::pair<int, int>>> ReadButtonStatus(dynamixel::PortHandler* portHandler,
                                                                     dynamixel::PacketHandler* packetHandler, int id) {
@@ -493,73 +493,6 @@ Eigen::Matrix<double, 14, 1> calc_torque_for_limit_avoid(Eigen::Matrix<double, 1
   return torque_add;
 }
 
-std::pair<Eigen::Vector<double, 3>, Eigen::Vector<double, 3>> calc_diff(std::shared_ptr<dyn::Robot<14>> robot,
-                                                                        std::shared_ptr<dyn::State<14>> state,
-                                                                        Eigen::Vector<double, 14> q_joint_target,
-                                                                        Eigen::Vector<double, 14> q_joint) {
-  Eigen::Matrix<double, 4, 4> T_right, T_left, T_right_target, T_left_target;
-
-  state->SetQ(q_joint_target);
-  robot->ComputeForwardKinematics(state);
-  T_right_target = robot->ComputeTransformation(state, 0, 7);
-  T_left_target = robot->ComputeTransformation(state, 0, 14);
-
-  state->SetQ(q_joint);
-  robot->ComputeForwardKinematics(state);
-  T_right = robot->ComputeTransformation(state, 0, 7);
-  T_left = robot->ComputeTransformation(state, 0, 14);
-
-  Eigen::Matrix<double, 4, 4> T_right_diff = T_right_target.inverse() * T_right;
-  Eigen::Matrix<double, 4, 4> T_left_diff = T_left_target.inverse() * T_left;
-
-  Eigen::Vector<double, 3> diff_right, diff_left;
-  diff_right.topRows(3) = math::SE3::Log(T_right_diff).topRows(3);
-  diff_left.topRows(3) = math::SE3::Log(T_left_diff).topRows(3);
-
-  int maxIndex;
-  Eigen::Vector<double, 3> unit_axis;
-
-  diff_right.cwiseAbs().maxCoeff(&maxIndex);
-  unit_axis.setZero();
-  unit_axis(maxIndex) = 1.;
-  diff_right = diff_right.cwiseProduct(unit_axis);
-
-  diff_left.cwiseAbs().maxCoeff(&maxIndex);
-  unit_axis.setZero();
-  unit_axis(maxIndex) = 1.;
-  diff_left = diff_left.cwiseProduct(unit_axis);
-
-  diff_right = diff_right.unaryExpr([](double v) {
-    double saturation = 0.3;
-    double offset = 0.15;
-    double abs_v = std::abs(v);
-    if (abs_v < offset) {
-      return 0.0;
-    } else if (abs_v <= saturation) {
-      double scaled = (abs_v - offset) / (saturation - offset);
-      return v < 0 ? -scaled : scaled;
-    } else {
-      return v < 0 ? -1.0 : 1.0;
-    }
-  });
-
-  diff_left = diff_left.unaryExpr([](double v) {
-    double saturation = 0.3;
-    double offset = 0.15;
-    double abs_v = std::abs(v);
-    if (abs_v < offset) {
-      return 0.0;
-    } else if (abs_v <= saturation) {
-      double scaled = (abs_v - offset) / (saturation - offset);
-      return v < 0 ? -scaled : scaled;
-    } else {
-      return v < 0 ? -1.0 : 1.0;
-    }
-  });
-
-  return std::make_pair(diff_right, diff_left);
-}
-
 void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel::PacketHandler* packetHandler,
                                  std::vector<int> activeIDs) {
 
@@ -589,8 +522,6 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
   Eigen::Vector<double, 14> q_joint_default;
   q_joint_default << 45, -30, 0, -135, -30, 90, 0, 45, 30, 0, -135, 30, 90, 0;
   q_joint_default = q_joint_default * 3.141592 / 180.;
-  
-  
 
   while (true) {
     auto start = std::chrono::steady_clock::now();
@@ -656,22 +587,26 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
     std::vector<int> id_torque_onoff_vector;
     std::vector<std::pair<int, double>> id_send_torque_vector;
 
-    if (!init_operation) {
+    if (!is_first_init) {
+      std::this_thread::sleep_for(100ms);
+      break;
+    }
+
+    if (!ma_master_mode) {
       Eigen::Vector<double, 14> temp_q;
 
       {
         std::lock_guard<std::mutex> lg(mtx_q_joint_ma_info);
 
-        init_cnt += 0.01;
+        init_cnt += 0.005;
 
         if (init_cnt > 1) {
-          init_operation = true;
+          ma_master_mode = true;
           init_cnt = 1.;
         }
-      }
 
-      temp_q = q_joint_rby1_24x1.block(2+6,0,14,1) * init_cnt + q_joint_ma * (1. - init_cnt);
-      
+        temp_q = q_joint_rby1_24x1.block(2 + 6, 0, 14, 1) * init_cnt + q_joint_ma * (1. - init_cnt);
+      }
       // right arm
       for (int id = 0; id < 7; id++) {
         // position control
@@ -701,9 +636,7 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
       BulkWriteTorqueEnable(portHandler, packetHandler, id_torque_onoff_vector, 1);
 
       BulkWriteGoalPosition(portHandler, packetHandler, id_and_q_vector);
-    }
-
-    if (1) {
+    } else {
       //master arm dual-arm command
 
       for (auto& button_status : button_status_vector) {
@@ -778,7 +711,7 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
       BulkWriteTorqueEnable(portHandler, packetHandler, id_torque_onoff_vector, 1);
 
       BulkWriteSendTorque(portHandler, packetHandler, id_send_torque_vector);
-    } 
+    }
 
     static int cnt = 0;
     if (ma_info_verbose) {
@@ -945,8 +878,6 @@ std::string resolve_symlink(const std::string& symlink) {
   }
   return "";
 }
-
-
 
 int main(int argc, char** argv) {
   if (argc < 2) {
@@ -1125,7 +1056,6 @@ int main(int argc, char** argv) {
   }
 
   std::vector<int> activeIDs_gripper;
-  
 
   for (int id = 0; id < 2; ++id) {
     uint8_t dxl_error = 0;
@@ -1158,12 +1088,6 @@ int main(int argc, char** argv) {
   }
 
   std::thread gripper_handler(control_loop_for_gripper, portHandler_gripper, packetHandler_gripper, activeIDs_gripper);
-
-
-  // robot->SetParameter("default.acceleration_limit_scaling", "0.8");
-  // robot->SetParameter("joint_position_command.cutoff_frequency", "5");
-  // robot->SetParameter("cartesian_command.cutoff_frequency", "5");
-  // robot->SetParameter("default.linear_acceleration_limit", "5");
 
   std::this_thread::sleep_for(1s);
 
@@ -1233,9 +1157,9 @@ int main(int argc, char** argv) {
                           .SetTorsoCommand(JointPositionCommandBuilder().SetMinimumTime(3).SetPosition(
                               Eigen::Vector<double, 6>{0, 30, -60, 30, 0, 0} * D2R))
                           .SetRightArmCommand(JointPositionCommandBuilder().SetMinimumTime(3).SetPosition(
-                              Eigen::Vector<double, 7>{45, 0, 0, -135, 0, 45, 0} * D2R))
+                              Eigen::Vector<double, 7>{45, -15, 0, -135, 0, 45, 0} * D2R))
                           .SetLeftArmCommand(JointPositionCommandBuilder().SetMinimumTime(3).SetPosition(
-                              Eigen::Vector<double, 7>{45, 0, 0, -135, 0, 45, 0} * D2R)))))
+                              Eigen::Vector<double, 7>{45, 15, 0, -135, 0, 45, 0} * D2R)))))
                   ->Get();
 
     if (rv.finish_code() != RobotCommandFeedback::FinishCode::kOk) {
@@ -1243,9 +1167,15 @@ int main(int argc, char** argv) {
 
       return 1;
     }
+
+    is_first_init = true;
+
+    q_joint_right_target << 45, -15, 0, -135, 0, 45, 0;
+    q_joint_left_target << 45, 15, 0, -135, 0, 45, 0;
+    q_joint_right_target = q_joint_right_target * 3.141592 / 180.;
+    q_joint_left_target = q_joint_left_target * 3.141592 / 180.;
   }
 
-  
   while (1) {
 
     // std::cout << "start !" << std::endl;
@@ -1254,47 +1184,45 @@ int main(int argc, char** argv) {
     JointPositionCommandBuilder left_arm_command;
     CartesianCommandBuilder torso_command;
 
+    {
+      std::lock_guard<std::mutex> lg(mtx_q_joint_ma_info);
+      {
+        std::lock_guard<std::mutex> lg(mtx_hand_controller_info);
 
-          {
-            std::lock_guard<std::mutex> lg(mtx_q_joint_ma_info);
-            {
-              std::lock_guard<std::mutex> lg(mtx_hand_controller_info);
+        Eigen::Vector<double, 24> q_joint_rby1_24x1_col;
+        q_joint_rby1_24x1_col.setZero();
 
-              Eigen::Vector<double,24> q_joint_rby1_24x1_col;
-              q_joint_rby1_24x1_col.setZero();
+        q_joint_rby1_24x1_col.block(2 + 0, 0, 6, 1) = q_joint_rby1_24x1.block(2, 0, 6, 1);
+        q_joint_rby1_24x1_col.block(2 + 6, 0, 14, 1) = q_joint_ma;
 
-              q_joint_rby1_24x1_col.block(2+0,0,6,1) = q_joint_rby1_24x1.block(2,0,6,1);
-              q_joint_rby1_24x1_col.block(2+6,0,14,1) = q_joint_ma;
+        dyn_state->SetQ(q_joint_rby1_24x1_col);
 
-              dyn_state->SetQ(q_joint_rby1_24x1_col);
-              
-              dyn->ComputeForwardKinematics(dyn_state);
-              
-              auto res_col = dyn->DetectCollisionsOrNearestLinks(dyn_state, 1);
-              bool is_coliision = false;
+        dyn->ComputeForwardKinematics(dyn_state);
 
-              if (res_col[0].distance < 0.02) {
-                is_coliision = true;
-              }
+        auto res_col = dyn->DetectCollisionsOrNearestLinks(dyn_state, 1);
+        bool is_coliision = false;
 
-              if (hand_controller_button(0) && !is_coliision) {
-                //right hand position control mode
-                q_joint_right_target = q_joint_right_target* (1 - lpf_update_ratio) +
-                                                q_joint_ma.block(0, 0, 7, 1) * lpf_update_ratio;
-              } else {
-                right_arm_minimum_time = 1.0;
-              }
+        if (res_col[0].distance < 0.02) {
+          is_coliision = true;
+        }
 
-              if (hand_controller_button(1) && !is_coliision) {
-                //left hand position control mode
-                q_joint_left_target = q_joint_left_target * (1 - lpf_update_ratio) +
-                                                q_joint_ma.block(7, 0, 7, 1) * lpf_update_ratio;
-              } else {
-                left_arm_minimum_time = 1.0;
-              }
-            }
-          }
+        if (hand_controller_button(0) && !is_coliision) {
+          //right hand position control mode
+          q_joint_right_target =
+              q_joint_right_target * (1 - lpf_update_ratio) + q_joint_ma.block(0, 0, 7, 1) * lpf_update_ratio;
+        } else {
+          right_arm_minimum_time = 1.0;
+        }
 
+        if (hand_controller_button(1) && !is_coliision) {
+          //left hand position control mode
+          q_joint_left_target =
+              q_joint_left_target * (1 - lpf_update_ratio) + q_joint_ma.block(7, 0, 7, 1) * lpf_update_ratio;
+        } else {
+          left_arm_minimum_time = 1.0;
+        }
+      }
+    }
 
     // q_joint_right_target << 45, 0, 0, -135, 0, 45, 0;  //right arm command
     // q_joint_left_target << 45, 0, 0, -135, 0, 45, 0;   //left arm command

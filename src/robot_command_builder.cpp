@@ -378,6 +378,19 @@ class CartesianCommandBuilderImpl {
     target.mutable_acceleration_limit_scaling()->set_value(acceleration_limit_scaling);
   }
 
+  void AddJointPositionTarget(const std::string& joint_name, double target_position,
+                              std::optional<double> velocity_limit, std::optional<double> acceleration_limit) {
+    auto& target = *req_->add_joint_position_targets();
+    target.set_joint_name(joint_name);
+    target.set_target_position(target_position);
+    if (velocity_limit.has_value()) {
+      target.mutable_velocity_limit()->set_value(velocity_limit.value());
+    }
+    if (acceleration_limit.has_value()) {
+      target.mutable_acceleration_limit()->set_value(acceleration_limit.value());
+    }
+  }
+
   void SetStopPositionTrackingError(double stop_position_tracking_error) {
     req_->mutable_stop_position_tracking_error()->set_value(stop_position_tracking_error);
   }
@@ -953,6 +966,14 @@ CartesianCommandBuilder& CartesianCommandBuilder::AddTarget(const std::string& r
                                                             double acceleration_limit_scaling) {
   impl_->AddTarget(ref_link_name, link_name, T, linear_velocity_limit, angular_velocity_limit,
                    acceleration_limit_scaling);
+  return *this;
+}
+
+CartesianCommandBuilder& CartesianCommandBuilder::AddJointPositionTarget(const std::string& joint_name,
+                                                                         double target_position,
+                                                                         std::optional<double> velocity_limit,
+                                                                         std::optional<double> acceleration_limit) {
+  impl_->AddJointPositionTarget(joint_name, target_position, velocity_limit, acceleration_limit);
   return *this;
 }
 

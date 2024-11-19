@@ -36,6 +36,13 @@ class OptimalControl {
       weight.setZero();
     }
 
+    JointAngleTarget() {
+      static_assert(DOF > 0);
+
+      q.setZero();
+      weight.setZero();
+    }
+
     Eigen::Vector<double, DOF> q;
     Eigen::Vector<double, DOF> weight;
   };

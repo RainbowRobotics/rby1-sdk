@@ -5,6 +5,7 @@
 
 namespace py = pybind11;
 using namespace rb;
+using namespace py::literals;
 
 void pybind11_robot_command_builder(py::module_& m) {
   py::class_<CommandHeaderBuilder>(m, "CommandHeaderBuilder")
@@ -88,6 +89,8 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_command_header", &CartesianCommandBuilder::SetCommandHeader)
       .def("set_minimum_time", &CartesianCommandBuilder::SetMinimumTime)
       .def("add_target", &CartesianCommandBuilder::AddTarget)
+      .def("add_joint_position_target", &CartesianCommandBuilder::AddJointPositionTarget, "joint_name"_a,
+           "target_position"_a, "velocity_limit"_a = {}, "acceleration_limit"_a = {})
       .def("set_stop_position_tracking_error", &CartesianCommandBuilder::SetStopPositionTrackingError)
       .def("set_stop_orientation_tracking_error", &CartesianCommandBuilder::SetStopOrientationTrackingError);
 

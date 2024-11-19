@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <optional>
+
 #include "Eigen/Core"
 #include "dynamics/inertial.h"
 #include "math/liegroup.h"
@@ -315,10 +317,10 @@ class CartesianCommandBuilder {
                                      double acceleration_limit = 1.     // (0, 1]
   );
 
-  CartesianCommandBuilder& AddJointPositionTarget(const std::string& joint_name,  //
-                                                  double target_position,         //
-                                                  double velocity_limit,          //
-                                                  double acceleration_limit       //
+  CartesianCommandBuilder& AddJointPositionTarget(const std::string& joint_name,            //
+                                                  double target_position,                   //
+                                                  std::optional<double> velocity_limit,     //
+                                                  std::optional<double> acceleration_limit  //
   );
 
   CartesianCommandBuilder& SetStopPositionTrackingError(double stop_position_tracking_error);

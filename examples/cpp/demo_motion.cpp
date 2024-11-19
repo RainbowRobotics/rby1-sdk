@@ -228,8 +228,8 @@ int main(int argc, char** argv) {
                           .SetLeftArmCommand(CartesianCommandBuilder()
                                                  .AddTarget("base", "ee_left", T_left, linear_velocity_limit,
                                                             angular_velocity_limit, acceleration_limit / 2)
-                                                  /* Need to be verified */
-                                                  .SetJointPositionTarget("left_arm_2", 10 * M_PI / 180, 3.14, 6.28)
+                                                 /* Need to be verified */
+                                                 .SetJointPositionTarget("left_arm_2", 10 * M_PI / 180, 3.14, 6.28)
                                                  .SetMinimumTime(minimum_time * 3)
                                                  .SetStopOrientationTrackingError(stop_orientation_tracking_error)
                                                  .SetStopPositionTrackingError(stop_position_tracking_error)))))

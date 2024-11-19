@@ -1,6 +1,6 @@
 add_subdirectory(dynamics)
 add_subdirectory(module_test)
-
+add_subdirectory(network)
 set(EXAMPLES
         trapezoidal_motion_generator
         so3
@@ -36,9 +36,12 @@ set(EXAMPLES
 
         master_arm_pid_gain
         master_arm_set_default_position_pid_gains
+        joystick_test
+        whole_body_command
 )
 
-find_package(Qt5Widgets REQUIRED)
+# find_package(Qt5Widgets REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Widgets Network)
 
 foreach (SRC IN LISTS EXAMPLES)
     set(EXECUTABLE_NAME example_${SRC})
@@ -47,10 +50,11 @@ foreach (SRC IN LISTS EXAMPLES)
     )
     target_link_libraries(${EXECUTABLE_NAME} PRIVATE
             rby1-sdk
-        
             DynamixelSDK
             OsqpEigen::OsqpEigen
             Qt5::Widgets
+            Qt5::Network
+            network
     )
     target_compile_definitions(${EXECUTABLE_NAME} PUBLIC
             -DPATH="${CMAKE_CURRENT_SOURCE_DIR}"

@@ -6,7 +6,7 @@
 #include "rby1-sdk/log.h"
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
-
+#include <QApplication>
 using namespace rb;
 using namespace std::chrono_literals;
 
@@ -45,10 +45,11 @@ int main(int argc, char** argv) {
       },
       1.0);
 
-  network = new Network();
-  std::this_thread::sleep_for(50s);
-
+  
+  
   robot->StopLogStream();
-
-  return 0;
+  QApplication a(argc, argv);
+  network = new Network();
+  
+  return a.exec();
 }

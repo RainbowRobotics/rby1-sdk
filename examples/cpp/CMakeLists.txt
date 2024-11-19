@@ -42,7 +42,7 @@ set(EXAMPLES
 
 # find_package(Qt5Widgets REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Widgets Network)
-
+set(CMAKE_AUTOMOC ON)
 foreach (SRC IN LISTS EXAMPLES)
     set(EXECUTABLE_NAME example_${SRC})
     add_executable(${EXECUTABLE_NAME}

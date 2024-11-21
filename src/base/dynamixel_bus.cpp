@@ -205,6 +205,30 @@ class DynamixelBusImpl {
     }
   }
 
+  std::optional<std::vector<std::pair<int, int16_t>>> ReadCurrent(const std::vector<int>& ids) {
+    std::vector<std::pair<int, int16_t>> rv;
+
+    uint16_t read_value;
+    uint8_t dxl_error;
+    for (auto const& id : ids) {
+      if (id < 0x80) {
+        int dxl_comm_result = packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPresentCurrent,
+                                                             &read_value, &dxl_error);
+        if (dxl_comm_result == COMM_SUCCESS) {
+          auto data = static_cast<int16_t>(read_value);
+          rv.emplace_back(id, data);
+        }
+      }
+    }
+    std::this_thread::sleep_for(100us);
+
+    if (rv.empty()) {
+      return {};
+    } else {
+      return rv;
+    }
+  }
+
   std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> BulkReadEncoder(
       const std::vector<int>& ids) {
     std::vector<std::pair<int, double>> v;
@@ -296,7 +320,7 @@ class DynamixelBusImpl {
     }
 
     {
-      const auto& rv = BulkRead(ids, DynamixelBus::kAddrPresentCurrent, 2);
+      const auto& rv = ReadCurrent(ids);
       if (rv.has_value()) {
         for (const auto& r : rv.value()) {
           ms[idx[r.first]].second.current = (double)r.second / 1000. * 2.69;

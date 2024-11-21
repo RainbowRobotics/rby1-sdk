@@ -100,6 +100,8 @@ class DynamixelBus {
 
   std::optional<std::vector<std::pair<int, int>>> BulkRead(const std::vector<int>& ids, int addr, int len);
 
+  std::optional<std::vector<std::pair<int, int16_t>>> ReadCurrent(const std::vector<int>& ids);
+
   std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> BulkReadEncoder(
       const std::vector<int>& ids);
 

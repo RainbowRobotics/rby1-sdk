@@ -834,8 +834,8 @@ def go_to_home_pose_2(robot):
     return 0
 
 
-if not example_joint_position_command_1(robot):
-    print("finish motion")
+# if not example_joint_position_command_1(robot):
+#     print("finish motion")
 if not example_joint_position_command_2(robot):
     print("finish motion")
 if not example_cartesian_command_1(robot):
@@ -860,8 +860,8 @@ if not example_mixed_command_1(robot):
     print("finish motion")
 if not example_mixed_command_2(robot):
     print("finish motion")
-if not go_to_home_pose_1(robot):
-    print("finish motion")
+# if not go_to_home_pose_1(robot):
+#     print("finish motion")
 if not go_to_home_pose_2(robot):
     print("finish motion")
 

@@ -54,13 +54,12 @@ int main(int argc, char** argv) {
   }
 
   // Torso joints
-  robot->SetPositionPIDGain("torso_0", 80, 15, 200);
-  robot->SetPositionPIDGain("torso_1", 80, 15, 200);
-  robot->SetPositionPIDGain("torso_2", 80, 15, 200);
-  robot->SetPositionPIDGain("torso_3", 35, 5, 80);
-  robot->SetPositionPIDGain("torso_4", 30, 5, 70);
-  robot->SetPositionPIDGain("torso_5", 30, 5, 70);
-  robot->SetPositionPIDGain("torso_6", 100, 5, 150);
+  robot->SetPositionPIDGain("torso_0", 100, 20, 900);
+  robot->SetPositionPIDGain("torso_1", 1000, 38, 900);
+  robot->SetPositionPIDGain("torso_2", 1000, 38, 900);
+  robot->SetPositionPIDGain("torso_3", 220, 40, 400);
+  robot->SetPositionPIDGain("torso_4", 50, 20, 400);
+  robot->SetPositionPIDGain("torso_5", 220, 40, 400);
 
   // Right arm joints
   robot->SetPositionPIDGain("right_arm_0", 80, 15, 200);

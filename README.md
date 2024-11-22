@@ -85,8 +85,8 @@ To fix the Intellisense problem, add the following code at the top of your sourc
 
 | Joint         | P Gain (Factory Default) | I Gain (Factory Default) | D Gain (Factory Default) |
 |---------------|--------------------------|--------------------------|--------------------------|
-| torso_0       | 80                       | 15                       | 200                      |
-| torso_1       | 80                       | 15                       | 200                      |
+| torso_0       | 30                       | 20                       | 900                      |
+| torso_1       | 1000                     | 38                       | 900                      |
 | torso_2       | 80                       | 15                       | 200                      |
 | torso_3       | 35                       | 5                        | 80                       |
 | torso_4       | 30                       | 5                        | 70                       |

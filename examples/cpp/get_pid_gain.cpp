@@ -69,10 +69,16 @@ int main(int argc, char** argv) {
   std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
           << ", d gain: " << gain.d_gain << std::endl<<std::endl;
 
-  taregt_joint_name = "head_0";
+  taregt_joint_name = "right_wheel";
   gain = robot->GetPositionPIDGain(taregt_joint_name);
   std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
           << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+
+  taregt_joint_name = "left_wheel";
+  gain = robot->GetPositionPIDGain(taregt_joint_name);
+  std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+
 
   return 0;
 }

@@ -38,6 +38,7 @@ set(EXAMPLES
         master_arm_set_default_position_pid_gains
         joystick_test
         whole_body_command
+        whole_body_command2
 )
 
 # find_package(Qt5Widgets REQUIRED)

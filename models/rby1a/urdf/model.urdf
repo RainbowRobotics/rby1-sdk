@@ -305,9 +305,9 @@
     </visual>
 
     <collision>
-      <origin xyz="0 0 -0.024" rpy="0 0 0" />
+      <origin xyz="0 0 -0.1" rpy="0 0 0" />
       <geometry>
-        <capsule radius="0.075" length="0.052000" coltype="512" colaffinity="31" />
+        <capsule radius="0.075" length="0.25" coltype="512" colaffinity="31" />
         <!-- <capsule sp="0.0 0.0 0.002" ep="0.0 0.0 -0.050" radius="0.075"/> -->
       </geometry>
     </collision>
@@ -453,9 +453,9 @@
     </visual>
 
     <collision>
-        <origin xyz="0 0 -0.024000" rpy="0 0 0" />
+        <origin xyz="0 0 -0.1" rpy="0 0 0" />
         <geometry>
-            <capsule radius="0.075" length="0.052000" colaffinity="1023" />
+            <capsule radius="0.075" length="0.25" colaffinity="1023" />
         </geometry>
     </collision>
   </link>

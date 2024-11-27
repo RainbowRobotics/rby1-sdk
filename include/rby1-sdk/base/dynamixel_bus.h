@@ -36,6 +36,8 @@ class DynamixelBus {
   static constexpr int kCurrentControlMode = 0;
   static constexpr int kCurrentBasedPositionControlMode = 5;
 
+  static constexpr int kAddrCurrentTeperature = 146;
+
   struct ButtonState {  // RB Gripper
     int button;
     int trigger;
@@ -48,6 +50,8 @@ class DynamixelBus {
     double velocity;
     double current;
     double torque;
+
+    int temperature;
   };
 
   struct PIDGain{
@@ -98,7 +102,11 @@ class DynamixelBus {
 
   void SendCurrent(int id, double current);
 
+  std::optional<int> ReadTemperature(int id);
+
   std::optional<std::vector<std::pair<int, int>>> BulkRead(const std::vector<int>& ids, int addr, int len);
+
+  std::optional<std::vector<std::pair<int, int16_t>>> ReadCurrent(const std::vector<int>& ids);
 
   std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> BulkReadEncoder(
       const std::vector<int>& ids);

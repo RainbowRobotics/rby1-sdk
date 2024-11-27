@@ -175,6 +175,18 @@ class DynamixelBusImpl {
     packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrGoalCurrent, current_value);
   }
 
+  std::optional<int> ReadTemperature(int id) {
+    uint8_t dxl_temperature = 0; // Read as uint8_t
+    uint8_t dxl_error = 0;
+    int dxl_comm_result = packet_handler_->read1ByteTxRx(port_handler_, id, DynamixelBus::kAddrCurrentTeperature,
+                                                         (uint8_t*)&dxl_temperature, &dxl_error);
+    if (dxl_comm_result == COMM_SUCCESS) {
+      return static_cast<int>(dxl_temperature);
+    } else {
+      return std::nullopt;
+    }
+  }
+
   std::optional<std::vector<std::pair<int, int>>> BulkRead(const std::vector<int>& ids, int addr, int len) {
     std::vector<std::pair<int, int>> rv;
     dynamixel::GroupBulkRead groupBulkRead(port_handler_, packet_handler_);
@@ -196,6 +208,30 @@ class DynamixelBusImpl {
       }
     }
 
+    std::this_thread::sleep_for(100us);
+
+    if (rv.empty()) {
+      return {};
+    } else {
+      return rv;
+    }
+  }
+
+  std::optional<std::vector<std::pair<int, int16_t>>> ReadCurrent(const std::vector<int>& ids) {
+    std::vector<std::pair<int, int16_t>> rv;
+
+    uint16_t read_value;
+    uint8_t dxl_error;
+    for (auto const& id : ids) {
+      if (id < 0x80) {
+        int dxl_comm_result = packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPresentCurrent,
+                                                             &read_value, &dxl_error);
+        if (dxl_comm_result == COMM_SUCCESS) {
+          auto data = static_cast<int16_t>(read_value);
+          rv.emplace_back(id, data);
+        }
+      }
+    }
     std::this_thread::sleep_for(100us);
 
     if (rv.empty()) {
@@ -296,7 +332,7 @@ class DynamixelBusImpl {
     }
 
     {
-      const auto& rv = BulkRead(ids, DynamixelBus::kAddrPresentCurrent, 2);
+      const auto& rv = ReadCurrent(ids);
       if (rv.has_value()) {
         for (const auto& r : rv.value()) {
           ms[idx[r.first]].second.current = (double)r.second / 1000. * 2.69;
@@ -322,6 +358,17 @@ class DynamixelBusImpl {
       if (rv.has_value()) {
         for (const auto& r : rv.value()) {
           ms[idx[r.first]].second.position = (double)r.second / 4096. * 2. * 3.141592;
+        }
+      } else {
+        return {};
+      }
+    }
+
+    {
+      const auto& rv = BulkRead(ids, DynamixelBus::kAddrCurrentTeperature, 1);
+      if (rv.has_value()) {
+        for (const auto& r : rv.value()) {
+          ms[idx[r.first]].second.temperature = r.second;
         }
       } else {
         return {};
@@ -588,6 +635,10 @@ void DynamixelBus::SendTorque(int id, double joint_torque) {
 
 void DynamixelBus::SendCurrent(int id, double current) {
   impl_->SendCurrent(id, current);
+}
+
+std::optional<int> DynamixelBus::ReadTemperature(int id) {
+  return impl_->ReadTemperature(id);
 }
 
 std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> DynamixelBus::BulkReadEncoder(

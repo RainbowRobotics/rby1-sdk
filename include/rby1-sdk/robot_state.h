@@ -61,6 +61,8 @@ struct JointState {
   double target_velocity{};            // (rad/s)
   uint32_t target_feedback_gain{};     // [0,10]
   double target_feedforward_torque{};  // (Nm)
+
+  int temperature{}; // ºC
 };
 
 struct ToolFlangeState {
@@ -122,6 +124,9 @@ struct RobotState {
 
   // Collisions
   std::vector<dyn::CollisionResult> collisions;
+
+  // Temperatures
+  std::vector<int> temperatures;
 };
 
 inline std::string to_string(PowerState::State s) {

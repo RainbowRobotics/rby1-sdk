@@ -40,13 +40,12 @@ def main(address):
     Set PID Gains(default value)
     """
     # Torso joints
-    robot.set_position_pid_gain("torso_0", 80, 15, 200)
-    robot.set_position_pid_gain("torso_1", 80, 15, 200)
-    robot.set_position_pid_gain("torso_2", 80, 15, 200)
-    robot.set_position_pid_gain("torso_3", 35, 5, 80)
-    robot.set_position_pid_gain("torso_4", 30, 5, 70)
-    robot.set_position_pid_gain("torso_5", 30, 5, 70)
-    robot.set_position_pid_gain("torso_6", 100, 5, 150)
+    robot.set_position_pid_gain("torso_0", 100, 20, 900)
+    robot.set_position_pid_gain("torso_1", 1000, 38, 900)
+    robot.set_position_pid_gain("torso_2", 1000, 38, 900)
+    robot.set_position_pid_gain("torso_3", 220, 40, 400)
+    robot.set_position_pid_gain("torso_4", 50, 20, 400)
+    robot.set_position_pid_gain("torso_5", 220, 40, 400)
 
     # Right arm joints
     robot.set_position_pid_gain("right_arm_0", 80, 15, 200)

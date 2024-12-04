@@ -709,12 +709,12 @@
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.350"/>
         <axis xyz="0 1 0"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
-        <!-- 120Nm, 5rad/s^2, 180deg/s, -45deg, 45deg -->
+        <!-- 120Nm, 5rad/s^2, 180deg/s, -45deg, 60deg -->
         <limit effort="120.0"
                acceleration="5.0"
                velocity="3.141592654"
                lower="-0.785398163"
-               upper="0.785398163"
+               upper="1.04719755"
         />
     </joint>
 

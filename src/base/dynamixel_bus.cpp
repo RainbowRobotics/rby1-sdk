@@ -350,7 +350,7 @@ class DynamixelBusImpl {
         auto& m = ms[idx[id]].second;
 
         if (group_bulk_read.isAvailable(id, DynamixelBus::kAddrPresentCurrent, 2)) {
-          auto data = (int)group_bulk_read.getData(id, DynamixelBus::kAddrPresentCurrent, 2);
+          auto data = (int16_t)group_bulk_read.getData(id, DynamixelBus::kAddrPresentCurrent, 2);
           m.current = (double)data / 1000. * 2.69;
         } else {
           return {};

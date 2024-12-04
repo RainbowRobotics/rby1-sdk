@@ -3,9 +3,9 @@
 
 #include <chrono>
 #include <iostream>
+#include <mutex>
 #include <thread>
 #include <unordered_map>
-#include <mutex>
 
 using namespace std::chrono_literals;
 
@@ -176,9 +176,9 @@ class DynamixelBusImpl {
   }
 
   std::optional<int> ReadTemperature(int id) {
-    uint8_t dxl_temperature = 0; // Read as uint8_t
+    uint8_t dxl_temperature = 0;  // Read as uint8_t
     uint8_t dxl_error = 0;
-    int dxl_comm_result = packet_handler_->read1ByteTxRx(port_handler_, id, DynamixelBus::kAddrCurrentTeperature,
+    int dxl_comm_result = packet_handler_->read1ByteTxRx(port_handler_, id, DynamixelBus::kAddrCurrentTemperature,
                                                          (uint8_t*)&dxl_temperature, &dxl_error);
     if (dxl_comm_result == COMM_SUCCESS) {
       return static_cast<int>(dxl_temperature);
@@ -323,7 +323,11 @@ class DynamixelBusImpl {
     {
       const auto& rv = BulkRead(ids, DynamixelBus::kAddrTorqueEnable, 1);
       if (rv.has_value()) {
-        for (const auto& r : rv.value()) {
+        const auto& torques = rv.value();
+        if (torques.size() != ids.size()) {
+          return {};
+        }
+        for (const auto& r : torques) {
           ms[idx[r.first]].second.torque_enable = (r.second == 1);
         }
       } else {
@@ -331,43 +335,53 @@ class DynamixelBusImpl {
       }
     }
 
+    // DynamixelBus::kAddrPresentCurrent, DynamixelBus::kAddrPresentVelocity, DynamixelBus::kAddrPresentPosition
     {
-      const auto& rv = ReadCurrent(ids);
-      if (rv.has_value()) {
-        for (const auto& r : rv.value()) {
-          ms[idx[r.first]].second.current = (double)r.second / 1000. * 2.69;
-        }
-      } else {
-        return {};
+      std::vector<std::pair<int, int>> rv;
+      dynamixel::GroupBulkRead group_bulk_read(port_handler_, packet_handler_);
+
+      for (auto const& id : ids) {
+        group_bulk_read.addParam(id, DynamixelBus::kAddrPresentCurrent, 2 + 4 + 4);
       }
+
+      group_bulk_read.txRxPacket();
+
+      for (auto const& id : ids) {
+        auto& m = ms[idx[id]].second;
+
+        if (group_bulk_read.isAvailable(id, DynamixelBus::kAddrPresentCurrent, 2)) {
+          auto data = (int)group_bulk_read.getData(id, DynamixelBus::kAddrPresentCurrent, 2);
+          m.current = (double)data / 1000. * 2.69;
+        } else {
+          return {};
+        }
+
+        if (group_bulk_read.isAvailable(id, DynamixelBus::kAddrPresentVelocity, 4)) {
+          auto data = (int)group_bulk_read.getData(id, DynamixelBus::kAddrPresentVelocity, 4);
+          m.velocity = (double)data * 0.229 * 2 * 3.141592 / 60;
+        } else {
+          return {};
+        }
+
+        if (group_bulk_read.isAvailable(id, DynamixelBus::kAddrPresentPosition, 4)) {
+          auto data = (int)group_bulk_read.getData(id, DynamixelBus::kAddrPresentPosition, 4);
+          m.position = (double)data / 4096. * 2. * 3.141592;
+        } else {
+          return {};
+        }
+      }
+
+      std::this_thread::sleep_for(100us);
     }
 
     {
-      const auto& rv = BulkRead(ids, DynamixelBus::kAddrPresentVelocity, 4);
+      const auto& rv = BulkRead(ids, DynamixelBus::kAddrCurrentTemperature, 1);
       if (rv.has_value()) {
-        for (const auto& r : rv.value()) {
-          ms[idx[r.first]].second.velocity = (double)r.second * 0.229 * 2 * 3.141592 / 60;
+        const auto& temperatures = rv.value();
+        if (temperatures.size() != ids.size()) {
+          return {};
         }
-      } else {
-        return {};
-      }
-    }
-
-    {
-      const auto& rv = BulkRead(ids, DynamixelBus::kAddrPresentPosition, 4);
-      if (rv.has_value()) {
-        for (const auto& r : rv.value()) {
-          ms[idx[r.first]].second.position = (double)r.second / 4096. * 2. * 3.141592;
-        }
-      } else {
-        return {};
-      }
-    }
-
-    {
-      const auto& rv = BulkRead(ids, DynamixelBus::kAddrCurrentTeperature, 1);
-      if (rv.has_value()) {
-        for (const auto& r : rv.value()) {
+        for (const auto& r : temperatures) {
           ms[idx[r.first]].second.temperature = r.second;
         }
       } else {
@@ -531,7 +545,8 @@ void DynamixelBus::SetPositionDGain(int id, uint16_t d_gain) {
   impl_->SetPositionGain(id, std::nullopt, std::nullopt, d_gain);
 }
 
-void DynamixelBus::SetPositionPIDGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain, std::optional<uint16_t> d_gain) {
+void DynamixelBus::SetPositionPIDGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain,
+                                      std::optional<uint16_t> d_gain) {
   impl_->SetPositionGain(id, p_gain, i_gain, d_gain);
 }
 

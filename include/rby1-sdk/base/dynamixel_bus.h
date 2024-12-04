@@ -36,7 +36,7 @@ class DynamixelBus {
   static constexpr int kCurrentControlMode = 0;
   static constexpr int kCurrentBasedPositionControlMode = 5;
 
-  static constexpr int kAddrCurrentTeperature = 146;
+  static constexpr int kAddrCurrentTemperature = 146;
 
   struct ButtonState {  // RB Gripper
     int button;

@@ -32,6 +32,8 @@ set(EXAMPLES
         get_pid_gain
         set_pid_gain
         fatory_default_pid_gain
+
+        demo_motion_with_master_arm
 )
 
 foreach (SRC IN LISTS EXAMPLES)

@@ -7,6 +7,7 @@ set(MODULE_TEST
         master_arm
         gripper
         tool_flange
+        joystick_test
 )
 
 foreach (SRC IN LISTS MODULE_TEST)

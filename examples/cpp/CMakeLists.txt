@@ -34,16 +34,28 @@ set(EXAMPLES
         fatory_default_pid_gain
 
         demo_motion_with_master_arm
+        wholebody_control_with_joystick
 )
 
 foreach (SRC IN LISTS EXAMPLES)
     set(EXECUTABLE_NAME example_${SRC})
-    add_executable(${EXECUTABLE_NAME}
-            ${SRC}.cpp
-    )
+    if (${SRC} STREQUAL "wholebody_control_with_joystick")
+        add_executable(${EXECUTABLE_NAME}
+                ${SRC}.cpp
+                joystick/joystick_receiver.cpp 
+        )
+        target_include_directories(${EXECUTABLE_NAME} PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}/joystick
+        )
+    else()
+        add_executable(${EXECUTABLE_NAME}
+                ${SRC}.cpp
+        )
+    endif()
+    
+    
     target_link_libraries(${EXECUTABLE_NAME} PRIVATE
             rby1-sdk
-        
             DynamixelSDK
             OsqpEigen::OsqpEigen
     )

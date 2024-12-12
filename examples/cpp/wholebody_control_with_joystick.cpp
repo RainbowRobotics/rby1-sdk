@@ -602,7 +602,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
     } else {
       flag_mode_change = false;
     }
-    std::cout << "mode: " << redandancy_mode << std::endl;
+    // std::cout << "mode: " << redandancy_mode << std::endl;
 
     // std::cout << "start !" << std::endl;
     MobilityCommandBuilder mobility_command;

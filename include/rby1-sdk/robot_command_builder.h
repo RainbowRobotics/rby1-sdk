@@ -38,10 +38,6 @@ class CommandHeaderBuilder {
 
   CommandHeaderBuilder& SetControlHoldTime(double control_hold_time);
 
-  CommandHeaderBuilder& SetGravity(const Eigen::Vector3d& gravity);
-
-  CommandHeaderBuilder& AddInertial(const std::string& name, const dyn::Inertial::MatrixType& inertial);
-
  private:
   [[nodiscard]] void* Build() const;
 

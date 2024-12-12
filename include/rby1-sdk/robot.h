@@ -77,10 +77,10 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool IsServoOn(const std::string& dev_name) const;
 
   bool SetPositionPGain(const std::string& dev_name, uint16_t p_gain) const;
-  bool SetPositionIGain(const std::string& dev_name, uint16_t i_gain) const;  
-  bool SetPositionDGain(const std::string& dev_name, uint16_t d_gain) const;  
-  bool SetPositionPIDGain(const std::string& dev_name, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const;  
-  bool SetPositionPIDGain(const std::string& dev_name, const rb::PIDGain& pid_gain) const; 
+  bool SetPositionIGain(const std::string& dev_name, uint16_t i_gain) const;
+  bool SetPositionDGain(const std::string& dev_name, uint16_t d_gain) const;
+  bool SetPositionPIDGain(const std::string& dev_name, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const;
+  bool SetPositionPIDGain(const std::string& dev_name, const rb::PIDGain& pid_gain) const;
 
   std::vector<rb::PIDGain> GetTorsoPositionPIDGains() const;
   std::vector<rb::PIDGain> GetRightArmPositionPIDGains() const;
@@ -128,13 +128,23 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   std::vector<std::pair<std::string, int>> GetParameterList() const;
 
-  bool SetParameter(const std::string& name, const std::string& value);
+  bool SetParameter(const std::string& name, const std::string& value, bool write_db = true);
 
   std::string GetParameter(const std::string& name) const;
 
+  [[deprecated("Use FactoryReset() instead.")]]
   bool ResetParameterToDefault(const std::string& name) const;
 
+  [[deprecated("Use FactoryResetAllParameters() instead.")]]
   void ResetAllParametersToDefault() const;
+
+  bool FactoryResetParameter(const std::string& name) const;
+
+  void FactoryResetAllParameters() const;
+
+  bool ResetParameter(const std::string& name) const;
+
+  void ResetAllParameters() const;
 
   std::string GetRobotModel() const;
 
@@ -226,7 +236,7 @@ struct ControlState {
   Eigen::Vector<double, T::kRobotDOF> torque{Eigen::Vector<double, T::kRobotDOF>::Zero()};
 };
 
-struct PIDGain{
+struct PIDGain {
   uint16_t p_gain;
   uint16_t i_gain;
   uint16_t d_gain;

@@ -198,10 +198,27 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
           "control"_a, "port"_a = 0, "priority"_a = 1, py::call_guard<py::gil_scoped_release>())
       .def("reset_odometry", &Robot<T>::ResetOdometry, "angle"_a, "position"_a)
       .def("get_parameter_list", &Robot<T>::GetParameterList)
-      .def("set_parameter", &Robot<T>::SetParameter, "name"_a, "value"_a)
+      .def("set_parameter", &Robot<T>::SetParameter, "name"_a, "value"_a, "write_db"_a = true)
       .def("get_parameter", &Robot<T>::GetParameter, "name"_a)
-      .def("reset_parameter_to_default", &Robot<T>::ResetParameterToDefault, "name"_a)
-      .def("reset_all_parameters_to_default", &Robot<T>::ResetAllParametersToDefault)
+      .def(
+          "reset_parameter_to_default",
+          [](Robot<T>& self, const std::string& name) {
+            PyErr_WarnEx(PyExc_DeprecationWarning,
+                         "reset_parameter_to_default() is deprecated, use factory_reset_parameter() instead.", 1);
+            return self.ResetParameterToDefault(name);
+          },
+          "name"_a)
+      .def("reset_all_parameters_to_default",
+           [](Robot<T>& self) {
+             PyErr_WarnEx(
+                 PyExc_DeprecationWarning,
+                 "reset_all_parameters_to_default() is deprecated, use factory_reset_all_parameters() instead.", 1);
+             self.ResetAllParametersToDefault();
+           })
+      .def("reset_parameter", &Robot<T>::ResetParameter, "name"_a)
+      .def("reset_all_parameters", &Robot<T>::ResetAllParameters)
+      .def("factory_reset_parameter", &Robot<T>::FactoryResetParameter, "name"_a)
+      .def("factory_reset_all_parameters", &Robot<T>::FactoryResetAllParameters)
       .def("get_robot_model", &Robot<T>::GetRobotModel)
       .def("import_robot_model", &Robot<T>::ImportRobotModel, "name"_a, "model"_a)
       .def("sync_time", &Robot<T>::SyncTime)
@@ -229,6 +246,6 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
 }
 
 void pybind11_robot(py::module_& m) {
-  bind_pid_gain(m); 
+  bind_pid_gain(m);
   bind_robot<y1_model::A>(m, "Robot_A");
 }

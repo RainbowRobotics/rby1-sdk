@@ -9,9 +9,9 @@ message CommandHeader {
   message Request {
     google.protobuf.Duration control_hold_time = 1;
 
-    Vec3 gravity = 2;
+    reserved 2;
 
-    map<string, Inertial> inertials = 3;
+    reserved 3;
   }
 
   message Feedback {

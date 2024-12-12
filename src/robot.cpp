@@ -211,7 +211,12 @@ class RobotCommandStreamHandlerImpl
     StartCall();
   }
 
-  ~RobotCommandStreamHandlerImpl() override { if(!IsDone()) { Cancel(); Wait(); } }
+  ~RobotCommandStreamHandlerImpl() override {
+    if (!IsDone()) {
+      Cancel();
+      Wait();
+    }
+  }
 
   bool IsDone() const { return done_.load(); }
 
@@ -525,7 +530,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     api::SetPositionPIDGainRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(dev_name);
-    
+
     if (p_gain.has_value()) {
       req.mutable_p_gain()->set_value(static_cast<uint32_t>(p_gain.value()));
     }
@@ -538,7 +543,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
     api::SetPositionPIDGainResponse res;
     grpc::ClientContext context;
-    grpc::Status status = joint_operation_service_->SetPositionPIDGain (&context, req, &res);
+    grpc::Status status = joint_operation_service_->SetPositionPIDGain(&context, req, &res);
     if (!status.ok()) {
       throw std::runtime_error("gRPC call failed: " + status.error_message());
     }
@@ -546,8 +551,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.status() == api::SetPositionPIDGainResponse::STATUS_SUCCESS;
   }
 
-
-  std::vector<rb::PIDGain> GetTorsoPositionPIDGains() const{
+  std::vector<rb::PIDGain> GetTorsoPositionPIDGains() const {
     api::GetPositionPIDGainRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -568,8 +572,8 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
     return result;
   }
-  
-  std::vector<rb::PIDGain> GetRightArmPositionPIDGains() const{
+
+  std::vector<rb::PIDGain> GetRightArmPositionPIDGains() const {
     api::GetPositionPIDGainRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -590,8 +594,8 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
     return result;
   }
-  
-  std::vector<rb::PIDGain> GetLeftArmPositionPIDGains() const{
+
+  std::vector<rb::PIDGain> GetLeftArmPositionPIDGains() const {
     api::GetPositionPIDGainRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -612,15 +616,15 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return result;
   }
 
-  std::vector<rb::PIDGain> GetHeadPositionPIDGains() const{
+  std::vector<rb::PIDGain> GetHeadPositionPIDGains() const {
     api::GetPositionPIDGainRequest req;
     InitializeRequestHeader(req.mutable_request_header());
-    
+
     req.set_target_component(api::GetPositionPIDGainRequest::HEAD);
     api::GetPositionPIDGainResponse res;
     grpc::ClientContext context;
     grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
-    
+
     if (!status.ok()) {
       throw std::runtime_error(status.error_message());
     }
@@ -634,7 +638,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return result;
   }
 
-  rb::PIDGain GetPositionPIDGain(const std::string& dev_name) const{
+  rb::PIDGain GetPositionPIDGain(const std::string& dev_name) const {
     api::GetPositionPIDGainRequest req;
     InitializeRequestHeader(req.mutable_request_header());
 
@@ -646,10 +650,11 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       throw std::runtime_error(status.error_message());
     }
     auto res_gains = res.position_gain();
-    auto result = rb::PIDGain{static_cast<uint16_t>(res_gains[0].p_gain()), static_cast<uint16_t>(res_gains[0].i_gain()),
-                                   static_cast<uint16_t>(res_gains[0].d_gain())};
-    return result;    
-  }  
+    auto result =
+        rb::PIDGain{static_cast<uint16_t>(res_gains[0].p_gain()), static_cast<uint16_t>(res_gains[0].i_gain()),
+                    static_cast<uint16_t>(res_gains[0].d_gain())};
+    return result;
+  }
 
   bool BreakEngage(const std::string& dev_name) const {
     api::JointCommandRequest req;
@@ -1005,9 +1010,9 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return rv;
   }
 
-  bool SetParameter(const std::string& name, const std::string& value) {
+  bool SetParameter(const std::string& name, const std::string& value, bool write_db) {
     std::stringstream ss;
-    ss << "{\"value\": " << value << "}";
+    ss << std::boolalpha << "{\"value\":" << value << ",\"write_db\":" << write_db << "}";
 
     api::SetParameterRequest req;
     InitializeRequestHeader(req.mutable_request_header());
@@ -1056,14 +1061,26 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return "";
   }
 
-  bool ResetParameterToDefault(const std::string& name) {
-    api::ResetParameterToDefaultRequest req;
+  void ResetAllParameters() {
+    api::ResetAllParametersRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::ResetAllParametersResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = parameter_service_->ResetAllParameters(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+  }
+
+  bool ResetParameter(const std::string& name) {
+    api::ResetParameterRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(name);
 
-    api::ResetParameterToDefaultResponse res;
+    api::ResetParameterResponse res;
     grpc::ClientContext context;
-    grpc::Status status = parameter_service_->ResetParameterToDefault(&context, req, &res);
+    grpc::Status status = parameter_service_->ResetParameter(&context, req, &res);
     if (!status.ok()) {
       throw std::runtime_error("gRPC call failed: " + status.error_message());
     }
@@ -1085,6 +1102,56 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     if (!status.ok()) {
       throw std::runtime_error("gRPC call failed: " + status.error_message());
     }
+  }
+
+  bool FactoryResetParameter(const std::string& name) {
+    api::FactoryResetParameterRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(name);
+
+    api::FactoryResetParameterResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = parameter_service_->FactoryResetParameter(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+
+    return true;
+  }
+
+  void FactoryResetAllParameters() {
+    api::FactoryResetAllParametersRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::FactoryResetAllParametersResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = parameter_service_->FactoryResetAllParameters(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+  }
+
+  bool ResetParameterToDefault(const std::string& name) {
+    api::ResetParameterToDefaultRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(name);
+
+    api::ResetParameterToDefaultResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = parameter_service_->ResetParameterToDefault(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+
+    return true;
   }
 
   std::string GetRobotModel() const {
@@ -1703,51 +1770,53 @@ bool Robot<T>::IsServoOn(const std::string& dev_name) const {
 }
 
 template <typename T>
-bool Robot<T>::SetPositionPGain(const std::string& dev_name, uint16_t p_gain) const{
+bool Robot<T>::SetPositionPGain(const std::string& dev_name, uint16_t p_gain) const {
   return impl_->SetPositionGain(dev_name, p_gain, std::nullopt, std::nullopt);
 }
 
 template <typename T>
-bool Robot<T>::SetPositionIGain(const std::string& dev_name, uint16_t i_gain) const{
+bool Robot<T>::SetPositionIGain(const std::string& dev_name, uint16_t i_gain) const {
   return impl_->SetPositionGain(dev_name, std::nullopt, i_gain, std::nullopt);
-}  
+}
 
 template <typename T>
-bool Robot<T>::SetPositionDGain(const std::string& dev_name, uint16_t d_gain) const{
+bool Robot<T>::SetPositionDGain(const std::string& dev_name, uint16_t d_gain) const {
   return impl_->SetPositionGain(dev_name, std::nullopt, std::nullopt, d_gain);
 }
 
 template <typename T>
-bool Robot<T>::SetPositionPIDGain(const std::string& dev_name, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const{
+bool Robot<T>::SetPositionPIDGain(const std::string& dev_name, uint16_t p_gain, uint16_t i_gain,
+                                  uint16_t d_gain) const {
   return impl_->SetPositionGain(dev_name, p_gain, i_gain, d_gain);
 }
 
 template <typename T>
-bool Robot<T>::SetPositionPIDGain(const std::string& dev_name, const rb::PIDGain& pid_gain) const{
+bool Robot<T>::SetPositionPIDGain(const std::string& dev_name, const rb::PIDGain& pid_gain) const {
   return impl_->SetPositionGain(dev_name, pid_gain.p_gain, pid_gain.i_gain, pid_gain.d_gain);
 }
+
 template <typename T>
-std::vector<rb::PIDGain> Robot<T>::GetTorsoPositionPIDGains() const{
+std::vector<rb::PIDGain> Robot<T>::GetTorsoPositionPIDGains() const {
   return impl_->GetTorsoPositionPIDGains();
 }
 
 template <typename T>
-std::vector<rb::PIDGain> Robot<T>::GetRightArmPositionPIDGains() const{
+std::vector<rb::PIDGain> Robot<T>::GetRightArmPositionPIDGains() const {
   return impl_->GetRightArmPositionPIDGains();
 }
 
 template <typename T>
-std::vector<rb::PIDGain> Robot<T>::GetLeftArmPositionPIDGains() const{
+std::vector<rb::PIDGain> Robot<T>::GetLeftArmPositionPIDGains() const {
   return impl_->GetLeftArmPositionPIDGains();
 }
 
 template <typename T>
-std::vector<rb::PIDGain> Robot<T>::GetHeadPositionPIDGains() const{
+std::vector<rb::PIDGain> Robot<T>::GetHeadPositionPIDGains() const {
   return impl_->GetHeadPositionPIDGains();
 }
 
 template <typename T>
-rb::PIDGain Robot<T>::GetPositionPIDGain(const std::string& dev_name) const{
+rb::PIDGain Robot<T>::GetPositionPIDGain(const std::string& dev_name) const {
   return impl_->GetPositionPIDGain(dev_name);
 }
 
@@ -1853,13 +1922,33 @@ std::vector<std::pair<std::string, int>> Robot<T>::GetParameterList() const {
 }
 
 template <typename T>
-bool Robot<T>::SetParameter(const std::string& name, const std::string& value) {
-  return impl_->SetParameter(name, value);
+bool Robot<T>::SetParameter(const std::string& name, const std::string& value, bool write_db) {
+  return impl_->SetParameter(name, value, write_db);
 }
 
 template <typename T>
 std::string Robot<T>::GetParameter(const std::string& name) const {
   return impl_->GetParameter(name);
+}
+
+template <typename T>
+bool Robot<T>::FactoryResetParameter(const std::string& name) const {
+  return impl_->FactoryResetParameter(name);
+}
+
+template <typename T>
+void Robot<T>::FactoryResetAllParameters() const {
+  impl_->FactoryResetAllParameters();
+}
+
+template <typename T>
+bool Robot<T>::ResetParameter(const std::string& name) const {
+  return impl_->ResetParameter(name);
+}
+
+template <typename T>
+void Robot<T>::ResetAllParameters() const {
+  impl_->ResetAllParameters();
 }
 
 template <typename T>

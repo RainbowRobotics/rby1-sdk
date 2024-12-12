@@ -5,7 +5,8 @@
 JoystickReceiver::JoystickReceiver(int port, int num_axes, int num_buttons, int num_hats)
     : num_axes_(num_axes), num_buttons_(num_buttons), num_hats_(num_hats),
       stop_flag_(false), socket_(io_service_, udp::endpoint(udp::v4(), port)) {
-    joystick_data_.axes.resize(num_axes_);
+    // joystick_data_.axes.resize(num_axes_);
+    joystick_data_.axes = {0, 0, -1, 0, 0, -1}; // axes 초기화
     joystick_data_.buttons.resize(num_buttons_);
     joystick_data_.hats.resize(4); // 네 방향으로 고정
 }

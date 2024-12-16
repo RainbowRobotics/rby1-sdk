@@ -463,7 +463,7 @@ int main(int argc, char** argv) {
                           .AddCartesianTarget("base", "ee_left", T_left, weight, weight)
                           .AddJointPositionTarget("right_arm_2", 3.141592 / 2., weight)
                           .AddJointPositionTarget("left_arm_2", -3.141592 / 2., weight)
-                          .SetVelocityLimitScaling(0.2)
+                          .SetVelocityLimitScaling(0.05)
                           .SetVelocityTrackingGain(velocity_tracking_gain)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)

@@ -7,7 +7,7 @@ import re
 from rby1_sdk import *
 
 D2R = np.pi / 180  # Degree to Radian conversion factor
-MINIMUM_TIME = 1.7
+MINIMUM_TIME = 2.5
 LINEAR_VELOCITY_LIMIT = 1.5
 ANGULAR_VELOCITY_LIMIT = np.pi * 1.5
 ACCELERATION_LIMIT = 1.0
@@ -450,7 +450,7 @@ def example_optimal_control_1(robot):
                                                                           WEIGHT).add_joint_position_target(
         "right_arm_2", np.pi / 2, WEIGHT).add_joint_position_target("left_arm_2", -np.pi / 2,
                                                                     WEIGHT).set_velocity_limit_scaling(
-        0.2).set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN).set_stop_cost(STOP_COST).set_min_delta_cost(
+        0.05).set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN).set_stop_cost(STOP_COST).set_min_delta_cost(
         MIN_DELTA_COST).set_patience(PATIENCE)
 
     # Send command
@@ -797,8 +797,8 @@ def main(address, power_device, servo):
         sys.exit(1)
     print("Control Manager enabled successfully.")
 
-    if not example_joint_position_command_1(robot):
-        print("finish motion")
+    # if not example_joint_position_command_1(robot):
+    #     print("finish motion")
     if not example_joint_position_command_2(robot):
         print("finish motion")
     if not example_cartesian_command_1(robot):
@@ -823,8 +823,8 @@ def main(address, power_device, servo):
         print("finish motion")
     if not example_mixed_command_2(robot):
         print("finish motion")
-    if not go_to_home_pose_1(robot):
-        print("finish motion")
+    # if not go_to_home_pose_1(robot):
+    #     print("finish motion")
     if not go_to_home_pose_2(robot):
         print("finish motion")
 

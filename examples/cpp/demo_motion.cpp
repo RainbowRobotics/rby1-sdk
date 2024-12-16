@@ -221,7 +221,7 @@ int main(int argc, char** argv) {
                                                   .AddTarget("base", "ee_right", T_right, linear_velocity_limit,
                                                              angular_velocity_limit, acceleration_limit / 2)
                                                   /* Need to be verified */
-                                                  .AddJointPositionTarget("right_arm_2", 45 * M_PI / 180, 3.14, 6.28)
+                                                  .AddJointPositionTarget("right_arm_2", -10 * M_PI / 180, 3.14, 6.28)
                                                   .SetMinimumTime(minimum_time * 3)
                                                   .SetStopOrientationTrackingError(stop_orientation_tracking_error)
                                                   .SetStopPositionTrackingError(stop_position_tracking_error))
@@ -264,6 +264,8 @@ int main(int argc, char** argv) {
                                      acceleration_limit)
                           .AddTarget("base", "ee_left", T_left, linear_velocity_limit, angular_velocity_limit,
                                      acceleration_limit)
+                          .AddJointPositionTarget("right_arm_1", -30 * M_PI / 180, {}, {})
+                          .AddJointPositionTarget("left_arm_1", 30 * M_PI / 180, {}, {})
                           .SetStopPositionTrackingError(stop_orientation_tracking_error)
                           .SetStopOrientationTrackingError(stop_position_tracking_error)
                           .SetMinimumTime(minimum_time))))

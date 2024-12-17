@@ -750,6 +750,27 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.control_manager_state().state() == api::ControlManagerState::CONTROL_MANAGER_STATE_IDLE;
   }
 
+  bool CancelControl() const {
+    api::CancelControlRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::CancelControlResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = control_manager_service_->CancelControl(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() == api::CommonError::CODE_OK) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const {
     api::ToolFlangePowerCommandRequest::Command cmd;
     if (voltage == 0) {
@@ -979,7 +1000,6 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
         }
       }
     }
-
     return false;
   }
 
@@ -1848,6 +1868,11 @@ bool Robot<T>::DisableControlManager() const {
 template <typename T>
 bool Robot<T>::ResetFaultControlManager() const {
   return impl_->ResetFaultControlManager();
+}
+
+template <typename T>
+bool Robot<T>::CancelControl() const {
+  return impl_->CancelControl();
 }
 
 template <typename T>

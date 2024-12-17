@@ -78,3 +78,13 @@ message SetTimeScaleResponse {
 
   double current_time_scale = 2;
 }
+
+message CancelControlRequest {
+  // Request header
+  RequestHeader request_header = 1;
+}
+
+message CancelControlResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+}

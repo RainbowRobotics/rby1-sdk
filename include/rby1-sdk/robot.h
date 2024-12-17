@@ -100,6 +100,8 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool ResetFaultControlManager() const;
 
+  bool CancelControl() const;
+
   bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const;
 
   void StartStateUpdate(const std::function<void(const RobotState<T>&)>& cb, double rate);

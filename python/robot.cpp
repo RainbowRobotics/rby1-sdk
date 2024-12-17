@@ -158,6 +158,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
            py::call_guard<py::gil_scoped_release>())
       .def("disable_control_manager", &Robot<T>::DisableControlManager, py::call_guard<py::gil_scoped_release>())
       .def("reset_fault_control_manager", &Robot<T>::ResetFaultControlManager, py::call_guard<py::gil_scoped_release>())
+      .def("cancel_control", &Robot<T>::CancelControl, py::call_guard<py::gil_scoped_release>())
       .def("set_tool_flange_output_voltage", &Robot<T>::SetToolFlangeOutputVoltage,
            py::call_guard<py::gil_scoped_release>())
       .def(

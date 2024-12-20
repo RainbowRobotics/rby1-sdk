@@ -10,6 +10,23 @@ namespace py = pybind11;
 using namespace rb;
 using namespace py::literals;
 
+void bind_pid_gain(pybind11::module_& m) {
+  py::class_<PIDGain>(m, "PIDGain")
+      .def(py::init<>())
+      .def(py::init<uint16_t, uint16_t, uint16_t>())
+      .def_readonly("p_gain", &PIDGain::p_gain)
+      .def_readonly("i_gain", &PIDGain::i_gain)
+      .def_readonly("d_gain", &PIDGain::d_gain)
+      .def("__repr__", [](const PIDGain& self) {
+        std::stringstream ss;
+        ss << "PIDGain("                  //
+           << "p_gain=" << self.p_gain    //
+           << ", i_gain=" << self.i_gain  //
+           << ", d_gain=" << self.d_gain << ")";
+        return ss.str();
+      });
+}
+
 template <typename T>
 void bind_robot_command_handler(py::module_& m, const std::string& handler_name) {
   py::class_<RobotCommandHandler<T>>(m, handler_name.c_str())
@@ -132,15 +149,35 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("power_on", &Robot<T>::PowerOn, "dev_name"_a, py::call_guard<py::gil_scoped_release>())
       .def("power_off", &Robot<T>::PowerOff, "dev_name"_a, py::call_guard<py::gil_scoped_release>())
       .def("is_power_on", &Robot<T>::IsPowerOn, "dev_name"_a)
-      .def("servo_on", &Robot<T>::ServoOn, "dev_name"_a)
+      .def("servo_on", &Robot<T>::ServoOn, "dev_name"_a, py::call_guard<py::gil_scoped_release>())
       .def("is_servo_on", &Robot<T>::IsServoOn, "dev_name"_a)
+      .def("break_engage", &Robot<T>::BreakEngage, "dev_name"_a)
+      .def("break_release", &Robot<T>::BreakRelease, "dev_name"_a)
+      .def("home_offset_reset", &Robot<T>::HomeOffsetReset, "dev_name"_a)
       .def("enable_control_manager", &Robot<T>::EnableControlManager, py::arg("unlimited_mode_enabled") = false,
            py::call_guard<py::gil_scoped_release>())
       .def("disable_control_manager", &Robot<T>::DisableControlManager, py::call_guard<py::gil_scoped_release>())
       .def("reset_fault_control_manager", &Robot<T>::ResetFaultControlManager, py::call_guard<py::gil_scoped_release>())
+      .def("cancel_control", &Robot<T>::CancelControl, py::call_guard<py::gil_scoped_release>())
       .def("set_tool_flange_output_voltage", &Robot<T>::SetToolFlangeOutputVoltage,
            py::call_guard<py::gil_scoped_release>())
-      .def("start_state_update", &Robot<T>::StartStateUpdate, "cb"_a, "rate"_a)
+      .def(
+          "start_state_update",
+          [](Robot<T>& self, py::function& cb, double rate) {
+            pybind11::module inspect_module = pybind11::module::import("inspect");
+            pybind11::object result = inspect_module.attr("signature")(cb).attr("parameters");
+            auto num_params = pybind11::len(result);
+
+            if (num_params == 1) {
+              self.StartStateUpdate(py::cast<const std::function<void(const RobotState<T>&)>>(cb), rate);
+            } else if (num_params == 2) {
+              self.StartStateUpdate(
+                  py::cast<const std::function<void(const RobotState<T>&, const ControlManagerState&)>>(cb), rate);
+            } else {
+              throw std::invalid_argument("The number of arguments of 'cb' can be one or two.");
+            }
+          },
+          "cb"_a, "rate"_a)
       .def("stop_state_update", &Robot<T>::StopStateUpdate, py::call_guard<py::gil_scoped_release>())
       .def("start_log_stream", &Robot<T>::StartLogStream, "cb"_a, "rate"_a)
       .def("stop_log_stream", &Robot<T>::StopLogStream)
@@ -162,19 +199,54 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
           "control"_a, "port"_a = 0, "priority"_a = 1, py::call_guard<py::gil_scoped_release>())
       .def("reset_odometry", &Robot<T>::ResetOdometry, "angle"_a, "position"_a)
       .def("get_parameter_list", &Robot<T>::GetParameterList)
-      .def("set_parameter", &Robot<T>::SetParameter, "name"_a, "value"_a)
+      .def("set_parameter", &Robot<T>::SetParameter, "name"_a, "value"_a, "write_db"_a = true)
       .def("get_parameter", &Robot<T>::GetParameter, "name"_a)
-      .def("reset_parameter_to_default", &Robot<T>::ResetParameterToDefault, "name"_a)
-      .def("reset_all_parameters_to_default", &Robot<T>::ResetAllParametersToDefault)
+      .def(
+          "reset_parameter_to_default",
+          [](Robot<T>& self, const std::string& name) {
+            PyErr_WarnEx(PyExc_DeprecationWarning,
+                         "reset_parameter_to_default() is deprecated, use factory_reset_parameter() instead.", 1);
+            return self.ResetParameterToDefault(name);
+          },
+          "name"_a)
+      .def("reset_all_parameters_to_default",
+           [](Robot<T>& self) {
+             PyErr_WarnEx(
+                 PyExc_DeprecationWarning,
+                 "reset_all_parameters_to_default() is deprecated, use factory_reset_all_parameters() instead.", 1);
+             self.ResetAllParametersToDefault();
+           })
+      .def("reset_parameter", &Robot<T>::ResetParameter, "name"_a)
+      .def("reset_all_parameters", &Robot<T>::ResetAllParameters)
+      .def("factory_reset_parameter", &Robot<T>::FactoryResetParameter, "name"_a)
+      .def("factory_reset_all_parameters", &Robot<T>::FactoryResetAllParameters)
       .def("get_robot_model", &Robot<T>::GetRobotModel)
       .def("import_robot_model", &Robot<T>::ImportRobotModel, "name"_a, "model"_a)
       .def("sync_time", &Robot<T>::SyncTime)
       .def("has_established_time_sync", &Robot<T>::HasEstablishedTimeSync)
       .def("start_time_sync", &Robot<T>::StartTimeSync, "period_sec"_a)
       .def("stop_time_sync", &Robot<T>::StopTimeSync, py::call_guard<py::gil_scoped_release>())
-      .def("get_dynamics", &Robot<T>::GetDynamics, "urdf_model"_a = "");
+      .def("get_dynamics", &Robot<T>::GetDynamics, "urdf_model"_a = "")
+
+      .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
+      .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)
+      .def("set_position_d_gain", &Robot<T>::SetPositionDGain, "dev_name"_a, "d_gain"_a)
+      .def("set_position_pid_gain",
+           static_cast<bool (Robot<T>::*)(const std::string&, uint16_t, uint16_t, uint16_t) const>(
+               &Robot<T>::SetPositionPIDGain),
+           "dev_name"_a, "p_gain"_a, "i_gain"_a, "d_gain"_a)
+      .def("set_position_pid_gain",
+           static_cast<bool (Robot<T>::*)(const std::string&, const rb::PIDGain&) const>(&Robot<T>::SetPositionPIDGain),
+           "dev_name"_a, "pid_gain"_a)
+
+      .def("get_torso_position_pid_gains", &Robot<T>::GetTorsoPositionPIDGains)
+      .def("get_right_arm_position_pid_gains", &Robot<T>::GetRightArmPositionPIDGains)
+      .def("get_left_arm_position_pid_gains", &Robot<T>::GetLeftArmPositionPIDGains)
+      .def("get_head_position_pid_gains", &Robot<T>::GetHeadPositionPIDGains)
+      .def("get_position_pid_gain", &Robot<T>::GetPositionPIDGain, "dev_name"_a);
 }
 
 void pybind11_robot(py::module_& m) {
+  bind_pid_gain(m);
   bind_robot<y1_model::A>(m, "Robot_A");
 }

@@ -55,8 +55,9 @@ std::vector<int> MasterArm::Initialize() {
     exit(1);
   }
 
-  handler_->SetTorqueConstant(
-      {1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043, 1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043});
+  torque_constant_ = {1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043,
+                      1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043};
+  handler_->SetTorqueConstant(torque_constant_);
 
   active_ids_ = active_ids;
   return active_ids;
@@ -66,6 +67,8 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
   if (is_running_.load()) {
     return;
   }
+  is_running_ = true;
+  control_ = control;
 
   auto rc = dyn::LoadRobotFromURDF(model_path_, "Base");
   dyn_robot_ = std::make_shared<dyn::Robot<kDOF>>(rc);
@@ -113,16 +116,35 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
         auto temp_operation_mode_vector = handler_->BulkReadOperationMode(active_ids_);
         if (temp_operation_mode_vector.has_value()) {
           for (auto const& ret : temp_operation_mode_vector.value()) {
-            state_.operation_mode(ret.first) = ret.second;
+            if (ret.first < kDOF) {
+              state_.operation_mode(ret.first) = ret.second;
+            }
           }
         }
 
-        std::optional<std::vector<std::pair<int, double>>> temp_q_joint_vector = handler_->BulkReadEncoder(active_ids_);
-        if (temp_q_joint_vector.has_value()) {
-          for (auto const& ret : temp_q_joint_vector.value()) {
-            state_.q_joint(ret.first) = ret.second;
+        // std::optional<std::vector<std::pair<int, double>>> temp_q_joint_vector = handler_->BulkReadEncoder(active_ids_);
+        // if (temp_q_joint_vector.has_value()) {
+        //   for (auto const& ret : temp_q_joint_vector.value()) {
+        //     state_.q_joint(ret.first) = ret.second;
+        //   }
+        //   state_updated_ = true;
+        // } else {
+        //   return;
+        // }
+
+        std::optional<std::vector<std::pair<int, DynamixelBus::MotorState>>> temp_ms_vector =
+            handler_->BulkReadMotorState(active_ids_);
+        if (temp_ms_vector.has_value()) {
+          for (auto const& ret : temp_ms_vector.value()) {
+            if (ret.first < kDOF) {
+              state_.q_joint(ret.first) = ret.second.position;
+              state_.qvel_joint(ret.first) = ret.second.velocity;
+              state_.torque_joint(ret.first) = ret.second.current * torque_constant_[ret.first] / kTorqueScaling;
+            }
           }
           state_updated_ = true;
+        } else {
+          return;
         }
 
         dyn_state_->SetQ(state_.q_joint);
@@ -133,8 +155,8 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
         state_.T_left = dyn_robot_->ComputeTransformation(dyn_state_, kBaseLinkId, kLeftLinkId);
 
         // Control
-        if (control && state_updated_) {
-          auto input = control(state_);
+        if (control_ && state_updated_) {
+          auto input = control_(state_);
 
           std::vector<std::pair<int, int>> changed_id_mode;
           std::vector<int> changed_id;
@@ -150,6 +172,7 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
               if (state_.operation_mode(i) == DynamixelBus::kCurrentControlMode) {
                 id_torque.emplace_back(i, input.target_torque(i));
               } else if (state_.operation_mode(i) == DynamixelBus::kCurrentBasedPositionControlMode) {
+                id_torque.emplace_back(i, kMaximumTorque);
                 id_position.emplace_back(i, input.target_position(i));
               }
             }
@@ -164,8 +187,6 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
         }
       },
       std::chrono::nanoseconds((long)(control_period_ * 1e9)));
-
-  is_running_ = true;
 }
 
 void MasterArm::StopControl() {
@@ -183,6 +204,9 @@ void MasterArm::StopControl() {
       handler_->SendTorqueEnable(id, DynamixelBus::kTorqueDisable);
     }
   }
+
+  is_running_ = false;
+  control_ = nullptr;
 }
 
 }  // namespace rb::upc

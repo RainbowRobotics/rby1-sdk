@@ -2,23 +2,22 @@ import rby1_sdk
 import numpy as np
 import sys
 import time
-
+import argparse
+import re
 from rby1_sdk import *
 
-ROBOT_ADDRESS = "192.168.30.1:50051"
-
-print("Attempting to connect to the robot...")
-
-robot = rby1_sdk.create_robot_a(ROBOT_ADDRESS)
-
-if not robot.connect():
-    print("Error: Unable to establish connection to the robot at")
-    sys.exit(1)
-
-print("Successfully connected to the robot")
-
-print("Starting state update...")
-
+D2R = np.pi / 180  # Degree to Radian conversion factor
+MINIMUM_TIME = 2.5
+LINEAR_VELOCITY_LIMIT = 1.5
+ANGULAR_VELOCITY_LIMIT = np.pi * 1.5
+ACCELERATION_LIMIT = 1.0
+STOP_ORIENTATION_TRACKING_ERROR = 1e-5
+STOP_POSITION_TRACKING_ERROR = 1e-5
+WEIGHT = 0.0015
+STOP_COST = 1e-2
+VELOCITY_TRACKING_GAIN = 0.01
+MIN_DELTA_COST = 1e-4
+PATIENCE = 10
 
 def cb(rs):
     print(f"Timestamp: {rs.timestamp - rs.ft_sensor_right.time_since_last_update}")
@@ -26,65 +25,6 @@ def cb(rs):
     print(f"waist [deg]: {position[2:2 + 6]}")
     print(f"right arm [deg]: {position[8:8 + 7]}")
     print(f"left arm [deg]: {position[15:15 + 8]}")
-
-
-robot.start_state_update(cb, 0.1)
-
-print("Checking power status...")
-if not robot.is_power_on(".*"):
-    print("Power is currently OFF. Attempting to power on...")
-    if not robot.power_on(".*"):
-        print("Error: Failed to power on the robot.")
-        sys.exit(1)
-    print("Robot powered on successfully.")
-else:
-    print("Power is already ON.")
-
-print("Checking servo status...")
-if not robot.is_servo_on(".*"):
-    print("Servo is currently OFF. Attempting to activate servo...")
-    if not robot.servo_on(".*"):
-        print("Error: Failed to activate servo.")
-        sys.exit(1)
-    print("Servo activated successfully.")
-else:
-    print("Servo is already ON.")
-
-control_manager_state = robot.get_control_manager_state()
-
-if (
-        control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
-
-    if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:
-        print("Warning: Detected a Major Fault in the Control Manager.")
-    else:
-        print("Warning: Detected a Minor Fault in the Control Manager.")
-
-    print("Attempting to reset the fault...")
-    if not robot.reset_fault_control_manager():
-        print("Error: Unable to reset the fault in the Control Manager.")
-        sys.exit(1)
-    print("Fault reset successfully.")
-
-print("Control Manager state is normal. No faults detected.")
-
-print("Enabling the Control Manager...")
-if not robot.enable_control_manager():
-    print("Error: Failed to enable the Control Manager.")
-    sys.exit(1)
-print("Control Manager enabled successfully.")
-
-robot.set_parameter("default.acceleration_limit_scaling", "0.8")
-robot.set_parameter("joint_position_command.cutoff_frequency", "5")
-robot.set_parameter("cartesian_command.cutoff_frequency", "5")
-robot.set_parameter("default.linear_acceleration_limit", "5")
-
-print("parameters setting is done")
-
-minimum_time = 5.0/3.0
-
-D2R = np.pi / 180  # Degrees to radians conversion factor
-
 
 def example_joint_position_command_1(robot):
     print("joint position command example 1")
@@ -103,17 +43,17 @@ def example_joint_position_command_1(robot):
             BodyComponentBasedCommandBuilder()
             .set_torso_command(
                 JointPositionCommandBuilder()
-                .set_minimum_time(minimum_time)
+                .set_minimum_time(MINIMUM_TIME)
                 .set_position(q_joint_waist)
             )
             .set_right_arm_command(
                 JointPositionCommandBuilder()
-                .set_minimum_time(minimum_time)
+                .set_minimum_time(MINIMUM_TIME)
                 .set_position(q_joint_right_arm)
             )
             .set_left_arm_command(
                 JointPositionCommandBuilder()
-                .set_minimum_time(minimum_time)
+                .set_minimum_time(MINIMUM_TIME)
                 .set_position(q_joint_left_arm)
             )
         )
@@ -145,7 +85,7 @@ def example_joint_position_command_2(robot):
             BodyCommandBuilder().set_command(
                 JointPositionCommandBuilder()
                 .set_position(q)
-                .set_minimum_time(minimum_time)
+                .set_minimum_time(MINIMUM_TIME)
             )
         )
     )
@@ -157,16 +97,6 @@ def example_joint_position_command_2(robot):
         return 1
 
     return 0
-
-
-D2R = np.pi / 180  # Degree to Radian conversion factor
-minimum_time = 4.0 /3.0
-angular_velocity_limit = np.pi * 1.5
-linear_velocity_limit = 1.5
-acceleration_limit = 1.0
-stop_orientation_tracking_error = 1e-5
-stop_position_tracking_error = 1e-5
-
 
 def example_cartesian_command_1(robot):
     print("Cartesian command example 1")
@@ -197,27 +127,27 @@ def example_cartesian_command_1(robot):
             BodyComponentBasedCommandBuilder()
             .set_torso_command(
                 CartesianCommandBuilder()
-                .add_target("base", "link_torso_5", T_torso, linear_velocity_limit,
-                            angular_velocity_limit, acceleration_limit / 2)
-                .set_minimum_time(minimum_time)
-                .set_stop_orientation_tracking_error(stop_orientation_tracking_error)
-                .set_stop_position_tracking_error(stop_position_tracking_error)
+                .add_target("base", "link_torso_5", T_torso, LINEAR_VELOCITY_LIMIT,
+                            ANGULAR_VELOCITY_LIMIT, ACCELERATION_LIMIT / 2)
+                .set_minimum_time(MINIMUM_TIME)
+                .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
+                .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
             )
             .set_right_arm_command(
                 CartesianCommandBuilder()
-                .add_target("base", "ee_right", T_right, linear_velocity_limit,
-                            angular_velocity_limit, acceleration_limit / 2)
-                .set_minimum_time(minimum_time * 3)
-                .set_stop_orientation_tracking_error(stop_orientation_tracking_error)
-                .set_stop_position_tracking_error(stop_position_tracking_error)
+                .add_target("base", "ee_right", T_right, LINEAR_VELOCITY_LIMIT,
+                            ANGULAR_VELOCITY_LIMIT, ACCELERATION_LIMIT / 2)
+                .set_minimum_time(MINIMUM_TIME * 3)
+                .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
+                .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
             )
             .set_left_arm_command(
                 CartesianCommandBuilder()
-                .add_target("base", "ee_left", T_left, linear_velocity_limit,
-                            angular_velocity_limit, acceleration_limit / 2)
-                .set_minimum_time(minimum_time * 3)
-                .set_stop_orientation_tracking_error(stop_orientation_tracking_error)
-                .set_stop_position_tracking_error(stop_position_tracking_error)
+                .add_target("base", "ee_left", T_left, LINEAR_VELOCITY_LIMIT,
+                            ANGULAR_VELOCITY_LIMIT, ACCELERATION_LIMIT / 2)
+                .set_minimum_time(MINIMUM_TIME * 3)
+                .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
+                .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
             )
         )
     )
@@ -261,13 +191,13 @@ def example_cartesian_command_2(robot):
     rc = RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder().set_body_command(
             CartesianCommandBuilder()
-            .add_target("base", "link_torso_5", T_torso, linear_velocity_limit, angular_velocity_limit,
-                        acceleration_limit)
-            .add_target("base", "ee_right", T_right, linear_velocity_limit, angular_velocity_limit, acceleration_limit)
-            .add_target("base", "ee_left", T_left, linear_velocity_limit, angular_velocity_limit, acceleration_limit)
-            .set_stop_position_tracking_error(stop_position_tracking_error)
-            .set_stop_orientation_tracking_error(stop_orientation_tracking_error)
-            .set_minimum_time(minimum_time)
+            .add_target("base", "link_torso_5", T_torso, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT,
+                        ACCELERATION_LIMIT)
+            .add_target("base", "ee_right", T_right, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT, ACCELERATION_LIMIT)
+            .add_target("base", "ee_left", T_left, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT, ACCELERATION_LIMIT)
+            .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
+            .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
+            .set_minimum_time(MINIMUM_TIME)
         )
     )
 
@@ -310,15 +240,15 @@ def example_cartesian_command_3(robot):
     rc = RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder().set_body_command(
             CartesianCommandBuilder()
-            .add_target("base", "link_torso_5", T_torso, linear_velocity_limit, angular_velocity_limit,
-                        acceleration_limit)
-            .add_target("link_torso_5", "ee_right", T_right, linear_velocity_limit, angular_velocity_limit,
-                        acceleration_limit)
-            .add_target("link_torso_5", "ee_left", T_left, linear_velocity_limit, angular_velocity_limit,
-                        acceleration_limit)
-            .set_stop_position_tracking_error(stop_position_tracking_error)
-            .set_stop_orientation_tracking_error(stop_orientation_tracking_error)
-            .set_minimum_time(minimum_time)
+            .add_target("base", "link_torso_5", T_torso, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT,
+                        ACCELERATION_LIMIT)
+            .add_target("link_torso_5", "ee_right", T_right, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT,
+                        ACCELERATION_LIMIT)
+            .add_target("link_torso_5", "ee_left", T_left, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT,
+                        ACCELERATION_LIMIT)
+            .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
+            .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
+            .set_minimum_time(MINIMUM_TIME)
         )
     )
 
@@ -329,15 +259,6 @@ def example_cartesian_command_3(robot):
         return 1
 
     return 0
-
-
-D2R = np.pi / 180  # Degree to Radian conversion factor
-minimum_time = 4.0 /3.0
-linear_velocity_limit = 1.5
-angular_velocity_limit = np.pi * 1.5
-acceleration_limit = 1.0
-stop_orientation_tracking_error = 1e-5
-stop_position_tracking_error = 1e-5
 
 
 def example_impedance_control_command_1(robot):
@@ -368,17 +289,17 @@ def example_impedance_control_command_1(robot):
 
     # Build commands
     torso_command = ImpedanceControlCommandBuilder().set_command_header(
-        CommandHeaderBuilder().set_control_hold_time(minimum_time)
+        CommandHeaderBuilder().set_control_hold_time(MINIMUM_TIME)
     ).set_reference_link_name("base").set_link_name("link_torso_5").set_translation_weight(
         [1000, 1000, 1000]).set_rotation_weight([100, 100, 100]).set_transformation(T_torso)
 
     right_arm_command = ImpedanceControlCommandBuilder().set_command_header(
-        CommandHeaderBuilder().set_control_hold_time(minimum_time)
+        CommandHeaderBuilder().set_control_hold_time(MINIMUM_TIME)
     ).set_reference_link_name("link_torso_5").set_link_name("ee_right").set_translation_weight(
         [1000, 1000, 1000]).set_rotation_weight([50, 50, 50]).set_transformation(T_right)
 
     left_arm_command = ImpedanceControlCommandBuilder().set_command_header(
-        CommandHeaderBuilder().set_control_hold_time(minimum_time)
+        CommandHeaderBuilder().set_control_hold_time(MINIMUM_TIME)
     ).set_reference_link_name("link_torso_5").set_link_name("ee_left").set_translation_weight(
         [1000, 1000, 1000]).set_rotation_weight([50, 50, 50]).set_transformation(T_left)
 
@@ -429,10 +350,10 @@ def example_relative_command_1(robot):
 
     # Build Cartesian command
     right_arm_command = (CartesianCommandBuilder()
-                         .set_minimum_time(minimum_time)
-                         .set_stop_orientation_tracking_error(stop_orientation_tracking_error)
-                         .set_stop_position_tracking_error(stop_position_tracking_error)
-                         .add_target("base", "ee_right", T_right, linear_velocity_limit, angular_velocity_limit, acceleration_limit)
+                         .set_minimum_time(MINIMUM_TIME)
+                         .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
+                         .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
+                         .add_target("base", "ee_right", T_right, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT, ACCELERATION_LIMIT)
                          )
 
     # Define transformation difference
@@ -442,7 +363,7 @@ def example_relative_command_1(robot):
     # Build Impedance control command
     left_arm_command = (ImpedanceControlCommandBuilder()
                         .set_command_header(CommandHeaderBuilder()
-                                            .set_control_hold_time(minimum_time * 2.0)
+                                            .set_control_hold_time(MINIMUM_TIME * 2.0)
                                             )
                         .set_reference_link_name("ee_right")
                         .set_link_name("ee_left")
@@ -469,16 +390,6 @@ def example_relative_command_1(robot):
     return 0
 
 
-# Constants
-D2R = np.pi / 180  # Degree to Radian conversion factor
-minimum_time = 4.0/3.0
-linear_velocity_limit = 1.5
-angular_velocity_limit = np.pi * 1.5
-acceleration_limit = 1.0
-stop_orientation_tracking_error = 1e-5
-stop_position_tracking_error = 1e-5
-
-
 def example_joint_position_command_3(robot):
     print("Joint position command example 3")
 
@@ -491,7 +402,7 @@ def example_joint_position_command_3(robot):
     q = np.concatenate((q_joint_waist, q_joint_right_arm, q_joint_left_arm))
 
     # Build joint position command
-    joint_position_command = JointPositionCommandBuilder().set_position(q).set_minimum_time(minimum_time)
+    joint_position_command = JointPositionCommandBuilder().set_position(q).set_minimum_time(MINIMUM_TIME)
 
     # Send command
     rc = RobotCommandBuilder().set_command(
@@ -534,13 +445,13 @@ def example_optimal_control_1(robot):
 
     # Build optimal control command
     optimal_control_command = OptimalControlCommandBuilder().add_cartesian_target("base", "link_torso_5", T_torso,
-                                                                                  weight, weight).add_cartesian_target(
-        "base", "ee_right", T_right, weight, weight).add_cartesian_target("base", "ee_left", T_left, weight,
-                                                                          weight).add_joint_position_target(
-        "right_arm_2", np.pi / 2, weight).add_joint_position_target("left_arm_2", -np.pi / 2,
-                                                                    weight).set_velocity_limit_scaling(
-        0.2).set_velocity_tracking_gain(velocity_tracking_gain).set_stop_cost(stop_cost).set_min_delta_cost(
-        min_delta_cost).set_patience(patience)
+                                                                                  WEIGHT, WEIGHT).add_cartesian_target(
+        "base", "ee_right", T_right, WEIGHT, WEIGHT).add_cartesian_target("base", "ee_left", T_left, WEIGHT,
+                                                                          WEIGHT).add_joint_position_target(
+        "right_arm_2", np.pi / 2, WEIGHT).add_joint_position_target("left_arm_2", -np.pi / 2,
+                                                                    WEIGHT).set_velocity_limit_scaling(
+        0.05).set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN).set_stop_cost(STOP_COST).set_min_delta_cost(
+        MIN_DELTA_COST).set_patience(PATIENCE)
 
     # Send command
     rc = RobotCommandBuilder().set_command(
@@ -583,15 +494,15 @@ def example_optimal_control_2(robot):
 
     # Build optimal control command
     optimal_control_command = (OptimalControlCommandBuilder()
-                               .add_cartesian_target("base", "link_torso_5", T_torso, weight, weight)
-                               .add_cartesian_target("base", "ee_right", T_right, weight, weight)
-                               .add_cartesian_target("base", "ee_left", T_left, weight, weight)
-                               .add_joint_position_target("right_arm_2", 0.0, weight)
-                               .add_joint_position_target("left_arm_2", -0.0, weight)
-                               .set_velocity_tracking_gain(velocity_tracking_gain)
-                               .set_stop_cost(stop_cost)
-                               .set_min_delta_cost(min_delta_cost)
-                               .set_patience(patience))
+                               .add_cartesian_target("base", "link_torso_5", T_torso, WEIGHT, WEIGHT)
+                               .add_cartesian_target("base", "ee_right", T_right, WEIGHT, WEIGHT)
+                               .add_cartesian_target("base", "ee_left", T_left, WEIGHT, WEIGHT)
+                               .add_joint_position_target("right_arm_2", 0.0, WEIGHT)
+                               .add_joint_position_target("left_arm_2", -0.0, WEIGHT)
+                               .set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN)
+                               .set_stop_cost(STOP_COST)
+                               .set_min_delta_cost(MIN_DELTA_COST)
+                               .set_patience(PATIENCE))
 
     # Send command
     rc = RobotCommandBuilder().set_command(
@@ -605,17 +516,6 @@ def example_optimal_control_2(robot):
         return 1
 
     return 0
-
-
-D2R = np.pi / 180  # Degree to Radian conversion factor
-minimum_time = 4.0/3.0
-# weight = 0.001
-weight = 0.0015
-stop_cost = 1e-2
-velocity_tracking_gain = 0.01
-min_delta_cost = 1e-4
-patience = 10
-
 
 def example_optimal_control_3(robot):
     print("Optimal control example 3")
@@ -646,18 +546,18 @@ def example_optimal_control_3(robot):
 
     # Build optimal control command
     optimal_control_command = (OptimalControlCommandBuilder()
-                                .set_center_of_mass_target("base", COM, weight)
-                                .add_cartesian_target("base", "ee_left", T_left, weight, weight)
-                                .add_cartesian_target("base", "ee_right", T_right, weight, weight)
-                                .add_joint_position_target("torso_4", 0, weight)
-                                .add_joint_position_target("torso_3", np.pi/4, weight)
-                                .add_joint_position_target("torso_2", -np.pi / 2, weight)
-                                .add_joint_position_target("right_arm_2", np.pi / 4, weight)
-                                .add_joint_position_target("left_arm_2", -np.pi / 4,weight)
-                                .set_velocity_tracking_gain(velocity_tracking_gain)
-                                .set_stop_cost(stop_cost)
-                                .set_min_delta_cost(min_delta_cost)
-                                .set_patience(patience)
+                                .set_center_of_mass_target("base", COM, WEIGHT)
+                                .add_cartesian_target("base", "ee_left", T_left, WEIGHT, WEIGHT)
+                                .add_cartesian_target("base", "ee_right", T_right, WEIGHT, WEIGHT)
+                                .add_joint_position_target("torso_4", 0, WEIGHT)
+                                .add_joint_position_target("torso_3", np.pi/4, WEIGHT)
+                                .add_joint_position_target("torso_2", -np.pi / 2, WEIGHT)
+                                .add_joint_position_target("right_arm_2", np.pi / 4, WEIGHT)
+                                .add_joint_position_target("left_arm_2", -np.pi / 4,WEIGHT)
+                                .set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN)
+                                .set_stop_cost(STOP_COST)
+                                .set_min_delta_cost(MIN_DELTA_COST)
+                                .set_patience(PATIENCE)
                                 )
 
     # Send command
@@ -695,20 +595,20 @@ def example_mixed_command_1(robot):
     T_left[:3, 3] = [0.5, 0.3, 1.0]
 
     torso_command = (OptimalControlCommandBuilder()
-                     .set_center_of_mass_target("base", np.array([0, 0, 0.4]), weight * 1e-1)
-                     .add_cartesian_target("base", "link_torso_5", T_torso, 0, weight)
-                     .add_joint_position_target("torso_2", -np.pi / 2, weight)
-                     .add_joint_position_target("torso_0", 0, weight)
-                     .set_stop_cost(stop_cost * 1e1)
-                     .set_velocity_tracking_gain(velocity_tracking_gain)
-                     .set_min_delta_cost(min_delta_cost)
-                     .set_patience(patience))
+                     .set_center_of_mass_target("base", np.array([0, 0, 0.4]), WEIGHT * 1e-1)
+                     .add_cartesian_target("base", "link_torso_5", T_torso, 0, WEIGHT)
+                     .add_joint_position_target("torso_2", -np.pi / 2, WEIGHT)
+                     .add_joint_position_target("torso_0", 0, WEIGHT)
+                     .set_stop_cost(STOP_COST * 1e1)
+                     .set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN)
+                     .set_min_delta_cost(MIN_DELTA_COST)
+                     .set_patience(PATIENCE))
 
     right_arm_command = (JointPositionCommandBuilder()
                          .set_position(np.array([0, -np.pi / 4, 0, -np.pi / 2, 0, 0, 0]))
                          .set_velocity_limit(np.array([np.pi]) * 7)
                          .set_acceleration_limit(np.array([1.0]) * 7)
-                         .set_minimum_time(minimum_time))
+                         .set_minimum_time(MINIMUM_TIME))
 
     # Send command
     rv = robot.send_command(RobotCommandBuilder().set_command(
@@ -751,23 +651,23 @@ def example_mixed_command_2(robot):
     T_left[:3, 3] = [0.5, 0.3, 1.0]
 
     torso_command = (OptimalControlCommandBuilder()
-                     .set_center_of_mass_target("base", np.array([0, 0, 0.4]), weight * 1e-1)
-                     .add_cartesian_target("base", "link_torso_5", T_torso, 0, weight)
-                     .add_joint_position_target("torso_2", -np.pi / 2, weight)
-                     .add_joint_position_target("torso_0", 0, weight)
-                     .set_stop_cost(stop_cost)
-                     .set_velocity_tracking_gain(velocity_tracking_gain)
-                     .set_min_delta_cost(min_delta_cost / 10)
-                     .set_patience(patience * 10))
+                     .set_center_of_mass_target("base", np.array([0, 0, 0.4]), WEIGHT * 1e-1)
+                     .add_cartesian_target("base", "link_torso_5", T_torso, 0, WEIGHT)
+                     .add_joint_position_target("torso_2", -np.pi / 2, WEIGHT)
+                     .add_joint_position_target("torso_0", 0, WEIGHT)
+                     .set_stop_cost(STOP_COST)
+                     .set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN)
+                     .set_min_delta_cost(MIN_DELTA_COST / 10)
+                     .set_patience(PATIENCE * 10))
 
     right_arm_command = (JointPositionCommandBuilder()
                          .set_position(np.array([0, -np.pi / 4, 0, -np.pi / 2, 0, 0, 0]))
                          .set_velocity_limit(np.array([np.pi]) * 7)
                          .set_acceleration_limit(np.array([1.0]) * 7)
-                         .set_minimum_time(minimum_time))
+                         .set_minimum_time(MINIMUM_TIME))
 
     left_arm_command = (GravityCompensationCommandBuilder()
-                        .set_command_header(CommandHeaderBuilder().set_control_hold_time(minimum_time))
+                        .set_command_header(CommandHeaderBuilder().set_control_hold_time(MINIMUM_TIME))
                         .set_on(True))
 
     # Send command
@@ -803,11 +703,11 @@ def go_to_home_pose_1(robot):
         ComponentBasedCommandBuilder()
         .set_body_command(BodyComponentBasedCommandBuilder()
         .set_torso_command(
-            JointPositionCommandBuilder().set_minimum_time(minimum_time * 2).set_position(q_joint_waist))
+            JointPositionCommandBuilder().set_minimum_time(MINIMUM_TIME * 2).set_position(q_joint_waist))
         .set_right_arm_command(
-            JointPositionCommandBuilder().set_minimum_time(minimum_time * 2).set_position(q_joint_right_arm))
+            JointPositionCommandBuilder().set_minimum_time(MINIMUM_TIME * 2).set_position(q_joint_right_arm))
         .set_left_arm_command(
-            JointPositionCommandBuilder().set_minimum_time(minimum_time * 2).set_position(q_joint_left_arm)))
+            JointPositionCommandBuilder().set_minimum_time(MINIMUM_TIME * 2).set_position(q_joint_left_arm)))
     ), 10).get()
 
     if rv.finish_code != RobotCommandFeedback.FinishCode.Ok:
@@ -824,7 +724,7 @@ def go_to_home_pose_2(robot):
     rv = robot.send_command(RobotCommandBuilder().set_command(ComponentBasedCommandBuilder().set_body_command(
         JointPositionCommandBuilder()
         .set_position(np.zeros(20))
-        .set_minimum_time(minimum_time))
+        .set_minimum_time(MINIMUM_TIME))
     ), 10).get()
 
     if rv.finish_code != RobotCommandFeedback.FinishCode.Ok:
@@ -834,35 +734,112 @@ def go_to_home_pose_2(robot):
     return 0
 
 
-if not example_joint_position_command_1(robot):
-    print("finish motion")
-if not example_joint_position_command_2(robot):
-    print("finish motion")
-if not example_cartesian_command_1(robot):
-    print("finish motion")
-if not example_cartesian_command_2(robot):
-    print("finish motion")
-if not example_cartesian_command_3(robot):
-    print("finish motion")
-if not example_impedance_control_command_1(robot):
-    print("finish motion")
-if not example_relative_command_1(robot):
-    print("finish motion")
-if not example_joint_position_command_3(robot):
-    print("finish motion")
-if not example_optimal_control_1(robot):
-    print("finish motion")
-if not example_optimal_control_2(robot):
-    print("finish motion")
-if not example_optimal_control_3(robot):
-    print("finish motion")
-if not example_mixed_command_1(robot):
-    print("finish motion")
-if not example_mixed_command_2(robot):
-    print("finish motion")
-if not go_to_home_pose_1(robot):
-    print("finish motion")
-if not go_to_home_pose_2(robot):
-    print("finish motion")
+def main(address, power_device, servo):
+    print("Attempting to connect to the robot...")
 
-print("end of demo")
+    robot = rby1_sdk.create_robot_a(address)
+
+    if not robot.connect():
+        print("Error: Unable to establish connection to the robot at")
+        sys.exit(1)
+
+    print("Successfully connected to the robot")
+
+    print("Starting state update...")
+    robot.start_state_update(cb, 0.1)
+
+    robot.set_parameter("default.acceleration_limit_scaling", "0.8")
+    robot.set_parameter("joint_position_command.cutoff_frequency", "5")
+    robot.set_parameter("cartesian_command.cutoff_frequency", "5")
+    robot.set_parameter("default.linear_acceleration_limit", "5")
+    # robot.set_time_scale(1.0)
+
+    print("parameters setting is done")
+
+    if not robot.is_connected():
+        print("Robot is not connected")
+        exit(1)
+        
+    if not robot.is_power_on(power_device):
+        rv = robot.power_on(power_device)
+        if not rv:
+            print("Failed to power on")
+            exit(1)
+            
+    print(servo)
+    if not robot.is_servo_on(servo):
+        rv = robot.servo_on(servo)
+        if not rv:
+            print("Fail to servo on")
+            exit(1)
+
+    
+    control_manager_state = robot.get_control_manager_state()
+
+    if (control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
+
+        if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:
+            print("Warning: Detected a Major Fault in the Control Manager!!!!!!!!!!!!!!!.")
+        else:
+            print("Warning: Detected a Minor Fault in the Control Manager@@@@@@@@@@@@@@@@.")
+
+        print("Attempting to reset the fault...")
+        if not robot.reset_fault_control_manager():
+            print("Error: Unable to reset the fault in the Control Manager.")
+            sys.exit(1)
+        print("Fault reset successfully.")
+
+    print("Control Manager state is normal. No faults detected.")
+
+    print("Enabling the Control Manager...")
+    if not robot.enable_control_manager():
+        print("Error: Failed to enable the Control Manager.")
+        sys.exit(1)
+    print("Control Manager enabled successfully.")
+
+    # if not example_joint_position_command_1(robot):
+    #     print("finish motion")
+    if not example_joint_position_command_2(robot):
+        print("finish motion")
+    if not example_cartesian_command_1(robot):
+        print("finish motion")
+    if not example_cartesian_command_2(robot):
+        print("finish motion")
+    if not example_cartesian_command_3(robot):
+        print("finish motion")
+    if not example_impedance_control_command_1(robot):
+        print("finish motion")
+    if not example_relative_command_1(robot):
+        print("finish motion")
+    if not example_joint_position_command_3(robot):
+        print("finish motion")
+    if not example_optimal_control_1(robot):
+        print("finish motion")
+    if not example_optimal_control_2(robot):
+        print("finish motion")
+    if not example_optimal_control_3(robot):
+        print("finish motion")
+    if not example_mixed_command_1(robot):
+        print("finish motion")
+    if not example_mixed_command_2(robot):
+        print("finish motion")
+    # if not go_to_home_pose_1(robot):
+    #     print("finish motion")
+    if not go_to_home_pose_2(robot):
+        print("finish motion")
+
+    print("end of demo")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="07_impedance_control")
+    parser.add_argument('--address', type=str, required=True, help="Robot address")
+    parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
+    parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")
+    args = parser.parse_args()
+
+    main(address=args.address,
+         power_device=args.device,
+         servo = args.servo)
+
+
+

@@ -25,11 +25,18 @@ class DynamixelBus {
   static constexpr uint16_t kAddrPresentButtonState = 132;
   static constexpr uint16_t kAddrGoalVibrationLevel = 102;
 
+  static constexpr uint16_t kAddrPositionPGain = 84;
+  static constexpr uint16_t kAddrPositionIGain = 82;
+  static constexpr uint16_t kAddrPositionDGain = 80;
+
+
   static constexpr int kTorqueEnable = 1;
   static constexpr int kTorqueDisable = 0;
 
   static constexpr int kCurrentControlMode = 0;
   static constexpr int kCurrentBasedPositionControlMode = 5;
+
+  static constexpr int kAddrCurrentTemperature = 146;
 
   struct ButtonState {  // RB Gripper
     int button;
@@ -43,6 +50,14 @@ class DynamixelBus {
     double velocity;
     double current;
     double torque;
+
+    int temperature;
+  };
+
+  struct PIDGain{
+    uint16_t p_gain;
+    uint16_t i_gain;
+    uint16_t d_gain;
   };
 
   explicit DynamixelBus(const std::string& dev_name);
@@ -61,6 +76,18 @@ class DynamixelBus {
 
   void SendTorqueEnable(int id, int onoff);
 
+  void SetPositionPGain(int id, uint16_t p_gain);
+  void SetPositionIGain(int id, uint16_t i_gain);
+  void SetPositionDGain(int id, uint16_t d_gain);
+  void SetPositionPIDGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain, std::optional<uint16_t> d_gain);
+  void SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain);
+
+
+  std::optional<uint16_t> GetPositionPGain(int id);
+  std::optional<uint16_t> GetPositionIGain(int id);
+  std::optional<uint16_t> GetPositionDGain(int id);
+  std::optional<DynamixelBus::PIDGain> GetPositionPIDGain(int id);
+
   std::optional<int> ReadTorqueEnable(int id);
 
   std::optional<double> ReadEncoder(int id);
@@ -75,7 +102,11 @@ class DynamixelBus {
 
   void SendCurrent(int id, double current);
 
+  std::optional<int> ReadTemperature(int id);
+
   std::optional<std::vector<std::pair<int, int>>> BulkRead(const std::vector<int>& ids, int addr, int len);
+
+  std::optional<std::vector<std::pair<int, int16_t>>> ReadCurrent(const std::vector<int>& ids);
 
   std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> BulkReadEncoder(
       const std::vector<int>& ids);

@@ -2,20 +2,23 @@ import rby1_sdk
 import numpy as np
 import time
 import sys
+import argparse
+import signal
 
-ROBOT_ADDRESS = "192.168.30.1:50051"
+recorded_traj = []  # 데이터를 저장할 리스트
+recording = False  # 녹화 상태를 관리할 변수
 
-current_state = None
-recorded_traj = []
 def cb(state):
-    print("---")
-    print(f"current position: {state.position}")
-    
-    current_state = state.position.copy()
-    recorded_traj.append(current_state)
+    global recorded_traj, recording
+    if recording:
+        print("---")
+        print(f"current position: {state.target_position}")
+        
+        current_state = state.position.copy()
+        recorded_traj.append(current_state)
 
-def pre_processing():
-    robot = rby1_sdk.create_robot_a(ROBOT_ADDRESS)
+def pre_processing(address):
+    robot = rby1_sdk.create_robot_a(address)
     robot.connect()
     
     if not robot.is_power_on(".*"):
@@ -26,40 +29,43 @@ def pre_processing():
         print("Robot powered on successfully.")
     else:
         print("Power is already ON.")
-
-    if not robot.is_servo_on(".*"):
-        print("Servo is currently OFF. Attempting to activate servo...")
-        if not robot.servo_on(".*"):
-            print("Error: Failed to activate servo.")
-            sys.exit(1)
-        print("Servo activated successfully.")
-    else:
-        print("Servo is already ON.")
-
-    control_manager_state = robot.get_control_manager_state()
-
-    if (control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or \
-        control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
-        if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:
-            print("Warning: Detected a Major Fault in the Control Manager.")
-        else:
-            print("Warning: Detected a Minor Fault in the Control Manager.")
-
-        print("Attempting to reset the fault...")
-        if not robot.reset_fault_control_manager():
-            print("Error: Unable to reset the fault in the Control Manager.")
-            sys.exit(1)
-        print("Fault reset successfully.")
-
-    if not robot.enable_control_manager():
-        print("Error: Failed to enable the Control Manager.")
-        sys.exit(1)
+    
     return robot
 
-if __name__ == '__main__':
-    robot = pre_processing()
-    
-    robot.start_state_update(cb, 10) #10Hz
-    time.sleep(10)
-    
+def start_recording():
+    global recording, recorded_traj
+    recorded_traj = []  # 녹화를 시작할 때 리스트 초기화
+    recording = True
+    print("Recording started...")
+
+def stop_recording():
+    global recording
+    recording = False
     np.savez_compressed('recorded.npz', data=recorded_traj)
+    print("Recording stopped and data saved to 'recorded.npz'.")
+
+def handle_exit(sig, frame):
+    """프로그램 종료 시 호출되는 핸들러"""
+    stop_recording()
+    sys.exit(0)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Record")
+    parser.add_argument('--address', type=str, required=True, help="Robot address")
+    args = parser.parse_args()
+    
+    # 종료 시 호출될 핸들러 등록
+    signal.signal(signal.SIGINT, handle_exit)
+    signal.signal(signal.SIGTERM, handle_exit)
+    
+    robot = pre_processing(args.address)
+    
+    robot.start_state_update(cb, 10) 
+
+    start_recording() 
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        handle_exit(None, None)  # Ctrl+C로 종료할 때도 파일을 저장하도록 처리

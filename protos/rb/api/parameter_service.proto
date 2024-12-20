@@ -5,13 +5,27 @@ package rb.api;
 import "rb/api/parameter.proto";
 
 service ParameterService {
-  rpc ResetAllParametersToDefault(ResetAllParametersToDefaultRequest) returns (ResetAllParametersToDefaultResponse) {}
+  rpc FactoryResetAllParameters(FactoryResetAllParametersRequest) returns (FactoryResetAllParametersResponse) {}
 
-  rpc ResetParameterToDefault(ResetParameterToDefaultRequest) returns (ResetParameterToDefaultResponse) {}
+  rpc FactoryResetParameter(FactoryResetParameterRequest) returns (FactoryResetParameterResponse) {}
+
+  rpc ResetAllParameters(ResetAllParametersRequest) returns (ResetAllParametersResponse) {}
+
+  rpc ResetParameter(ResetParameterRequest) returns (ResetParameterResponse) {}
 
   rpc GetParameter(GetParameterRequest) returns (GetParameterResponse) {}
 
   rpc SetParameter(SetParameterRequest) returns (SetParameterResponse) {}
 
   rpc GetParameterList(GetParameterListRequest) returns (GetParameterListResponse) {}
+
+  // Deprecated
+  rpc ResetAllParametersToDefault(ResetAllParametersToDefaultRequest) returns (ResetAllParametersToDefaultResponse) {
+    option deprecated = true;
+  }
+
+  // Deprecated
+  rpc ResetParameterToDefault(ResetParameterToDefaultRequest) returns (ResetParameterToDefaultResponse) {
+    option deprecated = true;
+  }
 }

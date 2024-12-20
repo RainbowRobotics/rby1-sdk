@@ -22,10 +22,16 @@ int main(int argc, char** argv) {
   }
 
   robot->StartStateUpdate(
-      [](const auto& state) {
+      [](const auto& state, const auto& control_manager) {
         std::cout << "Timestamp: " << state.timestamp.tv_sec << ".";
         std::cout << std::setw(9) << std::setfill('0') << state.timestamp.tv_nsec << std::endl;
         std::cout << "  Position: " << state.position.transpose() << std::endl;
+        std::cout << "Control Manager State: " << rb::to_string(control_manager.state) << std::endl;
+        for(std::size_t i = 0; i < state.joint_states.size(); ++i) {
+            auto& js = state.joint_states[i];
+            std::cout << "Index: " << i << " Temperature: " << js.temperature << std::endl;
+        }
+        
       },
       100);
 

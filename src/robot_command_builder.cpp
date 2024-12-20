@@ -35,39 +35,6 @@ class CommandHeaderBuilderImpl {
     t.set_nanos(nanos);
   }
 
-  void SetGravity(const Eigen::Vector<double, 3>& gravity) {
-    auto& g = *req_->mutable_gravity();
-    g.set_x(gravity.x());
-    g.set_y(gravity.y());
-    g.set_z(gravity.z());
-  }
-
-  void AddInertial(const std::string& name, const dyn::Inertial::MatrixType& inertial) {
-    double mass = dyn::Inertial::GetMass(inertial);
-    auto com = dyn::Inertial::GetCOM(inertial);
-    auto inertia = dyn::Inertial::GetInertia(dyn::Inertial::Transform(math::SE3::T(com).inverse(), inertial));
-
-    auto api_inertial = rb::api::Inertial();
-    {
-      api_inertial.set_mass(mass);
-
-      auto& api_com = *api_inertial.mutable_center_of_mass();
-      api_com.set_x(com.x());
-      api_com.set_y(com.y());
-      api_com.set_z(com.z());
-
-      auto& api_inertia = *api_inertial.mutable_inertia();
-      api_inertia.set_ixx(inertia(0));
-      api_inertia.set_iyy(inertia(1));
-      api_inertia.set_izz(inertia(2));
-      api_inertia.set_ixy(inertia(3));
-      api_inertia.set_ixz(inertia(4));
-      api_inertia.set_iyz(inertia(5));
-    }
-
-    req_->mutable_inertials()->emplace(name, api_inertial);
-  }
-
   api::CommandHeader::Request* Build() { return req_.release(); }
 
  private:
@@ -378,6 +345,19 @@ class CartesianCommandBuilderImpl {
     target.mutable_acceleration_limit_scaling()->set_value(acceleration_limit_scaling);
   }
 
+  void AddJointPositionTarget(const std::string& joint_name, double target_position,
+                              std::optional<double> velocity_limit, std::optional<double> acceleration_limit) {
+    auto& target = *req_->add_joint_position_targets();
+    target.set_joint_name(joint_name);
+    target.set_target_position(target_position);
+    if (velocity_limit.has_value()) {
+      target.mutable_velocity_limit()->set_value(velocity_limit.value());
+    }
+    if (acceleration_limit.has_value()) {
+      target.mutable_acceleration_limit()->set_value(acceleration_limit.value());
+    }
+  }
+
   void SetStopPositionTrackingError(double stop_position_tracking_error) {
     req_->mutable_stop_position_tracking_error()->set_value(stop_position_tracking_error);
   }
@@ -646,17 +626,6 @@ CommandHeaderBuilder::~CommandHeaderBuilder() = default;
 
 CommandHeaderBuilder& CommandHeaderBuilder::SetControlHoldTime(double control_hold_time) {
   impl_->SetControlHoldTime(control_hold_time);
-  return *this;
-}
-
-CommandHeaderBuilder& CommandHeaderBuilder::SetGravity(const Eigen::Vector3d& gravity) {
-  impl_->SetGravity(gravity);
-  return *this;
-}
-
-CommandHeaderBuilder& CommandHeaderBuilder::AddInertial(const std::string& name,
-                                                        const dyn::Inertial::MatrixType& inertial) {
-  impl_->AddInertial(name, inertial);
   return *this;
 }
 
@@ -953,6 +922,14 @@ CartesianCommandBuilder& CartesianCommandBuilder::AddTarget(const std::string& r
                                                             double acceleration_limit_scaling) {
   impl_->AddTarget(ref_link_name, link_name, T, linear_velocity_limit, angular_velocity_limit,
                    acceleration_limit_scaling);
+  return *this;
+}
+
+CartesianCommandBuilder& CartesianCommandBuilder::AddJointPositionTarget(const std::string& joint_name,
+                                                                         double target_position,
+                                                                         std::optional<double> velocity_limit,
+                                                                         std::optional<double> acceleration_limit) {
+  impl_->AddJointPositionTarget(joint_name, target_position, velocity_limit, acceleration_limit);
   return *this;
 }
 

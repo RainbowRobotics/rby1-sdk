@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <mutex>
 #include <thread>
 #include <unordered_map>
 
@@ -19,9 +20,9 @@ class DynamixelBusImpl {
 
   ~DynamixelBusImpl() {
     port_handler_->closePort();
+    port_handler_->clearPort();
 
     delete port_handler_;
-    delete packet_handler_;
   }
 
   void SetTorqueConstant(const std::vector<double>& torque_constant) { torque_constant_ = torque_constant; }
@@ -59,7 +60,58 @@ class DynamixelBusImpl {
 
   void SendTorqueEnable(int id, int onoff) {
     packet_handler_->write1ByteTxOnly(port_handler_, id, DynamixelBus::kAddrTorqueEnable, onoff);
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(100us);
+  }
+
+  void SetPositionGain(int id, std::optional<uint16_t> p_gain = std::nullopt,
+                       std::optional<uint16_t> i_gain = std::nullopt, std::optional<uint16_t> d_gain = std::nullopt) {
+    if (!p_gain.has_value() && !i_gain.has_value() && !d_gain.has_value()) {
+      return;
+    }
+    // SendTorqueEnable(id, false);
+    if (p_gain.has_value()) {
+      packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionPGain, p_gain.value());
+    }
+    if (i_gain.has_value()) {
+      packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionIGain, i_gain.value());
+    }
+    if (d_gain.has_value()) {
+      packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrPositionDGain, d_gain.value());
+    }
+  }
+
+  std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> GetPositionGain(int id) {
+    std::optional<uint16_t> p_gain;
+    std::optional<uint16_t> i_gain;
+    std::optional<uint16_t> d_gain;
+
+    uint16_t read_value;
+    uint8_t dxl_error;
+    std::this_thread::sleep_for(50ms);
+    int dxl_comm_result =
+        packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionPGain, &read_value, &dxl_error);
+
+    if (dxl_comm_result == COMM_SUCCESS) {
+      p_gain = read_value;
+    }
+
+    std::this_thread::sleep_for(50ms);
+    dxl_comm_result =
+        packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionIGain, &read_value, &dxl_error);
+
+    if (dxl_comm_result == COMM_SUCCESS) {
+      i_gain = read_value;
+    }
+
+    std::this_thread::sleep_for(50ms);
+    dxl_comm_result =
+        packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionDGain, &read_value, &dxl_error);
+
+    if (dxl_comm_result == COMM_SUCCESS) {
+      d_gain = read_value;
+    }
+
+    return std::make_tuple(p_gain, i_gain, d_gain);
   }
 
   std::optional<int> ReadTorqueEnable(int id) {
@@ -88,7 +140,7 @@ class DynamixelBusImpl {
 
   void SendGoalPosition(int id, int goal_position) {
     packet_handler_->write4ByteTxOnly(port_handler_, id, DynamixelBus::kAddrGoalPosition, goal_position);
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(100us);
   }
 
   std::optional<int> ReadOperationMode(int id) {
@@ -106,7 +158,7 @@ class DynamixelBusImpl {
   bool SendOperationMode(int id, int operation_mode) {
     int dxl_comm_result =
         packet_handler_->write1ByteTxOnly(port_handler_, id, DynamixelBus::kAddrOperatingMode, operation_mode);
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(100us);
     return dxl_comm_result == COMM_SUCCESS;
   }
 
@@ -114,13 +166,25 @@ class DynamixelBusImpl {
     if (id >= torque_constant_.size())
       return;
 
-    int32_t torque_value = (int32_t)(joint_torque / torque_constant_[id] * 1000. / 2.69);
+    auto torque_value = (int32_t)(joint_torque / torque_constant_[id] * 1000. / 2.69);
     packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrGoalCurrent, torque_value);
   }
 
   void SendCurrent(int id, double current /* (Amp) */) {
-    int32_t current_value = (int)(current / 2.69 * 1000.);
+    auto current_value = (int16_t)(current / 2.69 * 1000.);
     packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrGoalCurrent, current_value);
+  }
+
+  std::optional<int> ReadTemperature(int id) {
+    uint8_t dxl_temperature = 0;  // Read as uint8_t
+    uint8_t dxl_error = 0;
+    int dxl_comm_result = packet_handler_->read1ByteTxRx(port_handler_, id, DynamixelBus::kAddrCurrentTemperature,
+                                                         (uint8_t*)&dxl_temperature, &dxl_error);
+    if (dxl_comm_result == COMM_SUCCESS) {
+      return static_cast<int>(dxl_temperature);
+    } else {
+      return std::nullopt;
+    }
   }
 
   std::optional<std::vector<std::pair<int, int>>> BulkRead(const std::vector<int>& ids, int addr, int len) {
@@ -138,11 +202,37 @@ class DynamixelBusImpl {
     for (auto const& id : ids) {
       if (id < 0x80) {
         if (groupBulkRead.isAvailable(id, addr, len)) {
-          int data = groupBulkRead.getData(id, addr, len);
-          rv.push_back({id, data});
+          auto data = (int)groupBulkRead.getData(id, addr, len);
+          rv.emplace_back(id, data);
         }
       }
     }
+
+    std::this_thread::sleep_for(100us);
+
+    if (rv.empty()) {
+      return {};
+    } else {
+      return rv;
+    }
+  }
+
+  std::optional<std::vector<std::pair<int, int16_t>>> ReadCurrent(const std::vector<int>& ids) {
+    std::vector<std::pair<int, int16_t>> rv;
+
+    uint16_t read_value;
+    uint8_t dxl_error;
+    for (auto const& id : ids) {
+      if (id < 0x80) {
+        int dxl_comm_result = packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPresentCurrent,
+                                                             &read_value, &dxl_error);
+        if (dxl_comm_result == COMM_SUCCESS) {
+          auto data = static_cast<int16_t>(read_value);
+          rv.emplace_back(id, data);
+        }
+      }
+    }
+    std::this_thread::sleep_for(100us);
 
     if (rv.empty()) {
       return {};
@@ -158,7 +248,7 @@ class DynamixelBusImpl {
     const auto& rv = BulkRead(ids, DynamixelBus::kAddrPresentPosition, 4);
     if (rv.has_value()) {
       for (const auto& r : rv.value()) {
-        v.push_back({r.first, (double)r.second / 4096. * 2. * 3.141592});
+        v.emplace_back(r.first, (double)r.second / 4096. * 2. * 3.141592);
       }
       return v;
     } else {
@@ -181,8 +271,8 @@ class DynamixelBusImpl {
     for (auto const& id : ids) {
       if (id < 0x80) {
         if (groupBulkRead.isAvailable(id, DynamixelBus::kAddrOperatingMode, 1)) {
-          int operation_mode = groupBulkRead.getData(id, DynamixelBus::kAddrOperatingMode, 1);
-          operation_mode_vector.push_back(std::make_pair(id, operation_mode));
+          auto operation_mode = (int)groupBulkRead.getData(id, DynamixelBus::kAddrOperatingMode, 1);
+          operation_mode_vector.emplace_back(id, operation_mode);
         }
       }
     }
@@ -209,8 +299,8 @@ class DynamixelBusImpl {
     for (auto const& id : ids) {
       if (id < 0x80) {
         if (groupBulkRead.isAvailable(id, DynamixelBus::kAddrTorqueEnable, 1)) {
-          int operation_mode = groupBulkRead.getData(id, DynamixelBus::kAddrTorqueEnable, 1);
-          torque_enable_vector.push_back(std::make_pair(id, operation_mode));
+          auto operation_mode = (int)groupBulkRead.getData(id, DynamixelBus::kAddrTorqueEnable, 1);
+          torque_enable_vector.emplace_back(id, operation_mode);
         }
       }
     }
@@ -226,14 +316,18 @@ class DynamixelBusImpl {
     std::vector<std::pair<int, DynamixelBus::MotorState>> ms;
     std::unordered_map<int, int> idx;
     for (const auto& id : ids) {
-      ms.push_back({id, DynamixelBus::MotorState()});
-      idx[id] = ms.size() - 1;
+      ms.emplace_back(id, DynamixelBus::MotorState());
+      idx[id] = (int)ms.size() - 1;
     }
 
     {
       const auto& rv = BulkRead(ids, DynamixelBus::kAddrTorqueEnable, 1);
       if (rv.has_value()) {
-        for (const auto& r : rv.value()) {
+        const auto& torques = rv.value();
+        if (torques.size() != ids.size()) {
+          return {};
+        }
+        for (const auto& r : torques) {
           ms[idx[r.first]].second.torque_enable = (r.second == 1);
         }
       } else {
@@ -241,33 +335,54 @@ class DynamixelBusImpl {
       }
     }
 
+    // DynamixelBus::kAddrPresentCurrent, DynamixelBus::kAddrPresentVelocity, DynamixelBus::kAddrPresentPosition
     {
-      const auto& rv = BulkRead(ids, DynamixelBus::kAddrPresentCurrent, 2);
-      if (rv.has_value()) {
-        for (const auto& r : rv.value()) {
-          ms[idx[r.first]].second.current = (double)r.second / 1000. * 2.69;
-        }
-      } else {
-        return {};
+      std::vector<std::pair<int, int>> rv;
+      dynamixel::GroupBulkRead group_bulk_read(port_handler_, packet_handler_);
+
+      for (auto const& id : ids) {
+        group_bulk_read.addParam(id, DynamixelBus::kAddrPresentCurrent, 2 + 4 + 4);
       }
+
+      group_bulk_read.txRxPacket();
+
+      for (auto const& id : ids) {
+        auto& m = ms[idx[id]].second;
+
+        if (group_bulk_read.isAvailable(id, DynamixelBus::kAddrPresentCurrent, 2)) {
+          auto data = (int16_t)group_bulk_read.getData(id, DynamixelBus::kAddrPresentCurrent, 2);
+          m.current = (double)data / 1000. * 2.69;
+        } else {
+          return {};
+        }
+
+        if (group_bulk_read.isAvailable(id, DynamixelBus::kAddrPresentVelocity, 4)) {
+          auto data = (int)group_bulk_read.getData(id, DynamixelBus::kAddrPresentVelocity, 4);
+          m.velocity = (double)data * 0.229 * 2 * 3.141592 / 60;
+        } else {
+          return {};
+        }
+
+        if (group_bulk_read.isAvailable(id, DynamixelBus::kAddrPresentPosition, 4)) {
+          auto data = (int)group_bulk_read.getData(id, DynamixelBus::kAddrPresentPosition, 4);
+          m.position = (double)data / 4096. * 2. * 3.141592;
+        } else {
+          return {};
+        }
+      }
+
+      std::this_thread::sleep_for(100us);
     }
 
     {
-      const auto& rv = BulkRead(ids, DynamixelBus::kAddrPresentVelocity, 4);
+      const auto& rv = BulkRead(ids, DynamixelBus::kAddrCurrentTemperature, 1);
       if (rv.has_value()) {
-        for (const auto& r : rv.value()) {
-          ms[idx[r.first]].second.velocity = (double)r.second * 0.229 * 2 * 3.141592 / 60;
+        const auto& temperatures = rv.value();
+        if (temperatures.size() != ids.size()) {
+          return {};
         }
-      } else {
-        return {};
-      }
-    }
-
-    {
-      const auto& rv = BulkRead(ids, DynamixelBus::kAddrPresentPosition, 4);
-      if (rv.has_value()) {
-        for (const auto& r : rv.value()) {
-          ms[idx[r.first]].second.position = (double)r.second / 4096. * 2. * 3.141592;
+        for (const auto& r : temperatures) {
+          ms[idx[r.first]].second.temperature = r.second;
         }
       } else {
         return {};
@@ -293,7 +408,7 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(100us);
   }
 
   void BulkWriteTorqueEnable(const std::vector<int>& ids, int enable) {
@@ -312,7 +427,7 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(100us);
   }
 
   void BulkWriteOperationMode(const std::vector<std::pair<int, int>>& id_and_mode_vector) {
@@ -331,7 +446,7 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(100us);
   }
 
   void BulkWriteSendPosition(const std::vector<std::pair<int, double>>& id_and_position_vector) {
@@ -353,7 +468,7 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(100us);
   }
 
   void BulkWriteSendTorque(const std::vector<std::pair<int, double>>& id_and_torque_vector) {
@@ -373,13 +488,13 @@ class DynamixelBusImpl {
     }
 
     groupBulkWrite.txPacket();
-    std::this_thread::sleep_for(50us);
+    std::this_thread::sleep_for(100us);
   }
 
   void SendVibration(int id, int level) {
     if (id > 0x80) {
       packet_handler_->write2ByteTxOnly(port_handler_, id, DynamixelBus::kAddrGoalVibrationLevel, level);
-      std::this_thread::sleep_for(50us);
+      std::this_thread::sleep_for(100us);
     }
   }
 
@@ -418,6 +533,59 @@ void DynamixelBus::SendTorqueEnable(int id, int onoff) {
   impl_->SendTorqueEnable(id, onoff);
 }
 
+void DynamixelBus::SetPositionPGain(int id, uint16_t p_gain) {
+  impl_->SetPositionGain(id, p_gain, std::nullopt, std::nullopt);
+}
+
+void DynamixelBus::SetPositionIGain(int id, uint16_t i_gain) {
+  impl_->SetPositionGain(id, std::nullopt, i_gain, std::nullopt);
+}
+
+void DynamixelBus::SetPositionDGain(int id, uint16_t d_gain) {
+  impl_->SetPositionGain(id, std::nullopt, std::nullopt, d_gain);
+}
+
+void DynamixelBus::SetPositionPIDGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain,
+                                      std::optional<uint16_t> d_gain) {
+  impl_->SetPositionGain(id, p_gain, i_gain, d_gain);
+}
+
+void DynamixelBus::SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain) {
+  impl_->SetPositionGain(id, pid_gain.p_gain, pid_gain.i_gain, pid_gain.d_gain);
+}
+
+std::optional<uint16_t> DynamixelBus::GetPositionPGain(int id) {
+  auto [p_gain, i_gain, d_gain] = impl_->GetPositionGain(id);
+  return p_gain;
+}
+
+std::optional<uint16_t> DynamixelBus::GetPositionIGain(int id) {
+  auto [p_gain, i_gain, d_gain] = impl_->GetPositionGain(id);
+  return i_gain;
+}
+
+std::optional<uint16_t> DynamixelBus::GetPositionDGain(int id) {
+  auto [p_gain, i_gain, d_gain] = impl_->GetPositionGain(id);
+  return d_gain;
+}
+
+std::optional<DynamixelBus::PIDGain> DynamixelBus::GetPositionPIDGain(int id) {
+  auto [p_gain, i_gain, d_gain] = impl_->GetPositionGain(id);
+
+  if (!p_gain.has_value() || !i_gain.has_value() || !d_gain.has_value()) {
+    return std::nullopt;
+  }
+
+  DynamixelBus::PIDGain pid_gain{p_gain.value(), i_gain.value(), d_gain.value()};
+
+  return pid_gain;
+}
+
+// std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> DynamixelBus::GetPositionGain(
+//     int id) {
+//   return impl_->GetPositionGain(id);
+// }
+
 std::optional<int> DynamixelBus::ReadTorqueEnable(int id) {
   return impl_->ReadTorqueEnable(id);
 }
@@ -444,6 +612,10 @@ void DynamixelBus::SendTorque(int id, double joint_torque) {
 
 void DynamixelBus::SendCurrent(int id, double current) {
   impl_->SendCurrent(id, current);
+}
+
+std::optional<int> DynamixelBus::ReadTemperature(int id) {
+  return impl_->ReadTemperature(id);
 }
 
 std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> DynamixelBus::BulkReadEncoder(

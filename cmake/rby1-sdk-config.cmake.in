@@ -5,10 +5,13 @@ list(APPEND CMAKE_MODULE_PATH ${RBY1-SDK_CMAKE_DIR})
 
 # find_dependency(gRPC REQUIRED)
 # find_dependency(tinyxml2 REQUIRED)
-find_dependency(Eigen3 REQUIRED)
+if (NOT TARGET Eigen3::Eigen)
+    find_dependency(Eigen3 REQUIRED)
+endif ()
 
-if(NOT TARGET rby1-sdk::rby1-sdk)
+
+if (NOT TARGET rby1-sdk::rby1-sdk)
     include("${RBY1-SDK_CMAKE_DIR}/rby1-sdk-targets.cmake")
-endif()
+endif ()
 
 set(RBPODO_LIBRARIES rby1-sdk::rby1-sdk)

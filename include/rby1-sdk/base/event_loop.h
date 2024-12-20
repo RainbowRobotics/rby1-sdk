@@ -6,6 +6,7 @@
 #include <memory>
 #include <queue>
 #include "rby1-sdk/base/thread.h"
+#include "time_util.h"
 
 namespace rb {
 
@@ -36,40 +37,62 @@ class EventLoop {
 #ifdef __linux__
     const auto& get_next_wakeup_time = [period_ns](struct timespec ts) {
       ts.tv_nsec += period_ns;
-      while (ts.tv_nsec >= 1000000000) {
+      while (ts.tv_nsec >= kNanosecondsInSecond) {
         ++ts.tv_sec;
-        ts.tv_nsec -= 1000000000;
+        ts.tv_nsec -= kNanosecondsInSecond;
       }
       while (ts.tv_nsec < 0) {
         --ts.tv_sec;
-        ts.tv_nsec += 1000000000;
+        ts.tv_nsec += kNanosecondsInSecond;
       }
       return ts;
     };
 
-    const auto& cyclic_task = [=](struct timespec next_wakeup_time, const auto& self) -> void {
-      clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_wakeup_time, nullptr);
-      next_wakeup_time = get_next_wakeup_time(next_wakeup_time);
+    const auto& cyclic_task = [=](struct timespec wakeup_time, const auto& self) -> void {
+      struct timespec current_ts {};
+
+      clock_gettime(CLOCK_MONOTONIC, &current_ts);
+
+      while (true) {
+        if (current_ts.tv_sec * kNanosecondsInSecond + current_ts.tv_nsec <
+            wakeup_time.tv_sec * kNanosecondsInSecond + wakeup_time.tv_nsec) {
+          break;
+        }
+        wakeup_time = get_next_wakeup_time(wakeup_time);
+      }
+
+      while (true) {
+        int rv = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &wakeup_time, nullptr);
+        if (rv == EINTR) {
+          continue;
+        }
+        break;
+      }
       if (cb) {
         cb();
       }
 
-      PushTask([=] { self(next_wakeup_time, self); });
+      PushTask([=] { self(wakeup_time, self); });
     };
 
     struct timespec ts {};
 
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t c = (ts.tv_sec * 1000000000) + ts.tv_nsec;
+    uint64_t c = (ts.tv_sec * kNanosecondsInSecond) + ts.tv_nsec;
     c = (uint64_t)(c / period_ns + 1) * period_ns + offset_ns;
-    ts.tv_sec = (long)(c / 1000000000);
-    ts.tv_nsec = (long)(c % 1000000000);
-    ts = get_next_wakeup_time(ts);
+    ts.tv_sec = (long)(c / kNanosecondsInSecond);
+    ts.tv_nsec = (long)(c % kNanosecondsInSecond);
     PushTask([=] { cyclic_task(ts, cyclic_task); });
 #else
     const auto& cyclic_task = [=](std::chrono::steady_clock::time_point next_wakeup_time, const auto& self) -> void {
+      auto current_ts = std::chrono::steady_clock::now();
+      while (true) {
+        if (current_ts < next_wakeup_time) {
+          break;
+        }
+        next_wakeup_time = next_wakeup_time + period;
+      }
       std::this_thread::sleep_until(next_wakeup_time);
-      next_wakeup_time = next_wakeup_time + period;
       if (cb) {
         cb();
       }
@@ -83,7 +106,6 @@ class EventLoop {
       c = (uint64_t)(c / period_ns + 1) * period_ns + offset_ns;
     }
     std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> ts((std::chrono::nanoseconds(c)));
-    ts += period;
     PushTask([=] { cyclic_task(ts, cyclic_task); });
 #endif
   }

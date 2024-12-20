@@ -12,15 +12,21 @@ using namespace std::chrono_literals;
 #define R2D 57.296
 
 const std::string kAll = ".*";
+
 // const std::string kAll = "^(?!.*wheel$).*";
 
 int main(int argc, char** argv) {
   if (argc < 2) {
-    std::cerr << "Usage: " << argv[0] << " <server address>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <server address> [servo]" << std::endl;
     return 1;
   }
 
   std::string address{argv[1]};
+  std::string servo = ".*";  // 기본값
+
+  if (argc >= 3) {
+    servo = argv[2];
+  }
 
   auto robot = Robot<y1_model::A>::Create(address);
 
@@ -61,9 +67,9 @@ int main(int argc, char** argv) {
   }
 
   std::cout << "Checking servo status..." << std::endl;
-  if (!robot->IsServoOn(kAll)) {
+  if (!robot->IsServoOn(servo)) {
     std::cout << "Servo is currently OFF. Attempting to activate servo..." << std::endl;
-    if (!robot->ServoOn(kAll)) {
+    if (!robot->ServoOn(servo)) {
       std::cerr << "Error: Failed to activate servo." << std::endl;
       return 1;
     }
@@ -214,12 +220,16 @@ int main(int argc, char** argv) {
                           .SetRightArmCommand(CartesianCommandBuilder()
                                                   .AddTarget("base", "ee_right", T_right, linear_velocity_limit,
                                                              angular_velocity_limit, acceleration_limit / 2)
+                                                  /* Need to be verified */
+                                                  .AddJointPositionTarget("right_arm_2", -10 * M_PI / 180, 3.14, 6.28)
                                                   .SetMinimumTime(minimum_time * 3)
                                                   .SetStopOrientationTrackingError(stop_orientation_tracking_error)
                                                   .SetStopPositionTrackingError(stop_position_tracking_error))
                           .SetLeftArmCommand(CartesianCommandBuilder()
                                                  .AddTarget("base", "ee_left", T_left, linear_velocity_limit,
                                                             angular_velocity_limit, acceleration_limit / 2)
+                                                 /* Need to be verified */
+                                                 .AddJointPositionTarget("left_arm_2", 10 * M_PI / 180, 3.14, 6.28)
                                                  .SetMinimumTime(minimum_time * 3)
                                                  .SetStopOrientationTrackingError(stop_orientation_tracking_error)
                                                  .SetStopPositionTrackingError(stop_position_tracking_error)))))
@@ -254,6 +264,8 @@ int main(int argc, char** argv) {
                                      acceleration_limit)
                           .AddTarget("base", "ee_left", T_left, linear_velocity_limit, angular_velocity_limit,
                                      acceleration_limit)
+                          .AddJointPositionTarget("right_arm_1", -30 * M_PI / 180, {}, {})
+                          .AddJointPositionTarget("left_arm_1", 30 * M_PI / 180, {}, {})
                           .SetStopPositionTrackingError(stop_orientation_tracking_error)
                           .SetStopOrientationTrackingError(stop_position_tracking_error)
                           .SetMinimumTime(minimum_time))))
@@ -453,7 +465,7 @@ int main(int argc, char** argv) {
                           .AddCartesianTarget("base", "ee_left", T_left, weight, weight)
                           .AddJointPositionTarget("right_arm_2", 3.141592 / 2., weight)
                           .AddJointPositionTarget("left_arm_2", -3.141592 / 2., weight)
-                          .SetVelocityLimitScaling(0.2)
+                          .SetVelocityLimitScaling(0.05)
                           .SetVelocityTrackingGain(velocity_tracking_gain)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)

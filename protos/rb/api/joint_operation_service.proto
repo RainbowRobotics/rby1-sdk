@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/joint_operation.proto";
+
+service JointOperationService {
+  // Joint command
+  // rpc JointOperation(JointOperationRequest) returns (JointOperationResponse) {}
+  rpc ServoOn(ServoOnRequest) returns (ServoOnResponse) {}
+  rpc BrakeEngage(BrakeEngageRequest) returns (BrakeEngageResponse) {}
+  rpc BrakeRelease(BrakeReleaseRequest) returns (BrakeReleaseResponse) {}
+  rpc HomeOffsetReset(HomeOffsetResetRequest) returns (HomeOffsetResetResponse) {}
+  rpc GetPositionPIDGain(GetPositionPIDGainRequest) returns (GetPositionPIDGainResponse) {}
+  rpc SetPositionPIDGain(SetPositionPIDGainRequest) returns (SetPositionPIDGainResponse) {}
+
+}

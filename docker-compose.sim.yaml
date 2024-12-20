@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  rby1-sim:
+    image: rainbowroboticsofficial/rby1-sim
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    network_mode: host
+    # ports:
+    #   - "50051:50051"

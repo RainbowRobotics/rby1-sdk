@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <optional>
+
 #include "Eigen/Core"
 #include "dynamics/inertial.h"
 #include "math/liegroup.h"
@@ -35,10 +37,6 @@ class CommandHeaderBuilder {
   ~CommandHeaderBuilder();
 
   CommandHeaderBuilder& SetControlHoldTime(double control_hold_time);
-
-  CommandHeaderBuilder& SetGravity(const Eigen::Vector3d& gravity);
-
-  CommandHeaderBuilder& AddInertial(const std::string& name, const dyn::Inertial::MatrixType& inertial);
 
  private:
   [[nodiscard]] void* Build() const;
@@ -313,6 +311,12 @@ class CartesianCommandBuilder {
                                      double linear_velocity_limit,      // (m/s)
                                      double angular_velocity_limit,     // (rad/s)
                                      double acceleration_limit = 1.     // (0, 1]
+  );
+
+  CartesianCommandBuilder& AddJointPositionTarget(const std::string& joint_name,                           //
+                                                  double target_position,                                  //
+                                                  std::optional<double> velocity_limit = std::nullopt,     //
+                                                  std::optional<double> acceleration_limit = std::nullopt  //
   );
 
   CartesianCommandBuilder& SetStopPositionTrackingError(double stop_position_tracking_error);

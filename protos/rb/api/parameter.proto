@@ -51,6 +51,42 @@ message GetParameterListResponse {
   repeated ParameterType parameters = 2;
 }
 
+message FactoryResetParameterRequest {
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+message FactoryResetParameterResponse {
+  ResponseHeader response_header = 1;
+}
+
+message FactoryResetAllParametersRequest {
+  RequestHeader request_header = 1;
+}
+
+message FactoryResetAllParametersResponse {
+  ResponseHeader response_header = 1;
+}
+
+message ResetParameterRequest {
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+message ResetParameterResponse {
+  ResponseHeader response_header = 1;
+}
+
+message ResetAllParametersRequest {
+  RequestHeader request_header = 1;
+}
+
+message ResetAllParametersResponse {
+  ResponseHeader response_header = 1;
+}
+
 message ResetParameterToDefaultRequest {
   RequestHeader request_header = 1;
 

@@ -39,6 +39,8 @@ struct ControlInput;
 template <typename T>
 struct ControlState;
 
+struct PIDGain;
+
 }  // namespace rb
 
 namespace rb {
@@ -74,15 +76,37 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool IsServoOn(const std::string& dev_name) const;
 
+  bool SetPositionPGain(const std::string& dev_name, uint16_t p_gain) const;
+  bool SetPositionIGain(const std::string& dev_name, uint16_t i_gain) const;
+  bool SetPositionDGain(const std::string& dev_name, uint16_t d_gain) const;
+  bool SetPositionPIDGain(const std::string& dev_name, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const;
+  bool SetPositionPIDGain(const std::string& dev_name, const rb::PIDGain& pid_gain) const;
+
+  std::vector<rb::PIDGain> GetTorsoPositionPIDGains() const;
+  std::vector<rb::PIDGain> GetRightArmPositionPIDGains() const;
+  std::vector<rb::PIDGain> GetLeftArmPositionPIDGains() const;
+  std::vector<rb::PIDGain> GetHeadPositionPIDGains() const;
+  rb::PIDGain GetPositionPIDGain(const std::string& dev_name) const;
+
+  bool BreakEngage(const std::string& dev_name) const;
+
+  bool BreakRelease(const std::string& dev_name) const;
+
+  bool HomeOffsetReset(const std::string& dev_name) const;
+
   bool EnableControlManager(bool unlimited_mode_enabled = false) const;
 
   bool DisableControlManager() const;
 
   bool ResetFaultControlManager() const;
 
+  bool CancelControl() const;
+
   bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const;
 
   void StartStateUpdate(const std::function<void(const RobotState<T>&)>& cb, double rate);
+
+  void StartStateUpdate(const std::function<void(const RobotState<T>&, const ControlManagerState&)>& cb, double rate);
 
   void StopStateUpdate();
 
@@ -106,13 +130,23 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   std::vector<std::pair<std::string, int>> GetParameterList() const;
 
-  bool SetParameter(const std::string& name, const std::string& value);
+  bool SetParameter(const std::string& name, const std::string& value, bool write_db = true);
 
   std::string GetParameter(const std::string& name) const;
 
+  [[deprecated("Use FactoryReset() instead.")]]
   bool ResetParameterToDefault(const std::string& name) const;
 
+  [[deprecated("Use FactoryResetAllParameters() instead.")]]
   void ResetAllParametersToDefault() const;
+
+  bool FactoryResetParameter(const std::string& name) const;
+
+  void FactoryResetAllParameters() const;
+
+  bool ResetParameter(const std::string& name) const;
+
+  void ResetAllParameters() const;
 
   std::string GetRobotModel() const;
 
@@ -202,6 +236,12 @@ struct ControlState {
   Eigen::Vector<double, T::kRobotDOF> velocity{Eigen::Vector<double, T::kRobotDOF>::Zero()};
   Eigen::Vector<double, T::kRobotDOF> current{Eigen::Vector<double, T::kRobotDOF>::Zero()};
   Eigen::Vector<double, T::kRobotDOF> torque{Eigen::Vector<double, T::kRobotDOF>::Zero()};
+};
+
+struct PIDGain {
+  uint16_t p_gain;
+  uint16_t i_gain;
+  uint16_t d_gain;
 };
 
 }  // namespace rb

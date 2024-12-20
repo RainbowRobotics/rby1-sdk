@@ -132,6 +132,17 @@ class CartesianCommand(_message.Message):
         angular_velocity_limit: _wrappers_pb2.DoubleValue
         acceleration_limit_scaling: _wrappers_pb2.DoubleValue
         def __init__(self, ref_link_name: _Optional[str] = ..., link_name: _Optional[str] = ..., T: _Optional[_Union[_geometry_pb2.SE3Pose, _Mapping]] = ..., linear_velocity_limit: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., angular_velocity_limit: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., acceleration_limit_scaling: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ...) -> None: ...
+    class JointPositionTarget(_message.Message):
+        __slots__ = ("joint_name", "target_position", "velocity_limit", "acceleration_limit")
+        JOINT_NAME_FIELD_NUMBER: _ClassVar[int]
+        TARGET_POSITION_FIELD_NUMBER: _ClassVar[int]
+        VELOCITY_LIMIT_FIELD_NUMBER: _ClassVar[int]
+        ACCELERATION_LIMIT_FIELD_NUMBER: _ClassVar[int]
+        joint_name: str
+        target_position: float
+        velocity_limit: _wrappers_pb2.DoubleValue
+        acceleration_limit: _wrappers_pb2.DoubleValue
+        def __init__(self, joint_name: _Optional[str] = ..., target_position: _Optional[float] = ..., velocity_limit: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., acceleration_limit: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ...) -> None: ...
     class TrackingError(_message.Message):
         __slots__ = ("position_error", "rotation_error")
         POSITION_ERROR_FIELD_NUMBER: _ClassVar[int]
@@ -140,18 +151,20 @@ class CartesianCommand(_message.Message):
         rotation_error: float
         def __init__(self, position_error: _Optional[float] = ..., rotation_error: _Optional[float] = ...) -> None: ...
     class Request(_message.Message):
-        __slots__ = ("command_header", "minimum_time", "targets", "stop_position_tracking_error", "stop_orientation_tracking_error")
+        __slots__ = ("command_header", "minimum_time", "targets", "joint_position_targets", "stop_position_tracking_error", "stop_orientation_tracking_error")
         COMMAND_HEADER_FIELD_NUMBER: _ClassVar[int]
         MINIMUM_TIME_FIELD_NUMBER: _ClassVar[int]
         TARGETS_FIELD_NUMBER: _ClassVar[int]
+        JOINT_POSITION_TARGETS_FIELD_NUMBER: _ClassVar[int]
         STOP_POSITION_TRACKING_ERROR_FIELD_NUMBER: _ClassVar[int]
         STOP_ORIENTATION_TRACKING_ERROR_FIELD_NUMBER: _ClassVar[int]
         command_header: _command_header_pb2.CommandHeader.Request
         minimum_time: _duration_pb2.Duration
         targets: _containers.RepeatedCompositeFieldContainer[CartesianCommand.SE3PoseTarget]
+        joint_position_targets: _containers.RepeatedCompositeFieldContainer[CartesianCommand.JointPositionTarget]
         stop_position_tracking_error: _wrappers_pb2.DoubleValue
         stop_orientation_tracking_error: _wrappers_pb2.DoubleValue
-        def __init__(self, command_header: _Optional[_Union[_command_header_pb2.CommandHeader.Request, _Mapping]] = ..., minimum_time: _Optional[_Union[_duration_pb2.Duration, _Mapping]] = ..., targets: _Optional[_Iterable[_Union[CartesianCommand.SE3PoseTarget, _Mapping]]] = ..., stop_position_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., stop_orientation_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ...) -> None: ...
+        def __init__(self, command_header: _Optional[_Union[_command_header_pb2.CommandHeader.Request, _Mapping]] = ..., minimum_time: _Optional[_Union[_duration_pb2.Duration, _Mapping]] = ..., targets: _Optional[_Iterable[_Union[CartesianCommand.SE3PoseTarget, _Mapping]]] = ..., joint_position_targets: _Optional[_Iterable[_Union[CartesianCommand.JointPositionTarget, _Mapping]]] = ..., stop_position_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., stop_orientation_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ...) -> None: ...
     class Feedback(_message.Message):
         __slots__ = ("command_header_feedback", "tracking_errors")
         COMMAND_HEADER_FEEDBACK_FIELD_NUMBER: _ClassVar[int]

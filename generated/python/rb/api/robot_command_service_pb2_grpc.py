@@ -55,14 +55,14 @@ class RobotCommandServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def RobotCommand(self, request, context):
-        """단일 명령을 주고 받는 경우
+        """In case of sending and receiving a single command
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def RobotCommandStream(self, request_iterator, context):
-        """명령을 지속적으로 주고 받고자 하는 경우
+        """In case of sending and receiving commands continuously
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')

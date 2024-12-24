@@ -27,6 +27,15 @@ void bind_pid_gain(pybind11::module_& m) {
       });
 }
 
+void bind_color(pybind11::module_& m) {
+  py::class_<Color>(m, "Color")
+      .def(py::init<>())
+      .def(py::init<uint8_t, uint8_t, uint8_t>(), "r"_a, "g"_a, "b"_a)
+      .def_readwrite("r", &Color::r)
+      .def_readwrite("g", &Color::g)
+      .def_readwrite("b", &Color::b);
+}
+
 template <typename T>
 void bind_robot_command_handler(py::module_& m, const std::string& handler_name) {
   py::class_<RobotCommandHandler<T>>(m, handler_name.c_str())
@@ -227,6 +236,8 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("start_time_sync", &Robot<T>::StartTimeSync, "period_sec"_a)
       .def("stop_time_sync", &Robot<T>::StopTimeSync, py::call_guard<py::gil_scoped_release>())
       .def("get_dynamics", &Robot<T>::GetDynamics, "urdf_model"_a = "")
+      .def("set_led_color", &Robot<T>::SetLEDColor, "color"_a, "duration"_a = 1, "transition_time"_a = 0,
+           "blinking"_a = false, "blinking_freq"_a = 1)
 
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)
@@ -248,5 +259,6 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
 
 void pybind11_robot(py::module_& m) {
   bind_pid_gain(m);
+  bind_color(m);
   bind_robot<y1_model::A>(m, "Robot_A");
 }

@@ -46,6 +46,19 @@ jobs:
       - name: Update PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+      - name: Check if version changed
+        id: check-version
+        run: |
+          previous_version=$(git tag --sort=-v:refname | head -n 1 | sed 's/^v//')
+          new_version=$(poetry version -s)
+          echo "previous_version=$previous_version"
+          echo "new_version=$new_version"
+          if [ "$new_version" == "$previous_version" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set outputs for next jobs
         id: out
         run: |
@@ -58,7 +71,7 @@ jobs:
 
   build-wheels:
     needs: [ bump-version ]
-
+    if: needs.bump-version.outputs.changed == 'true'
     runs-on: ${{ matrix.os }}
     name: "Build wheels"
 

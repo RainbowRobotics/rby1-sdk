@@ -1314,9 +1314,9 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     InitializeRequestHeader(req.mutable_request_header());
 
     api::Color c;
-    c.set_red((float)color.r / 255.);
-    c.set_green((float)color.g / 255.);
-    c.set_blue((float)color.b / 255.);
+    c.set_red(color.r);
+    c.set_green(color.g);
+    c.set_blue(color.b);
 
     *req.mutable_color() = c;
     int duration_seconds = (int)duration;

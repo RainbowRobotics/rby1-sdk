@@ -1,4 +1,5 @@
 # rby1-sdk
+
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 
 ## Prerequisites
@@ -64,7 +65,8 @@ Run the examples:
 
 ## ARM Intellisense Issue
 
-For issues with ARM Intellisense, refer to the following [GitHub Issue](https://github.com/microsoft/vscode-cpptools/issues/7413).
+For issues with ARM Intellisense, refer to the
+following [GitHub Issue](https://github.com/microsoft/vscode-cpptools/issues/7413).
 
 To fix the Intellisense problem, add the following code at the top of your source file:
 
@@ -75,36 +77,10 @@ To fix the Intellisense problem, add the following code at the top of your sourc
 #undef __ARM_NEON__
 #endif
 ```
+
 ## Resources and Support
+
 - Documentation: [https://rainbowrobotics.github.io/rby1-dev/](https://rainbowrobotics.github.io/rby1-dev/)
 - Official Website: [Rainbow Robotics](https://www.rainbowrobotics.com/rby1eng)
 - Official Support Email: rby.support@rainbow-robotics.com
 - GitHub Discussions: [Join the Discussion](https://github.com/RainbowRobotics/rby1-sdk/discussions)
-
-## Factory Default Joint Position PID Gain
-
-| Joint         | P Gain (Factory Default) | I Gain (Factory Default) | D Gain (Factory Default) |
-|---------------|--------------------------|--------------------------|--------------------------|
-| torso_0       | 80                       | 15                       | 200                      |
-| torso_1       | 80                       | 15                       | 200                      |
-| torso_2       | 80                       | 15                       | 200                      |
-| torso_3       | 35                       | 5                        | 80                       |
-| torso_4       | 30                       | 5                        | 70                       |
-| torso_5       | 30                       | 5                        | 70                       |
-| torso_6       | 100                      | 5                        | 150                      |
-| right_arm_0   | 80                       | 15                       | 200                      |
-| right_arm_1   | 80                       | 15                       | 200                      |
-| right_arm_2   | 80                       | 15                       | 200                      |
-| right_arm_3   | 35                       | 5                        | 80                       |
-| right_arm_4   | 30                       | 5                        | 70                       |
-| right_arm_5   | 30                       | 5                        | 70                       |
-| right_arm_6   | 100                      | 5                        | 120                      |
-| left_arm_0    | 80                       | 15                       | 200                      |
-| left_arm_1    | 80                       | 15                       | 200                      |
-| left_arm_2    | 80                       | 15                       | 200                      |
-| left_arm_3    | 35                       | 5                        | 80                       |
-| left_arm_4    | 30                       | 5                        | 70                       |
-| left_arm_5    | 30                       | 5                        | 70                       |
-| left_arm_6    | 100                      | 5                        | 150                      |
-| head_0        | 800                      | 0                        | 4000                     |
-| head_1        | 800                      | 0                        | 4000                     |

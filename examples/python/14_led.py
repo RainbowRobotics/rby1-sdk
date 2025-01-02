@@ -42,7 +42,7 @@ def main(address):
         time.sleep(0.5)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="13_robot_model")
+    parser = argparse.ArgumentParser(description="14_led")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
     args = parser.parse_args()
 

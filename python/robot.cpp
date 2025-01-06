@@ -238,6 +238,79 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("get_dynamics", &Robot<T>::GetDynamics, "urdf_model"_a = "")
       .def("set_led_color", &Robot<T>::SetLEDColor, "color"_a, "duration"_a = 1, "transition_time"_a = 0,
            "blinking"_a = false, "blinking_freq"_a = 1)
+      .def("get_system_time",
+           [](Robot<T>& self) {
+             const auto& [ts, tz_string, local_time_string] = self.GetSystemTime();
+
+             py::module_ datetime = py::module_::import("datetime");
+             py::module_ zoneinfo = py::module_::import("zoneinfo");
+
+             double epoch_seconds = ts.tv_sec + static_cast<double>(ts.tv_nsec) / 1000000000.0;
+             py::object dt =
+                 datetime.attr("datetime").attr("fromtimestamp")(epoch_seconds, datetime.attr("timezone").attr("utc"));
+             py::object tzinfo = zoneinfo.attr("ZoneInfo")(tz_string);
+             dt = dt.attr("astimezone")(tzinfo);
+
+             return std::pair(dt, local_time_string);
+           })
+      .def(
+          "set_system_time",
+          [](Robot<T>& self, py::object dt) {
+            py::module_ datetime_mod = py::module_::import("datetime");
+            py::object datetime_type = datetime_mod.attr("datetime");
+
+            if (!py::isinstance(dt, datetime_type)) {
+              throw std::runtime_error("Argument must be a datetime.datetime object");
+            }
+
+            std::string timezone_string;
+
+            py::object tzinfo = dt.attr("tzinfo");
+            if (tzinfo.is_none()) {
+              dt = dt.attr("astimezone")(); // Naive datetime
+            }
+
+            tzinfo = dt.attr("tzinfo");
+            if (py::hasattr(tzinfo, "key")) {
+              // zoneinfo.ZoneInfo
+              timezone_string = tzinfo.attr("key").cast<std::string>();
+            } else {
+              py::object dt_tzname = dt.attr("tzname")();
+              if (!dt_tzname.is_none()) {
+                timezone_string = dt_tzname.cast<std::string>();
+              } else {
+                timezone_string = "";
+              }
+            }
+            double epoch_seconds = dt.attr("timestamp")().cast<double>();
+
+            struct timespec ts;
+            ts.tv_sec = static_cast<time_t>(epoch_seconds);
+            double fractional = epoch_seconds - static_cast<double>(ts.tv_sec);
+            ts.tv_nsec = static_cast<long>(fractional * 1000000000L);
+
+            return self.SetSystemTime(ts, timezone_string.empty() ? std::nullopt : std::make_optional(timezone_string));
+          },
+          "datetime"_a)
+      .def(
+          "set_system_time",
+          [](Robot<T>& self, py::object dt, const std::string& time_zone) {
+            py::module_ datetime_mod = py::module_::import("datetime");
+            py::object datetime_type = datetime_mod.attr("datetime");
+
+            if (!py::isinstance(dt, datetime_type)) {
+              throw std::runtime_error("Argument must be a datetime.datetime object");
+            }
+            double epoch_seconds = dt.attr("timestamp")().cast<double>();
+
+            struct timespec ts;
+            ts.tv_sec = static_cast<time_t>(epoch_seconds);
+            double fractional = epoch_seconds - static_cast<double>(ts.tv_sec);
+            ts.tv_nsec = static_cast<long>(fractional * 1000000000L);
+
+            return self.SetSystemTime(ts, time_zone.empty() ? std::nullopt : std::make_optional(time_zone));
+          },
+          "datetime"_a, "time_zone"_a)
 
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)

@@ -20,6 +20,7 @@
 #include "rb/api/robot_command_service.grpc.pb.h"
 #include "rb/api/robot_info_service.grpc.pb.h"
 #include "rb/api/robot_state_service.grpc.pb.h"
+#include "rb/api/system_service.grpc.pb.h"
 
 #include "rby1-sdk/base/event_loop.h"
 #include "rby1-sdk/base/time_util.h"
@@ -356,6 +357,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     log_service_ = api::LogService::NewStub(channel_);
     parameter_service_ = api::ParameterService::NewStub(channel_);
     led_service_ = api::LEDService::NewStub(channel_);
+    system_service_ = api::SystemService::NewStub(channel_);
 
     int retries = 0;
     while (retries < max_retries) {
@@ -1344,6 +1346,51 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return true;
   }
 
+  std::tuple<struct timespec, std::string, std::string> GetSystemTime() const {
+    api::GetSystemTimeRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::GetSystemTimeResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->GetSystemTime(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+
+    struct timespec utc_time {};
+
+    if (res.has_utc_time()) {
+      utc_time.tv_sec = res.utc_time().seconds();
+      utc_time.tv_nsec = res.utc_time().nanos();
+    }
+
+    return {utc_time, res.time_zone(), res.local_time()};
+  }
+
+  bool SetSystemTime(struct timespec utc_time, std::optional<std::string> time_zone) const {
+    api::SetSystemTimeRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    auto& req_utc_time = *req.mutable_utc_time();
+    req_utc_time.set_seconds(utc_time.tv_sec);
+    req_utc_time.set_nanos(utc_time.tv_nsec);
+    if (time_zone.has_value()) {
+      *req.mutable_time_zone() = time_zone.value();
+    }
+
+    api::SetSystemTimeResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->SetSystemTime(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error(status.error_message());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+
+    return true;
+  }
+
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
     explicit StateReader(std::shared_ptr<RobotImpl<T>> robot, api::RobotStateService::Stub* stub,
@@ -1743,6 +1790,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   std::unique_ptr<api::LogService::Stub> log_service_;
   std::unique_ptr<api::ParameterService::Stub> parameter_service_;
   std::unique_ptr<api::LEDService::Stub> led_service_;
+  std::unique_ptr<api::SystemService::Stub> system_service_;
 
   std::unique_ptr<StateReader> state_reader_;
   std::unique_ptr<LogReader> log_reader_;
@@ -2064,6 +2112,16 @@ template <typename T>
 bool Robot<T>::SetLEDColor(const rb::Color& color, double duration, double transition_time, bool blinking,
                            double blinking_freq) {
   return impl_->SetLEDColor(color, duration, transition_time, blinking, blinking_freq);
+}
+
+template <typename T>
+std::tuple<struct timespec, std::string, std::string> Robot<T>::GetSystemTime() const {
+  return impl_->GetSystemTime();
+}
+
+template <typename T>
+bool Robot<T>::SetSystemTime(struct timespec utc_time, std::optional<std::string> time_zone) const {
+  return impl_->SetSystemTime(utc_time, time_zone);
 }
 
 template <typename T>

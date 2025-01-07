@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package rb.api;
+
+// Represents a color in the RGB color space.
+// Each color component is an unsigned 32-bit integer value in the range [0, 255].
+message Color {
+  // The red component of the color, specified as a value in the range [0, 255].
+  uint32 red = 1;
+
+  // The green component of the color, specified as a value in the range [0, 255].
+  uint32 green = 2;
+
+  // The blue component of the color, specified as a value in the range [0, 255].
+  uint32 blue = 3;
+}

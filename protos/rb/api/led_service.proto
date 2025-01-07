@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/led.proto";
+
+// Service for controlling LED behavior
+service LEDService {
+  // Sets the LED color and (optionally) its blinking behavior.
+  // If blinking is true, the LED blinks at 'blinking_freq' for 'duration'.
+  // Otherwise, the LED remains in the requested color for 'duration'.
+  rpc SetLEDColor(SetLEDColorRequest) returns (SetLEDColorResponse) {}
+}

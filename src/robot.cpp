@@ -12,6 +12,7 @@
 
 #include "rb/api/control_manager_service.grpc.pb.h"
 #include "rb/api/joint_operation_service.grpc.pb.h"
+#include "rb/api/led_service.grpc.pb.h"
 #include "rb/api/log_service.grpc.pb.h"
 #include "rb/api/parameter_service.grpc.pb.h"
 #include "rb/api/ping_service.grpc.pb.h"
@@ -354,6 +355,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     robot_state_service_ = api::RobotStateService::NewStub(channel_);
     log_service_ = api::LogService::NewStub(channel_);
     parameter_service_ = api::ParameterService::NewStub(channel_);
+    led_service_ = api::LEDService::NewStub(channel_);
 
     int retries = 0;
     while (retries < max_retries) {
@@ -1306,6 +1308,42 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return dyn_robot;
   }
 
+  bool SetLEDColor(const rb::Color& color, double duration, double transition_time, bool blinking,
+                   double blinking_freq) {
+    api::SetLEDColorRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::Color c;
+    c.set_red(color.r);
+    c.set_green(color.g);
+    c.set_blue(color.b);
+
+    *req.mutable_color() = c;
+    int duration_seconds = (int)duration;
+    int duration_nanos = (int)((duration - duration_seconds) * 1e9);
+    req.mutable_duration()->set_seconds(duration_seconds);
+    req.mutable_duration()->set_nanos(duration_nanos);
+    int transition_time_seconds = (int)transition_time;
+    int transition_time_nanos = (int)((transition_time - transition_time_seconds) * 1e9);
+    req.mutable_transition_time()->set_seconds(transition_time_seconds);
+    req.mutable_transition_time()->set_nanos(transition_time_nanos);
+    req.set_blinking(blinking);
+    req.mutable_blinking_freq()->set_value(blinking_freq);
+
+    api::SetLEDColorResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = led_service_->SetLEDColor(&context, req, &res);
+    if (!status.ok()) {
+      throw std::runtime_error("gRPC call failed: " + status.error_message());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+
+    return true;
+  }
+
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
     explicit StateReader(std::shared_ptr<RobotImpl<T>> robot, api::RobotStateService::Stub* stub,
@@ -1704,6 +1742,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   std::unique_ptr<api::RobotStateService::Stub> robot_state_service_;
   std::unique_ptr<api::LogService::Stub> log_service_;
   std::unique_ptr<api::ParameterService::Stub> parameter_service_;
+  std::unique_ptr<api::LEDService::Stub> led_service_;
 
   std::unique_ptr<StateReader> state_reader_;
   std::unique_ptr<LogReader> log_reader_;
@@ -2019,6 +2058,12 @@ bool Robot<T>::StopTimeSync() {
 template <typename T>
 std::shared_ptr<dyn::Robot<T::kRobotDOF>> Robot<T>::GetDynamics(const std::string& urdf_model) {
   return impl_->GetDynamics(urdf_model);
+}
+
+template <typename T>
+bool Robot<T>::SetLEDColor(const rb::Color& color, double duration, double transition_time, bool blinking,
+                           double blinking_freq) {
+  return impl_->SetLEDColor(color, duration, transition_time, blinking, blinking_freq);
 }
 
 template <typename T>

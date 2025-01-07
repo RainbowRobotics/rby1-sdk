@@ -1,3 +1,15 @@
+## v0.4.0 (2025-01-07)
+
+### ✨ Features
+
+- add api for battery config (#42)
+- add api for system time control
+- add api to control the led (#40)
+
+### 🐛 Fixes
+
+- change Color (proto message) component type from float to uint32
+
 ## v0.3.0 (2024-12-20)
 
 ### ♻️ Refactor

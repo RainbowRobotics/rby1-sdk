@@ -167,6 +167,16 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool SetLEDColor(const Color& color, double duration = 1 /* sec */, double transition_time = 0 /* sec */,
                    bool blinking = false, double blinking_freq = 1 /* Hz */);
 
+  std::tuple<struct timespec, std::string, std::string> GetSystemTime() const;
+
+  bool SetSystemTime(struct timespec utc_time, std::optional<std::string> time_zone = std::nullopt) const;
+
+  bool SetBatteryLevel(double level) const;
+
+  bool SetBatteryConfig(double cutoff_voltage, double fully_charged_voltage, const std::array<double, 4>& coefficients);
+
+  bool ResetBatteryConfig() const;
+
  private:
   explicit Robot(std::string address);
 

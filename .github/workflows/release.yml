@@ -49,11 +49,9 @@ jobs:
       - name: Check if version changed
         id: check-version
         run: |
-          previous_version=$(git tag --sort=-v:refname | head -n 1 | sed 's/^v//')
-          new_version=$(poetry version -s)
-          echo "previous_version=$previous_version"
-          echo "new_version=$new_version"
-          if [ "$new_version" == "$previous_version" ]; then
+          echo "PREVIOUS_REVISION: ${{ env.PREVIOUS_REVISION }}"
+          echo "REVISION: ${{ env.REVISION }}"
+          if [ "${{ env.PREVIOUS_REVISION }}" == "${{ env.REVISION }}" ]; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -64,7 +62,7 @@ jobs:
         run: |
           new_sha=$(git rev-parse HEAD)
           version=$(poetry version -s)
-          echo $sha_new
+          echo $new_sha
           echo $version
           echo "SHA=$new_sha" >> "$GITHUB_OUTPUT"
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"

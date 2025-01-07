@@ -53,6 +53,66 @@ int64_t TimestampInNs(const google::protobuf::Timestamp& time) {
   return (int64_t)time.seconds() * (int64_t)rb::kNanosecondsInSecond + (int64_t)time.nanos();
 }
 
+std::string gRPCStatusToString(grpc::StatusCode status_code) {
+  switch (status_code) {
+    case grpc::OK: {
+      return "OK";
+    }
+    case grpc::CANCELLED: {
+      return "CANCELLED";
+    }
+    case grpc::UNKNOWN: {
+      return "UNKNOWN";
+    }
+    case grpc::INVALID_ARGUMENT: {
+      return "INVALID_ARGUMENT";
+    }
+    case grpc::DEADLINE_EXCEEDED: {
+      return "DEADLINE_EXCEEDED";
+    }
+    case grpc::NOT_FOUND: {
+      return "NOT_FOUND";
+    }
+    case grpc::ALREADY_EXISTS: {
+      return "ALREADY_EXISTS";
+    }
+    case grpc::PERMISSION_DENIED: {
+      return "PERMISSION_DENIED";
+    }
+    case grpc::UNAUTHENTICATED: {
+      return "UNAUTHENTICATED";
+    }
+    case grpc::RESOURCE_EXHAUSTED: {
+      return "RESOURCE_EXHAUSTED";
+    }
+    case grpc::FAILED_PRECONDITION: {
+      return "FAILED_PRECONDITION";
+    }
+    case grpc::ABORTED: {
+      return "ABORTED";
+    }
+    case grpc::OUT_OF_RANGE: {
+      return "OUT_OF_RANGE";
+    }
+    case grpc::UNIMPLEMENTED: {
+      return "UNIMPLEMENTED";
+    }
+    case grpc::INTERNAL: {
+      return "INTERNAL";
+    }
+    case grpc::UNAVAILABLE: {
+      return "UNAVAILABLE";
+    }
+    case grpc::DATA_LOSS: {
+      return "DATA_LOSS";
+    }
+    case grpc::DO_NOT_USE: {
+      return "DO_NOT_USE";
+    }
+  }
+  return "UNKNOWN";
+}
+
 }  // namespace
 
 namespace rb::api {
@@ -400,7 +460,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = robot_info_service_->GetRobotInfo(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.robot_info();
@@ -414,7 +480,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = control_manager_service_->GetTimeScale(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.time_scale();
@@ -429,7 +501,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = control_manager_service_->SetTimeScale(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.current_time_scale();
@@ -445,7 +523,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = power_service_->PowerCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.status() == api::PowerCommandResponse::STATUS_SUCCESS;
@@ -461,7 +545,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = power_service_->PowerCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.status() == api::PowerCommandResponse::STATUS_SUCCESS;
@@ -502,7 +592,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = power_service_->JointCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
@@ -549,7 +645,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = joint_operation_service_->SetPositionPIDGain(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.status() == api::SetPositionPIDGainResponse::STATUS_SUCCESS;
@@ -564,7 +666,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
     auto res_gains = res.position_gain();
     std::vector<rb::PIDGain> result;
@@ -586,7 +694,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
     auto res_gains = res.position_gain();
     std::vector<rb::PIDGain> result;
@@ -608,7 +722,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
     auto res_gains = res.position_gain();
     std::vector<rb::PIDGain> result;
@@ -630,7 +750,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
 
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
     auto res_gains = res.position_gain();
     std::vector<rb::PIDGain> result;
@@ -651,7 +777,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = joint_operation_service_->GetPositionPIDGain(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
     auto res_gains = res.position_gain();
     auto result =
@@ -670,7 +802,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = power_service_->JointCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
@@ -686,7 +824,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = power_service_->JointCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
@@ -702,7 +846,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = power_service_->JointCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
@@ -718,7 +868,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = control_manager_service_->ControlManagerCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.control_manager_state().state() == api::ControlManagerState::CONTROL_MANAGER_STATE_ENABLED;
@@ -733,7 +889,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = control_manager_service_->ControlManagerCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.control_manager_state().state() == api::ControlManagerState::CONTROL_MANAGER_STATE_IDLE;
@@ -748,7 +910,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = control_manager_service_->ControlManagerCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.control_manager_state().state() == api::ControlManagerState::CONTROL_MANAGER_STATE_IDLE;
@@ -762,7 +930,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = control_manager_service_->CancelControl(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.has_response_header()) {
@@ -796,7 +970,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = power_service_->ToolFlangePowerCommand(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return true;
@@ -842,7 +1022,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = robot_state_service_->GetRobotState(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return ProtoToRobotState(res.robot_state());
@@ -857,7 +1043,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = log_service_->GetLastLog(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     std::vector<Log> logs;
@@ -876,7 +1068,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = robot_state_service_->GetControlManagerState(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return api::ProtoToControlManagerState(res.control_manager_state());
@@ -994,7 +1192,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = robot_state_service_->ResetOdometry(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.has_response_header()) {
@@ -1015,7 +1219,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = parameter_service_->GetParameterList(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.has_response_header()) {
@@ -1047,7 +1257,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = parameter_service_->SetParameter(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream error_msg_ss;
+      error_msg_ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        error_msg_ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(error_msg_ss.str());
     }
 
     if (res.response_header().has_error()) {
@@ -1066,7 +1282,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = parameter_service_->GetParameter(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.has_response_header()) {
@@ -1093,7 +1315,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = parameter_service_->ResetAllParameters(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
   }
 
@@ -1106,7 +1334,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = parameter_service_->ResetParameter(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.response_header().has_error()) {
@@ -1124,7 +1358,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = parameter_service_->ResetAllParametersToDefault(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
   }
 
@@ -1137,7 +1377,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = parameter_service_->FactoryResetParameter(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.response_header().has_error()) {
@@ -1155,7 +1401,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = parameter_service_->FactoryResetAllParameters(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
   }
 
@@ -1168,7 +1420,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = parameter_service_->ResetParameterToDefault(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.response_header().has_error()) {
@@ -1186,7 +1444,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = robot_info_service_->GetRobotModel(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     return res.model();
@@ -1202,7 +1466,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = robot_info_service_->ImportRobotModel(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.has_response_header()) {
@@ -1230,7 +1500,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::Status status = ping_service_->Ping(&context, req, &res);
     client_res_time = TimespecInNs(GetCurrentTime());
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.has_response_header()) {
@@ -1336,13 +1612,18 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = led_service_->SetLEDColor(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error("gRPC call failed: " + status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.response_header().has_error()) {
       return res.response_header().error().code() == api::CommonError::CODE_OK;
     }
-
     return true;
   }
 
@@ -1354,7 +1635,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = system_service_->GetSystemTime(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     struct timespec utc_time {};
@@ -1372,7 +1659,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     InitializeRequestHeader(req.mutable_request_header());
     auto& req_utc_time = *req.mutable_utc_time();
     req_utc_time.set_seconds(utc_time.tv_sec);
-    req_utc_time.set_nanos(utc_time.tv_nsec);
+    req_utc_time.set_nanos((int)utc_time.tv_nsec);
     if (time_zone.has_value()) {
       *req.mutable_time_zone() = time_zone.value();
     }
@@ -1381,13 +1668,95 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     grpc::ClientContext context;
     grpc::Status status = system_service_->SetSystemTime(&context, req, &res);
     if (!status.ok()) {
-      throw std::runtime_error(status.error_message());
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
     }
 
     if (res.response_header().has_error()) {
       return res.response_header().error().code() == api::CommonError::CODE_OK;
     }
+    return true;
+  }
 
+  bool SetBatteryLevel(double level) const {
+    api::SetBatteryLevelRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_level(level);
+
+    api::SetBatteryLevelResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->SetBatteryLevel(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+    return true;
+  }
+
+  bool SetBatteryConfig(double cutoff_voltage, double fully_charged_voltage,
+                        const std::array<double, 4>& coefficients) const {
+    api::SetBatteryConfigRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_cut_off_voltage(cutoff_voltage);
+    req.set_fully_charged_voltage(fully_charged_voltage);
+    req.clear_coefficients();
+    for (const auto& c : coefficients) {
+      req.add_coefficients(c);
+    }
+
+    api::SetBatteryConfigResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->SetBatteryConfig(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+    return true;
+  }
+
+  bool ResetBatteryConfig() const {
+    api::ResetBatteryConfigRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::ResetBatteryConfigResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->ResetBatteryConfig(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
     return true;
   }
 
@@ -2122,6 +2491,22 @@ std::tuple<struct timespec, std::string, std::string> Robot<T>::GetSystemTime() 
 template <typename T>
 bool Robot<T>::SetSystemTime(struct timespec utc_time, std::optional<std::string> time_zone) const {
   return impl_->SetSystemTime(utc_time, time_zone);
+}
+
+template <typename T>
+bool Robot<T>::SetBatteryLevel(const double level) const {
+  return impl_->SetBatteryLevel(level);
+}
+
+template <typename T>
+bool Robot<T>::SetBatteryConfig(double cutoff_voltage, double fully_charged_voltage,
+                                const std::array<double, 4>& coefficients) {
+  return impl_->SetBatteryConfig(cutoff_voltage, fully_charged_voltage, coefficients);
+}
+
+template <typename T>
+bool Robot<T>::ResetBatteryConfig() const {
+  return impl_->ResetBatteryConfig();
 }
 
 template <typename T>

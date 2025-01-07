@@ -34,7 +34,7 @@ message SetSystemTimeResponse {
 message SetBatteryLevelRequest {
   RequestHeader request_header = 1;
 
-  double level = 2;
+  double level = 2; // [0, 100]
 }
 
 message SetBatteryLevelResponse {
@@ -47,6 +47,8 @@ message SetBatteryConfigRequest {
   double cut_off_voltage = 2; // voltage at 0 %
 
   double fully_charged_voltage = 3; // voltage at 100 %
+
+  repeated double coefficients = 4; // double[4]; coefficients for 3rd order polynomial
 }
 
 message SetBatteryConfigResponse {

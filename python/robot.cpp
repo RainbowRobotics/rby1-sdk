@@ -267,7 +267,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
 
             py::object tzinfo = dt.attr("tzinfo");
             if (tzinfo.is_none()) {
-              dt = dt.attr("astimezone")(); // Naive datetime
+              dt = dt.attr("astimezone")();  // Naive datetime
             }
 
             tzinfo = dt.attr("tzinfo");
@@ -311,6 +311,9 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
             return self.SetSystemTime(ts, time_zone.empty() ? std::nullopt : std::make_optional(time_zone));
           },
           "datetime"_a, "time_zone"_a)
+      .def("set_battery_level", &Robot<T>::SetBatteryLevel)
+      .def("set_battery_config", &Robot<T>::SetBatteryConfig)
+      .def("reset_battery_config", &Robot<T>::ResetBatteryConfig)
 
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)

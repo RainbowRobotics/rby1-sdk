@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
         std::cout << "State Update Received:" << std::endl;
         std::cout << "  Timestamp: " << state.timestamp.tv_sec << ".";
         std::cout << std::setw(9) << std::setfill('0') << state.timestamp.tv_nsec << std::endl;
-        std::cout << "  wasit [deg]     : " << state.position.block(2, 0, 6, 1).transpose() * R2D << std::endl;
+        std::cout << "  torso [deg]     : " << state.position.block(2, 0, 6, 1).transpose() * R2D << std::endl;
         std::cout << "  right arm [deg] : " << state.position.block(2 + 6, 0, 7, 1).transpose() * R2D << std::endl;
         std::cout << "  left arm [deg]  : " << state.position.block(2 + 6 + 7, 0, 7, 1).transpose() * R2D << std::endl;
       },
@@ -116,10 +116,10 @@ int main(int argc, char** argv) {
 
   std::this_thread::sleep_for(1s);
 
-  Eigen::Vector<double, 6> q_joint_waist;
+  Eigen::Vector<double, 6> q_joint_torso;
   Eigen::Vector<double, 7> q_joint_right_arm;
   Eigen::Vector<double, 7> q_joint_left_arm;
-  q_joint_waist.setZero();
+  q_joint_torso.setZero();
   q_joint_right_arm.setZero();
   q_joint_left_arm.setZero();
 
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 
   if (1) {
     std::cout << "joint position command example 1\n";
-    q_joint_waist.setZero();
+    q_joint_torso.setZero();
     q_joint_right_arm.setZero();
     q_joint_left_arm.setZero();
 
@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
             ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
                 BodyComponentBasedCommandBuilder()
                     .SetTorsoCommand(
-                        JointPositionCommandBuilder().SetMinimumTime(minimum_time).SetPosition(q_joint_waist))
+                        JointPositionCommandBuilder().SetMinimumTime(minimum_time).SetPosition(q_joint_torso))
                     .SetRightArmCommand(
                         JointPositionCommandBuilder().SetMinimumTime(minimum_time).SetPosition(q_joint_right_arm))
                     .SetLeftArmCommand(
@@ -158,8 +158,8 @@ int main(int argc, char** argv) {
   if (1) {
     std::cout << "joint position command example 2\n";
 
-    q_joint_waist << 0, 30, -60, 30, 0, 0;
-    q_joint_waist *= D2R;
+    q_joint_torso << 0, 30, -60, 30, 0, 0;
+    q_joint_torso *= D2R;
 
     q_joint_right_arm << -45, -30, 0, -90, 0, 45, 0;
     q_joint_right_arm *= D2R;
@@ -168,7 +168,7 @@ int main(int argc, char** argv) {
     q_joint_left_arm *= D2R;
 
     Eigen::Vector<double, 20> q;
-    q.block(0, 0, 6, 1) = q_joint_waist;
+    q.block(0, 0, 6, 1) = q_joint_torso;
     q.block(6, 0, 7, 1) = q_joint_right_arm;
     q.block(6 + 7, 0, 7, 1) = q_joint_left_arm;
 
@@ -409,8 +409,8 @@ int main(int argc, char** argv) {
   if (1) {
     std::cout << "joint position command example 3\n";
 
-    q_joint_waist << 0, 30, -60, 30, 0, 0;
-    q_joint_waist *= D2R;
+    q_joint_torso << 0, 30, -60, 30, 0, 0;
+    q_joint_torso *= D2R;
 
     q_joint_right_arm << -45, -30, 0, -90, 0, 45, 0;
     q_joint_right_arm *= D2R;
@@ -419,7 +419,7 @@ int main(int argc, char** argv) {
     q_joint_left_arm *= D2R;
 
     Eigen::Vector<double, 20> q;
-    q.block(0, 0, 6, 1) = q_joint_waist;
+    q.block(0, 0, 6, 1) = q_joint_torso;
     q.block(6, 0, 7, 1) = q_joint_right_arm;
     q.block(6 + 7, 0, 7, 1) = q_joint_left_arm;
 
@@ -652,7 +652,7 @@ int main(int argc, char** argv) {
 
   if (1) {
     std::cout << "go to home pose 1\n";
-    q_joint_waist.setZero();
+    q_joint_torso.setZero();
     q_joint_right_arm.setZero();
     q_joint_left_arm.setZero();
 
@@ -665,7 +665,7 @@ int main(int argc, char** argv) {
             ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
                 BodyComponentBasedCommandBuilder()
                     .SetTorsoCommand(
-                        JointPositionCommandBuilder().SetMinimumTime(minimum_time * 2).SetPosition(q_joint_waist))
+                        JointPositionCommandBuilder().SetMinimumTime(minimum_time * 2).SetPosition(q_joint_torso))
                     .SetRightArmCommand(
                         JointPositionCommandBuilder().SetMinimumTime(minimum_time * 2).SetPosition(q_joint_right_arm))
                     .SetLeftArmCommand(

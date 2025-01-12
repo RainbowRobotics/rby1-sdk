@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/system.proto";
+
+service SystemService {
+  rpc GetSystemTime(GetSystemTimeRequest) returns (GetSystemTimeResponse) {}
+
+  rpc SetSystemTime(SetSystemTimeRequest) returns (SetSystemTimeResponse) {}
+
+  rpc SetBatteryLevel(SetBatteryLevelRequest) returns (SetBatteryLevelResponse) {}
+
+  rpc SetBatteryConfig(SetBatteryConfigRequest) returns (SetBatteryConfigResponse) {}
+
+  rpc ResetBatteryConfig(ResetBatteryConfigRequest) returns (ResetBatteryConfigResponse) {}
+}

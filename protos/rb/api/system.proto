@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "google/protobuf/timestamp.proto";
+import "rb/api/header.proto";
+
+message GetSystemTimeRequest {
+  RequestHeader request_header = 1;
+}
+
+message GetSystemTimeResponse {
+  ResponseHeader response_header = 1;
+
+  google.protobuf.Timestamp utc_time = 2;
+
+  string time_zone = 3; // https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+  string local_time = 4;
+}
+
+message SetSystemTimeRequest {
+  RequestHeader request_header = 1;
+
+  google.protobuf.Timestamp utc_time = 2;
+
+  string time_zone = 3; // https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+}
+
+message SetSystemTimeResponse {
+  ResponseHeader response_header = 1;
+}
+
+message SetBatteryLevelRequest {
+  RequestHeader request_header = 1;
+
+  double level = 2; // [0, 100]
+}
+
+message SetBatteryLevelResponse {
+  ResponseHeader response_header = 1;
+}
+
+message SetBatteryConfigRequest {
+  RequestHeader request_header = 1;
+
+  double cut_off_voltage = 2; // voltage at 0 %
+
+  double fully_charged_voltage = 3; // voltage at 100 %
+
+  repeated double coefficients = 4; // double[4]; coefficients for 3rd order polynomial
+}
+
+message SetBatteryConfigResponse {
+  ResponseHeader response_header = 1;
+}
+
+message ResetBatteryConfigRequest {
+  RequestHeader request_header = 1;
+}
+
+message ResetBatteryConfigResponse {
+  ResponseHeader response_header = 1;
+}

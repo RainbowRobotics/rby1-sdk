@@ -2125,3 +2125,9 @@ template class rb::RobotCommandHandler<rb::y1_model::A>;
 template class rb::RobotCommandStreamHandler<rb::y1_model::A>;
 template class rb::ControlInput<rb::y1_model::A>;
 template class rb::ControlState<rb::y1_model::A>;
+
+template class rb::Robot<rb::y1_model::T5>;
+template class rb::RobotCommandHandler<rb::y1_model::T5>;
+template class rb::RobotCommandStreamHandler<rb::y1_model::T5>;
+template class rb::ControlInput<rb::y1_model::T5>;
+template class rb::ControlState<rb::y1_model::T5>;

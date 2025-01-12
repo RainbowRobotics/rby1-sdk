@@ -249,4 +249,5 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
 void pybind11_robot(py::module_& m) {
   bind_pid_gain(m);
   bind_robot<y1_model::A>(m, "Robot_A");
+  bind_robot<y1_model::T5>(m, "Robot_T5");
 }

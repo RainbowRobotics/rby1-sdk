@@ -28,6 +28,8 @@ py::object create_robot(const py::object& model, const std::string& address) {
 
   if (model_name == y1_model::A::kModelName) {
     return py::cast(rb::Robot<y1_model::A>::Create(address));
+  } else if (model_name == y1_model::T5::kModelName) {
+    return py::cast(rb::Robot<y1_model::T5>::Create(address));
   }
 
   throw std::runtime_error("Unknown model name: " + std::string(model_name));
@@ -51,5 +53,10 @@ PYBIND11_MODULE(_bindings, m) {
   m.def("create_robot", &create_robot, "Creates a robot based on the provided model and address.", py::arg("model"),
         py::arg("address"));
 
-  m.def("create_robot_a", [](const std::string& address) { return Robot<y1_model::A>::Create(address); }, "address"_a);
+  m.def(
+      "create_robot_a",  //
+      [](const std::string& address) { return Robot<y1_model::A>::Create(address); }, "address"_a);
+  m.def(
+      "create_robot_t5",  //
+      [](const std::string& address) { return Robot<y1_model::T5>::Create(address); }, "address"_a);
 }

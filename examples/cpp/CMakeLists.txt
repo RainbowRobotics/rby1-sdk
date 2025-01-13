@@ -49,6 +49,7 @@ foreach (SRC IN LISTS EXAMPLES)
     )
     target_compile_definitions(${EXECUTABLE_NAME} PUBLIC
             -DPATH="${CMAKE_CURRENT_SOURCE_DIR}"
+            -DMODELS_PATH="${CMAKE_SOURCE_DIR}/models/"
     )
     message(STATUS ${EXECUTABLE_NAME})
 endforeach ()

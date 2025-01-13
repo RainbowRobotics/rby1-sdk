@@ -22,3 +22,5 @@ wheelhouse
 
 !.github/**
 !build.py
+
+.DS_Store

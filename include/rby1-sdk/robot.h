@@ -50,6 +50,8 @@ namespace rb {
 template <typename T>
 class Robot : public std::enable_shared_from_this<Robot<T>> {
  public:
+  using ModelType = T;
+
   static std::shared_ptr<Robot<T>> Create(std::string address);
 
   ~Robot();

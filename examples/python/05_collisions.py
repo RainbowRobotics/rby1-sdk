@@ -4,7 +4,7 @@ import rby1_sdk
 import argparse
 
 
-def callback(robot_state: rby1_sdk.RobotState_A):
+def callback(robot_state):
     if robot_state.collisions:
         collision = robot_state.collisions[0]
         if collision.distance < 0:
@@ -12,8 +12,8 @@ def callback(robot_state: rby1_sdk.RobotState_A):
         print(collision)
 
 
-def main(address, power_device):
-    robot = rby1_sdk.create_robot_a(address)
+def main(address, model, power_device):
+    robot = rby1_sdk.create_robot(address, model)
     robot.connect()
     if not robot.is_connected():
         print("Robot is not connected")
@@ -38,8 +38,10 @@ def main(address, power_device):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="05_collisions")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
+    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     args = parser.parse_args()
 
     main(address=args.address,
+         model=args.model,
          power_device=args.device)

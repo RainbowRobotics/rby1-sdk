@@ -6,6 +6,8 @@
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 
+#include "model.h"
+
 namespace py = pybind11;
 using namespace rb;
 using namespace py::literals;
@@ -147,6 +149,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
   bind_control_input<T>(m, robot_name + "_ControlInput");
 
   py::class_<Robot<T>, std::shared_ptr<Robot<T>>>(m, robot_name.c_str())
+      .def_static("model", []() { return PyModel<T>(); })
       .def_static("create", &Robot<T>::Create)
       .def("connect", &Robot<T>::Connect, "max_retries"_a = 5, "timeout_ms"_a = 1000,
            py::call_guard<py::gil_scoped_release>())

@@ -15,16 +15,18 @@ acceleration_limit = 1.0
 stop_orientation_tracking_error = 1e-5
 stop_position_tracking_error = 1e-5
 
+
 def example_joint_position_command_1(robot):
     print("joint position command example 1")
 
+    model = robot.model()
+
     # Initialize joint positions
-    q_joint_waist = np.zeros(6)
+    q_joint_waist = np.zeros(len(model.torso_idx))
     q_joint_right_arm = np.deg2rad(np.array([30, -10, 0, -100, 0, 20, 0]))
     q_joint_left_arm = np.deg2rad(np.array([30, 10, 0, -100, 0, 20, 0]))
 
     # Set specific joint positions
-    
 
     rc = RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder().set_body_command(
@@ -54,6 +56,7 @@ def example_joint_position_command_1(robot):
         return 1
 
     return 0
+
 
 def example_cartesian_command_1(robot):
     print("Cartesian command example 1")
@@ -104,7 +107,6 @@ def example_cartesian_command_1(robot):
         return 1
 
     return 0
-
 
 
 def example_impedance_control_command_1(robot):
@@ -166,29 +168,29 @@ def example_impedance_control_command_1(robot):
     return 0
 
 
-def main(address, power_device, servo):
-    robot = rby1_sdk.create_robot_a(address)
+def main(address, model, power_device, servo):
+    robot = rby1_sdk.create_robot(address, model)
     robot.connect()
-    
+
     if not robot.is_connected():
         print("Robot is not connected")
         exit(1)
-        
+
     if not robot.is_power_on(power_device):
         rv = robot.power_on(power_device)
         if not rv:
             print("Failed to power on")
             exit(1)
-    
+
     if not robot.is_servo_on(servo):
         rv = robot.servo_on(servo)
         if not rv:
             print("Fail to servo on")
             exit(1)
 
-    control_manager_state = robot.get_control_manager_state()            
-    if (control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or \
-        control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
+    control_manager_state = robot.get_control_manager_state()
+    if (control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or
+            control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
 
         if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:
             print("Warning: Detected a Major Fault in the Control Manager.")
@@ -217,17 +219,20 @@ def main(address, power_device, servo):
     if not example_joint_position_command_1(robot):
         print("Finish Joint")
     if not example_cartesian_command_1(robot):
-        print("Finish Impedance")        
+        print("Finish Impedance")
     if not example_impedance_control_command_1(robot):
         print("Finish Impedance")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="07_impedance_control")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
+    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")
     args = parser.parse_args()
 
     main(address=args.address,
+         model=args.model,
          power_device=args.device,
-         servo = args.servo)
+         servo=args.servo)

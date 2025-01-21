@@ -49,12 +49,16 @@ void bind_joint_info(py::module_& m) {
       .def(py::init<>())
       .def_readonly("name", &JointInfo::name)
       .def_readonly("has_brake", &JointInfo::has_brake)
+      .def_readonly("product_name", &JointInfo::product_name)
+      .def_readonly("firmware_version", &JointInfo::firmware_version)
       .def("__repr__", [](const JointInfo& self) {
         std::stringstream ss;
         ss << std::fixed << std::setprecision(kDoublePrecision)      //
            << "JointInfo("                                           //
            << "name=" << self.name                                   //
            << ", has_brake=" << (self.has_brake ? "True" : "False")  //
+           << ", product_name=" << self.product_name  //
+           << ", firmware_version=" << self.firmware_version  //
            << ")";
         return ss.str();
       });

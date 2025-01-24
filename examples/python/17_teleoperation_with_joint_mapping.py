@@ -415,72 +415,6 @@ def bulk_read_torque_enable(port_handler: dxl.PortHandler, packet_handler: dxl.P
     else:
         return torque_enable_vector
 
-
-
-###
-### Robot Control Loop(Thread)
-###
-# def control_loop_for_master_arm(port_handler: dxl.PortHandler, packet_handler: dxl.PacketHandler, active_ids):
-#     robot_config = rby1_sdk.load_robot_from_urdf("../../models/master_arm/model.urdf", "Base")
-#     state = robot_config.make_state(LINK_NAMES, JOINT_NAMES)
-
-#     gravity_vector = np.array([0, 0, 0, 0, 0, -9.81])
-#     state.set_gravity(gravity_vector)
-    
-#     q_joint = np.zeros(14, dtype=np.float64)
-#     tau_joint = np.zeros(14, dtype=np.float64)
-
-#     operation_mode = np.full(14, -1, dtype=np.int32)
-#     torque_enable = np.zeros(14, dtype=np.int32)
-#     button_status_vector = []
-#     temp_eigen = np.full(14, -1, dtype=np.float64)
-#     button_info = np.zeros(2, dtype=np.float64)
-#     trigger_info = np.zeros(2, dtype=np.float64)
-
-#     while True:
-#         button_status_vector.clear()
-
-#         operation_mode.fill(-1)
-#         torque_enable.fill(0)
-
-#         temp_eigen.fill(-1)
-        
-#         for dxl_id in active_ids:
-#             if id >= 0x80:
-#                 temp_button_status = read_button_status(port_handler, packet_handler, dxl_id)
-#                 button_status_vector.append(temp_button_status)
-        
-#         temp_q_joint_vector = bulk_read_encoder(port_handler, packet_handler, active_ids)
-#         if temp_q_joint_vector is not None:
-#             for ret in temp_q_joint_vector:
-#                 q_joint[ret[0]] = ret[1]
-                
-#         tau_joint = compute_gravity_torque(robot_config, state, q_joint) * M_SF
-        
-#         add_torque = calc_torque_for_limit_avoid(q_joint)
-        
-#         tau_joint = tau_joint + add_torque
-        
-#         with mtx_q_joint_master_arm_info:
-#             q_joint_master_arm = q_joint
-        
-#         temp_operation_mode_vector = bulk_read_operation_mode(port_handler, packet_handler, active_ids)
-#         if temp_operation_mode_vector is not None:
-#             for ret in temp_operation_mode_vector:
-#                 operation_mode[ret[0]] = ret[1]
-                
-#         temp_torque_enable_vector = bulk_read_torque_enable(port_handler, packet_handler, active_ids)
-#         if temp_torque_enable_vector is not None:
-#             for ret in temp_torque_enable_vector:
-#                 torque_enable(ret[0]) = ret[1]
-                
-#         id_and_enable_vector = []
-#         for i in active_ids:
-#             if not torque_enable[i]:
-#                 id_and_enable_vector.append((i, 1))
-                
-#         bulk_write_torque_enable(port_handler, packet_handler, id_and_enable_vector)
-        
 def control_loop_for_master_arm(port_handler, packet_handler, active_ids):
     robot_dyn = rby1_sdk.dynamics.Robot(rby1_sdk.dynamics.load_robot_from_urdf("/home/nvidia/ws/rby1-sdk/models/master_arm/model.urdf", "Base"))    
     state = robot_dyn.make_state(LINK_NAMES, JOINT_NAMES)
@@ -958,7 +892,7 @@ def main(address, power_device, servo):
         
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="13_teleoperation_with_joint_mapping")
+    parser = argparse.ArgumentParser(description="17_teleoperation_with_joint_mapping")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")

@@ -323,6 +323,9 @@ void pybind11_dynamics(py::module_& m) {
   bind_state<y1_model::T5::kRobotDOF>(m);
   bind_robot<y1_model::T5::kRobotDOF>(m);
 
+  bind_state<y1_model::M::kRobotDOF>(m);
+  bind_robot<y1_model::M::kRobotDOF>(m);
+
   m.def("load_robot_from_urdf_data", &dyn::LoadRobotFromURDFData, "model"_a, "base_link_name"_a);
 
   m.def("load_robot_from_urdf", &dyn::LoadRobotFromURDF, "path"_a, "base_link_name"_a);

@@ -341,4 +341,5 @@ void pybind11_robot(py::module_& m) {
   bind_color(m);
   bind_robot<y1_model::A>(m, "Robot_A");
   bind_robot<y1_model::T5>(m, "Robot_T5");
+  bind_robot<y1_model::M>(m, "Robot_M");
 }

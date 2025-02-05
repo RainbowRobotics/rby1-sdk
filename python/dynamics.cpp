@@ -156,7 +156,7 @@ void bind_mobile_base(py::module_& m) {
   py::enum_<dyn::MobileBaseType>(m, "MobileBaseType")
       .value("None", dyn::MobileBaseType::kNone)
       .value("Differential", dyn::MobileBaseType::kDifferential)
-      .value("Omni", dyn::MobileBaseType::kOmni);
+      .value("Mecanum", dyn::MobileBaseType::kMecanum);
 
   py::class_<dyn::MobileBase>(m, "MobileBase")
       .def_readonly("type", &dyn::MobileBase::type)

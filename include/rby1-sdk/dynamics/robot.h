@@ -34,7 +34,7 @@ class Joint;
 enum class MobileBaseType {
   kNone,          //
   kDifferential,  //
-  kOmni           //
+  kMecanum        //
 };
 
 struct MobileBase {
@@ -50,6 +50,17 @@ struct MobileBaseDifferential : public MobileBase {
   unsigned int left_wheel_idx{};
 
   double wheel_base{0.};
+  double wheel_radius{0.};
+};
+
+struct MobileBaseMecanum : public MobileBase {
+  unsigned int fr_wheel_idx{};
+  unsigned int fl_wheel_idx{};
+  unsigned int rr_wheel_idx{};
+  unsigned int rl_wheel_idx{};
+
+  double L_x{0.};
+  double L_y{0.};
   double wheel_radius{0.};
 };
 
@@ -584,7 +595,19 @@ class Robot {
         state->qdot(mb->left_wheel_idx) = -v_left / mb->wheel_radius;
         break;
       }
-      case MobileBaseType::kOmni: {
+      case MobileBaseType::kMecanum: {
+        double v_x = S(3);
+        double v_y = S(4);
+        double w = S(2);
+        auto mb = std::static_pointer_cast<MobileBaseMecanum>(mobile_base_);
+        double w_1 = 1 / mb->wheel_radius * (v_x - v_y - (mb->L_x + mb->L_y) * w);
+        double w_2 = 1 / mb->wheel_radius * (v_x + v_y + (mb->L_x + mb->L_y) * w);
+        double w_3 = 1 / mb->wheel_radius * (v_x + v_y - (mb->L_x + mb->L_y) * w);
+        double w_4 = 1 / mb->wheel_radius * (v_x - v_y + (mb->L_x + mb->L_y) * w);
+        state->qdot(mb->fl_wheel_idx) = -w_1;
+        state->qdot(mb->fr_wheel_idx) = -w_2;
+        state->qdot(mb->rl_wheel_idx) = -w_3;
+        state->qdot(mb->rr_wheel_idx) = -w_4;
         break;
       }
     }
@@ -606,8 +629,16 @@ class Robot {
         S.block<3, 1>(2, 0) = math::se2v::MatrixType{(w_r - w_l) * mb->wheel_radius / mb->wheel_base,
                                                      (w_r + w_l) * mb->wheel_radius / 2, 0};
       }
-      case MobileBaseType::kOmni: {
-        // TODO
+      case MobileBaseType::kMecanum: {
+        auto mb = std::static_pointer_cast<MobileBaseMecanum>(mobile_base_);
+        double w_1 = -state->qdot(mb->fl_wheel_idx);
+        double w_2 = -state->qdot(mb->fr_wheel_idx);
+        double w_3 = -state->qdot(mb->rl_wheel_idx);
+        double w_4 = -state->qdot(mb->rr_wheel_idx);
+        double v_x = mb->wheel_radius / 4 * (w_1 + w_2 + w_3 + w_4);
+        double v_y = mb->wheel_radius / 4 * (-w_1 + w_2 + w_3 - w_4);
+        double w = mb->wheel_radius / (4 * (mb->L_x + mb->L_y)) * (-w_1 + w_2 - w_3 + w_4);
+        S.block<3, 1>(2, 0) = math::se2v::MatrixType{w, v_x, v_y};
         break;
       }
     }
@@ -770,8 +801,36 @@ class Robot {
           mobile_base_ = mb;
           break;
         }
-        case MobileBaseType::kOmni:
-          // TODO
+        case MobileBaseType::kMecanum:
+          auto mb = std::make_shared<MobileBaseMecanum>();
+          *std::static_pointer_cast<MobileBase>(mb) = *rc.mobile_base;
+          if (rc.mobile_base->joints.size() != 4) {
+            throw std::runtime_error(
+                "Mecanum type mobile should have four joints. (front-right, front-left, rear-right, rear-left)");
+          }
+          if (joint_idx_.find(rc.mobile_base->joints[0]) == joint_idx_.end()) {
+            throw std::runtime_error("Front-right wheel has invalid parameter.");
+          }
+          if (joint_idx_.find(rc.mobile_base->joints[1]) == joint_idx_.end()) {
+            throw std::runtime_error("Front-left wheel has invalid parameter.");
+          }
+          if (joint_idx_.find(rc.mobile_base->joints[2]) == joint_idx_.end()) {
+            throw std::runtime_error("Rear-right wheel has invalid parameter.");
+          }
+          if (joint_idx_.find(rc.mobile_base->joints[3]) == joint_idx_.end()) {
+            throw std::runtime_error("Rear-left wheel has invalid parameter.");
+          }
+          if (rc.mobile_base->params.size() != 2) {
+            throw std::runtime_error("Mecanum type mobile should have two parameters. (Lx, Ly, wheel radius)");
+          }
+          mb->fr_wheel_idx = joint_idx_[rc.mobile_base->joints[0]];
+          mb->fl_wheel_idx = joint_idx_[rc.mobile_base->joints[1]];
+          mb->rr_wheel_idx = joint_idx_[rc.mobile_base->joints[1]];
+          mb->rl_wheel_idx = joint_idx_[rc.mobile_base->joints[1]];
+          mb->L_x = rc.mobile_base->params[0];
+          mb->L_y = rc.mobile_base->params[1];
+          mb->wheel_radius = rc.mobile_base->params[2];
+          mobile_base_ = mb;
           break;
       }
     }

@@ -820,8 +820,8 @@ class Robot {
           if (joint_idx_.find(rc.mobile_base->joints[3]) == joint_idx_.end()) {
             throw std::runtime_error("Rear-left wheel has invalid parameter.");
           }
-          if (rc.mobile_base->params.size() != 2) {
-            throw std::runtime_error("Mecanum type mobile should have two parameters. (Lx, Ly, wheel radius)");
+          if (rc.mobile_base->params.size() != 3) {
+            throw std::runtime_error("Mecanum type mobile should have three parameters. (Lx, Ly, wheel radius)");
           }
           mb->fr_wheel_idx = joint_idx_[rc.mobile_base->joints[0]];
           mb->fl_wheel_idx = joint_idx_[rc.mobile_base->joints[1]];

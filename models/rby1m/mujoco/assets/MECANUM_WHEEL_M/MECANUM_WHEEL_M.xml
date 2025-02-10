@@ -1,0 +1,189 @@
+<mujoco model="MECANUM_WHEEL_M">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="191,191,191" specular="0.0" shininess="0.3" rgba="0.749020 0.749020 0.749020 1.000000"/>
+    <mesh file="MECANUM_WHEEL_M.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_0.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_1.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_2.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_3.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_4.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_5.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_6.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_7.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_8.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_9.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_10.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_11.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_12.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_13.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_14.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_15.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_16.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_17.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_18.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_19.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_20.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_21.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_22.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_23.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_24.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_25.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_26.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_27.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_28.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_29.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_30.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_31.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_32.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_33.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_34.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_35.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_36.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_37.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_38.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_39.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_40.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_41.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_42.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_43.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_44.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_45.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_46.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_47.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_48.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_49.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_50.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_51.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_52.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_53.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_54.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_55.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_56.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_57.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_58.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_59.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_60.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_61.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_62.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_63.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_64.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_65.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_66.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_67.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_68.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_69.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_70.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_71.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_72.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_73.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_74.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_75.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_76.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_77.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_78.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_79.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_80.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_81.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_82.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_83.obj"/>
+    <mesh file="MECANUM_WHEEL_M_collision_84.obj"/>
+  </asset>
+  <worldbody>
+    <body name="MECANUM_WHEEL_M">
+      <geom material="191,191,191" mesh="MECANUM_WHEEL_M" class="visual"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_0" rgba="0.30036400405337615 0.8707044263287901 0.48082272029073647 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_1" rgba="0.40004018509144057 0.8515716342744865 0.45038732692356953 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_2" rgba="0.2878751173047508 0.34874251549303126 0.42090427173994915 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_3" rgba="0.028456039160798863 0.12106709620728406 0.5356631158925772 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_4" rgba="0.5303287361415477 0.9423490559973097 0.7722006983696725 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_5" rgba="0.7803528015086186 0.29959183492118746 0.9625772651424432 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_6" rgba="0.8933206855641668 0.934357871215206 0.2622439037936086 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_7" rgba="0.4597484011598576 0.7267265714933785 0.8047277112140104 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_8" rgba="0.6130277255365221 0.014675444774558843 0.6477491281327281 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_9" rgba="0.722955461869848 0.4882780384984766 0.7647589312778785 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_10" rgba="0.4189226049154434 0.03140587708600273 0.5259527938319202 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_11" rgba="0.8095009125714067 0.20356843179354112 0.252779908149254 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_12" rgba="0.4441685100467576 0.8642151003859626 0.4103113556512594 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_13" rgba="0.3535384604469952 0.9538158448846646 0.724035571423212 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_14" rgba="0.8350385580689548 0.5623359741134106 0.24982895665998484 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_15" rgba="0.14170530375182788 0.07231376037077542 0.03981791554195968 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_16" rgba="0.179574947911037 0.057353872336983414 0.96823551159585 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_17" rgba="0.379698469959469 0.09137227770163525 0.03876212646811594 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_18" rgba="0.04979475258463062 0.9916829289740974 0.625975895210386 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_19" rgba="0.8226977517185793 0.6919017396352416 0.1252028039636488 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_20" rgba="0.6718481506285731 0.024659286092573396 0.21578113070246197 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_21" rgba="0.6786090480944689 0.04812979525058325 0.630453974762459 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_22" rgba="0.06491855748682607 0.13934849704936192 0.6556630016126693 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_23" rgba="0.43578642508038856 0.5338094093110809 0.1396573753814857 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_24" rgba="0.6383461901333999 0.1457890978653401 0.34661136040234675 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_25" rgba="0.43868938609090635 0.14354282981328137 0.10250245073025221 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_26" rgba="0.5818649708264304 0.7758889415504766 0.14743500127208042 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_27" rgba="0.2564354683062331 0.3453634153895798 0.4096261551500967 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_28" rgba="0.7164076155079406 0.9922883231394706 0.8953857726348866 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_29" rgba="0.5316374371973114 0.022585546500054066 0.4122094102692343 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_30" rgba="0.3365438872450447 0.3947851024365969 0.46247470502553045 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_31" rgba="0.7858193181936909 0.7166905371256502 0.83227428571419 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_32" rgba="0.8452367644928864 0.7495122457572198 0.8942785589152898 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_33" rgba="0.4302501061348598 0.5282423879250115 0.8914990676881802 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_34" rgba="0.7816905304320314 0.19549845678986955 0.4534637523974103 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_35" rgba="0.9854009781611235 0.8008640705106335 0.4912379768948124 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_36" rgba="0.16212541907463773 0.6066800047999376 0.5604657369906003 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_37" rgba="0.6973178071012456 0.11949297613106724 0.9534475818522646 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_38" rgba="0.03530740500605112 0.4495084163722033 0.8227321594480651 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_39" rgba="0.09083171084274189 0.6235211597117514 0.535189227314196 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_40" rgba="0.6139579369657523 0.5325256653633399 0.930781341632266 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_41" rgba="0.2069471124481359 0.9313995115214226 0.18950016392703983 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_42" rgba="0.33463165746313117 0.874747887074197 0.21481318625955703 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_43" rgba="0.2528809748075572 0.6555310680115187 0.8865981583691034 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_44" rgba="0.2531904256271913 0.6012198070458852 0.06547224671600194 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_45" rgba="0.9259971070681795 0.8223475758928155 0.5586525870546991 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_46" rgba="0.317595899098264 0.19175177650741526 0.49708988945496924 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_47" rgba="0.9419307671749946 0.9681352352008563 0.2914407198595953 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_48" rgba="0.30613217364175227 0.9033098761673448 0.4553124992943872 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_49" rgba="0.8057557637381347 0.9384634907030807 0.975519744909778 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_50" rgba="0.8801781771781494 0.495331344903131 0.05776832768537821 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_51" rgba="0.8936695916128317 0.28791556660591144 0.22867567858020288 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_52" rgba="0.6371265283886118 0.1674376834482485 0.0057949569449951 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_53" rgba="0.8705760134912696 0.47187984682822026 0.4616020039160784 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_54" rgba="0.39406215644142584 0.4967919543435253 0.755545301670479 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_55" rgba="0.9040222507571494 0.7922067497654438 0.019815515092934777 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_56" rgba="0.6788272652147893 0.9195022115905095 0.7054233814016668 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_57" rgba="0.46168324661367244 0.6575364710774192 0.8428878679307791 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_58" rgba="0.16375474493154174 0.6615805979450605 0.4984233920966168 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_59" rgba="0.10944987539658624 0.8578251290252492 0.24902574074097594 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_60" rgba="0.5517673266199653 0.011431365310060837 0.5201785774290825 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_61" rgba="0.8527327840686107 0.7569371101166 0.8709356926908249 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_62" rgba="0.6782195116959309 0.7135840016233197 0.7651705027838817 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_63" rgba="0.1571584316035729 0.17985633882383112 0.16678959049445774 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_64" rgba="0.4256838547675599 0.46571607761763556 0.24526020616568334 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_65" rgba="0.6669844726190228 0.6925765052617034 0.750820106597237 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_66" rgba="0.5390866488853432 0.8871430308800644 0.8195959592930736 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_67" rgba="0.9727418185078429 0.49723266936211274 0.5520828362756143 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_68" rgba="0.9028332728320058 0.5319092962129388 0.4834617966641943 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_69" rgba="0.33695877406567576 0.5498637721321451 0.8130326225747617 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_70" rgba="0.2992143737477295 0.9800744692971637 0.8876695142811559 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_71" rgba="0.5762538052162665 0.606938762147093 0.19314069337536777 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_72" rgba="0.6504573598924711 0.271224803321499 0.21426998362364602 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_73" rgba="0.9838793414997824 0.4578688478722861 0.03489438990165972 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_74" rgba="0.8176863636305588 0.7744758427160233 0.5326579281130626 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_75" rgba="0.7823766734535516 0.10191733094991307 0.0245448613735727 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_76" rgba="0.09413562375926576 0.7634725939116289 0.7095992151788487 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_77" rgba="0.6382367725660896 0.6608328457993825 0.5586219052648651 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_78" rgba="0.642227526351124 0.4901736658963618 0.5369339653696762 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_79" rgba="0.12879591420819814 0.6166585230184101 0.9799805257229843 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_80" rgba="0.9983946724460785 0.3927691157461034 0.6769799385085284 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_81" rgba="0.1707398140370855 0.1573799521452487 0.9360180725907473 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_82" rgba="0.4992292658549432 0.3620944370005612 0.6095864726265694 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_83" rgba="0.7312021395218418 0.296031454487646 0.4168114642027517 1" class="collision"/>
+      <geom mesh="MECANUM_WHEEL_M_collision_84" rgba="0.8078975478078932 0.5141150101712917 0.7804325863123526 1" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

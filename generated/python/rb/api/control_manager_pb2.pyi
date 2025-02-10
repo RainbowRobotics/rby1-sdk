@@ -101,3 +101,15 @@ class SetTimeScaleResponse(_message.Message):
     response_header: _header_pb2.ResponseHeader
     current_time_scale: float
     def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., current_time_scale: _Optional[float] = ...) -> None: ...
+
+class CancelControlRequest(_message.Message):
+    __slots__ = ("request_header",)
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ...) -> None: ...
+
+class CancelControlResponse(_message.Message):
+    __slots__ = ("response_header",)
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ...) -> None: ...

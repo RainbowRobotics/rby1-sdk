@@ -608,10 +608,10 @@ class Robot {
         double w_2 = 1 / mb->wheel_radius * (v_x + v_y + (mb->L_x + mb->L_y) * w);
         double w_3 = 1 / mb->wheel_radius * (v_x + v_y - (mb->L_x + mb->L_y) * w);
         double w_4 = 1 / mb->wheel_radius * (v_x - v_y + (mb->L_x + mb->L_y) * w);
-        state->qdot(mb->fl_wheel_idx) = -w_1;
-        state->qdot(mb->fr_wheel_idx) = -w_2;
-        state->qdot(mb->rl_wheel_idx) = -w_3;
-        state->qdot(mb->rr_wheel_idx) = -w_4;
+        state->qdot(mb->fl_wheel_idx) = w_1;
+        state->qdot(mb->fr_wheel_idx) = w_2;
+        state->qdot(mb->rl_wheel_idx) = w_3;
+        state->qdot(mb->rr_wheel_idx) = w_4;
 
         std::cout<<"mb->fl_wheel_idx: "<<mb->fl_wheel_idx<<std::endl;
         std::cout<<"mb->fr_wheel_idx: "<<mb->fr_wheel_idx<<std::endl;

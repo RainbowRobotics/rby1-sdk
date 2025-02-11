@@ -132,7 +132,7 @@ def example_SE2_x_backward_command(robot):
             .set_command_header(CommandHeaderBuilder()
             .set_control_hold_time(1.))
             .set_minimum_time(3)
-            .set_velocity([-1, 0], 0) # linear velocity[m/s], angualr velocity[rad/s]
+            .set_velocity([-0.2, 0], 0) # linear velocity[m/s], angualr velocity[rad/s]
             )
     )
 
@@ -163,7 +163,7 @@ def example_SE2_x_forward_command(robot):
             .set_command_header(CommandHeaderBuilder()
             .set_control_hold_time(1.))
             .set_minimum_time(3)
-            .set_velocity([1, 0], 0) # linear velocity[m/s], angualr velocity[rad/s]
+            .set_velocity([0.2, 0], 0) # linear velocity[m/s], angualr velocity[rad/s]
             )
     )
 
@@ -195,7 +195,7 @@ def example_SE2_y_backward_command(robot):
             .set_command_header(CommandHeaderBuilder()
             .set_control_hold_time(1.))
             .set_minimum_time(3)
-            .set_velocity([0, -1], 0) # linear velocity[m/s], angualr velocity[rad/s]
+            .set_velocity([0, -0.2], 0) # linear velocity[m/s], angualr velocity[rad/s]
             )
     )
 
@@ -226,7 +226,7 @@ def example_SE2_y_forward_command(robot):
             .set_command_header(CommandHeaderBuilder()
             .set_control_hold_time(1.))
             .set_minimum_time(3)
-            .set_velocity([0, 1], 0) # linear velocity[m/s], angualr velocity[rad/s]
+            .set_velocity([0, 0.2], 0) # linear velocity[m/s], angualr velocity[rad/s]
             )
     )
 
@@ -294,10 +294,14 @@ def main(address, model, power_device, servo):
     # example_ready_command(robot)
     # example_backward_command(robot)
     # example_forward_command(robot)
-    # example_SE2_x_backward_command(robot)
-    # example_SE2_x_forward_command(robot)
-    example_SE2_y_backward_command(robot)
+    
     example_SE2_y_forward_command(robot)
+    example_SE2_y_backward_command(robot)
+    example_SE2_x_forward_command(robot)
+    example_SE2_x_backward_command(robot)
+   
+
+
     # if not example_forward_command(robot):
     #     print("finish motion")
     # if not example_backward_command(robot):

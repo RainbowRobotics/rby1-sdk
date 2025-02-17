@@ -599,15 +599,25 @@ class Robot {
         double v_x = S(3);
         double v_y = S(4);
         double w = S(2);
+        // std::cout<<"V_x: "<< v_x<<std::endl;
+        // std::cout<<"V_y: "<< v_y<<std::endl;
+        // std::cout<<"w: "<< w<<std::endl;
+
         auto mb = std::static_pointer_cast<MobileBaseMecanum>(mobile_base_);
         double w_1 = 1 / mb->wheel_radius * (v_x - v_y - (mb->L_x + mb->L_y) * w);
         double w_2 = 1 / mb->wheel_radius * (v_x + v_y + (mb->L_x + mb->L_y) * w);
         double w_3 = 1 / mb->wheel_radius * (v_x + v_y - (mb->L_x + mb->L_y) * w);
         double w_4 = 1 / mb->wheel_radius * (v_x - v_y + (mb->L_x + mb->L_y) * w);
-        state->qdot(mb->fl_wheel_idx) = -w_1;
-        state->qdot(mb->fr_wheel_idx) = -w_2;
-        state->qdot(mb->rl_wheel_idx) = -w_3;
-        state->qdot(mb->rr_wheel_idx) = -w_4;
+        state->qdot(mb->fl_wheel_idx) = w_1;
+        state->qdot(mb->fr_wheel_idx) = w_2;
+        state->qdot(mb->rl_wheel_idx) = w_3;
+        state->qdot(mb->rr_wheel_idx) = w_4;
+
+        // std::cout<<"mb->fl_wheel_idx: "<<mb->fl_wheel_idx<<std::endl;
+        // std::cout<<"mb->fr_wheel_idx: "<<mb->fr_wheel_idx<<std::endl;
+        // std::cout<<"mb->rl_wheel_idx: "<<mb->rl_wheel_idx<<std::endl;
+        // std::cout<<"mb->rr_wheel_idx: "<<mb->rr_wheel_idx<<std::endl;
+
         break;
       }
     }
@@ -825,8 +835,8 @@ class Robot {
           }
           mb->fr_wheel_idx = joint_idx_[rc.mobile_base->joints[0]];
           mb->fl_wheel_idx = joint_idx_[rc.mobile_base->joints[1]];
-          mb->rr_wheel_idx = joint_idx_[rc.mobile_base->joints[1]];
-          mb->rl_wheel_idx = joint_idx_[rc.mobile_base->joints[1]];
+          mb->rr_wheel_idx = joint_idx_[rc.mobile_base->joints[2]];
+          mb->rl_wheel_idx = joint_idx_[rc.mobile_base->joints[3]];
           mb->L_x = rc.mobile_base->params[0];
           mb->L_y = rc.mobile_base->params[1];
           mb->wheel_radius = rc.mobile_base->params[2];

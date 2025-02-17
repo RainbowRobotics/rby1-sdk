@@ -19,10 +19,10 @@
   <include file="./rby1.xml" />
 
   <actuator>
-    <motor name="fr_wheel_act" joint="wheel_fr" />
-    <motor name="fl_wheel_act" joint="wheel_fl" />
-    <motor name="rr_wheel_act" joint="wheel_rr" />
-    <motor name="rl_wheel_act" joint="wheel_rl" />
+    <motor name="fr_wheel_act" joint="wheel_fr"/>
+    <motor name="fl_wheel_act" joint="wheel_fl"/>
+    <motor name="rr_wheel_act" joint="wheel_rr"/>
+    <motor name="rl_wheel_act" joint="wheel_rl"/>
 
     <motor name="link1_act" joint="torso_0" />
     <motor name="link2_act" joint="torso_1" />

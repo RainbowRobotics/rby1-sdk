@@ -1,17 +1,14 @@
 <?xml version="1.0"?>
-<!-- 예시입니다. -->
 <robot name="RB_Y1M">
     <mobile type="mecanum" xyz="0 0 0" rpy="0 0 0" joints="wheel_fr wheel_fl wheel_rr wheel_rl"
             params="1.0 1.0 0.1"/> <!-- wheel_base, wheel_radius -->
 
     <link name="base">
         <inertial>
-            <mass value="60.08042639"/> <!-- TODO 수정 필요 -->
-            <origin rpy="0 0 0" xyz="-0.06157942 -0.00142271 0.13513861"/>
-            <inertia ixx="1.37742174" ixy="0.02521789" ixz="0.18565467" iyy="2.99386515" iyz="-0.00641869"
-                     izz="3.76085052"/> <!-- TODO 수정 필요 -->
+            <mass value="82.93082168"/>
+            <origin rpy="0 0 0" xyz="-0.05361531 -0.00279946 0.13500266"/>
+            <inertia ixx="2.38184773" ixy="0.00958286" ixz="0.32695003" iyy="4.04857218" iyz="-0.01527373" izz="5.45210782"/>
         </inertial>
-
         <visual>
             <geometry>
                 <mesh filename="./meshes/base.dae"/>
@@ -19,64 +16,58 @@
         </visual>
     </link>
 
-    <!-- Mobile Base Wheels -->
-    <!-- TODO 수정 필요 -->
     <link name="wheel_fr_link">
         <inertial>
-            <mass value="1.37783736"/>
-            <origin rpy="0 0 0" xyz="0.0 -0.00073938 0.0"/>
-            <inertia ixx="0.00426657" ixy="0.0" ixz="0.0" iyy="0.00811815" iyz="0.0" izz="0.00426657"/>
+            <mass value="2.54410022"/>
+            <origin rpy="0 0 3.1415926535897932384626433832795" xyz="-0.00010511 0.00094580 0.0"/>
+            <inertia ixx="0.00470985" ixy="-0.00000025" ixz="0.0" iyy="0.00616429" iyz="0.0" izz="0.00470754"/>
         </inertial>
-
         <visual>
             <geometry>
-                <mesh filename="./meshes/WHEEL.dae"/>
+                <mesh filename="./meshes/MECANUM_WHEEL.dae"/>
             </geometry>
         </visual>
     </link>
 
     <link name="wheel_fl_link">
         <inertial>
-            <mass value="1.37783736"/>
-            <origin rpy="0 0 0" xyz="0.0 0.00073938 0.0"/>
-            <inertia ixx="0.00426657" ixy="0.0" ixz="0.0" iyy="0.00811815" iyz="0.0" izz="0.00426657"/>
+            <mass value="2.54417879"/>
+            <origin rpy="0 0 0" xyz="-0.00010433 -0.00094577 0.0"/>
+            <inertia ixx="0.00471013" ixy="0.00000025" ixz="0.0" iyy="0.00616468" iyz="0.0" izz="0.00470782"/>
         </inertial>
-
         <visual>
             <geometry>
-                <mesh filename="./meshes/WHEEL.dae"/>
+                <mesh filename="./meshes/MECANUM_WHEEL.dae"/>
             </geometry>
         </visual>
     </link>
 
     <link name="wheel_rr_link">
         <inertial>
-            <mass value="1.37783736"/>
-            <origin rpy="0 0 0" xyz="0.0 0.00073938 0.0"/>
-            <inertia ixx="0.00426657" ixy="0.0" ixz="0.0" iyy="0.00811815" iyz="0.0" izz="0.00426657"/>
+            <mass value="2.54410022"/>
+            <origin rpy="0 0 0" xyz="-0.00010511 0.00094580 0.0"/>
+            <inertia ixx="0.00470985" ixy="-0.00000025" ixz="0.0" iyy="0.00616429" iyz="0.0" izz="0.00470754"/>
         </inertial>
-
         <visual>
             <geometry>
-                <mesh filename="./meshes/WHEEL.dae"/>
+                <mesh filename="./meshes/MECANUM_WHEEL_M.dae"/>
             </geometry>
         </visual>
     </link>
 
     <link name="wheel_rl_link">
         <inertial>
-            <mass value="1.37783736"/>
-            <origin rpy="0 0 0" xyz="0.0 0.00073938 0.0"/>
-            <inertia ixx="0.00426657" ixy="0.0" ixz="0.0" iyy="0.00811815" iyz="0.0" izz="0.00426657"/>
+            <mass value="2.54417879"/>
+            <origin rpy="0 0 3.1415926535897932384626433832795" xyz="-0.00010433 -0.00094577 0.0"/>
+            <inertia ixx="0.00471013" ixy="0.00000025" ixz="0.0" iyy="0.00616468" iyz="0.0" izz="0.00470782"/>
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/WHEEL.dae"/>
+                <mesh filename="./meshes/MECANUM_WHEEL_M.dae"/>
             </geometry>
         </visual>
-    </link>
-    <!-- -->
+    </link> 
 
     <link name="link_torso_0">
         <inertial>
@@ -677,38 +668,35 @@
     <joint name="wheel_fr" type="continuous">
         <parent link="base"/>
         <child link="wheel_fr_link"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.228 -0.265 0.1"/> <!-- TODO 수정 필요 -->
-        <axis xyz="0 -1 0"/>
-        <limit velocity="15.707963268" acceleration="3.141592"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.243 -0.245 0.076"/>
+        <axis xyz="0 1 0"/>
     </joint>
 
     <joint name="wheel_fl" type="continuous">
         <parent link="base"/>
         <child link="wheel_fl_link"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.228 0.265 0.1"/> <!-- TODO 수정 필요 -->
-        <axis xyz="0 -1 0"/>
-        <limit velocity="15.707963268" acceleration="3.141592"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.243 0.245 0.076"/>
+        <axis xyz="0 1 0"/>
     </joint>
+
     <joint name="wheel_rr" type="continuous">
         <parent link="base"/>
         <child link="wheel_rr_link"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.228 -0.265 0.1"/> <!-- TODO 수정 필요 -->
-        <axis xyz="0 -1 0"/>
-        <limit velocity="15.707963268" acceleration="3.141592"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.247 -0.245 0.076"/>
+        <axis xyz="0 1 0"/>
     </joint>
 
     <joint name="wheel_rl" type="continuous">
         <parent link="base"/>
         <child link="wheel_rl_link"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.228 0.265 0.1"/> <!-- TODO 수정 필요 -->
-        <axis xyz="0 -1 0"/>
-        <limit velocity="15.707963268" acceleration="3.141592"/>
+        <origin rpy="0.0 0.0 0.0" xyz="-0.247 0.245 0.076"/>
+        <axis xyz="0 1 0"/>
     </joint>
 
     <joint name="torso_0" type="revolute">
         <parent link="base"/>
         <child link="link_torso_0"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.2805"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.2965"/>
         <axis xyz="1 0 0"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 270Nm, 5rad/s^2, 120deg/s, -15deg, 15deg -->

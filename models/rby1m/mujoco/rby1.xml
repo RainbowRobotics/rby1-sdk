@@ -21,6 +21,8 @@
 
     <include file="./assets/materials.xml" />
     <include file="./assets/base/assets.xml" />
+    <include file="./assets/MECANUM_WHEEL/assets.xml" />
+    <include file="./assets/MECANUM_WHEEL_M/assets.xml" />
     <include file="./assets/WHEEL/assets.xml" />
     <include file="./assets/EE_BODY/assets.xml" />
     <include file="./assets/EE_FINGER/assets.xml" />
@@ -61,31 +63,33 @@
       <joint name="world_j" type="free" limited="false" actuatorfrclimited="false" />
       <include file="./assets/base/geoms.xml" />
 
-      <body name="wheel_fr_link" pos="0.228 -0.265 0.1"> <!-- TODO 수정이 필요함 -->
-        <inertial pos="0 -0.00073938 0" quat="0.707107 0 0 0.707107" mass="1.37784" diaginertia="0.00811815 0.00426657 0.00426657" />
-        <joint name="wheel_fr" pos="0 0 0" axis="0 -1 0" limited="false" />
-        <include file="./assets/WHEEL/geoms.xml" />
+      <body name="wheel_fr_link" pos="0.243 -0.245 0.076">
+        <inertial pos="-0.00010511 0.0009458 0" quat="0.707046 0 0 0.707168" mass="2.5441" diaginertia="0.00616429 0.00470985 0.00470754"/>
+        <joint name="wheel_fr" pos="0 0 0" axis="0 1 0" limited="false"/>
+        <include file="./assets/MECANUM_WHEEL/geoms.xml" />
       </body>
-      <body name="wheel_fl_link" pos="0.228 0.265 0.1"> <!-- TODO 수정이 필요함 -->
-        <inertial pos="0 0.00073938 0" quat="0.707107 0 0 0.707107" mass="1.37784" diaginertia="0.00811815 0.00426657 0.00426657" />
-        <joint name="wheel_fl" pos="0 0 0" axis="0 -1 0" limited="false" />
-        <include file="./assets/WHEEL/geoms.xml" />
+      <body name="wheel_fl_link" pos="0.243 0.245 0.076">
+        <inertial pos="-0.00010433 -0.00094577 0" quat="0.707168 0 0 0.707046" mass="2.54418" diaginertia="0.00616468 0.00471013 0.00470782"/>
+        <joint name="wheel_fl" pos="0 0 0" axis="0 1 0" limited="false"/>
+        <include file="./assets/MECANUM_WHEEL/geoms.xml" />
       </body>
-      <body name="wheel_rr_link" pos="0.0 -0.265 0.1"> <!-- TODO 수정이 필요함 -->
-        <inertial pos="0 -0.00073938 0" quat="0.707107 0 0 0.707107" mass="1.37784" diaginertia="0.00811815 0.00426657 0.00426657" />
-        <joint name="wheel_rr" pos="0 0 0" axis="0 -1 0" limited="false" />
-        <include file="./assets/WHEEL/geoms.xml" />
+      <body name="wheel_rr_link" pos="-0.247 -0.245 0.076">
+        <inertial pos="-0.00010433 -0.00094577 0" quat="0.707168 0 0 0.707046" mass="2.54418" diaginertia="0.00616468 0.00471013 0.00470782"/>
+        <joint name="wheel_rr" pos="0 0 0" axis="0 1 0" limited="false"/>
+        <include file="./assets/MECANUM_WHEEL_M/geoms.xml" />
       </body>
-      <body name="wheel_rl_link" pos="0.0 0.265 0.1"> <!-- TODO 수정이 필요함 -->
-        <inertial pos="0 0.00073938 0" quat="0.707107 0 0 0.707107" mass="1.37784" diaginertia="0.00811815 0.00426657 0.00426657" />
-        <joint name="wheel_rl" pos="0 0 0" axis="0 -1 0" limited="false" />
-        <include file="./assets/WHEEL/geoms.xml" />
+      <body name="wheel_rl_link" pos="-0.247 0.245 0.076">
+        <inertial pos="-0.00010511 0.0009458 0" quat="0.707046 0 0 0.707168" mass="2.5441" diaginertia="0.00616429 0.00470985 0.00470754"/>
+        <joint name="wheel_rl" pos="0 0 0" axis="0 1 0" limited="false"/>
+        <include file="./assets/MECANUM_WHEEL_M/geoms.xml" />
       </body>
-      <body name="link_torso_0" pos="0 0 0.2805">
+
+      <body name="link_torso_0" pos="0 0 0.2965">
         <inertial pos="-0.0884841 0.00021367 4.6e-07" quat="0.443798 0.550483 -0.443815 0.55049" mass="2.24282" diaginertia="0.0189253 0.0143368 0.00985172" />
         <joint name="torso_0" pos="0 0 0" axis="1 0 0" limited="true" range="-0.349066 0.349066" />
         <include file="./assets/LINK_1/geoms.xml" />
         <geom size="0.105 0.115" pos="-0.115 0 0" quat="0.707105 0 0.707108 0" class="in-model-collision" />
+
         <body name="link_torso_1">
           <inertial pos="0.00728955 -0.0172852 0.0691138" quat="0.997768 -0.0453891 0.0382115 -0.0306483" mass="9.72163" diaginertia="0.149421 0.139376 0.0275059" />
           <joint name="torso_1" pos="0 0 0" axis="0 1 0" limited="true" range="-1.0472 1.52173" />

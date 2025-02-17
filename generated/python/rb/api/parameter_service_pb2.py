@@ -15,13 +15,17 @@ _sym_db = _symbol_database.Default()
 from rb.api import parameter_pb2 as rb_dot_api_dot_parameter__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1erb/api/parameter_service.proto\x12\x06rb.api\x1a\x16rb/api/parameter.proto2\xed\x03\n\x10ParameterService\x12x\n\x1bResetAllParametersToDefault\x12*.rb.api.ResetAllParametersToDefaultRequest\x1a+.rb.api.ResetAllParametersToDefaultResponse\"\x00\x12l\n\x17ResetParameterToDefault\x12&.rb.api.ResetParameterToDefaultRequest\x1a\'.rb.api.ResetParameterToDefaultResponse\"\x00\x12K\n\x0cGetParameter\x12\x1b.rb.api.GetParameterRequest\x1a\x1c.rb.api.GetParameterResponse\"\x00\x12K\n\x0cSetParameter\x12\x1b.rb.api.SetParameterRequest\x1a\x1c.rb.api.SetParameterResponse\"\x00\x12W\n\x10GetParameterList\x12\x1f.rb.api.GetParameterListRequest\x1a .rb.api.GetParameterListResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1erb/api/parameter_service.proto\x12\x06rb.api\x1a\x16rb/api/parameter.proto2\x81\x07\n\x10ParameterService\x12r\n\x19\x46\x61\x63toryResetAllParameters\x12(.rb.api.FactoryResetAllParametersRequest\x1a).rb.api.FactoryResetAllParametersResponse\"\x00\x12\x66\n\x15\x46\x61\x63toryResetParameter\x12$.rb.api.FactoryResetParameterRequest\x1a%.rb.api.FactoryResetParameterResponse\"\x00\x12]\n\x12ResetAllParameters\x12!.rb.api.ResetAllParametersRequest\x1a\".rb.api.ResetAllParametersResponse\"\x00\x12Q\n\x0eResetParameter\x12\x1d.rb.api.ResetParameterRequest\x1a\x1e.rb.api.ResetParameterResponse\"\x00\x12K\n\x0cGetParameter\x12\x1b.rb.api.GetParameterRequest\x1a\x1c.rb.api.GetParameterResponse\"\x00\x12K\n\x0cSetParameter\x12\x1b.rb.api.SetParameterRequest\x1a\x1c.rb.api.SetParameterResponse\"\x00\x12W\n\x10GetParameterList\x12\x1f.rb.api.GetParameterListRequest\x1a .rb.api.GetParameterListResponse\"\x00\x12{\n\x1bResetAllParametersToDefault\x12*.rb.api.ResetAllParametersToDefaultRequest\x1a+.rb.api.ResetAllParametersToDefaultResponse\"\x03\x88\x02\x01\x12o\n\x17ResetParameterToDefault\x12&.rb.api.ResetParameterToDefaultRequest\x1a\'.rb.api.ResetParameterToDefaultResponse\"\x03\x88\x02\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'rb.api.parameter_service_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
+  _globals['_PARAMETERSERVICE'].methods_by_name['ResetAllParametersToDefault']._loaded_options = None
+  _globals['_PARAMETERSERVICE'].methods_by_name['ResetAllParametersToDefault']._serialized_options = b'\210\002\001'
+  _globals['_PARAMETERSERVICE'].methods_by_name['ResetParameterToDefault']._loaded_options = None
+  _globals['_PARAMETERSERVICE'].methods_by_name['ResetParameterToDefault']._serialized_options = b'\210\002\001'
   _globals['_PARAMETERSERVICE']._serialized_start=67
-  _globals['_PARAMETERSERVICE']._serialized_end=560
+  _globals['_PARAMETERSERVICE']._serialized_end=964
 # @@protoc_insertion_point(module_scope)

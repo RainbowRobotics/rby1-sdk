@@ -638,6 +638,7 @@ class Robot {
         double w_l = -state->qdot(mb->left_wheel_idx);
         S.block<3, 1>(2, 0) = math::se2v::MatrixType{(w_r - w_l) * mb->wheel_radius / mb->wheel_base,
                                                      (w_r + w_l) * mb->wheel_radius / 2, 0};
+        break;
       }
       case MobileBaseType::kMecanum: {
         auto mb = std::static_pointer_cast<MobileBaseMecanum>(mobile_base_);

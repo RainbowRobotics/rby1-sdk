@@ -19,9 +19,17 @@ message EMOInfo {
 }
 
 message JointInfo {
+  // Joint Motor Name
   string name = 1;
 
+  // Whether the joint has a brake
   bool has_brake = 2;
+
+  // RB or Dynamixel
+  string product_name = 3;
+
+  // Firmware Version Name
+  string firmware_version = 4;
 }
 
 message RobotInfo {

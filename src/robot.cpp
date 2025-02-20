@@ -153,9 +153,11 @@ rb::EMOInfo ProtoToEMOInfo(const api::EMOInfo& msg) {
 
 rb::JointInfo ProtoToJointInfo(const api::JointInfo& msg) {
   rb::JointInfo ji;
-
+  
   ji.name = msg.name();
   ji.has_brake = msg.has_brake();
+  ji.product_name = msg.product_name();
+  ji.firmware_version = msg.firmware_version();
 
   return ji;
 }

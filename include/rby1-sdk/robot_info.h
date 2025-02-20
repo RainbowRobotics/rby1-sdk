@@ -16,6 +16,10 @@ struct JointInfo {
   std::string name{};
 
   bool has_brake{};
+
+  std::string product_name{};
+
+  std::string firmware_version{};
 };
 
 struct RobotInfo {

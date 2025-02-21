@@ -4,7 +4,7 @@ run-name: 🎉 Release - ${{ github.event.head_commit.message }}
 on:
   push:
     branches:
-      - main-backup
+      - main
 
 jobs:
   bump-version:

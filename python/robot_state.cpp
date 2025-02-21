@@ -225,7 +225,7 @@ void bind_robot_state(py::module_& m, const std::string& robot_state_name) {
         std::stringstream ss;
         ss << std::fixed << std::setprecision(kDoublePrecision)                                     //
            << "RobotState("                                                                         //
-           << "timestamp=" << static_cast<std::string>(py::repr(py::cast(timestamp)))          //
+           << "timestamp=" << static_cast<std::string>(py::repr(py::cast(timestamp)))               //
            << ", is_ready=" << np.attr("array2string")(self.is_ready).template cast<std::string>()  //
            << ", position=" << np.attr("array2string")(self.position).template cast<std::string>()  //
            << ", velocity=" << np.attr("array2string")(self.velocity).template cast<std::string>()  //
@@ -247,4 +247,6 @@ void pybind11_robot_state(py::module_& m) {
   bind_ft_sensor(m);
 
   bind_robot_state<y1_model::A>(m, "RobotState_A");
+  bind_robot_state<y1_model::T5>(m, "RobotState_T5");
+  bind_robot_state<y1_model::M>(m, "RobotState_M");
 }

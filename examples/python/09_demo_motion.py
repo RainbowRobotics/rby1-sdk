@@ -22,15 +22,15 @@ PATIENCE = 10
 def cb(rs):
     print(f"Timestamp: {rs.timestamp - rs.ft_sensor_right.time_since_last_update}")
     position = rs.position * 180 / 3.141592
-    print(f"waist [deg]: {position[2:2 + 6]}")
+    print(f"torso [deg]: {position[2:2 + 6]}")
     print(f"right arm [deg]: {position[8:8 + 7]}")
-    print(f"left arm [deg]: {position[15:15 + 8]}")
+    print(f"left arm [deg]: {position[15:15 + 7]}")
 
 def example_joint_position_command_1(robot):
     print("joint position command example 1")
 
     # Initialize joint positions
-    q_joint_waist = np.zeros(6)
+    q_joint_torso = np.zeros(6)
     q_joint_right_arm = np.zeros(7)
     q_joint_left_arm = np.zeros(7)
 
@@ -44,7 +44,7 @@ def example_joint_position_command_1(robot):
             .set_torso_command(
                 JointPositionCommandBuilder()
                 .set_minimum_time(MINIMUM_TIME)
-                .set_position(q_joint_waist)
+                .set_position(q_joint_torso)
             )
             .set_right_arm_command(
                 JointPositionCommandBuilder()
@@ -831,7 +831,7 @@ def main(address, power_device, servo):
     print("end of demo")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="07_impedance_control")
+    parser = argparse.ArgumentParser(description="09_demo_motion")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")

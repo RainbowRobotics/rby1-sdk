@@ -1,3 +1,30 @@
+## v0.4.0 (2025-02-21)
+
+### ♻️ Refactor
+
+- update bind_robot and bind_state in python
+- **demo_motion**: rename waist to torso in demo_motion
+
+### ✨ Features
+
+- add example for checking firmware version
+- Enhance JointInfo to include firmware version and product name
+- add python teleoperation example (performance improvements needed)
+- add m model (urdf, mjcf) and update motor index for m model
+- support mecanum mobile base in dynamics lib
+- add api for battery config (#42)
+- add api for system time control
+- add api to control the led (#40)
+
+### 🐛 Fixes
+
+- **robot.h**: add missing break in switch statement
+- support model m in python
+- bugfix in loader mecanum mobile base
+- add ready for command
+- **robot_state**: add gravity term in robot_state
+- change Color (proto message) component type from float to uint32
+
 ## v0.3.0 (2024-12-20)
 
 ### ♻️ Refactor

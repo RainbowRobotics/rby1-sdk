@@ -122,11 +122,16 @@ struct RobotState {
   // Center of mass
   Eigen::Vector<double, 3> center_of_mass;  // Cent of mass position with respect to base link
 
+  // Gravity term
+  Eigen::Vector<double, T::kRobotDOF> gravity;
+
   // Collisions
   std::vector<dyn::CollisionResult> collisions;
 
   // Temperatures
   std::vector<int> temperatures;
+
+  bool ready_for_command{false};
 };
 
 inline std::string to_string(PowerState::State s) {

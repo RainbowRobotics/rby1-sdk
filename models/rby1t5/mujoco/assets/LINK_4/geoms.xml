@@ -1,0 +1,4 @@
+<mujoco>
+  <geom material="10,10,10" mesh="LINK_4" class="visual" />
+  <!-- <geom type="capsule" size="0.05 0.3" pos="0 0 0.15" rgba="0.988 0.079 0.503 1" class="collision"/> -->
+</mujoco>

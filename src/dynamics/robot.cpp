@@ -226,8 +226,8 @@ RobotConfiguration _load_robot_from_urdf(tinyxml2::XMLDocument& doc, const std::
       mobile_base->type = MobileBaseType::kNone;
       if (type == "differential") {
         mobile_base->type = MobileBaseType::kDifferential;
-      } else if (type == "omni") {
-        mobile_base->type = MobileBaseType::kOmni;
+      } else if (type == "mecanum") {
+        mobile_base->type = MobileBaseType::kMecanum;
       }
     } else {
       throw std::runtime_error("There is not type in mobile.");

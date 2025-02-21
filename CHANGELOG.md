@@ -1,3 +1,9 @@
+## v0.4.1 (2025-02-21)
+
+### 🐛 Fixes
+
+- update pypi version to 0.4.1 due to versioning issue (skip 0.4.0)
+
 ## v0.4.0 (2025-02-21)
 
 ### ♻️ Refactor

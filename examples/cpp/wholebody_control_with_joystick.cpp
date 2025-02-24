@@ -838,6 +838,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
       // std::cout << "set whole body command\n";
       stream->SendCommand(whole_body_command);
+      std::this_thread::sleep_for(5ms);
     }
     // std::cout << "end !" << std::endl;
   }

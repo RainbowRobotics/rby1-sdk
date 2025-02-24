@@ -1283,8 +1283,8 @@ int main(int argc, char** argv) {
 
   std::cout << "Starting state update..." << std::endl;
 
-  robot->SetParameter("joint_position_command.cutoff_frequency", "10.0");
-  robot->SetParameter("default.acceleration_limit_scaling", "1.0");
+  robot->SetParameter("joint_position_command.cutoff_frequency", "10.0", false);
+  robot->SetParameter("default.acceleration_limit_scaling", "1.0", false);
 
   robot->StartStateUpdate(
       [&](const auto& state) {

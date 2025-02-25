@@ -3,8 +3,8 @@ from rby1_sdk import *
 import argparse
 import time
 
-def main(address, power_device):
-    robot = rby1_sdk.create_robot_a(address)
+def main(address, power_device, model):
+    robot = rby1_sdk.create_robot(address, model)
     robot.connect()
     
     if not robot.is_connected():
@@ -25,7 +25,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="18_check_firmware_version")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
+    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
     args = parser.parse_args()
 
     main(address=args.address,
-         power_device=args.device)
+         power_device=args.device,
+         model=args.model)

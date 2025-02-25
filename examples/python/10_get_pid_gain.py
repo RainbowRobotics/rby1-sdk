@@ -6,8 +6,8 @@ import argparse
 import numpy as np
 import sys
 
-def main(address):
-    robot = rby1_sdk.create_robot_a(address)
+def main(address, model):
+    robot = rby1_sdk.create_robot(address, model)
     robot.connect()
     
     if not robot.is_connected():
@@ -54,6 +54,7 @@ def main(address):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="10_get_pid_gain")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
+    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
     args = parser.parse_args()
 
-    main(address=args.address)
+    main(address=args.address, model=args.model)

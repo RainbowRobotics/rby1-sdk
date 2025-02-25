@@ -844,12 +844,12 @@
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <axis xyz="0 0 1"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
-        <!-- 8Nm, 10rad/s^2, 120deg/s, -160deg, 160deg -->
+        <!-- 8Nm, 10rad/s^2, 120deg/s, -155deg, 155deg -->
         <limit effort="8.0"
                acceleration="10.0"
                velocity="2.094395102"
-               lower="-2.792526803"
-               upper="2.792526803"
+               lower="-2.705260340"
+               upper="2.705260340"
         />
     </joint>
 
@@ -949,12 +949,12 @@
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <axis xyz="0 0 1"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
-        <!-- 8Nm, 10rad/s^2, 120deg/s, -160deg, 160deg -->
+        <!-- 8Nm, 10rad/s^2, 120deg/s, -155deg, 155deg -->
         <limit effort="8.0"
                acceleration="10.0"
                velocity="2.094395102"
-               lower="-2.792526803"
-               upper="2.792526803"
+               lower="-2.705260340"
+               upper="2.705260340"
         />
     </joint>
 

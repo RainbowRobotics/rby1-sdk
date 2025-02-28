@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <thread>
+#include <chrono>
 
 #if defined(_WIN32)
 #include <windows.h>

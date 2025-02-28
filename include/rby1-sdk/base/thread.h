@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <utility>
 
 #if defined(_WIN32)
 #include <Windows.h>
@@ -28,8 +29,14 @@ class Thread {
  public:
   using Functor = std::function<void()>;
 
-  Thread()
-      : thread_(), name_(), cpuid_(-1), priority_(0), policy_(POLICY_DEFAULT_VALUE), started_(false), running_(false) {}
+  Thread(std::string name = "", int cpuid = -1, int priority = 0, int policy = POLICY_DEFAULT_VALUE)
+      : thread_(),
+        name_(std::move(name)),
+        cpuid_(cpuid),
+        priority_(priority),
+        policy_(policy),
+        started_(false),
+        running_(false) {}
 
   ~Thread() {
     if (started_) {

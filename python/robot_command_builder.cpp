@@ -15,7 +15,7 @@ void pybind11_robot_command_builder(py::module_& m) {
 
   py::class_<JointPositionCommandBuilder>(m, "JointPositionCommandBuilder")
       .def(py::init<>())
-      .def("set_command_header", &JointPositionCommandBuilder::SetCommandHeader, "joint_position_command_builder"_a)
+      .def("set_command_header", &JointPositionCommandBuilder::SetCommandHeader, "command_header_builder"_a)
       .def("set_minimum_time", &JointPositionCommandBuilder::SetMinimumTime, "minimum_time"_a)
       .def("set_position", &JointPositionCommandBuilder::SetPosition, "position"_a)
       .def("set_velocity_limit", &JointPositionCommandBuilder::SetVelocityLimit, "velocity_limit"_a)
@@ -23,7 +23,7 @@ void pybind11_robot_command_builder(py::module_& m) {
 
   py::class_<OptimalControlCommandBuilder>(m, "OptimalControlCommandBuilder")
       .def(py::init<>())
-      .def("set_command_header", &OptimalControlCommandBuilder::SetCommandHeader, "optimal_control_command_builder"_a)
+      .def("set_command_header", &OptimalControlCommandBuilder::SetCommandHeader, "command_header_builder"_a)
       .def("add_cartesian_target", &OptimalControlCommandBuilder::AddCartesianTarget, "ref_link_name"_a,
          "link_name"_a, "T"_a, "translation_weight"_a, "rotation_weight"_a)
       .def("set_center_of_mass_target", &OptimalControlCommandBuilder::SetCenterOfMassTarget, "ref_link_name"_a, "pose"_a, "weight"_a)
@@ -36,16 +36,16 @@ void pybind11_robot_command_builder(py::module_& m) {
 
   py::class_<ImpedanceControlCommandBuilder>(m, "ImpedanceControlCommandBuilder")
       .def(py::init<>())
-      .def("set_command_header", &ImpedanceControlCommandBuilder::SetCommandHeader, "impedance_control_command_builder"_a)
-      .def("set_reference_link_name", &ImpedanceControlCommandBuilder::SetReferenceLinkName, "name"_a)
-      .def("set_link_name", &ImpedanceControlCommandBuilder::SetLinkName, "name"_a)
+      .def("set_command_header", &ImpedanceControlCommandBuilder::SetCommandHeader, "command_header_builder"_a)
+      .def("set_reference_link_name", &ImpedanceControlCommandBuilder::SetReferenceLinkName, "reference_link_name"_a)
+      .def("set_link_name", &ImpedanceControlCommandBuilder::SetLinkName, "link_name"_a)
       .def("set_transformation", &ImpedanceControlCommandBuilder::SetTransformation, "T"_a)
       .def("set_translation_weight", &ImpedanceControlCommandBuilder::SetTranslationWeight, "weight"_a)
       .def("set_rotation_weight", &ImpedanceControlCommandBuilder::SetRotationWeight, "weight"_a);
 
   py::class_<JointVelocityCommandBuilder>(m, "JointVelocityCommandBuilder")
       .def(py::init<>())
-      .def("set_command_header", &JointVelocityCommandBuilder::SetCommandHeader, "joint_velocity_command_builder"_a)
+      .def("set_command_header", &JointVelocityCommandBuilder::SetCommandHeader, "command_header_builder"_a)
       .def("set_minimum_time", &JointVelocityCommandBuilder::SetMinimumTime, "minimum_time"_a)
       .def("set_velocity", &JointVelocityCommandBuilder::SetVelocity, "velocity"_a)
       .def("set_acceleration_limit", &JointVelocityCommandBuilder::SetAccelerationLimit, "acceleration_limit"_a);
@@ -65,17 +65,17 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("value", &JogCommandBuilder::OneStep::value);
 
   jcb.def(py::init<>())
-      .def("set_command_header", &JogCommandBuilder::SetCommandHeader, "jog_command_builder"_a) 
-      .def("set_joint_name", &JogCommandBuilder::SetJointName, "name"_a)
-      .def("set_velocity_limit", &JogCommandBuilder::SetVelocityLimit, "value"_a)
-      .def("set_acceleration_limit", &JogCommandBuilder::SetAccelerationLimit, "value"_a)  
+      .def("set_command_header", &JogCommandBuilder::SetCommandHeader, "command_header_builder"_a) 
+      .def("set_joint_name", &JogCommandBuilder::SetJointName, "joint_name"_a)
+      .def("set_velocity_limit", &JogCommandBuilder::SetVelocityLimit, "velocity_limite"_a)
+      .def("set_acceleration_limit", &JogCommandBuilder::SetAccelerationLimit, "acceleration_limit"_a)  
       .def("set_command", py::overload_cast<JogCommandBuilder::AbsolutePosition>(&JogCommandBuilder::SetCommand), "absolute_position"_a)
       .def("set_command", py::overload_cast<JogCommandBuilder::RelativePosition>(&JogCommandBuilder::SetCommand), "relative_position"_a)
       .def("set_command", py::overload_cast<JogCommandBuilder::OneStep>(&JogCommandBuilder::SetCommand), "one_step"_a);
 
   py::class_<SE2VelocityCommandBuilder>(m, "SE2VelocityCommandBuilder")
       .def(py::init<>())
-      .def("set_command_header", &SE2VelocityCommandBuilder::SetCommandHeader, "se2_velocity_command_builder"_a)
+      .def("set_command_header", &SE2VelocityCommandBuilder::SetCommandHeader, "command_header_builder"_a)
       .def("set_minimum_time", &SE2VelocityCommandBuilder::SetMinimumTime, "minimum_time"_a)
       .def("set_velocity", &SE2VelocityCommandBuilder::SetVelocity, "linear"_a, "angular"_a)
       .def("set_acceleration_limit", &SE2VelocityCommandBuilder::SetAccelerationLimit, "linear"_a, "angular"_a);
@@ -86,7 +86,7 @@ void pybind11_robot_command_builder(py::module_& m) {
 
   py::class_<CartesianCommandBuilder>(m, "CartesianCommandBuilder")
       .def(py::init<>())
-      .def("set_command_header", &CartesianCommandBuilder::SetCommandHeader, "cartesian_command_builder"_a)
+      .def("set_command_header", &CartesianCommandBuilder::SetCommandHeader, "command_header_builder"_a)
       .def("set_minimum_time", &CartesianCommandBuilder::SetMinimumTime, "minium_time"_a)
       .def("add_target", &CartesianCommandBuilder::AddTarget, "ref_link_name"_a, "link_name"_a, "T"_a, 
         "linear_velocity_limit"_a, "angular_velocity_limit"_a, "acceleration_limit"_a)
@@ -128,7 +128,7 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def(py::init<>())
       .def("set_right_arm_command", &BodyComponentBasedCommandBuilder::SetRightArmCommand, "arm_command_builder"_a)
       .def("set_left_arm_command", &BodyComponentBasedCommandBuilder::SetLeftArmCommand, "arm_command_builder"_a)
-      .def("set_torso_command", &BodyComponentBasedCommandBuilder::SetTorsoCommand, "arm_command_builder"_a);
+      .def("set_torso_command", &BodyComponentBasedCommandBuilder::SetTorsoCommand, "torso_command_builder"_a);
 
   py::class_<BodyCommandBuilder>(m, "BodyCommandBuilder")
       .def(py::init<>())

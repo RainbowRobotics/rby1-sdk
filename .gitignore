@@ -24,3 +24,4 @@ wheelhouse
 !build.py
 
 .DS_Store
+.ipynb_checkpoints

@@ -62,6 +62,8 @@ class RobotCommandFeedbackParserImpl {
     if (feedback->has_command_header_feedback()) {
       ParseCommandHeaderFeedback(self.command_header_, feedback->mutable_command_header_feedback());
     }
+    self.time_based_progress_ = feedback->time_based_progress();
+    self.position_based_progress_ = feedback->position_based_progress();
   }
 
   void ParseCartesianCommandFeedback(CartesianCommandFeedback& self, api::CartesianCommand::Feedback* feedback) {

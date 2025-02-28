@@ -71,7 +71,7 @@
       <body name="wheel_fl_link" pos="0.243 0.245 0.076">
         <inertial pos="-0.00010433 -0.00094577 0" quat="0.707168 0 0 0.707046" mass="2.54418" diaginertia="0.00616468 0.00471013 0.00470782"/>
         <joint name="wheel_fl" pos="0 0 0" axis="0 1 0" limited="false"/>
-        <include file="./assets/MECANUM_WHEEL/geoms.xml" />
+        <include file="./assets/MECANUM_WHEEL_M/geoms.xml" />
       </body>
       <body name="wheel_rr_link" pos="-0.247 -0.245 0.076">
         <inertial pos="-0.00010433 -0.00094577 0" quat="0.707168 0 0 0.707046" mass="2.54418" diaginertia="0.00616468 0.00471013 0.00470782"/>
@@ -81,7 +81,7 @@
       <body name="wheel_rl_link" pos="-0.247 0.245 0.076">
         <inertial pos="-0.00010511 0.0009458 0" quat="0.707046 0 0 0.707168" mass="2.5441" diaginertia="0.00616429 0.00470985 0.00470754"/>
         <joint name="wheel_rl" pos="0 0 0" axis="0 1 0" limited="false"/>
-        <include file="./assets/MECANUM_WHEEL_M/geoms.xml" />
+        <include file="./assets/MECANUM_WHEEL/geoms.xml" />
       </body>
 
       <body name="link_torso_0" pos="0 0 0.2965">

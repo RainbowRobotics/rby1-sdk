@@ -118,7 +118,7 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def(py::init<const CartesianCommandBuilder&>())
       .def(py::init<const ImpedanceControlCommandBuilder&>())
       .def(py::init<const OptimalControlCommandBuilder&>())
-      .def("set_command", py::overload_cast<const JointPositionCommandBuilder&>(&TorsoCommandBuilder::SetCommand), "joint_position_command_builder"_a) //==========
+      .def("set_command", py::overload_cast<const JointPositionCommandBuilder&>(&TorsoCommandBuilder::SetCommand), "joint_position_command_builder"_a)
       .def("set_command", py::overload_cast<const GravityCompensationCommandBuilder&>(&TorsoCommandBuilder::SetCommand), "gravity_compensation_command_builder"_a)
       .def("set_command", py::overload_cast<const CartesianCommandBuilder&>(&TorsoCommandBuilder::SetCommand), "cartesian_command_builder"_a)
       .def("set_command", py::overload_cast<const ImpedanceControlCommandBuilder&>(&TorsoCommandBuilder::SetCommand), "impedance_control_command_builder"_a)
@@ -126,9 +126,9 @@ void pybind11_robot_command_builder(py::module_& m) {
 
   py::class_<BodyComponentBasedCommandBuilder>(m, "BodyComponentBasedCommandBuilder")
       .def(py::init<>())
-      .def("set_right_arm_command", &BodyComponentBasedCommandBuilder::SetRightArmCommand, "body_component_based_command_builder"_a)
-      .def("set_left_arm_command", &BodyComponentBasedCommandBuilder::SetLeftArmCommand, "body_component_based_command_builder"_a)
-      .def("set_torso_command", &BodyComponentBasedCommandBuilder::SetTorsoCommand, "body_component_based_command_builder"_a);
+      .def("set_right_arm_command", &BodyComponentBasedCommandBuilder::SetRightArmCommand, "arm_command_builder"_a)
+      .def("set_left_arm_command", &BodyComponentBasedCommandBuilder::SetLeftArmCommand, "arm_command_builder"_a)
+      .def("set_torso_command", &BodyComponentBasedCommandBuilder::SetTorsoCommand, "arm_command_builder"_a);
 
   py::class_<BodyCommandBuilder>(m, "BodyCommandBuilder")
       .def(py::init<>())
@@ -157,9 +157,9 @@ void pybind11_robot_command_builder(py::module_& m) {
 
   py::class_<ComponentBasedCommandBuilder>(m, "ComponentBasedCommandBuilder")
       .def(py::init<>())
-      .def("set_mobility_command", &ComponentBasedCommandBuilder::SetMobilityCommand, "component_based_command_builder"_a)
-      .def("set_body_command", &ComponentBasedCommandBuilder::SetBodyCommand, "component_based_command_builder"_a)
-      .def("set_head_command", &ComponentBasedCommandBuilder::SetHeadCommand, "component_based_command_builder"_a);
+      .def("set_mobility_command", &ComponentBasedCommandBuilder::SetMobilityCommand, "mobility_command_builder"_a)
+      .def("set_body_command", &ComponentBasedCommandBuilder::SetBodyCommand, "body_command_builder"_a)
+      .def("set_head_command", &ComponentBasedCommandBuilder::SetHeadCommand, "head_command_builder"_a);
 
   py::class_<WholeBodyCommandBuilder>(m, "WholeBodyCommandBuilder")
       .def(py::init<>())

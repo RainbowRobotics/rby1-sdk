@@ -42,7 +42,7 @@ void InitializeRequestHeader(rb::api::RequestHeader* req_header) {
 }
 
 struct timespec DurationToTimespec(const google::protobuf::Duration& duration) {
-  struct timespec t {};
+  struct timespec t{};
 
   t.tv_sec = duration.seconds();
   t.tv_nsec = duration.nanos();
@@ -153,7 +153,7 @@ rb::EMOInfo ProtoToEMOInfo(const api::EMOInfo& msg) {
 
 rb::JointInfo ProtoToJointInfo(const api::JointInfo& msg) {
   rb::JointInfo ji;
-  
+
   ji.name = msg.name();
   ji.has_brake = msg.has_brake();
   ji.product_name = msg.product_name();
@@ -215,7 +215,10 @@ class RobotCommandHandlerImpl {
                                                           [=](grpc::Status status) { OnResponseReceived(status); });
   }
 
-  ~RobotCommandHandlerImpl() { Cancel(); }
+  ~RobotCommandHandlerImpl() {
+    Cancel();
+    Wait();
+  }
 
   bool IsDone() const { return done_.load(); }
 
@@ -229,7 +232,11 @@ class RobotCommandHandlerImpl {
     return cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms), [this] { return done_.load(); });
   }
 
-  void Cancel() { context_.TryCancel(); }
+  void Cancel() {
+    if (!IsDone()) {
+      robot_->CancelControl();
+    }
+  }
 
   api::RobotCommand::Feedback Get() {
     Wait();
@@ -276,10 +283,8 @@ class RobotCommandStreamHandlerImpl
   }
 
   ~RobotCommandStreamHandlerImpl() override {
-    if (!IsDone()) {
-      Cancel();
-      Wait();
-    }
+    Cancel();
+    Wait();
   }
 
   bool IsDone() const { return done_.load(); }
@@ -341,7 +346,11 @@ class RobotCommandStreamHandlerImpl
     return SendCommand(rb::RobotCommandBuilder(), timeout_ms);
   }
 
-  void Cancel() { context_.TryCancel(); }
+  void Cancel() {
+    if (!IsDone()) {
+      robot_->CancelControl();
+    }
+  }
 
   void OnWriteDone(bool ok) override {
     {
@@ -1123,7 +1132,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     int recv_pkt_size_{0};
     std::array<unsigned char, kMaxPacketLength> recv_packet{};
 
-    struct sockaddr_storage client_addr {};
+    struct sockaddr_storage client_addr{};
 
     while (!handler->IsDone()) {
       {
@@ -1261,7 +1270,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     if (!status.ok()) {
       std::stringstream error_msg_ss;
       error_msg_ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
-         << gRPCStatusToString(status.error_code()) << ")";
+                   << gRPCStatusToString(status.error_code()) << ")";
       if (!status.error_message().empty()) {
         error_msg_ss << ", Message: " << status.error_message();
       }
@@ -1646,7 +1655,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       throw std::runtime_error(ss.str());
     }
 
-    struct timespec utc_time {};
+    struct timespec utc_time{};
 
     if (res.has_utc_time()) {
       utc_time.tv_sec = res.utc_time().seconds();

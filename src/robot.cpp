@@ -1771,6 +1771,32 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return true;
   }
 
+  bool WaitForControlReady(long timeout_ms) const {
+    api::WaitForControlReadyRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    if (timeout_ms >= 0) {
+      auto& t = *req.mutable_timeout();
+      t.set_seconds(timeout_ms / 1000);
+      t.set_nanos((timeout_ms % 1000) * 1000000);
+    }
+    
+    api::WaitForControlReadyResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = control_manager_service_->WaitForControlReady(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    return res.ready();
+  }
+
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
     explicit StateReader(std::shared_ptr<RobotImpl<T>> robot, api::RobotStateService::Stub* stub,
@@ -2518,6 +2544,11 @@ bool Robot<T>::SetBatteryConfig(double cutoff_voltage, double fully_charged_volt
 template <typename T>
 bool Robot<T>::ResetBatteryConfig() const {
   return impl_->ResetBatteryConfig();
+}
+
+template <typename T>
+bool Robot<T>::WaitForControlReady(long timeout_ms) const {
+  return impl_->WaitForControlReady(timeout_ms);
 }
 
 template <typename T>

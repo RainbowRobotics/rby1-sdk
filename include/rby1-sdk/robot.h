@@ -179,6 +179,8 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool ResetBatteryConfig() const;
 
+  bool WaitForControlReady(long timeout_ms) const;
+
  private:
   explicit Robot(std::string address);
 

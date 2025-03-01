@@ -234,7 +234,7 @@ class RobotCommandHandlerImpl {
 
   void Cancel() {
     if (!IsDone()) {
-      robot_->CancelControl();
+      context_.TryCancel();
     }
   }
 
@@ -348,7 +348,7 @@ class RobotCommandStreamHandlerImpl
 
   void Cancel() {
     if (!IsDone()) {
-      robot_->CancelControl();
+      context_.TryCancel();
     }
   }
 

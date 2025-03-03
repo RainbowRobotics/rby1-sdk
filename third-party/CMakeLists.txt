@@ -37,9 +37,5 @@ if(NOT TARGET DynamixelSDK)
         add_library(DynamixelSDK
                 ${DynamixelSDK_SRCS}
         )
-        set_target_properties(DynamixelSDK
-                PROPERTIES
-                PUBLIC_HEADER "${DynamixelSDK_SRC_PATH}/DynamixelSDK.h"
-        )
         target_include_directories(DynamixelSDK PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/DynamixelSDK/c++/include/dynamixel_sdk)
 endif()

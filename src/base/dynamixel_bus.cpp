@@ -1,4 +1,8 @@
 #include "rby1-sdk/base/dynamixel_bus.h"
+
+#if defined(_WIN32) || defined(_WIN64)
+#define WINDLLEXPORT
+#endif
 #include "dynamixel_sdk.h"
 
 #include <chrono>

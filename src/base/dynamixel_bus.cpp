@@ -618,6 +618,14 @@ std::optional<int> DynamixelBus::ReadTemperature(int id) {
   return impl_->ReadTemperature(id);
 }
 
+std::optional<std::vector<std::pair<int, int>>> DynamixelBus::BulkRead(const std::vector<int>& ids, int addr, int len) {
+  return impl_->BulkRead(ids, addr, len);
+}
+
+std::optional<std::vector<std::pair<int, int16_t>>> DynamixelBus::ReadCurrent(const std::vector<int>& ids) {
+  return impl_->ReadCurrent(ids);
+}
+
 std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> DynamixelBus::BulkReadEncoder(
     const std::vector<int>& ids) {
   return impl_->BulkReadEncoder(ids);

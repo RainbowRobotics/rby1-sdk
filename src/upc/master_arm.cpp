@@ -20,13 +20,17 @@ void MasterArm::SetModelPath(const std::string& model_path) {
   model_path_ = model_path;
 }
 
-std::vector<int> MasterArm::Initialize() {
+std::vector<int> MasterArm::Initialize(bool verbose) {
   if (!handler_->OpenPort()) {
-    std::cerr << "Failed to open the port!" << std::endl;
+    if (verbose) {
+      std::cerr << "Failed to open the port!" << std::endl;
+    }
     return {};
   }
   if (!handler_->SetBaudRate(DynamixelBus::kDefaultBaudrate)) {
-    std::cerr << "Failed to change the baudrate!" << std::endl;
+    if (verbose) {
+      std::cerr << "Failed to change the baudrate!" << std::endl;
+    }
     return {};
   }
 
@@ -34,24 +38,36 @@ std::vector<int> MasterArm::Initialize() {
 
   for (int id = 0; id < 14; ++id) {
     if (handler_->Ping(id)) {
-      std::cout << "Dynamixel ID " << id << " is active." << std::endl;
+      if (verbose) {
+        std::cout << "Dynamixel ID " << id << " is active." << std::endl;
+      }
       active_ids.push_back(id);
     } else {
-      std::cerr << "Dynamixel ID " << id << " is not active." << std::endl;
+      if (verbose) {
+        std::cerr << "Dynamixel ID " << id << " is not active." << std::endl;
+      }
     }
   }
   for (int id = 0x80; id < 0x80 + 2; id++) {
     if (handler_->Ping(id)) {
-      std::cout << "Dynamixel ID " << id << " is active." << std::endl;
+      if (verbose) {
+        std::cout << "Dynamixel ID " << id << " is active." << std::endl;
+      }
       active_ids.push_back(id);
     } else {
-      std::cerr << "Dynamixel ID " << id << " is not active." << std::endl;
+      if (verbose) {
+        std::cerr << "Dynamixel ID " << id << " is not active." << std::endl;
+      }
     }
   }
   if (active_ids.size() != 16) {
-    std::cerr << "Unable to ping all devices for master arm" << std::endl;
+    if (verbose) {
+      std::cerr << "Unable to ping all devices for master arm" << std::endl;
+    }
     Eigen::Map<Eigen::VectorXi> ids(active_ids.data(), (long)active_ids.size());
-    std::cerr << "active ids: " << ids.transpose() << std::endl;
+    if (verbose) {
+      std::cerr << "active ids: " << ids.transpose() << std::endl;
+    }
     exit(1);
   }
 

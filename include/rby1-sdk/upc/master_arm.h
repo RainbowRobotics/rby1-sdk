@@ -15,6 +15,7 @@ namespace rb::upc {
 class MasterArm {
  public:
   static constexpr int kDOF = 14;
+  static constexpr int kDeivceCount = kDOF + 2;
   static constexpr double kTorqueScaling = 0.5;
   static constexpr double kMaximumTorque = 4.;  // 3.0 Nm
 
@@ -50,7 +51,7 @@ class MasterArm {
 
   void SetModelPath(const std::string& model_path);
 
-  std::vector<int> Initialize();
+  std::vector<int> Initialize(bool verbose = false);
 
   void StartControl(const std::function<ControlInput(const State& state)>& control = nullptr);
 

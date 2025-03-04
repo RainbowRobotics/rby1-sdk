@@ -36,9 +36,33 @@ void bind_master_arm(py::module_& m) {
 
   py::class_<MasterArm::ControlInput>(ma_m, "ControlInput")
       .def(py::init<>())
-      .def_readwrite("target_operation_mode", &MasterArm::ControlInput::target_operation_mode)
-      .def_readwrite("target_position", &MasterArm::ControlInput::target_position)
-      .def_readwrite("target_torque", &MasterArm::ControlInput::target_torque);
+      .def_property(
+          "target_operation_mode",
+          [](MasterArm::ControlInput& self) -> Eigen::Vector<int, MasterArm::kDOF>& {
+            return self.target_operation_mode;
+          },
+          [](MasterArm::ControlInput& self, const Eigen::Vector<int, MasterArm::kDOF>& mat) {
+            self.target_operation_mode = mat;
+          },
+          py::return_value_policy::reference_internal)
+      .def_property(
+          "target_position",
+          [](MasterArm::ControlInput& self) -> Eigen::Vector<double, MasterArm::kDOF>& {
+            return self.target_position;
+          },
+          [](MasterArm::ControlInput& self, const Eigen::Vector<double, MasterArm::kDOF>& mat) {
+            self.target_position = mat;
+          },
+          py::return_value_policy::reference_internal)
+      .def_property(
+          "target_torque",
+          [](MasterArm::ControlInput& self) -> Eigen::Vector<double, MasterArm::kDOF>& {
+            return self.target_torque;
+          },
+          [](MasterArm::ControlInput& self, const Eigen::Vector<double, MasterArm::kDOF>& mat) {
+            self.target_torque = mat;
+          },
+          py::return_value_policy::reference_internal);
 
   ma_m  //
       .def_readonly_static("DOF", &MasterArm::kDOF)
@@ -50,9 +74,9 @@ void bind_master_arm(py::module_& m) {
       .def(py::init<const std::string&>(), "dev_name"_a = kMasterArmDeviceName)
       .def("set_control_period", &MasterArm::SetControlPeriod, "control_period"_a)
       .def("set_model_path", &MasterArm::SetModelPath, "model_path"_a)
-      .def("initialize", &MasterArm::Initialize, "verbose"_a = false)
-      .def("start_control", &MasterArm::StartControl, "control"_a)
-      .def("stop_control", &MasterArm::StopControl);
+      .def("initialize", &MasterArm::Initialize, "verbose"_a = false, py::call_guard<py::gil_scoped_release>())
+      .def("start_control", &MasterArm::StartControl, "control"_a, py::call_guard<py::gil_scoped_release>())
+      .def("stop_control", &MasterArm::StopControl, py::call_guard<py::gil_scoped_release>());
 }
 
 void pybind11_upc(py::module_& m) {

@@ -72,6 +72,7 @@ class MasterArm {
   std::vector<int> active_ids_;
   bool state_updated_;
   State state_;
+  bool operation_mode_init_{false};
 
   std::function<ControlInput(const State& state)> control_;
 };

@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
   
   master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
-  master_arm->SetControlPeriod(0.02);
+  master_arm->SetControlPeriod(0.05); // 20Hz
 
   auto active_ids = master_arm->Initialize();
   if (active_ids.size() != upc::MasterArm::kDeivceCount) {
@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
     return input;
   });
 
-  std::this_thread::sleep_for(10s);
+  std::this_thread::sleep_for(20s);
 
   master_arm->StopControl();
   robot->PowerOff("12v");

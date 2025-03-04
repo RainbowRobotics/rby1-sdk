@@ -27,9 +27,8 @@ def STATE_CALL_BACK(robot_state, control_manager_state: rby1_sdk.ControlManagerS
     global IS_READY, CUR_POSITION, CONTROL_MANAGER_STATE, IS_POWER
     IS_READY = robot_state.is_ready
     CUR_POSITION = robot_state.position
-    # print(CUR_POSITION)
     CONTROL_MANAGER_STATE = control_manager_state.state
-    IS_POWER = True if robot_state.power_states[-1].voltage > 0 else False  
+    IS_POWER = True if robot_state.power_states[-1].voltage > 40 else False  
 
     
 class SplashScreen(QSplashScreen):
@@ -234,19 +233,51 @@ class ButtonGrid(QWidget):
         self.create_button(self.layout, "브레이크 풀기(l_arm_6)", 2, 11, lambda:asyncio.ensure_future(self.l_arm_6_break_release_for_cal()), 1)
         self.create_button(self.layout, "홈 리셋(l_arm_6)", 2, 12, lambda:asyncio.ensure_future(self.l_arm_6_home_offset_reset_for_cal()), 1, background_color="#ED325A")
         
-        for idx in range(24):
-            lamp = QLineEdit("")
-            lamp.setFixedSize(65,20)
-            lamp.setReadOnly(True)  # 읽기 전용
-            lamp.setFocusPolicy(Qt.NoFocus)  # 선택 안되게 설정
-            lamp.setStyleSheet(IDLE_STATE)
-            
-            if idx >=2 and idx<=7:
-                self.layout.addWidget(lamp, 7+idx-2, 5)
-            elif idx >=8 and idx<=14:
-                self.layout.addWidget(lamp, 16+idx-8, 5)
-            elif idx >=15 and idx<=21:
-                self.layout.addWidget(lamp, 16+idx-15, 7)
+        if self.model == "a":
+            for idx in range(24):
+                lamp = QLineEdit("")
+                lamp.setFixedSize(65,20)
+                lamp.setReadOnly(True)  # 읽기 전용
+                lamp.setFocusPolicy(Qt.NoFocus)  # 선택 안되게 설정
+                lamp.setStyleSheet(IDLE_STATE)
+                
+                if idx >=2 and idx<=7:
+                    self.layout.addWidget(lamp, 7+idx-2, 5)
+                elif idx >=8 and idx<=14:
+                    self.layout.addWidget(lamp, 16+idx-8, 5)
+                elif idx >=15 and idx<=21:
+                    self.layout.addWidget(lamp, 16+idx-15, 7)
+                    
+        elif self.model == "t5":
+            for idx in range(23):
+                lamp = QLineEdit("")
+                lamp.setFixedSize(65,20)
+                lamp.setReadOnly(True)  # 읽기 전용
+                lamp.setFocusPolicy(Qt.NoFocus)  # 선택 안되게 설정
+                lamp.setStyleSheet(IDLE_STATE)
+                
+                if idx >=2 and idx<=6:
+                    self.layout.addWidget(lamp, 7+idx-1, 5)
+                elif idx >=7 and idx<=13:
+                    self.layout.addWidget(lamp, 16+idx-7, 5)
+                elif idx >=14 and idx<=20:
+                    self.layout.addWidget(lamp, 16+idx-14, 7)
+                    
+        elif self.model == "m":
+            for idx in range(26):
+                lamp = QLineEdit("")
+                lamp.setFixedSize(65,20)
+                lamp.setReadOnly(True)  # 읽기 전용
+                lamp.setFocusPolicy(Qt.NoFocus)  # 선택 안되게 설정
+                lamp.setStyleSheet(IDLE_STATE)
+                
+                if idx >=4 and idx<=9:
+                    self.layout.addWidget(lamp, 7+idx-4, 5)
+                elif idx >=10 and idx<=16:
+                    self.layout.addWidget(lamp, 16+idx-10, 5)
+                elif idx >=17 and idx<=23:
+                    self.layout.addWidget(lamp, 16+idx-17, 7)
+                    
         self.create_button(self.layout, "데모모션(비인증)", 3, 9, lambda : self.demo_motion(False), 2)
         self.create_button(self.layout, "데모모션(인증)", 3, 11, lambda: self.demo_motion(True), 2)
         
@@ -459,12 +490,29 @@ class ButtonGrid(QWidget):
             # if CUR_POSITION and CUR_POSITION.__len__()>0:
             #     print(CUR_POSITION[idx])
                 # lamp.setText(CUR_POSITION[idx])
-            if idx >=2 and idx<=7:
-                self.layout.addWidget(lamp, 7+idx-2, 5)
-            elif idx >=8 and idx<=14:
-                self.layout.addWidget(lamp, 16+idx-8, 5)
-            elif idx >=15 and idx<=21:
-                self.layout.addWidget(lamp, 16+idx-15, 7)
+            if self.model == "a":
+                if idx >=2 and idx<=7:
+                    self.layout.addWidget(lamp, 7+idx-2, 5)
+                elif idx >=8 and idx<=14:
+                    self.layout.addWidget(lamp, 16+idx-8, 5)
+                elif idx >=15 and idx<=21:
+                    self.layout.addWidget(lamp, 16+idx-15, 7)
+                    
+            elif self.model == "t5":                
+                if idx >=2 and idx<=6:
+                    self.layout.addWidget(lamp, 7+idx-1, 5)
+                elif idx >=7 and idx<=13:
+                    self.layout.addWidget(lamp, 16+idx-7, 5)
+                elif idx >=14 and idx<=20:
+                    self.layout.addWidget(lamp, 16+idx-14, 7)
+                    
+            elif self.model == "m":
+                if idx >=4 and idx<=9:
+                    self.layout.addWidget(lamp, 7+idx-4, 5)
+                elif idx >=10 and idx<=16:
+                    self.layout.addWidget(lamp, 16+idx-10, 5)
+                elif idx >=17 and idx<=23:
+                    self.layout.addWidget(lamp, 16+idx-17, 7)
                 
     @Slot()
     async def connect(self):
@@ -620,7 +668,7 @@ class ButtonGrid(QWidget):
     def demo_motion(self, is_certification:bool):
         print("데모 모션 ", is_certification)
         if is_certification:
-            self.start_process("demo_motion", ["python", "examples/python/09_demo_motion.py", "--address", self.address, "--model", self.model, "--servo", "^(?!.*_wheel$).+$"])
+            self.start_process("demo_motion", ["python", "examples/python/09_demo_motion.py", "--address", self.address, "--model", self.model, "--servo", "torso_.*|left_arm_.*|right_arm_.*"])
         else:
             self.start_process("demo_motion", ["python", "examples/python/09_demo_motion.py", "--address", self.address, "--model", self.model,])
             

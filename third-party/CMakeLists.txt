@@ -13,7 +13,7 @@ if(NOT TARGET DynamixelSDK)
                 ${DynamixelSDK_SRC_PATH}/group_sync_write.cpp
                 ${DynamixelSDK_SRC_PATH}/packet_handler.cpp
                 ${DynamixelSDK_SRC_PATH}/port_handler.cpp
-                ${DynamixelSDK_SRC_PATH}/port_handler_linux.cpp
+                # ${DynamixelSDK_SRC_PATH}/port_handler_linux.cpp
                 ${DynamixelSDK_SRC_PATH}/protocol1_packet_handler.cpp
                 ${DynamixelSDK_SRC_PATH}/protocol2_packet_handler.cpp
         )
@@ -33,6 +33,7 @@ if(NOT TARGET DynamixelSDK)
                         ${DynamixelSDK_SRC_PATH}/port_handler_linux.cpp
                 )
         endif()
+        message(STATUS "DynamixelSDK Sources: ${DynamixelSDK_SRCS}")
         add_library(DynamixelSDK
                 ${DynamixelSDK_SRCS}
         )

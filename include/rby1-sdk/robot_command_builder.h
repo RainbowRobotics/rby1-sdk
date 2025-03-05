@@ -110,8 +110,6 @@ class OptimalControlCommandBuilder {
 
   OptimalControlCommandBuilder& SetVelocityLimitScaling(double velocity_limit_scaling);
 
-  OptimalControlCommandBuilder& SetVelocityTrackingGain(double gain);
-
   OptimalControlCommandBuilder& SetStopCost(double stop_cost);
 
   OptimalControlCommandBuilder& SetMinDeltaCost(double min_delta_cost);

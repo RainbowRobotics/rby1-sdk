@@ -240,7 +240,7 @@ message OptimalControlCommand {
 
     // velocity tracking gain
     // default: default.optimal_control_command.velocity_tracking_gain, range: (0, 1]
-    google.protobuf.DoubleValue velocity_tracking_gain = 6;
+    reserved 6;
 
     // stop cost
     // default: default.optimal_control_command.stop_cost, range: (0, ∞)

@@ -190,6 +190,9 @@ class OptimalControl {
       qdot_ub = robot_->GetLimitQdotUpper(state) * velocity_limit_scaling;
     }
 
+    qdot_lb = qdot_lb.cwiseMax(state->GetQdot() + robot_->GetLimitQddotLower(state));
+    qdot_ub = qdot_lb.cwiseMax(state->GetQdot() + robot_->GetLimitQddotUpper(state));
+
     if constexpr (DOF < 0) {
       lb.topRows(n_joints_) = qdot_lb;
       ub.topRows(n_joints_) = qdot_ub;

@@ -126,8 +126,6 @@ class OptimalControlCommandBuilderImpl {
 
   void SetVelocityLimitScaling(double scaling) { req_->mutable_velocity_limit_scaling()->set_value(scaling); }
 
-  void SetVelocityTrackingGain(double gain) { req_->mutable_velocity_tracking_gain()->set_value(gain); }
-
   void SetStopCost(double stop_cost) { req_->mutable_stop_cost()->set_value(stop_cost); }
 
   void SetMinDeltaCost(double min_delta_cost) { req_->mutable_min_delta_cost()->set_value(min_delta_cost); }
@@ -708,11 +706,6 @@ OptimalControlCommandBuilder& OptimalControlCommandBuilder::AddJointPositionTarg
 
 OptimalControlCommandBuilder& OptimalControlCommandBuilder::SetVelocityLimitScaling(double velocity_limit_scaling) {
   impl_->SetVelocityLimitScaling(velocity_limit_scaling);
-  return *this;
-}
-
-OptimalControlCommandBuilder& OptimalControlCommandBuilder::SetVelocityTrackingGain(double gain) {
-  impl_->SetVelocityTrackingGain(gain);
   return *this;
 }
 

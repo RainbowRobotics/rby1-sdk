@@ -95,8 +95,11 @@ class OptimalControl {
             robot_->ComputeTransformation(state, link_target.ref_link_index, link_target.link_index);
         Eigen::Matrix<double, 4, 4> T_target = link_target.T;
         Eigen::Matrix<double, 4, 4> T_err = T_cur.inverse() * T_target;
+        Eigen::Matrix<double, 6, DOF> J =
+            robot_->ComputeBodyJacobian(state, link_target.ref_link_index, link_target.link_index);
+        J(Eigen::all, rev_joint_idx_).setZero();
 
-        Eigen::Matrix<double, 6, 1> err = SE3::Log(T_err) / dt;
+        Eigen::Matrix<double, 6, 1> err = 2 * SE3::Log(T_err) / dt - J * state->GetQdot();
 
         if (link_target.weight_orientation < 1e-6) {
           err.topRows(3).setZero();
@@ -107,10 +110,6 @@ class OptimalControl {
         }
 
         err_sum += (err * dt).squaredNorm();
-
-        Eigen::Matrix<double, 6, DOF> J =
-            robot_->ComputeBodyJacobian(state, link_target.ref_link_index, link_target.link_index);
-        J(Eigen::all, rev_joint_idx_).setZero();
 
         err.topRows(3) = err.topRows(3) * link_target.weight_orientation;
         err.bottomRows(3) = err.bottomRows(3) * link_target.weight_position;
@@ -128,20 +127,20 @@ class OptimalControl {
 
       com = robot_->ComputeCenterOfMass(state, in.com_target.value().ref_link_index);
       J_com = robot_->ComputeCenterOfMassJacobian(state, in.com_target.value().ref_link_index);
+      J_com(Eigen::all, rev_joint_idx_).setZero();
 
       Eigen::Matrix<double, 3, 1> com_target = in.com_target.value().com;
-      Eigen::Matrix<double, 3, 1> err = (com_target - com) / dt;
+      Eigen::Matrix<double, 3, 1> err = 2 * (com_target - com) / dt - J_com * state->GetQdot();
       err_sum += (err * dt).squaredNorm();
 
       err = err * in.com_target.value().weight;
-      J_com(Eigen::all, rev_joint_idx_).setZero();
 
       qp_solver_.AddCostFunction(J_com, err);
     }
 
     if (in.q_target.has_value()) {
       Eigen::Matrix<double, DOF, 1> err;
-      err = (in.q_target.value().q - state->GetQ()) / dt;
+      err = 2 * (in.q_target.value().q - state->GetQ()) / dt - state->GetQdot();
 
       Eigen::Matrix<double, DOF, DOF> J;
       J.resize(n_joints_, n_joints_);

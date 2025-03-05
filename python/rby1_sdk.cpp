@@ -73,7 +73,7 @@ PYBIND11_MODULE(_bindings, m) {
   pybind11_robot_command_feedback(m);
   pybind11_robot(m);
 
-  m.def("create_robot", &create_robot, "Creates a robot based on the provided model and address.", py::arg("address"),
+  m.def("_create_robot", &create_robot, "Creates a robot based on the provided model and address.", py::arg("address"),
         py::arg("model") = "a");
 
   m.def(

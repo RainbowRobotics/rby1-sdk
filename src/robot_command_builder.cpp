@@ -366,6 +366,10 @@ class CartesianCommandBuilderImpl {
     req_->mutable_stop_orientation_tracking_error()->set_value(stop_orientation_tracking_error);
   }
 
+  void SetStopJointPositionTrackingError(double stop_joint_position_tracking_error) {
+    req_->mutable_stop_joint_position_tracking_error()->set_value(stop_joint_position_tracking_error);
+  }
+
   api::CartesianCommand::Request* Build() { return req_.release(); }
 
  private:
@@ -941,6 +945,12 @@ CartesianCommandBuilder& CartesianCommandBuilder::SetStopPositionTrackingError(d
 CartesianCommandBuilder& CartesianCommandBuilder::SetStopOrientationTrackingError(
     double stop_orientation_tracking_error) {
   impl_->SetStopOrientationTrackingError(stop_orientation_tracking_error);
+  return *this;
+}
+
+CartesianCommandBuilder& CartesianCommandBuilder::SetStopJointPositionTrackingError(
+    double stop_joint_position_tracking_error) {
+  impl_->SetStopJointPositionTrackingError(stop_joint_position_tracking_error);
   return *this;
 }
 

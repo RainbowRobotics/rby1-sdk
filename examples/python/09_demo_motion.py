@@ -161,7 +161,7 @@ def example_cartesian_command_1(robot):
                     ACCELERATION_LIMIT,
                 )
                 .set_minimum_time(MINIMUM_TIME)
-                .set_command_header(CommandHeaderBuilder().set_control_hold_time(5))
+                .set_command_header(CommandHeaderBuilder().set_control_hold_time(3))
                 .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
                 .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
             )
@@ -995,6 +995,7 @@ def main(address, power_device, servo):
     robot.set_parameter("joint_position_command.cutoff_frequency", "5")
     robot.set_parameter("cartesian_command.cutoff_frequency", "5")
     robot.set_parameter("default.linear_acceleration_limit", "5")
+    robot.set_parameter("manipulability_threshold", "1e4")
     # robot.set_time_scale(1.0)
 
     print("parameters setting is done")

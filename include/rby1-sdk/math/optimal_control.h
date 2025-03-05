@@ -73,6 +73,18 @@ class OptimalControl {
     velocity_limit_ = velocity_limit;
   }
 
+  template <int N>
+  double CalculateConditionVariable(const Eigen::Matrix<double, N, N>& A) {
+    Eigen::JacobiSVD<Eigen::Matrix<double, N, N>> svd(A);
+    const auto& singular_values = svd.singularValues();
+    double max_sv = singular_values(0);
+    double min_sv = singular_values(singular_values.size() - 1);
+    if (std::abs(min_sv) <= 1e-6) {
+      return std::numeric_limits<double>::infinity();
+    }
+    return max_sv / min_sv;
+  }
+
   std::optional<Eigen::VectorXd> Solve(Input in, std::shared_ptr<dyn::State<DOF>> state, double dt,
                                        double velocity_limit_scaling = 1.0, bool need_forward_kinematics = false) {
     using namespace math;
@@ -87,6 +99,8 @@ class OptimalControl {
 
     qp_solver_.InitFunction();
 
+    double max_cond = 1.0;
+
     double err_sum = 0;
 
     if (in.link_targets.has_value()) {
@@ -98,6 +112,10 @@ class OptimalControl {
         Eigen::Matrix<double, 6, DOF> J =
             robot_->ComputeBodyJacobian(state, link_target.ref_link_index, link_target.link_index);
         J(Eigen::all, rev_joint_idx_).setZero();
+
+        Eigen::Matrix<double, 6, 6> A = J * J.transpose();
+        double cond = CalculateConditionVariable(A);
+        max_cond = std::max(max_cond, cond);
 
         Eigen::Matrix<double, 6, 1> err = 2 * SE3::Log(T_err) / dt - J * state->GetQdot();
 
@@ -128,6 +146,10 @@ class OptimalControl {
       com = robot_->ComputeCenterOfMass(state, in.com_target.value().ref_link_index);
       J_com = robot_->ComputeCenterOfMassJacobian(state, in.com_target.value().ref_link_index);
       J_com(Eigen::all, rev_joint_idx_).setZero();
+
+      Eigen::Matrix3d A = J_com * J_com.transpose();
+      double cond = CalculateConditionVariable(A);
+      max_cond = std::max(max_cond, cond);
 
       Eigen::Matrix<double, 3, 1> com_target = in.com_target.value().com;
       Eigen::Matrix<double, 3, 1> err = 2 * (com_target - com) / dt - J_com * state->GetQdot();
@@ -214,6 +236,7 @@ class OptimalControl {
     if (ret.has_value()) {
       err_ = std::sqrt(err_sum);
     }
+    manipulability_ = max_cond;
 
     if (ret.has_value()) {
       return ret;
@@ -221,10 +244,13 @@ class OptimalControl {
     return {};
   }
 
-  [[nodiscard]] double GetError() const { return err_; }  // NOLINT
+  [[nodiscard]] double GetError() const { return err_; }
+
+  [[nodiscard]] double GetManipulability() const { return manipulability_; }
 
  private:
   double err_{};
+  double manipulability_{};
   math::QPSolver qp_solver_;
 
   std::shared_ptr<dyn::Robot<DOF>> robot_;

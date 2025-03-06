@@ -213,12 +213,12 @@ void bind_robot(py::module_& m) {
       .def("compute_inverse_dynamics", &dyn::Robot<DOF>::ComputeInverseDynamics, "state"_a)
       .def("compute_gravity_term", &dyn::Robot<DOF>::ComputeGravityTerm, "state"_a)
       .def("compute_mass_matrix", &dyn::Robot<DOF>::ComputeMassMatrix, "state"_a)
-      .def("compute_reflective_inertia", &dyn::Robot<DOF>::ComputeReflectiveInertia, "state"_a, "from"_a, "to"_a)
-      .def("compute_transformation", &dyn::Robot<DOF>::ComputeTransformation, "state"_a, "from"_a, "to"_a)
-      .def("compute_body_velocity", &dyn::Robot<DOF>::ComputeBodyVelocity, "state"_a, "from"_a, "to"_a)
-      .def("compute_space_jacobian", &dyn::Robot<DOF>::ComputeSpaceJacobian, "state"_a, "from"_a, "to"_a)
-      .def("compute_body_jacobian", &dyn::Robot<DOF>::ComputeBodyJacobian, "state"_a, "from"_a, "to"_a)
-      .def("compute_mass", &dyn::Robot<DOF>::ComputeMass, "state"_a, "target_link"_a)
+      .def("compute_reflective_inertia", &dyn::Robot<DOF>::ComputeReflectiveInertia, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_transformation", &dyn::Robot<DOF>::ComputeTransformation, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_body_velocity", &dyn::Robot<DOF>::ComputeBodyVelocity, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_space_jacobian", &dyn::Robot<DOF>::ComputeSpaceJacobian, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_body_jacobian", &dyn::Robot<DOF>::ComputeBodyJacobian, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_mass", &dyn::Robot<DOF>::ComputeMass, "state"_a, "target_link_index"_a)
       .def("compute_center_of_mass",
            static_cast<Eigen::Vector3d (dyn::Robot<DOF>::*)(std::shared_ptr<dyn::State<DOF>>, unsigned int,
                                                             unsigned int)>(&dyn::Robot<DOF>::ComputeCenterOfMass),

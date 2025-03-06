@@ -149,8 +149,8 @@ void bind_joint_state(py::module_& m) {
 
   py::enum_<JointState::InitializationState>(js, "InitializationState")
       .value("Unknown", JointState::InitializationState::kUnknown)
-      .value("kInitialized", JointState::InitializationState::kInitialized)
-      .value("kUninitialized", JointState::InitializationState::kUninitialized);
+      .value("Initialized", JointState::InitializationState::kInitialized)
+      .value("Uninitialized", JointState::InitializationState::kUninitialized);
 
   js.def(py::init<>())  //
       .def_property_readonly(

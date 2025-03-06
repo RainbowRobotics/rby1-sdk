@@ -317,6 +317,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("set_battery_level", &Robot<T>::SetBatteryLevel)
       .def("set_battery_config", &Robot<T>::SetBatteryConfig)
       .def("reset_battery_config", &Robot<T>::ResetBatteryConfig)
+      .def("wait_for_control_ready", &Robot<T>::WaitForControlReady, "timeout_ms"_a)
 
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)

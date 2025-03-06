@@ -13,7 +13,7 @@ class Feedback {
   bool valid() const { return valid_; }
 
  private:
-  bool valid_;
+  bool valid_{false};
 
   friend class RobotCommandFeedbackParserImpl;
 };
@@ -79,7 +79,14 @@ class JointVelocityCommandFeedback : public CommandFeedback {
 
 class JointPositionCommandFeedback : public CommandFeedback {
  public:
+  double time_based_progress() const { return time_based_progress_; }
+
+  double position_based_progress() const { return position_based_progress_; }
+
  protected:
+  double time_based_progress_;
+  double position_based_progress_;
+
  private:
   friend class RobotCommandFeedbackParserImpl;
 };

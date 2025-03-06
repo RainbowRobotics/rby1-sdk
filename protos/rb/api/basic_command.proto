@@ -87,11 +87,15 @@ message JointPositionCommand {
 
     repeated double acceleration_limit = 5;
 
-    google.protobuf.DoubleValue cutoff_frequency = 10;
+    reserved 10; // ``cutoff_frequency`` is moved to Parameter
   }
 
   message Feedback {
     CommandHeader.Feedback command_header_feedback = 1;
+
+    double time_based_progress = 2; // [0, 1]
+
+    double position_based_progress = 3; // (-inf, 1]
   }
 }
 

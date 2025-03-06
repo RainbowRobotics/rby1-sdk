@@ -13,6 +13,8 @@ using namespace rb;
 using namespace py::literals;
 
 void pybind11_dynamics(py::module_& m);
+void pybind11_dynamixel_bus(py::module_& m);
+void pybind11_upc(py::module_& m);
 
 void pybind11_robot_state(py::module_& m);
 void pybind11_model(py::module_& m);
@@ -56,6 +58,11 @@ PYBIND11_MODULE(_bindings, m) {
 
   auto dyn_m = m.def_submodule("dynamics", "Dynamics module for rby1");
   pybind11_dynamics(dyn_m);
+
+  pybind11_dynamixel_bus(m);
+
+  auto upc_m = m.def_submodule("upc", "Modeul for UPC (User PC)");
+  pybind11_upc(upc_m);
 
   pybind11_robot_state(m);
   pybind11_control_manager_state(m);

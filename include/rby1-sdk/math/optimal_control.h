@@ -127,10 +127,9 @@ class OptimalControl {
           err.bottomRows(3).setZero();
         }
 
-        err_sum += (err * dt).squaredNorm();
-
         err.topRows(3) = err.topRows(3) * link_target.weight_orientation;
         err.bottomRows(3) = err.bottomRows(3) * link_target.weight_position;
+        err_sum += err.squaredNorm();
 
         qp_solver_.AddCostFunction(J, err);
       }
@@ -153,9 +152,9 @@ class OptimalControl {
 
       Eigen::Matrix<double, 3, 1> com_target = in.com_target.value().com;
       Eigen::Matrix<double, 3, 1> err = 2 * (com_target - com) / dt - J_com * state->GetQdot();
-      err_sum += (err * dt).squaredNorm();
 
       err = err * in.com_target.value().weight;
+      err_sum += err.squaredNorm();
 
       qp_solver_.AddCostFunction(J_com, err);
     }
@@ -174,9 +173,9 @@ class OptimalControl {
       }
       J(Eigen::all, rev_joint_idx_).setZero();
 
-      err_sum += (J * err * dt).squaredNorm();
-
       err = err.cwiseProduct(in.q_target.value().weight);
+      err_sum += err.squaredNorm();
+
       qp_solver_.AddCostFunction(J, err);
     }
 
@@ -228,7 +227,7 @@ class OptimalControl {
     }
 
     qp_solver_.SetConstraintsFunction(A_const, lb, ub);
-    qp_solver_.SetPrimalVariable(Eigen::Vector<double, DOF>::Zero(n_joints_));
+    qp_solver_.SetPrimalVariable(state->GetQdot());
 
     auto ret = qp_solver_.Solve();
 

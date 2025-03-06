@@ -13,8 +13,8 @@ ANGULAR_VELOCITY_LIMIT = np.pi * 1.5
 ACCELERATION_LIMIT = 1.0
 STOP_ORIENTATION_TRACKING_ERROR = 1e-5
 STOP_POSITION_TRACKING_ERROR = 1e-5
-WEIGHT = 0.0015
-STOP_COST = 2e-2
+WEIGHT = 1
+STOP_COST = 1e-2
 VELOCITY_TRACKING_GAIN = 0.1
 MIN_DELTA_COST = 2e-4
 PATIENCE = 10
@@ -996,7 +996,7 @@ def main(address, power_device, servo):
     robot.set_parameter("cartesian_command.cutoff_frequency", "5")
     robot.set_parameter("default.linear_acceleration_limit", "5")
     robot.set_parameter("manipulability_threshold", "1e4")
-    # robot.set_time_scale(1.0)
+    robot.set_time_scale(1.0)
 
     print("parameters setting is done")
 

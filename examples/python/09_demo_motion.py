@@ -14,9 +14,9 @@ ACCELERATION_LIMIT = 1.0
 STOP_ORIENTATION_TRACKING_ERROR = 1e-5
 STOP_POSITION_TRACKING_ERROR = 1e-5
 WEIGHT = 1
-STOP_COST = 1e-2
+STOP_COST = 1e-3
 VELOCITY_TRACKING_GAIN = 0.1
-MIN_DELTA_COST = 2e-4
+MIN_DELTA_COST = 1e-4
 PATIENCE = 10
 
 
@@ -193,6 +193,9 @@ def example_cartesian_command_1(robot):
 
 def example_cartesian_command_2(robot):
     print("Cartesian command example 2")
+    
+    q = robot.get_state().position
+    m = robot.model()
 
     # Initialize transformation matrices
     T_torso = np.eye(4)
@@ -257,6 +260,8 @@ def example_cartesian_command_2(robot):
                 ANGULAR_VELOCITY_LIMIT,
                 ACCELERATION_LIMIT,
             )
+            .add_joint_position_target("right_arm_1", -np.pi/3)
+            .add_joint_position_target("left_arm_1",  np.pi/3)
             .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
             .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
             .set_minimum_time(MINIMUM_TIME)
@@ -264,6 +269,9 @@ def example_cartesian_command_2(robot):
     )
 
     rv = robot.send_command(rc, 10).get()
+    
+    with np.printoptions(precision=3, suppress=True):
+        print(np.rad2deg(robot.get_state().position))
 
     if rv.finish_code != RobotCommandFeedback.FinishCode.Ok:
         print("Error: Failed to conduct demo motion.")
@@ -338,6 +346,8 @@ def example_cartesian_command_3(robot):
                 ANGULAR_VELOCITY_LIMIT,
                 ACCELERATION_LIMIT,
             )
+            .add_joint_position_target("right_arm_1", -np.pi/3)
+            .add_joint_position_target("left_arm_1",  np.pi/3)
             .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
             .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
             .set_minimum_time(MINIMUM_TIME)
@@ -493,6 +503,7 @@ def example_relative_command_1(robot):
             ANGULAR_VELOCITY_LIMIT,
             ACCELERATION_LIMIT,
         )
+        # .add_joint_position_target("right_arm_1", -np.pi/3)
     )
 
     # Define transformation difference
@@ -669,7 +680,7 @@ def example_optimal_control_2(robot):
         .add_cartesian_target("base", "ee_left", T_left, WEIGHT, WEIGHT)
         .add_joint_position_target("right_arm_2", 0.0, WEIGHT / 2)
         .add_joint_position_target("left_arm_2", -0.0, WEIGHT / 2)
-        .set_velocity_limit_scaling(0.5)
+        .set_velocity_limit_scaling(1)
         #    .set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN)
         .set_stop_cost(STOP_COST)
         .set_min_delta_cost(MIN_DELTA_COST)

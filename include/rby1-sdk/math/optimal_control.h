@@ -54,10 +54,10 @@ class OptimalControl {
   };
 
   explicit OptimalControl(std::shared_ptr<dyn::Robot<DOF>> robot, std::vector<unsigned int> joint_idx,
-                          const Eigen::VectorXd& velocity_limit = Eigen::Vector<double, 0>())
-      : robot_(std::move(robot)), joint_idx_(std::move(joint_idx)) {
+                          const Eigen::Vector<double, DOF>& velocity_limit)
+      : robot_(std::move(robot)), joint_idx_(std::move(joint_idx)), velocity_limit_(velocity_limit) {
     n_joints_ = robot_->GetDOF();
-    qp_solver_.Setup(n_joints_, n_joints_ * 2);
+    qp_solver_.Setup(n_joints_, n_joints_);
 
     std::vector<bool> check;
     check.resize(n_joints_, false);
@@ -69,8 +69,6 @@ class OptimalControl {
         rev_joint_idx_.push_back(i);
       }
     }
-
-    velocity_limit_ = velocity_limit;
   }
 
   template <int N>
@@ -86,7 +84,12 @@ class OptimalControl {
   }
 
   std::optional<Eigen::VectorXd> Solve(Input in, std::shared_ptr<dyn::State<DOF>> state, double dt,
-                                       double velocity_limit_scaling = 1.0, bool need_forward_kinematics = false) {
+                                       std::optional<Eigen::Vector<double, DOF>> velocity_limit = std::nullopt,
+                                       std::optional<Eigen::Vector<double, DOF>> acceleration_limit = std::nullopt,
+                                       bool need_forward_kinematics = false) {
+    Eigen::Vector<double, DOF> q = state->GetQ();
+    Eigen::Vector<double, DOF> qdot = state->GetQdot();
+
     using namespace math;
 
     if (dt <= 1.e-6) {
@@ -117,7 +120,7 @@ class OptimalControl {
         double cond = CalculateConditionVariable(A);
         max_cond = std::max(max_cond, cond);
 
-        Eigen::Matrix<double, 6, 1> err = 2 * SE3::Log(T_err) / dt - J * state->GetQdot();
+        Eigen::Matrix<double, 6, 1> err = 2 * SE3::Log(T_err) / dt - J * qdot;
 
         if (link_target.weight_orientation < 1e-6) {
           err.topRows(3).setZero();
@@ -151,7 +154,7 @@ class OptimalControl {
       max_cond = std::max(max_cond, cond);
 
       Eigen::Matrix<double, 3, 1> com_target = in.com_target.value().com;
-      Eigen::Matrix<double, 3, 1> err = 2 * (com_target - com) / dt - J_com * state->GetQdot();
+      Eigen::Matrix<double, 3, 1> err = 2 * (com_target - com) / dt - J_com * qdot;
 
       err = err * in.com_target.value().weight;
       err_sum += err.squaredNorm();
@@ -161,7 +164,7 @@ class OptimalControl {
 
     if (in.q_target.has_value()) {
       Eigen::Matrix<double, DOF, 1> err;
-      err = 2 * (in.q_target.value().q - state->GetQ()) / dt - state->GetQdot();
+      err = 2 * (in.q_target.value().q - q) / dt - qdot;
 
       Eigen::Matrix<double, DOF, DOF> J;
       J.resize(n_joints_, n_joints_);
@@ -179,55 +182,55 @@ class OptimalControl {
       qp_solver_.AddCostFunction(J, err);
     }
 
-    qp_solver_.AddCostFunction(Eigen::Matrix<double, DOF, DOF>::Identity(n_joints_, n_joints_) * 1e-5,
-                               Eigen::Vector<double, DOF>::Zero());
+    Eigen::Matrix<double, DOF, DOF> penalty_term_A;
+    Eigen::Vector<double, DOF> penalty_term_b;
+    penalty_term_A.resize(n_joints_, n_joints_);
+    penalty_term_b.resize(n_joints_);
+    penalty_term_A.setZero();
+    penalty_term_A.diagonal()(joint_idx_).fill(1e-2);
+    penalty_term_b.setZero();
+
+    qp_solver_.AddCostFunction(penalty_term_A, penalty_term_b);
     qp_solver_.SetCostFunction(qp_solver_.GetACost(), qp_solver_.GetBCost());
 
-    Eigen::Matrix<double, (DOF * 2 < 0 ? -1 : DOF * 2), DOF> A_const;
-    Eigen::Vector<double, (DOF * 2 < 0 ? -1 : DOF * 2)> lb, ub;
-    A_const.resize(n_joints_ * 2, n_joints_);
-    lb.resize(2 * n_joints_);
-    ub.resize(2 * n_joints_);
-    A_const.setZero();
-    lb.setZero();
-    ub.setZero();
-
-    if constexpr (DOF < 0) {
-      A_const.topRows(n_joints_) = Eigen::MatrixXd::Identity(n_joints_, n_joints_);
-      A_const.bottomRows(n_joints_) = Eigen::MatrixXd::Identity(n_joints_, n_joints_);
-    } else {
-      A_const.template topRows<DOF>() = Eigen::Matrix<double, DOF, DOF>::Identity();
-      A_const.template bottomRows<DOF>() = Eigen::Matrix<double, DOF, DOF>::Identity();
-    }
+    Eigen::Matrix<double, DOF, DOF> A_const;
+    A_const.resize(n_joints_, n_joints_);
+    A_const.setIdentity();
 
     Eigen::Vector<double, DOF> q_lb, q_ub, qdot_lb, qdot_ub;
+    qdot_lb.resize(n_joints_);
+    qdot_ub.resize(n_joints_);
     q_lb = robot_->GetLimitQLower(state);
     q_ub = robot_->GetLimitQUpper(state);
-    if (velocity_limit_.size() == n_joints_) {
-      qdot_lb = -velocity_limit_ * velocity_limit_scaling;
-      qdot_ub = velocity_limit_ * velocity_limit_scaling;
-    } else {
-      qdot_lb = robot_->GetLimitQdotLower(state) * velocity_limit_scaling;
-      qdot_ub = robot_->GetLimitQdotUpper(state) * velocity_limit_scaling;
+    if (!velocity_limit.has_value()) {
+      velocity_limit = velocity_limit_;
+    }
+    if (!acceleration_limit.has_value()) {
+      acceleration_limit = robot_->GetLimitQddotUpper(state);
+    }
+    qdot_lb = -velocity_limit.value();
+    qdot_ub = velocity_limit.value();
+    qdot_lb = qdot_lb.cwiseMax(qdot - acceleration_limit.value() * dt);
+    qdot_ub = qdot_ub.cwiseMin(qdot + acceleration_limit.value() * dt);
+    qdot_lb = qdot_lb.cwiseMax(2 * (q_lb - q) / dt - qdot);
+    qdot_ub = qdot_ub.cwiseMin(2 * (q_ub - q) / dt - qdot);
+
+    qdot_lb(rev_joint_idx_) = qdot(rev_joint_idx_);
+    qdot_ub(rev_joint_idx_) = qdot(rev_joint_idx_);
+
+    if ((qdot_lb.array() <= qdot_ub.array()).all())
+      ;
+    else {
+      return {};
     }
 
-    qdot_lb = qdot_lb.cwiseMax(state->GetQdot() + robot_->GetLimitQddotLower(state));
-    qdot_ub = qdot_lb.cwiseMax(state->GetQdot() + robot_->GetLimitQddotUpper(state));
-
-    if constexpr (DOF < 0) {
-      lb.topRows(n_joints_) = qdot_lb;
-      ub.topRows(n_joints_) = qdot_ub;
-      lb.bottomRows(n_joints_) = (q_lb - state->GetQ()) / dt;
-      ub.bottomRows(n_joints_) = (q_ub - state->GetQ()) / dt;
+    qp_solver_.SetConstraintsFunction(A_const, qdot_lb, qdot_ub);
+    //    qp_solver_.SetPrimalVariable(Eigen::Vector<double, DOF>::Zero(n_joints_));
+    if ((qdot_lb.array() <= qdot.array()).all() && (qdot.array() <= qdot_ub.array()).all()) {
+      qp_solver_.SetPrimalVariable(qdot);
     } else {
-      lb.template topRows<DOF>() = qdot_lb;
-      ub.template topRows<DOF>() = qdot_ub;
-      lb.template bottomRows<DOF>() = (q_lb - state->GetQ()) / dt;
-      ub.template bottomRows<DOF>() = (q_ub - state->GetQ()) / dt;
+      qp_solver_.SetPrimalVariable(qdot_lb);
     }
-
-    qp_solver_.SetConstraintsFunction(A_const, lb, ub);
-    qp_solver_.SetPrimalVariable(state->GetQdot());
 
     auto ret = qp_solver_.Solve();
 
@@ -254,11 +257,10 @@ class OptimalControl {
 
   std::shared_ptr<dyn::Robot<DOF>> robot_;
   int n_joints_;
+  Eigen::Vector<double, DOF> velocity_limit_;
 
   std::vector<unsigned int> joint_idx_;
   std::vector<unsigned int> rev_joint_idx_;
-
-  Eigen::VectorXd velocity_limit_;
 };
 
 }  // namespace rb

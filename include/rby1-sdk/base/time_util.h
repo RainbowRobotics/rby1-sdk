@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <ctime>
 #include <iostream>
 
@@ -29,7 +30,7 @@ inline long GetDurationInNs(struct timespec start, struct timespec end) {
 inline struct timespec GetDurationInTimespec(struct timespec start, struct timespec end) {
   int64_t duration_ns = GetDurationInNs(start, end);
 
-  struct timespec duration {};
+  struct timespec duration{};
 
   duration.tv_sec = duration_ns / kNanosecondsInSecond;
   duration.tv_nsec = duration_ns % kNanosecondsInSecond;
@@ -45,7 +46,7 @@ inline struct timespec GetDurationInTimespec(struct timespec start, struct times
  *       In case of failure, an empty timespec structure is returned.
  */
 inline struct timespec GetCurrentTime() {
-  struct timespec current_time {};
+  struct timespec current_time{};
 
 #ifdef __linux__
   if (clock_gettime(CLOCK_MONOTONIC, &current_time) != 0) {

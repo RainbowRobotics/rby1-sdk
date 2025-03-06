@@ -12,4 +12,6 @@ service ControlManagerService {
   rpc GetTimeScale(GetTimeScaleRequest) returns (GetTimeScaleResponse) {}
 
   rpc SetTimeScale(SetTimeScaleRequest) returns (SetTimeScaleResponse) {}
+
+  rpc WaitForControlReady(WaitForControlReadyRequest) returns (WaitForControlReadyResponse) {}
 }

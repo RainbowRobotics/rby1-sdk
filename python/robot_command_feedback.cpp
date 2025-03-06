@@ -29,7 +29,10 @@ void pybind11_robot_command_feedback(py::module_& m) {
 
   py::class_<JointVelocityCommandFeedback, CommandFeedback>(m, "JointVelocityCommandFeedback").def(py::init<>());
 
-  py::class_<JointPositionCommandFeedback, CommandFeedback>(m, "JointPositionCommandFeedback").def(py::init<>());
+  py::class_<JointPositionCommandFeedback, CommandFeedback>(m, "JointPositionCommandFeedback")
+      .def(py::init<>())
+      .def_property_readonly("time_based_progress", &JointPositionCommandFeedback::time_based_progress)
+      .def_property_readonly("position_based_progress", &JointPositionCommandFeedback::position_based_progress);
 
   py::class_<CartesianCommandFeedback, CommandFeedback> ccf(m, "CartesianCommandFeedback");
 

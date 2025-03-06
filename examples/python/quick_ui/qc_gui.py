@@ -20,12 +20,16 @@ from rby1_sdk import *
 
 IS_READY = None
 CUR_POSITION =None
+CONTROL_MANAGER_STATE = None
+IS_POWER = None
 
-def STATE_CALL_BACK(state: RobotState_A):
-    global IS_READY, CUR_POSITION
-    IS_READY = state.is_ready
-    CUR_POSITION = state.position
-    # print(CUR_POSITION)
+def STATE_CALL_BACK(robot_state, control_manager_state: rby1_sdk.ControlManagerState):
+    global IS_READY, CUR_POSITION, CONTROL_MANAGER_STATE, IS_POWER
+    IS_READY = robot_state.is_ready
+    CUR_POSITION = robot_state.position
+    CONTROL_MANAGER_STATE = control_manager_state.state
+    IS_POWER = True if robot_state.power_states[-1].voltage > 40 else False  
+
     
 class SplashScreen(QSplashScreen):
     def __init__(self):
@@ -54,7 +58,7 @@ ACTIVATE_STATE = "background-color: #A6D256;"
 FAULT_STATE = "background-color: #ED325A;"
 
 class ButtonGrid(QWidget):
-    def __init__(self, address, device, servo):
+    def __init__(self, address, device, model, servo):
         super().__init__()
         # 각 프로세스를 관리할 딕셔너리
         self.processes = {}
@@ -62,8 +66,9 @@ class ButtonGrid(QWidget):
 
         self.address = address
         self.device = device
+        self.model = model
         self.servo = servo
-        self.robot = create_robot_a(self.address)
+        self.robot = create_robot(self.address, self.model)
         self.splash_screen = SplashScreen()
 
         # 전체 레이아웃
@@ -228,19 +233,51 @@ class ButtonGrid(QWidget):
         self.create_button(self.layout, "브레이크 풀기(l_arm_6)", 2, 11, lambda:asyncio.ensure_future(self.l_arm_6_break_release_for_cal()), 1)
         self.create_button(self.layout, "홈 리셋(l_arm_6)", 2, 12, lambda:asyncio.ensure_future(self.l_arm_6_home_offset_reset_for_cal()), 1, background_color="#ED325A")
         
-        for idx in range(24):
-            lamp = QLineEdit("")
-            lamp.setFixedSize(65,20)
-            lamp.setReadOnly(True)  # 읽기 전용
-            lamp.setFocusPolicy(Qt.NoFocus)  # 선택 안되게 설정
-            lamp.setStyleSheet(IDLE_STATE)
-            
-            if idx >=2 and idx<=7:
-                self.layout.addWidget(lamp, 7+idx-2, 5)
-            elif idx >=8 and idx<=14:
-                self.layout.addWidget(lamp, 16+idx-8, 5)
-            elif idx >=15 and idx<=21:
-                self.layout.addWidget(lamp, 16+idx-15, 7)
+        if self.model == "a":
+            for idx in range(24):
+                lamp = QLineEdit("")
+                lamp.setFixedSize(65,20)
+                lamp.setReadOnly(True)  # 읽기 전용
+                lamp.setFocusPolicy(Qt.NoFocus)  # 선택 안되게 설정
+                lamp.setStyleSheet(IDLE_STATE)
+                
+                if idx >=2 and idx<=7:
+                    self.layout.addWidget(lamp, 7+idx-2, 5)
+                elif idx >=8 and idx<=14:
+                    self.layout.addWidget(lamp, 16+idx-8, 5)
+                elif idx >=15 and idx<=21:
+                    self.layout.addWidget(lamp, 16+idx-15, 7)
+                    
+        elif self.model == "t5":
+            for idx in range(23):
+                lamp = QLineEdit("")
+                lamp.setFixedSize(65,20)
+                lamp.setReadOnly(True)  # 읽기 전용
+                lamp.setFocusPolicy(Qt.NoFocus)  # 선택 안되게 설정
+                lamp.setStyleSheet(IDLE_STATE)
+                
+                if idx >=2 and idx<=6:
+                    self.layout.addWidget(lamp, 7+idx-1, 5)
+                elif idx >=7 and idx<=13:
+                    self.layout.addWidget(lamp, 16+idx-7, 5)
+                elif idx >=14 and idx<=20:
+                    self.layout.addWidget(lamp, 16+idx-14, 7)
+                    
+        elif self.model == "m":
+            for idx in range(26):
+                lamp = QLineEdit("")
+                lamp.setFixedSize(65,20)
+                lamp.setReadOnly(True)  # 읽기 전용
+                lamp.setFocusPolicy(Qt.NoFocus)  # 선택 안되게 설정
+                lamp.setStyleSheet(IDLE_STATE)
+                
+                if idx >=4 and idx<=9:
+                    self.layout.addWidget(lamp, 7+idx-4, 5)
+                elif idx >=10 and idx<=16:
+                    self.layout.addWidget(lamp, 16+idx-10, 5)
+                elif idx >=17 and idx<=23:
+                    self.layout.addWidget(lamp, 16+idx-17, 7)
+                    
         self.create_button(self.layout, "데모모션(비인증)", 3, 9, lambda : self.demo_motion(False), 2)
         self.create_button(self.layout, "데모모션(인증)", 3, 11, lambda: self.demo_motion(True), 2)
         
@@ -412,31 +449,33 @@ class ButtonGrid(QWidget):
                 rby1_sdk.JogCommandBuilder().set_joint_name(joint_name).set_command(rby1_sdk.JogCommandBuilder().RelativePosition(jog_value))
             )
         )
-        await asyncio.to_thread(Robot_A_CommandHandler.get, handler)
+        if self.model =="a":
+            await asyncio.to_thread(Robot_A_CommandHandler.get, handler)
+        elif self.model =="t5":
+            await asyncio.to_thread(Robot_T5_CommandHandler.get, handler)
+        elif self.model =="m":
+            await asyncio.to_thread(Robot_M_CommandHandler.get, handler)
         
 
     async def update_display(self):
-        cm_state: ControlManagerState = await asyncio.to_thread(Robot_A.get_control_manager_state,
-                                                                self.robot)
-        is_power: bool = await asyncio.to_thread(Robot_A.is_power_on, self.robot, self.device)
-        # print(robot_state.is_ready)
-        if cm_state.state == ControlManagerState.State.Enabled:
+        global IS_READY, CUR_POSITION, CONTROL_MANAGER_STATE, IS_POWER
+        if CONTROL_MANAGER_STATE == ControlManagerState.State.Enabled:
             self.control_state.setText("Enabled")
             self.control_state.setStyleSheet(ACTIVATE_STATE)
-        elif cm_state.state == ControlManagerState.State.MajorFault or cm_state.state == ControlManagerState.State.MinorFault:
+        elif CONTROL_MANAGER_STATE == ControlManagerState.State.MajorFault or CONTROL_MANAGER_STATE == ControlManagerState.State.MinorFault:
             self.control_state.setText("Fault")
             self.control_state.setStyleSheet(FAULT_STATE)
         else:
             self.control_state.setText("idle")
             self.control_state.setStyleSheet(IDLE_STATE)
             
-        if is_power:
+        if IS_POWER:
             self.connect_state.setText("Power On")
             self.connect_state.setStyleSheet(ACTIVATE_STATE)
         else:
             self.connect_state.setText("Power Off")
             self.connect_state.setStyleSheet(FAULT_STATE)
-        global IS_READY, CUR_POSITION
+        
         for idx in range(IS_READY.__len__()):
             lamp = QLineEdit("")
             lamp.setFixedSize(65,20)
@@ -451,16 +490,35 @@ class ButtonGrid(QWidget):
             # if CUR_POSITION and CUR_POSITION.__len__()>0:
             #     print(CUR_POSITION[idx])
                 # lamp.setText(CUR_POSITION[idx])
-            if idx >=2 and idx<=7:
-                self.layout.addWidget(lamp, 7+idx-2, 5)
-            elif idx >=8 and idx<=14:
-                self.layout.addWidget(lamp, 16+idx-8, 5)
-            elif idx >=15 and idx<=21:
-                self.layout.addWidget(lamp, 16+idx-15, 7)
+            if self.model == "a":
+                if idx >=2 and idx<=7:
+                    self.layout.addWidget(lamp, 7+idx-2, 5)
+                elif idx >=8 and idx<=14:
+                    self.layout.addWidget(lamp, 16+idx-8, 5)
+                elif idx >=15 and idx<=21:
+                    self.layout.addWidget(lamp, 16+idx-15, 7)
+                    
+            elif self.model == "t5":                
+                if idx >=2 and idx<=6:
+                    self.layout.addWidget(lamp, 7+idx-1, 5)
+                elif idx >=7 and idx<=13:
+                    self.layout.addWidget(lamp, 16+idx-7, 5)
+                elif idx >=14 and idx<=20:
+                    self.layout.addWidget(lamp, 16+idx-14, 7)
+                    
+            elif self.model == "m":
+                if idx >=4 and idx<=9:
+                    self.layout.addWidget(lamp, 7+idx-4, 5)
+                elif idx >=10 and idx<=16:
+                    self.layout.addWidget(lamp, 16+idx-10, 5)
+                elif idx >=17 and idx<=23:
+                    self.layout.addWidget(lamp, 16+idx-17, 7)
                 
     @Slot()
     async def connect(self):
+        print("connect")
         ret = self.robot.connect()
+        print(ret)
         self.channel = grpc.aio.insecure_channel(self.address)
         await self.channel.channel_ready()
 
@@ -610,9 +668,9 @@ class ButtonGrid(QWidget):
     def demo_motion(self, is_certification:bool):
         print("데모 모션 ", is_certification)
         if is_certification:
-            self.start_process("demo_motion", ["python", "examples/python/09_demo_motion.py", "--address", self.address, "--servo", "^(?!.*_wheel$).+$"])
+            self.start_process("demo_motion", ["python", "examples/python/09_demo_motion.py", "--address", self.address, "--model", self.model, "--servo", "torso_.*|left_arm_.*|right_arm_.*"])
         else:
-            self.start_process("demo_motion", ["python", "examples/python/09_demo_motion.py", "--address", self.address])
+            self.start_process("demo_motion", ["python", "examples/python/09_demo_motion.py", "--address", self.address, "--model", self.model,])
             
     @Slot()
     def start_teleoperation(self, is_samsung:bool):
@@ -666,8 +724,16 @@ class ButtonGrid(QWidget):
     async def go_to_zero_pose(self):
         QTimer.singleShot(0, self.show_splash)
         self.set_buttons_enabled(False)
-        handler = self.robot.send_command(self.make_joint_control_command([0.] * 20, 4))
-        ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler)
+        
+        if self.model =="a": 
+            handler = self.robot.send_command(self.make_joint_control_command([0.] * 20, 4))
+            ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler)
+        elif self.model =="t5": 
+            handler = self.robot.send_command(self.make_joint_control_command([0.] * 19, 4))
+            ret = await asyncio.to_thread(Robot_T5_CommandHandler.get, handler)
+        elif self.model == "m":
+            handler = self.robot.send_command(self.make_joint_control_command([0.] * 20, 4))
+            ret = await asyncio.to_thread(Robot_M_CommandHandler.get, handler)
         if ret.finish_code == RobotCommandFeedback.FinishCode.Canceled:
             QMessageBox.critical(self, "Error", "Canceled(이전 명령 중복?)")
         elif ret.finish_code == RobotCommandFeedback.FinishCode.InitializedFailed:
@@ -682,9 +748,22 @@ class ButtonGrid(QWidget):
         QTimer.singleShot(0, self.show_splash)
         self.set_buttons_enabled(False)
         
-        target_joint = np.array([0, 80, -140, 60, 0, 0] + [0, 0, 0, -150, 0, 105, 0] + [0, 0, 0, -150, 0, 105, 0])
-        handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
-        ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler)      
+
+        if self.model == "a":
+            target_joint = np.array([0, 80, -140, 60, 0, 0] + [0, 0, 0, -150, 0, 105, 0] + [0, 0, 0, -150, 0, 105, 0])
+            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
+            ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler) 
+            
+        if self.model == "t5":
+            target_joint = np.array([80, -140, 60, 0, 0] + [0, 0, 0, -150, 0, 105, 0] + [0, 0, 0, -150, 0, 105, 0])
+            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
+            ret = await asyncio.to_thread(Robot_T5_CommandHandler.get, handler)    
+                     
+        elif self.model == "m":
+            target_joint = np.array([0, 80, -140, 60, 0, 0] + [0, 0, 0, -150, 0, 105, 0] + [0, 0, 0, -150, 0, 105, 0])
+            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
+            ret = await asyncio.to_thread(Robot_M_CommandHandler.get, handler) 
+            
         if ret.finish_code == RobotCommandFeedback.FinishCode.Canceled:
             QMessageBox.critical(self, "Error", "Canceled(이전 명령 중복?)")
         elif ret.finish_code == RobotCommandFeedback.FinishCode.InitializedFailed:
@@ -711,9 +790,19 @@ class ButtonGrid(QWidget):
         # 버튼 비활성화
         self.set_buttons_enabled(False)
         
-        target_joint = np.array([0, 35, -70, 35, 0, 0] + [0, -90, 0, -100, 0, 90, 0] + [0, 90, 0, -100, 0, 90, 0])
-        handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
-        ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler)      
+        
+        if self.model == "a":
+            target_joint = np.array([0, 35, -70, 35, 0, 0] + [0, -90, 0, -100, 0, 90, 0] + [0, 90, 0, -100, 0, 90, 0])
+            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
+            ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler) 
+        elif self.model == "t5":
+            target_joint = np.array([35, -70, 35, 0, 0] + [0, -90, 0, -100, 0, 90, 0] + [0, 90, 0, -100, 0, 90, 0])
+            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
+            ret = await asyncio.to_thread(Robot_T5_CommandHandler.get, handler) 
+        elif self.model == "m":
+            target_joint = np.array([0, 35, -70, 35, 0, 0] + [0, -90, 0, -100, 0, 90, 0] + [0, 90, 0, -100, 0, 90, 0])
+            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
+            ret = await asyncio.to_thread(Robot_M_CommandHandler.get, handler) 
         
         if ret.finish_code == RobotCommandFeedback.FinishCode.Canceled:
             QMessageBox.critical(self, "Error", "Canceled(이전 명령 중복?)")
@@ -736,9 +825,21 @@ class ButtonGrid(QWidget):
 
         # 메인 스레드에서 스플래쉬 스크린을 표시
         QTimer.singleShot(0, show_splash)
-        target_joint = np.array([0, 35, -70, 35, 0, 0] + [-30, -10, 0, -100, 0, 0, 0] + [-30, 10, 0, -100, 0, 0, 0])
-        handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
-        ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler)      
+        
+        
+        if self.model == "a":
+            target_joint = np.array([0, 35, -70, 35, 0, 0] + [-30, -10, 0, -100, 0, 0, 0] + [-30, 10, 0, -100, 0, 0, 0])
+            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
+            ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler)
+        elif self.model == "t5":
+            target_joint = np.array([35, -70, 35, 0, 0] + [-30, -10, 0, -100, 0, 0, 0] + [-30, 10, 0, -100, 0, 0, 0])
+            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
+            ret = await asyncio.to_thread(Robot_T5_CommandHandler.get, handler)  
+        elif self.model == "m":
+            target_joint = np.array([0, 35, -70, 35, 0, 0] + [-30, -10, 0, -100, 0, 0, 0] + [-30, 10, 0, -100, 0, 0, 0])
+            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
+            ret = await asyncio.to_thread(Robot_M_CommandHandler.get, handler)  
+        
         if ret.finish_code == RobotCommandFeedback.FinishCode.Canceled:
             QMessageBox.critical(self, "Error", "Canceled(이전 명령 중복?)")
         elif ret.finish_code == RobotCommandFeedback.FinishCode.InitializedFailed:
@@ -750,6 +851,7 @@ class ButtonGrid(QWidget):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="quick_ui_cal")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
+    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")
     args = parser.parse_args()
@@ -759,7 +861,7 @@ if __name__ == "__main__":
     font = QFont("Noto Sans CJK KR", 10) 
     app.setFont(font)
     # QtAsyncio.run(app.exec, ButtonGrid(address=args.address, device=args.device).show())
-    window = ButtonGrid(address=args.address, device=args.device, servo = args.servo)
+    window = ButtonGrid(address=args.address, device=args.device, model = args.model, servo = args.servo)
     window.show()
     
     

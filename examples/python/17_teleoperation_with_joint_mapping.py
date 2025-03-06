@@ -650,8 +650,8 @@ def control_loop_for_gripper(port_handler, packet_handler, active_ids):
                     send_goal_position(port_handler, packet_handler, dxl_id, int(goal_position * 4096 / 3.141592 / 2))
         time.sleep(0.01)   
 
-def main(address, power_device, servo):
-    robot = rby1_sdk.create_robot_a(address)
+def main(address, power_device, model, servo):
+    robot = rby1_sdk.create_robot(address, model)
     if not robot.connect():
         print("Error: Unable to establish connection to the robot at")
         sys.exit(1)
@@ -779,7 +779,10 @@ def main(address, power_device, servo):
     gripper_handler = threading.Thread(target = control_loop_for_gripper, args=(port_handler_gripper, packet_handler_gripper, active_ids_gripper))
     gripper_handler.start()
     
-    q_joint_torso = np.deg2rad(np.array([0, 30, -60, 30, 0, 0]))
+    if model =="t5":
+        q_joint_torso = np.deg2rad(np.array([30, -60, 30, 0, 0]))
+    else:
+        q_joint_torso = np.deg2rad(np.array([0, 30, -60, 30, 0, 0]))
     rc = RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder().set_body_command(
             BodyComponentBasedCommandBuilder()
@@ -799,10 +802,19 @@ def main(address, power_device, servo):
         q_joint_ref = Q_JOINT_MASTER_ARM
     
     dyn = robot.get_dynamics()
-    dyn_state = dyn.make_state(["base"], Model_A().robot_joint_names)
     
-    q_upper_limit = dyn.get_limit_q_upper(dyn_state)[8:8 + 14]
-    q_lower_limit = dyn.get_limit_q_lower(dyn_state)[8:8 + 14]
+    if model =="a":
+        dyn_state = dyn.make_state(["base"], Model_A().robot_joint_names)
+        q_upper_limit = dyn.get_limit_q_upper(dyn_state)[8:8 + 14]
+        q_lower_limit = dyn.get_limit_q_lower(dyn_state)[8:8 + 14]
+    elif model =="t5":
+        dyn_state = dyn.make_state(["base"], Model_T5().robot_joint_names)
+        q_upper_limit = dyn.get_limit_q_upper(dyn_state)[7:7 + 14]
+        q_lower_limit = dyn.get_limit_q_lower(dyn_state)[7:7 + 14]
+    elif model =="m":
+        dyn_state = dyn.make_state(["base"], Model_M().robot_joint_names)
+        q_upper_limit = dyn.get_limit_q_upper(dyn_state)[10:10 + 14]
+        q_lower_limit = dyn.get_limit_q_lower(dyn_state)[10:10 + 14]
     
     stream = robot.create_command_stream()
     
@@ -814,15 +826,31 @@ def main(address, power_device, servo):
     
     print("Start to send command to robot")
     
-    q_joint_ref_20 = np.zeros(20, dtype=np.float64)
-    q_joint_ref_20[0:6] = np.deg2rad(np.array([0, 30, -60, 30, 0, 0]))
+    if model =="a":
+        q_joint_ref_body = np.zeros(20, dtype=np.float64)
+        q_joint_ref_body[0:6] = np.deg2rad(np.array([0, 30, -60, 30, 0, 0]))
+    elif model =="t5":
+        q_joint_ref_body = np.zeros(19, dtype=np.float64)
+        q_joint_ref_body[0:5] = np.deg2rad(np.array([30, -60, 30, 0, 0]))
+    elif model=="m":
+        q_joint_ref_body = np.zeros(20, dtype=np.float64)
+        q_joint_ref_body[0:6] = np.deg2rad(np.array([0, 30, -60, 30, 0, 0]))
     
     while True:
         with MTX_Q_JOINT_MASTER_ARM_INFO:
             with MTX_HAND_CONTROLLER_INFO:
-                q_joint_ref_20[6:6+14] = q_joint_ref_20[6:6+14] * (1 - lpf_update_ratio) + Q_JOINT_MASTER_ARM * lpf_update_ratio
-                q_joint_rby1 = np.zeros(24, dtype = np.float64)
-                q_joint_rby1[2:2+20] = q_joint_ref_20
+                if model == "a":
+                    q_joint_ref_body[6:6+14] = q_joint_ref_body[6:6+14] * (1 - lpf_update_ratio) + Q_JOINT_MASTER_ARM * lpf_update_ratio
+                    q_joint_rby1 = np.zeros(24, dtype = np.float64)
+                    q_joint_rby1[2:2+20] = q_joint_ref_body
+                elif model == "t5":
+                    q_joint_ref_body[5:5+14] = q_joint_ref_body[5:5+14] * (1 - lpf_update_ratio) + Q_JOINT_MASTER_ARM * lpf_update_ratio
+                    q_joint_rby1 = np.zeros(23, dtype = np.float64)
+                    q_joint_rby1[2:2+19] = q_joint_ref_body
+                elif model == "m":
+                    q_joint_ref_body[6:6+14] = q_joint_ref_body[6:6+14] * (1 - lpf_update_ratio) + Q_JOINT_MASTER_ARM * lpf_update_ratio
+                    q_joint_rby1 = np.zeros(26, dtype = np.float64)
+                    q_joint_rby1[4:4+20] = q_joint_ref_body
                 
                 dyn_state.set_q(q_joint_rby1)
                 dyn.compute_forward_kinematics(dyn_state)
@@ -850,7 +878,7 @@ def main(address, power_device, servo):
         acc_limit = np.full(7, 1200.0, dtype=np.float64)
         acc_limit = np.deg2rad(acc_limit) 
 
-        vel_limit = np.array([160, 160, 160, 160, 330, 330, 330], dtype=np.float64)
+        vel_limit = np.array([160, 160, 160, 160, 330, 330, 120], dtype=np.float64)
         vel_limit = np.deg2rad(vel_limit)
         
         right_arm_minimum_time *= 0.99
@@ -896,9 +924,11 @@ if __name__ == "__main__":
     parser.add_argument('--address', type=str, required=True, help="Robot address")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")
+    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
     args = parser.parse_args()
 
     main(address=args.address,
          power_device=args.device,
+         model  = args.model,
          servo = args.servo)
 

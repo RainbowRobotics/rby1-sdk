@@ -53,9 +53,8 @@ class OptimalControl {
     std::optional<JointAngleTarget> q_target;
   };
 
-  explicit OptimalControl(std::shared_ptr<dyn::Robot<DOF>> robot, std::vector<unsigned int> joint_idx,
-                          const Eigen::Vector<double, DOF>& velocity_limit)
-      : robot_(std::move(robot)), joint_idx_(std::move(joint_idx)), velocity_limit_(velocity_limit) {
+  explicit OptimalControl(std::shared_ptr<dyn::Robot<DOF>> robot, std::vector<unsigned int> joint_idx)
+      : robot_(std::move(robot)), joint_idx_(std::move(joint_idx)) {
     n_joints_ = robot_->GetDOF();
     qp_solver_.Setup(n_joints_, n_joints_);
 
@@ -84,8 +83,8 @@ class OptimalControl {
   }
 
   std::optional<Eigen::VectorXd> Solve(Input in, std::shared_ptr<dyn::State<DOF>> state, double dt,
-                                       std::optional<Eigen::Vector<double, DOF>> velocity_limit = std::nullopt,
-                                       std::optional<Eigen::Vector<double, DOF>> acceleration_limit = std::nullopt,
+                                       Eigen::Vector<double, DOF> velocity_limit,
+                                       Eigen::Vector<double, DOF> acceleration_limit,
                                        bool need_forward_kinematics = false) {
     Eigen::Vector<double, DOF> q = state->GetQ();
     Eigen::Vector<double, DOF> qdot = state->GetQdot();
@@ -202,16 +201,10 @@ class OptimalControl {
     qdot_ub.resize(n_joints_);
     q_lb = robot_->GetLimitQLower(state);
     q_ub = robot_->GetLimitQUpper(state);
-    if (!velocity_limit.has_value()) {
-      velocity_limit = velocity_limit_;
-    }
-    if (!acceleration_limit.has_value()) {
-      acceleration_limit = robot_->GetLimitQddotUpper(state);
-    }
-    qdot_lb = -velocity_limit.value();
-    qdot_ub = velocity_limit.value();
-    qdot_lb = qdot_lb.cwiseMax(qdot - acceleration_limit.value() * dt);
-    qdot_ub = qdot_ub.cwiseMin(qdot + acceleration_limit.value() * dt);
+    qdot_lb = -velocity_limit;
+    qdot_ub = velocity_limit;
+    qdot_lb = qdot_lb.cwiseMax(qdot - acceleration_limit * dt);
+    qdot_ub = qdot_ub.cwiseMin(qdot + acceleration_limit * dt);
     qdot_lb = qdot_lb.cwiseMax(2 * (q_lb - q) / dt - qdot);
     qdot_ub = qdot_ub.cwiseMin(2 * (q_ub - q) / dt - qdot);
 
@@ -257,7 +250,6 @@ class OptimalControl {
 
   std::shared_ptr<dyn::Robot<DOF>> robot_;
   int n_joints_;
-  Eigen::Vector<double, DOF> velocity_limit_;
 
   std::vector<unsigned int> joint_idx_;
   std::vector<unsigned int> rev_joint_idx_;

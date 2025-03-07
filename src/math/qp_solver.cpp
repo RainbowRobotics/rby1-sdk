@@ -6,12 +6,13 @@ namespace rb::math {
 
 class QPSolverImpl {
  public:
-  void SetupImpl(int n_var, int n_const) {
+  void SetupImpl(int n_var, int n_const, double time_limit = 2e-3) {
     n_var_ = n_var;
     n_const_ = n_const;
 
     solver_.settings()->setWarmStart(true);
     solver_.settings()->setVerbosity(false);
+    solver_.settings()->setTimeLimit(time_limit);
 
     solver_.data()->setNumberOfVariables(n_var);
     solver_.data()->setNumberOfConstraints(n_const);
@@ -214,8 +215,8 @@ QPSolver::QPSolver() {
 
 QPSolver::~QPSolver() = default;
 
-void QPSolver::Setup(int n_var, int n_const) {
-  impl_->SetupImpl(n_var, n_const);
+void QPSolver::Setup(int n_var, int n_const, double time_limit) {
+  impl_->SetupImpl(n_var, n_const, time_limit);
 }
 
 void QPSolver::InitFunction() {

@@ -23,7 +23,7 @@ class OptimalControl {
 
   struct COMTarget {
     int ref_link_index{};
-    Eigen::Vector3d com;
+    Eigen::Vector3d com{Eigen::Vector3d::Zero()};
     double weight{0.};
   };
 
@@ -70,22 +70,12 @@ class OptimalControl {
     }
   }
 
-  template <int N>
-  double CalculateConditionVariable(const Eigen::Matrix<double, N, N>& A) {
-    Eigen::JacobiSVD<Eigen::Matrix<double, N, N>> svd(A);
-    const auto& singular_values = svd.singularValues();
-    double max_sv = singular_values(0);
-    double min_sv = singular_values(singular_values.size() - 1);
-    if (std::abs(min_sv) <= 1e-6) {
-      return std::numeric_limits<double>::infinity();
-    }
-    return max_sv / min_sv;
-  }
-
   std::optional<Eigen::VectorXd> Solve(Input in, std::shared_ptr<dyn::State<DOF>> state, double dt,
                                        Eigen::Vector<double, DOF> velocity_limit,
                                        Eigen::Vector<double, DOF> acceleration_limit,
                                        bool need_forward_kinematics = false) {
+    double err_sum = 0;
+    double max_cond = 1.0;
     Eigen::Vector<double, DOF> q = state->GetQ();
     Eigen::Vector<double, DOF> qdot = state->GetQdot();
 
@@ -101,30 +91,27 @@ class OptimalControl {
 
     qp_solver_.InitFunction();
 
-    double max_cond = 1.0;
-
-    double err_sum = 0;
-
     if (in.link_targets.has_value()) {
       for (const auto& link_target : in.link_targets.value()) {
-        Eigen::Matrix<double, 4, 4> T_cur =
+        Eigen::Matrix4d T_cur =
             robot_->ComputeTransformation(state, link_target.ref_link_index, link_target.link_index);
-        Eigen::Matrix<double, 4, 4> T_target = link_target.T;
-        Eigen::Matrix<double, 4, 4> T_err = T_cur.inverse() * T_target;
+        Eigen::Matrix4d T_target = link_target.T;
+        Eigen::Matrix4d T_err = T_cur.inverse() * T_target;
         Eigen::Matrix<double, 6, DOF> J =
             robot_->ComputeBodyJacobian(state, link_target.ref_link_index, link_target.link_index);
         J(Eigen::all, rev_joint_idx_).setZero();
 
-        Eigen::Matrix<double, 6, 6> A = J * J.transpose();
-        double cond = CalculateConditionVariable(A);
-        max_cond = std::max(max_cond, cond);
+        {
+          Eigen::Matrix<double, 6, 6> A = J * J.transpose();
+          double cond = CalculateConditionVariable(A);
+          max_cond = std::max(max_cond, cond);
+        }
 
         Eigen::Matrix<double, 6, 1> err = 2 * SE3::Log(T_err) / dt - J * qdot;
 
         if (link_target.weight_orientation < 1e-6) {
           err.topRows(3).setZero();
         }
-
         if (link_target.weight_position < 1e-6) {
           err.bottomRows(3).setZero();
         }
@@ -138,7 +125,7 @@ class OptimalControl {
     }
 
     if (in.com_target.has_value()) {
-      Eigen::Matrix<double, 3, 1> com;
+      Eigen::Vector3d com;
       Eigen::Matrix<double, 3, DOF> J_com;
       J_com.resize(3, n_joints_);
       com.setZero();
@@ -148,12 +135,14 @@ class OptimalControl {
       J_com = robot_->ComputeCenterOfMassJacobian(state, in.com_target.value().ref_link_index);
       J_com(Eigen::all, rev_joint_idx_).setZero();
 
-      Eigen::Matrix3d A = J_com * J_com.transpose();
-      double cond = CalculateConditionVariable(A);
-      max_cond = std::max(max_cond, cond);
+      {
+        Eigen::Matrix3d A = J_com * J_com.transpose();
+        double cond = CalculateConditionVariable(A);
+        max_cond = std::max(max_cond, cond);
+      }
 
-      Eigen::Matrix<double, 3, 1> com_target = in.com_target.value().com;
-      Eigen::Matrix<double, 3, 1> err = 2 * (com_target - com) / dt - J_com * qdot;
+      Eigen::Vector3d com_target = in.com_target.value().com;
+      Eigen::Vector3d err = 2 * (com_target - com) / dt - J_com * qdot;
 
       err = err * in.com_target.value().weight;
       err_sum += err.squaredNorm();
@@ -181,15 +170,11 @@ class OptimalControl {
       qp_solver_.AddCostFunction(J, err);
     }
 
-    Eigen::Matrix<double, DOF, DOF> penalty_term_A;
-    Eigen::Vector<double, DOF> penalty_term_b;
-    penalty_term_A.resize(n_joints_, n_joints_);
-    penalty_term_b.resize(n_joints_);
-    penalty_term_A.setZero();
-    penalty_term_A.diagonal()(joint_idx_).fill(1e-2);
-    penalty_term_b.setZero();
+    Eigen::MatrixXd J = qp_solver_.GetACost();
+    Eigen::Matrix<double, DOF, -1> J_pinv = J.completeOrthogonalDecomposition().pseudoInverse();
+    Eigen::Matrix<double, DOF, DOF> P = Eigen::Matrix<double, DOF, DOF>::Identity(n_joints_, n_joints_) - J_pinv * J;
 
-    qp_solver_.AddCostFunction(penalty_term_A, penalty_term_b);
+    qp_solver_.AddCostFunction(P * 0.01, Eigen::Vector<double, DOF>::Zero(n_joints_));
     qp_solver_.SetCostFunction(qp_solver_.GetACost(), qp_solver_.GetBCost());
 
     Eigen::Matrix<double, DOF, DOF> A_const;
@@ -218,7 +203,6 @@ class OptimalControl {
     }
 
     qp_solver_.SetConstraintsFunction(A_const, qdot_lb, qdot_ub);
-    //    qp_solver_.SetPrimalVariable(Eigen::Vector<double, DOF>::Zero(n_joints_));
     if ((qdot_lb.array() <= qdot.array()).all() && (qdot.array() <= qdot_ub.array()).all()) {
       qp_solver_.SetPrimalVariable(qdot);
     } else {
@@ -239,9 +223,22 @@ class OptimalControl {
     return {};
   }
 
-  [[nodiscard]] double GetError() const { return err_; }
+  double GetError() const { return err_; }
 
-  [[nodiscard]] double GetManipulability() const { return manipulability_; }
+  double GetManipulability() const { return manipulability_; }
+
+ protected:
+  template <int N>
+  double CalculateConditionVariable(const Eigen::Matrix<double, N, N>& A) {
+    Eigen::JacobiSVD<Eigen::Matrix<double, N, N>> svd(A);
+    const auto& singular_values = svd.singularValues();
+    double max_sv = singular_values(0);
+    double min_sv = singular_values(singular_values.size() - 1);
+    if (std::abs(min_sv) <= 1e-6) {
+      return std::numeric_limits<double>::infinity();
+    }
+    return max_sv / min_sv;
+  }
 
  private:
   double err_{};

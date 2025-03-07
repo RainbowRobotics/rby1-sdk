@@ -52,6 +52,7 @@ FetchContent_Declare(osqp
         OVERRIDE_FIND_PACKAGE
         EXCLUDE_FROM_ALL
 )
+set(PROFILING ON)
 FetchContent_MakeAvailable(osqp)
 add_library(osqp::osqp INTERFACE IMPORTED)
 target_link_libraries(osqp::osqp INTERFACE osqpstatic)
@@ -63,7 +64,7 @@ FetchContent_Declare(OsqpEigen
         EXCLUDE_FROM_ALL
 )
 FetchContent_MakeAvailable(OsqpEigen)
-target_compile_definitions(OsqpEigen PUBLIC -DOSQP_EIGEN_OSQP_IS_V1)
+target_compile_definitions(OsqpEigen PUBLIC -DOSQP_EIGEN_OSQP_IS_V1 -DPROFILING)
 
 ############################################################
 # PROTO

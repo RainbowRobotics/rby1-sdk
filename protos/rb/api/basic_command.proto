@@ -238,6 +238,9 @@ message OptimalControlCommand {
     // default: 1.0, range: (0, 1]
     google.protobuf.DoubleValue velocity_limit_scaling = 5;
 
+    // acceleration scaling factor: qddot_limit * default.acceleration_limit_scaling * acceleration_limit_scaling
+    google.protobuf.DoubleValue acceleration_limit_scaling = 10;
+
     // velocity tracking gain
     // default: default.optimal_control_command.velocity_tracking_gain, range: (0, 1]
     reserved 6;

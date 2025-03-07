@@ -32,7 +32,8 @@ void pybind11_robot_command_builder(py::module_& m) {
            "target_position"_a, "weight"_a)
       .def("set_velocity_limit_scaling", &OptimalControlCommandBuilder::SetVelocityLimitScaling,
            "velocity_limit_scaling"_a)
-      .def("set_velocity_tracking_gain", &OptimalControlCommandBuilder::SetVelocityTrackingGain, "gain"_a)
+      .def("set_acceleration_limit_scaling", &OptimalControlCommandBuilder::SetAccelerationLimitScaling,
+           "acceleration_limit_scaling"_a)
       .def("set_stop_cost", &OptimalControlCommandBuilder::SetStopCost, "stop_cost"_a)
       .def("set_min_delta_cost", &OptimalControlCommandBuilder::SetMinDeltaCost, "min_delta_cost"_a)
       .def("set_patience", &OptimalControlCommandBuilder::SetPatience, "patience"_a);

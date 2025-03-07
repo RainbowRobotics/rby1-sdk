@@ -6,10 +6,12 @@ Run this example on UPC to which the master arm and hands are connected
 
 import rby1_sdk as rby
 import numpy as np
+import os
 import time
 import logging
 import argparse
 import signal
+import datetime
 from typing import *
 from dataclasses import dataclass
 

@@ -16,6 +16,8 @@ import datetime
 from typing import *
 from dataclasses import dataclass
 
+GRIPPER_DIRECTION = False
+
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -103,10 +105,11 @@ class Gripper:
                     q[dev_id] = enc
             self.min_q = np.minimum(self.min_q, q)
             self.max_q = np.maximum(self.max_q, q)
-            if prev_q == q:
+            if np.array_equal(prev_q, q):
                 counter += 1
             prev_q = q
-            if counter >= 5:
+            # A small value (e.g., 5) was too short and failed to detect limits properly, so a reasonably larger value was chosen.
+            if counter >= 15: 
                 direction += 1
                 counter = 0
             time.sleep(0.1)
@@ -135,7 +138,17 @@ class Gripper:
             time.sleep(0.1)
 
     def set_target(self, normalized_q):
-        self.target_q = normalized_q * (self.max_q - self.min_q) + self.min_q
+        # self.target_q = normalized_q * (self.max_q - self.min_q) + self.min_q
+        if not np.isfinite(self.min_q).all() or not np.isfinite(self.max_q).all():
+            logging.error("Cannot set target. min_q or max_q is not valid.")
+            return
+
+        if GRIPPER_DIRECTION:
+            self.target_q = normalized_q * (self.max_q - self.min_q) + self.min_q
+        else:
+            self.target_q = (1 - normalized_q) * (self.max_q - self.min_q) + self.min_q
+
+        
 
 
 def joint_position_command_builder(pose: Pose, minimum_time, control_hold_time=0):
@@ -224,14 +237,14 @@ def main(address, model, power, servo):
     robot.start_state_update(robot_state_callback, 1 / Settings.master_arm_loop_period)
 
     # ===== SETUP GRIPPER =====
-    # gripper = Gripper()
-    # if not gripper.initialize():
-    #     logging.error("Failed to initialize gripper")
-    #     robot.stop_state_update()
-    #     robot.power_off("12v")
-    #     exit(1)
-    # gripper.homing()
-    # gripper.start()
+    gripper = Gripper()
+    if not gripper.initialize():
+        logging.error("Failed to initialize gripper")
+        robot.stop_state_update()
+        robot.power_off("12v")
+        exit(1)
+    gripper.homing()
+    gripper.start()
 
     # ===== SETUP MASTER ARM =====
     rby.upc.initialize_device(rby.upc.MasterArmDeviceName)
@@ -279,7 +292,7 @@ def main(address, model, power, servo):
         print(f"--- {datetime.datetime.now().time()} ---")
         print(f"Button: {state.button_right.button}, {state.button_left.button}")
         print(f"Trigger: {state.button_right.trigger}, {state.button_left.trigger}")
-
+        gripper.set_target(np.array([state.button_right.trigger/1000, state.button_left.trigger/1000]))
         # ===== CALCULATE MASTER ARM COMMAND =====
         torque = (
             state.gravity_term
@@ -393,7 +406,7 @@ def main(address, model, power, servo):
 
         robot.disable_control_manager()
         robot.power_off("12v")
-        # gripper.stop()
+        gripper.stop()
         exit(1)
 
     signal.signal(signal.SIGINT, handler)
@@ -417,8 +430,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--servo",
         type=str,
-        default="^(?!head|.*_wheel).*$",
-        help="Servo name regex pattern (default: '^(?!head|.*_wheel).*$'",
+        default="torso_.*|right_arm_.*|left_arm_.*",
+        help="Servo name regex pattern (default: 'torso_.*|right_arm_.*|left_arm_.*'",
     )
     args = parser.parse_args()
 

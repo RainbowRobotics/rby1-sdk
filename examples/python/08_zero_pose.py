@@ -68,8 +68,10 @@ def main(address, model, power_device, servo):
             exit(1)
 
     control_manager_state = robot.get_control_manager_state()
-    if (control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or
-            control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
+    if (
+        control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault
+        or control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault
+    ):
 
         if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:
             print("Warning: Detected a Major Fault in the Control Manager.")
@@ -96,13 +98,27 @@ def main(address, model, power_device, servo):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="07_impedance_control")
-    parser.add_argument('--address', type=str, required=True, help="Robot address")
-    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
-    parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
-    parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")
+    parser.add_argument("--address", type=str, required=True, help="Robot address")
+    parser.add_argument(
+        "--model", type=str, default="a", help="Robot Model Name (default: 'a')"
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default=".*",
+        help="Power device name regex pattern (default: '.*')",
+    )
+    parser.add_argument(
+        "--servo",
+        type=str,
+        default=".*",
+        help="Servo name regex pattern (default: '.*')",
+    )
     args = parser.parse_args()
 
-    main(address=args.address,
-         model=args.model,
-         power_device=args.device,
-         servo=args.servo)
+    main(
+        address=args.address,
+        model=args.model,
+        power_device=args.device,
+        servo=args.servo,
+    )

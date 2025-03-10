@@ -109,7 +109,7 @@ class Gripper:
                 counter += 1
             prev_q = q
             # A small value (e.g., 5) was too short and failed to detect limits properly, so a reasonably larger value was chosen.
-            if counter >= 15: 
+            if counter >= 15:
                 direction += 1
                 counter = 0
             time.sleep(0.1)
@@ -147,8 +147,6 @@ class Gripper:
             self.target_q = normalized_q * (self.max_q - self.min_q) + self.min_q
         else:
             self.target_q = (1 - normalized_q) * (self.max_q - self.min_q) + self.min_q
-
-        
 
 
 def joint_position_command_builder(pose: Pose, minimum_time, control_hold_time=0):
@@ -227,9 +225,9 @@ def main(address, model, power, servo):
         if not robot.set_tool_flange_output_voltage(arm, 12):
             logging.error(f"Failed to set tool flange output voltage ({arm}) as 12v")
             exit(1)
-    robot.set_parameter('joint_position_command.cutoff_frequency', '3')
+    robot.set_parameter("joint_position_command.cutoff_frequency", "3")
     move_j(robot, READY_POSE[model.model_name], 5)
-    
+
     def robot_state_callback(state: rby.RobotState_A):
         nonlocal robot_q
         robot_q = state.position
@@ -292,7 +290,11 @@ def main(address, model, power, servo):
         print(f"--- {datetime.datetime.now().time()} ---")
         print(f"Button: {state.button_right.button}, {state.button_left.button}")
         print(f"Trigger: {state.button_right.trigger}, {state.button_left.trigger}")
-        gripper.set_target(np.array([state.button_right.trigger/1000, state.button_left.trigger/1000]))
+        gripper.set_target(
+            np.array(
+                [state.button_right.trigger / 1000, state.button_left.trigger / 1000]
+            )
+        )
         # ===== CALCULATE MASTER ARM COMMAND =====
         torque = (
             state.gravity_term
@@ -329,14 +331,17 @@ def main(address, model, power, servo):
             )
             ma_input.target_torque[7:14].fill(5)
             ma_input.target_position[7:14] = left_q
-            
+
         # Check whether target configure is in collision
         q = robot_q.copy()
         q[model.right_arm_idx] = right_q
         q[model.left_arm_idx] = left_q
         dyn_state.set_q(q)
         dyn_model.compute_forward_kinematics(dyn_state)
-        is_collision = dyn_model.detect_collisions_or_nearest_links(dyn_state, 1)[0].distance < 0.02
+        is_collision = (
+            dyn_model.detect_collisions_or_nearest_links(dyn_state, 1)[0].distance
+            < 0.02
+        )
 
         # ===== BUILD ROBOT COMMAND =====
         rc = rby.BodyComponentBasedCommandBuilder()

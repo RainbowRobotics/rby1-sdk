@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/color.proto";
+import "rb/api/header.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/wrappers.proto";
+
+// Request message for configuring the LED color and behavior
+message SetLEDColorRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  // Desired LED color
+  Color color = 2;
+
+  // Duration for which the LED will maintain the requested color.
+  // If blinking is enabled, this duration applies to the blinking cycle.
+  // Default: 1s
+  google.protobuf.Duration duration = 3;
+
+  // Specifies the time for transitioning from the current color
+  // to the new requested color. If omitted or zero, the transition is immediate.
+  // Default: 0s
+  google.protobuf.Duration transition_time = 4;
+
+  // Indicates whether to enable blinking
+  // Default: False
+  bool blinking = 5;
+
+  // Blinking frequency in Hz.
+  // This field is only relevant if blinking is set to true.
+  // Default: 1Hz
+  google.protobuf.DoubleValue blinking_freq = 6;
+}
+
+// Response message for the SetLEDColor RPC call
+message SetLEDColorResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+}

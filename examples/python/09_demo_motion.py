@@ -7,7 +7,7 @@ import re
 from rby1_sdk import *
 
 D2R = np.pi / 180  # Degree to Radian conversion factor
-MINIMUM_TIME = 1.7
+MINIMUM_TIME = 2.5
 LINEAR_VELOCITY_LIMIT = 1.5
 ANGULAR_VELOCITY_LIMIT = np.pi * 1.5
 ACCELERATION_LIMIT = 1.0
@@ -22,15 +22,15 @@ PATIENCE = 10
 def cb(rs):
     print(f"Timestamp: {rs.timestamp - rs.ft_sensor_right.time_since_last_update}")
     position = rs.position * 180 / 3.141592
-    print(f"waist [deg]: {position[2:2 + 6]}")
+    print(f"torso [deg]: {position[2:2 + 6]}")
     print(f"right arm [deg]: {position[8:8 + 7]}")
-    print(f"left arm [deg]: {position[15:15 + 8]}")
+    print(f"left arm [deg]: {position[15:15 + 7]}")
 
 def example_joint_position_command_1(robot):
     print("joint position command example 1")
 
     # Initialize joint positions
-    q_joint_waist = np.zeros(6)
+    q_joint_torso = np.zeros(6)
     q_joint_right_arm = np.zeros(7)
     q_joint_left_arm = np.zeros(7)
 
@@ -44,7 +44,7 @@ def example_joint_position_command_1(robot):
             .set_torso_command(
                 JointPositionCommandBuilder()
                 .set_minimum_time(MINIMUM_TIME)
-                .set_position(q_joint_waist)
+                .set_position(q_joint_torso)
             )
             .set_right_arm_command(
                 JointPositionCommandBuilder()
@@ -68,11 +68,17 @@ def example_joint_position_command_1(robot):
     return 0
 
 
-def example_joint_position_command_2(robot):
+def example_joint_position_command_2(robot, model_name):
     print("joint position command example 2")
-
+    
     # Define joint positions
-    q_joint_waist = np.array([0, 30, -60, 30, 0, 0]) * D2R
+    if model_name == "a":
+        q_joint_waist = np.array([0, 30, -60, 30, 0, 0]) * D2R
+    elif model_name == "t5":
+        q_joint_waist = np.array([30, -60, 30, 0, 0]) * D2R
+    elif model_name == "m":
+        q_joint_waist = np.array([0, 30, -60, 30, 0, 0]) * D2R
+        
     q_joint_right_arm = np.array([-45, -30, 0, -90, 0, 45, 0]) * D2R
     q_joint_left_arm = np.array([-45, 30, 0, -90, 0, 45, 0]) * D2R
 
@@ -98,7 +104,7 @@ def example_joint_position_command_2(robot):
 
     return 0
 
-def example_cartesian_command_1(robot):
+def example_cartesian_command_1(robot, model_name):
     print("Cartesian command example 1")
 
     # Initialize transformation matrices
@@ -121,13 +127,20 @@ def example_cartesian_command_1(robot):
                                [-np.sin(angle), 0, np.cos(angle)]])
     T_left[:3, 3] = [0.5, 0.3, 1.0]
 
+
+    if model_name == "a":
+        target_link = "link_torso_5"
+    elif model_name == "t5":
+        target_link = "link_torso_4"
+    elif model_name == "m":
+        target_link = "link_torso_5"
     # Build command
     rc = RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder().set_body_command(
             BodyComponentBasedCommandBuilder()
             .set_torso_command(
                 CartesianCommandBuilder()
-                .add_target("base", "link_torso_5", T_torso, LINEAR_VELOCITY_LIMIT,
+                .add_target("base", target_link, T_torso, LINEAR_VELOCITY_LIMIT,
                             ANGULAR_VELOCITY_LIMIT, ACCELERATION_LIMIT / 2)
                 .set_minimum_time(MINIMUM_TIME)
                 .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
@@ -161,7 +174,7 @@ def example_cartesian_command_1(robot):
     return 0
 
 
-def example_cartesian_command_2(robot):
+def example_cartesian_command_2(robot, model_name):
     print("Cartesian command example 2")
 
     # Initialize transformation matrices
@@ -187,11 +200,18 @@ def example_cartesian_command_2(robot):
                                [-np.sin(angle), 0, np.cos(angle)]])
     T_left[:3, 3] = [0.5, 0.4, 1.2]
 
+    if model_name=="a":
+        target_link = "link_torso_5"
+    elif model_name=="t5":
+        target_link = "link_torso_4"
+    elif model_name=="m":
+        target_link = "link_torso_5"
+        
     # Build command
     rc = RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder().set_body_command(
             CartesianCommandBuilder()
-            .add_target("base", "link_torso_5", T_torso, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT,
+            .add_target("base", target_link, T_torso, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT,
                         ACCELERATION_LIMIT)
             .add_target("base", "ee_right", T_right, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT, ACCELERATION_LIMIT)
             .add_target("base", "ee_left", T_left, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT, ACCELERATION_LIMIT)
@@ -210,7 +230,7 @@ def example_cartesian_command_2(robot):
     return 0
 
 
-def example_cartesian_command_3(robot):
+def example_cartesian_command_3(robot, model_name):
     print("Cartesian command example 3")
 
     # Initialize transformation matrices
@@ -235,12 +255,19 @@ def example_cartesian_command_3(robot):
                                [0, 1, 0],
                                [-np.sin(angle), 0, np.cos(angle)]])
     T_left[:3, 3] = [0.4, 0.4, 0]
+    
+    if model_name=="a":
+        target_link = "link_torso_5"
+    elif model_name=="t5":
+        target_link = "link_torso_4"
+    elif model_name=="m":
+        target_link = "link_torso_5"
 
     # Build command
     rc = RobotCommandBuilder().set_command(
         ComponentBasedCommandBuilder().set_body_command(
             CartesianCommandBuilder()
-            .add_target("base", "link_torso_5", T_torso, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT,
+            .add_target("base", target_link, T_torso, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT,
                         ACCELERATION_LIMIT)
             .add_target("link_torso_5", "ee_right", T_right, LINEAR_VELOCITY_LIMIT, ANGULAR_VELOCITY_LIMIT,
                         ACCELERATION_LIMIT)
@@ -261,7 +288,7 @@ def example_cartesian_command_3(robot):
     return 0
 
 
-def example_impedance_control_command_1(robot):
+def example_impedance_control_command_1(robot, model_name):
     print("Impedance control command example 1")
 
     # Initialize transformation matrices
@@ -287,20 +314,27 @@ def example_impedance_control_command_1(robot):
                                [-np.sin(angle), 0, np.cos(angle)]])
     T_left[:3, 3] = [0.45, 0.4, -0.1]
 
+    if model_name=="a":
+        target_link = "link_torso_5"
+    elif model_name=="t5":
+        target_link = "link_torso_4"
+    elif model_name=="m":
+        target_link = "link_torso_5"
+        
     # Build commands
     torso_command = ImpedanceControlCommandBuilder().set_command_header(
         CommandHeaderBuilder().set_control_hold_time(MINIMUM_TIME)
-    ).set_reference_link_name("base").set_link_name("link_torso_5").set_translation_weight(
+    ).set_reference_link_name("base").set_link_name(target_link).set_translation_weight(
         [1000, 1000, 1000]).set_rotation_weight([100, 100, 100]).set_transformation(T_torso)
 
     right_arm_command = ImpedanceControlCommandBuilder().set_command_header(
         CommandHeaderBuilder().set_control_hold_time(MINIMUM_TIME)
-    ).set_reference_link_name("link_torso_5").set_link_name("ee_right").set_translation_weight(
+    ).set_reference_link_name(target_link).set_link_name("ee_right").set_translation_weight(
         [1000, 1000, 1000]).set_rotation_weight([50, 50, 50]).set_transformation(T_right)
 
     left_arm_command = ImpedanceControlCommandBuilder().set_command_header(
         CommandHeaderBuilder().set_control_hold_time(MINIMUM_TIME)
-    ).set_reference_link_name("link_torso_5").set_link_name("ee_left").set_translation_weight(
+    ).set_reference_link_name(target_link).set_link_name("ee_left").set_translation_weight(
         [1000, 1000, 1000]).set_rotation_weight([50, 50, 50]).set_transformation(T_left)
 
     # Send command
@@ -322,7 +356,7 @@ def example_impedance_control_command_1(robot):
     return 0
 
 
-def example_relative_command_1(robot):
+def example_relative_command_1(robot, model_name):
     print("Relative command example 1")
 
     # Initialize transformation matrices
@@ -390,11 +424,17 @@ def example_relative_command_1(robot):
     return 0
 
 
-def example_joint_position_command_3(robot):
+def example_joint_position_command_3(robot, model_name):
     print("Joint position command example 3")
 
     # Define joint angles in degrees and convert to radians
-    q_joint_waist = np.array([0, 30, -60, 30, 0, 0]) * D2R
+    if model_name=="a":
+        q_joint_waist = np.array([0, 30, -60, 30, 0, 0]) * D2R
+    elif model_name =="t5":
+        q_joint_waist = np.array([30, -60, 30, 0, 0]) * D2R
+    elif model_name =="m":
+        q_joint_waist = np.array([0, 30, -60, 30, 0, 0]) * D2R
+        
     q_joint_right_arm = np.array([-45, -30, 0, -90, 0, 45, 0]) * D2R
     q_joint_left_arm = np.array([-45, 30, 0, -90, 0, 45, 0]) * D2R
 
@@ -418,7 +458,7 @@ def example_joint_position_command_3(robot):
     return 0
 
 
-def example_optimal_control_1(robot):
+def example_optimal_control_1(robot, model_name):
     print("Optimal control example 1")
 
     # Define transformation matrices
@@ -442,15 +482,22 @@ def example_optimal_control_1(robot):
                                [0, 1, 0],
                                [-np.sin(angle), 0, np.cos(angle)]])
     T_left[:3, 3] = [0.4, 0.2, 1.0]
+    
+    if model_name=="a":
+        target_link = "link_torso_5"
+    elif model_name=="t5":
+        target_link = "link_torso_4"
+    elif model_name=="m":
+        target_link = "link_torso_5"
 
     # Build optimal control command
-    optimal_control_command = OptimalControlCommandBuilder().add_cartesian_target("base", "link_torso_5", T_torso,
+    optimal_control_command = OptimalControlCommandBuilder().add_cartesian_target("base", target_link, T_torso,
                                                                                   WEIGHT, WEIGHT).add_cartesian_target(
         "base", "ee_right", T_right, WEIGHT, WEIGHT).add_cartesian_target("base", "ee_left", T_left, WEIGHT,
                                                                           WEIGHT).add_joint_position_target(
         "right_arm_2", np.pi / 2, WEIGHT).add_joint_position_target("left_arm_2", -np.pi / 2,
                                                                     WEIGHT).set_velocity_limit_scaling(
-        0.2).set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN).set_stop_cost(STOP_COST).set_min_delta_cost(
+        0.05).set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN).set_stop_cost(STOP_COST).set_min_delta_cost(
         MIN_DELTA_COST).set_patience(PATIENCE)
 
     # Send command
@@ -467,7 +514,7 @@ def example_optimal_control_1(robot):
     return 0
 
 
-def example_optimal_control_2(robot):
+def example_optimal_control_2(robot, model_name):
     print("Optimal control example 2")
 
     # Define transformation matrices
@@ -491,10 +538,17 @@ def example_optimal_control_2(robot):
                                [0, 1, 0],
                                [-np.sin(angle), 0, np.cos(angle)]])
     T_left[:3, 3] = [0.4, 0.2, 1.0]
+    
+    if model_name=="a":
+        target_link = "link_torso_5"
+    elif model_name=="t5":
+        target_link = "link_torso_4"
+    elif model_name=="m":
+        target_link = "link_torso_5"
 
     # Build optimal control command
     optimal_control_command = (OptimalControlCommandBuilder()
-                               .add_cartesian_target("base", "link_torso_5", T_torso, WEIGHT, WEIGHT)
+                               .add_cartesian_target("base", target_link, T_torso, WEIGHT, WEIGHT)
                                .add_cartesian_target("base", "ee_right", T_right, WEIGHT, WEIGHT)
                                .add_cartesian_target("base", "ee_left", T_left, WEIGHT, WEIGHT)
                                .add_joint_position_target("right_arm_2", 0.0, WEIGHT)
@@ -517,7 +571,7 @@ def example_optimal_control_2(robot):
 
     return 0
 
-def example_optimal_control_3(robot):
+def example_optimal_control_3(robot, model_name):
     print("Optimal control example 3")
 
     # Define transformation matrices
@@ -543,15 +597,28 @@ def example_optimal_control_3(robot):
     T_left[:3, 3] = [0.4, 0.3, 1.2]
 
     COM = np.array([0.0, 0.0, 0.5])
-
+    
+    if model_name =="a":
+        target_joint_1 = "torso_4"
+        target_joint_2 = "torso_3"
+        target_joint_3 = "torso_2"
+    elif model_name =="t5":
+        target_joint_1 = "torso_3"
+        target_joint_2 = "torso_2"
+        target_joint_3 = "torso_1"
+    elif model_name =="m":
+        target_joint_1 = "torso_4"
+        target_joint_2 = "torso_3"
+        target_joint_3 = "torso_2"
+        
     # Build optimal control command
     optimal_control_command = (OptimalControlCommandBuilder()
                                 .set_center_of_mass_target("base", COM, WEIGHT)
                                 .add_cartesian_target("base", "ee_left", T_left, WEIGHT, WEIGHT)
                                 .add_cartesian_target("base", "ee_right", T_right, WEIGHT, WEIGHT)
-                                .add_joint_position_target("torso_4", 0, WEIGHT)
-                                .add_joint_position_target("torso_3", np.pi/4, WEIGHT)
-                                .add_joint_position_target("torso_2", -np.pi / 2, WEIGHT)
+                                .add_joint_position_target(target_joint_1, 0, WEIGHT)
+                                .add_joint_position_target(target_joint_2, np.pi/4, WEIGHT)
+                                .add_joint_position_target(target_joint_3, -np.pi / 2, WEIGHT)
                                 .add_joint_position_target("right_arm_2", np.pi / 4, WEIGHT)
                                 .add_joint_position_target("left_arm_2", -np.pi / 4,WEIGHT)
                                 .set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN)
@@ -574,7 +641,7 @@ def example_optimal_control_3(robot):
     return 0
 
 
-def example_mixed_command_1(robot):
+def example_mixed_command_1(robot, model_name):
     print("Mixed command example 1")
 
     # Define transformation matrices
@@ -593,12 +660,22 @@ def example_mixed_command_1(robot):
                                [0, 1, 0],
                                [-np.sin(angle), 0, np.cos(angle)]])
     T_left[:3, 3] = [0.5, 0.3, 1.0]
+    
+    if model_name =="a":
+        target_link = "link_torso_5"
+        target_joint = "torso_2"
+    elif model_name == "t5":
+        target_link = "link_torso_4"
+        target_joint = "torso_1"
+    elif model_name == "m":
+        target_link = "link_torso_5"
+        target_joint = "torso_2"
+
 
     torso_command = (OptimalControlCommandBuilder()
                      .set_center_of_mass_target("base", np.array([0, 0, 0.4]), WEIGHT * 1e-1)
-                     .add_cartesian_target("base", "link_torso_5", T_torso, 0, WEIGHT)
-                     .add_joint_position_target("torso_2", -np.pi / 2, WEIGHT)
-                     .add_joint_position_target("torso_0", 0, WEIGHT)
+                     .add_cartesian_target("base", target_link, T_torso, 0, WEIGHT)
+                     .add_joint_position_target(target_joint, -np.pi / 2, WEIGHT)
                      .set_stop_cost(STOP_COST * 1e1)
                      .set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN)
                      .set_min_delta_cost(MIN_DELTA_COST)
@@ -626,7 +703,7 @@ def example_mixed_command_1(robot):
     return 0
 
 
-def example_mixed_command_2(robot):
+def example_mixed_command_2(robot, model_name):
     print("Mixed command example 2")
 
     # Define transformation matrices
@@ -649,12 +726,21 @@ def example_mixed_command_2(robot):
                                [0, 1, 0],
                                [-np.sin(angle), 0, np.cos(angle)]])
     T_left[:3, 3] = [0.5, 0.3, 1.0]
+    
+    if model_name =="a":
+        target_link = "link_torso_5"
+        target_joint = "torso_2"
+    elif model_name == "t5":
+        target_link = "link_torso_4"
+        target_joint = "torso_1"
+    elif model_name == "m":
+        target_link = "link_torso_5"
+        target_joint = "torso_2"
 
     torso_command = (OptimalControlCommandBuilder()
                      .set_center_of_mass_target("base", np.array([0, 0, 0.4]), WEIGHT * 1e-1)
                      .add_cartesian_target("base", "link_torso_5", T_torso, 0, WEIGHT)
                      .add_joint_position_target("torso_2", -np.pi / 2, WEIGHT)
-                     .add_joint_position_target("torso_0", 0, WEIGHT)
                      .set_stop_cost(STOP_COST)
                      .set_velocity_tracking_gain(VELOCITY_TRACKING_GAIN)
                      .set_min_delta_cost(MIN_DELTA_COST / 10)
@@ -688,10 +774,16 @@ def example_mixed_command_2(robot):
     return 0
 
 
-def go_to_home_pose_1(robot):
+def go_to_home_pose_1(robot, model_name):
     print("Go to home pose 1")
 
-    q_joint_waist = np.zeros(6)
+    if model_name == "a":
+        q_joint_waist = np.zeros(6)
+    elif model_name == "t5":
+        q_joint_waist = np.zeros(5)
+    elif model_name == "m":
+        q_joint_waist = np.zeros(6)
+        
     q_joint_right_arm = np.zeros(7)
     q_joint_left_arm = np.zeros(7)
 
@@ -717,13 +809,19 @@ def go_to_home_pose_1(robot):
     return 0
 
 
-def go_to_home_pose_2(robot):
+def go_to_home_pose_2(robot, model_name):
     print("Go to home pose 2")
 
+    if model_name =="a":
+        target_joint = np.zeros(20)
+    elif model_name == "t5":
+        target_joint = np.zeros(19)
+    elif model_name == "m":
+        target_joint = np.zeros(20)
     # Send command to go to home pose
     rv = robot.send_command(RobotCommandBuilder().set_command(ComponentBasedCommandBuilder().set_body_command(
         JointPositionCommandBuilder()
-        .set_position(np.zeros(20))
+        .set_position(target_joint)
         .set_minimum_time(MINIMUM_TIME))
     ), 10).get()
 
@@ -734,11 +832,11 @@ def go_to_home_pose_2(robot):
     return 0
 
 
-def main(address, power_device, servo):
+def main(address, model_name, power_device, servo):
     print("Attempting to connect to the robot...")
 
-    robot = rby1_sdk.create_robot_a(address)
-
+    robot = rby1_sdk.create_robot(address, model_name)
+    
     if not robot.connect():
         print("Error: Unable to establish connection to the robot at")
         sys.exit(1)
@@ -747,7 +845,6 @@ def main(address, power_device, servo):
 
     print("Starting state update...")
     robot.start_state_update(cb, 0.1)
-
     robot.set_parameter("default.acceleration_limit_scaling", "0.8")
     robot.set_parameter("joint_position_command.cutoff_frequency", "5")
     robot.set_parameter("cartesian_command.cutoff_frequency", "5")
@@ -779,9 +876,9 @@ def main(address, power_device, servo):
     if (control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
 
         if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:
-            print("Warning: Detected a Major Fault in the Control Manager!!!!!!!!!!!!!!!.")
+            print("Warning: Detected a Major Fault in the Control Manager")
         else:
-            print("Warning: Detected a Minor Fault in the Control Manager@@@@@@@@@@@@@@@@.")
+            print("Warning: Detected a Minor Fault in the Control Manager")
 
         print("Attempting to reset the fault...")
         if not robot.reset_fault_control_manager():
@@ -796,48 +893,46 @@ def main(address, power_device, servo):
         print("Error: Failed to enable the Control Manager.")
         sys.exit(1)
     print("Control Manager enabled successfully.")
-
-    if not example_joint_position_command_1(robot):
+        
+    if not example_joint_position_command_2(robot, model_name):
         print("finish motion")
-    if not example_joint_position_command_2(robot):
+    if not example_cartesian_command_1(robot, model_name):
         print("finish motion")
-    if not example_cartesian_command_1(robot):
+    if not example_cartesian_command_2(robot, model_name):
         print("finish motion")
-    if not example_cartesian_command_2(robot):
+    if not example_cartesian_command_3(robot, model_name):
         print("finish motion")
-    if not example_cartesian_command_3(robot):
+    if not example_impedance_control_command_1(robot, model_name):
         print("finish motion")
-    if not example_impedance_control_command_1(robot):
+    if not example_relative_command_1(robot, model_name):
         print("finish motion")
-    if not example_relative_command_1(robot):
+    if not example_joint_position_command_3(robot, model_name):
         print("finish motion")
-    if not example_joint_position_command_3(robot):
+    if not example_optimal_control_1(robot, model_name):
         print("finish motion")
-    if not example_optimal_control_1(robot):
+    if not example_optimal_control_2(robot, model_name):
         print("finish motion")
-    if not example_optimal_control_2(robot):
+    if not example_optimal_control_3(robot, model_name):
         print("finish motion")
-    if not example_optimal_control_3(robot):
+    if not example_mixed_command_1(robot, model_name):
         print("finish motion")
-    if not example_mixed_command_1(robot):
+    if not example_mixed_command_2(robot, model_name):
         print("finish motion")
-    if not example_mixed_command_2(robot):
-        print("finish motion")
-    if not go_to_home_pose_1(robot):
-        print("finish motion")
-    if not go_to_home_pose_2(robot):
+    if not go_to_home_pose_2(robot, model_name):
         print("finish motion")
 
     print("end of demo")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="07_impedance_control")
+    parser = argparse.ArgumentParser(description="09_demo_motion")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
+    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")
     args = parser.parse_args()
 
     main(address=args.address,
+         model_name = args.model,
          power_device=args.device,
          servo = args.servo)
 

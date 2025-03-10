@@ -7,11 +7,14 @@ import sys
 
 MINIMUM_TIME = 10
 
+
 def zero_pose(robot):
+    model = robot.model()
+
     # Initialize joint positions
-    q_joint_waist = np.zeros(6)
-    q_joint_right_arm = np.zeros(7)
-    q_joint_left_arm = np.zeros(7)
+    q_joint_waist = np.zeros(len(model.torso_idx))
+    q_joint_right_arm = np.zeros(len(model.right_arm_idx))
+    q_joint_left_arm = np.zeros(len(model.left_arm_idx))
 
     # Set specific joint positions
     rc = RobotCommandBuilder().set_command(
@@ -43,29 +46,30 @@ def zero_pose(robot):
 
     return 0
 
-def main(address, power_device, servo):
-    robot = rby1_sdk.create_robot_a(address)
+
+def main(address, model, power_device, servo):
+    robot = rby1_sdk.create_robot(address, model)
     robot.connect()
-    
+
     if not robot.is_connected():
         print("Robot is not connected")
         exit(1)
-        
+
     if not robot.is_power_on(power_device):
         rv = robot.power_on(power_device)
         if not rv:
             print("Failed to power on")
             exit(1)
-    
+
     if not robot.is_servo_on(servo):
         rv = robot.servo_on(servo)
         if not rv:
             print("Fail to servo on")
             exit(1)
 
-    control_manager_state = robot.get_control_manager_state()            
-    if (control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or \
-        control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
+    control_manager_state = robot.get_control_manager_state()
+    if (control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault or
+            control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault):
 
         if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:
             print("Warning: Detected a Major Fault in the Control Manager.")
@@ -89,13 +93,16 @@ def main(address, power_device, servo):
     if not zero_pose(robot):
         print("Finish Joint")
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="07_impedance_control")
     parser.add_argument('--address', type=str, required=True, help="Robot address")
+    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
     parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
     parser.add_argument('--servo', type=str, default=".*", help="Servo name regex pattern (default: '.*')")
     args = parser.parse_args()
 
     main(address=args.address,
+         model=args.model,
          power_device=args.device,
-         servo = args.servo)
+         servo=args.servo)

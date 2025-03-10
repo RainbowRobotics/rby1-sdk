@@ -1,4 +1,8 @@
 #include "rby1-sdk/base/dynamixel_bus.h"
+
+#if defined(_WIN32) || defined(_WIN64)
+#define WINDLLEXPORT
+#endif
 #include "dynamixel_sdk.h"
 
 #include <chrono>
@@ -616,6 +620,14 @@ void DynamixelBus::SendCurrent(int id, double current) {
 
 std::optional<int> DynamixelBus::ReadTemperature(int id) {
   return impl_->ReadTemperature(id);
+}
+
+std::optional<std::vector<std::pair<int, int>>> DynamixelBus::BulkRead(const std::vector<int>& ids, int addr, int len) {
+  return impl_->BulkRead(ids, addr, len);
+}
+
+std::optional<std::vector<std::pair<int, int16_t>>> DynamixelBus::ReadCurrent(const std::vector<int>& ids) {
+  return impl_->ReadCurrent(ids);
 }
 
 std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> DynamixelBus::BulkReadEncoder(

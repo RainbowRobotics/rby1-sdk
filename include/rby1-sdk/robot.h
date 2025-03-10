@@ -41,6 +41,8 @@ struct ControlState;
 
 struct PIDGain;
 
+struct Color;
+
 }  // namespace rb
 
 namespace rb {
@@ -48,6 +50,8 @@ namespace rb {
 template <typename T>
 class Robot : public std::enable_shared_from_this<Robot<T>> {
  public:
+  using ModelType = T;
+
   static std::shared_ptr<Robot<T>> Create(std::string address);
 
   ~Robot();
@@ -99,6 +103,8 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool DisableControlManager() const;
 
   bool ResetFaultControlManager() const;
+
+  bool CancelControl() const;
 
   bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const;
 
@@ -159,6 +165,21 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool StopTimeSync();
 
   std::shared_ptr<dyn::Robot<T::kRobotDOF>> GetDynamics(const std::string& urdf_model = "");
+
+  bool SetLEDColor(const Color& color, double duration = 1 /* sec */, double transition_time = 0 /* sec */,
+                   bool blinking = false, double blinking_freq = 1 /* Hz */);
+
+  std::tuple<struct timespec, std::string, std::string> GetSystemTime() const;
+
+  bool SetSystemTime(struct timespec utc_time, std::optional<std::string> time_zone = std::nullopt) const;
+
+  bool SetBatteryLevel(double level) const;
+
+  bool SetBatteryConfig(double cutoff_voltage, double fully_charged_voltage, const std::array<double, 4>& coefficients);
+
+  bool ResetBatteryConfig() const;
+
+  bool WaitForControlReady(long timeout_ms) const;
 
  private:
   explicit Robot(std::string address);
@@ -240,6 +261,16 @@ struct PIDGain {
   uint16_t p_gain;
   uint16_t i_gain;
   uint16_t d_gain;
+};
+
+struct Color {
+  Color() : r(0), g(0), b(0) {}
+
+  Color(uint8_t _r, uint8_t _g, uint8_t _b) : r(_r), g(_g), b(_b) {}
+
+  uint8_t r{0};
+  uint8_t g{0};
+  uint8_t b{0};
 };
 
 }  // namespace rb

@@ -156,7 +156,7 @@ void bind_mobile_base(py::module_& m) {
   py::enum_<dyn::MobileBaseType>(m, "MobileBaseType")
       .value("None", dyn::MobileBaseType::kNone)
       .value("Differential", dyn::MobileBaseType::kDifferential)
-      .value("Omni", dyn::MobileBaseType::kOmni);
+      .value("Mecanum", dyn::MobileBaseType::kMecanum);
 
   py::class_<dyn::MobileBase>(m, "MobileBase")
       .def_readonly("type", &dyn::MobileBase::type)
@@ -178,7 +178,7 @@ void bind_robot_configuration(py::module_& m) {
       .def_readonly("mobile_base", &dyn::RobotConfiguration::mobile_base);
 }
 
-template <size_t DOF>
+template <int DOF>
 void bind_robot(py::module_& m) {
   std::stringstream ss;
   ss << "Robot";
@@ -213,12 +213,12 @@ void bind_robot(py::module_& m) {
       .def("compute_inverse_dynamics", &dyn::Robot<DOF>::ComputeInverseDynamics, "state"_a)
       .def("compute_gravity_term", &dyn::Robot<DOF>::ComputeGravityTerm, "state"_a)
       .def("compute_mass_matrix", &dyn::Robot<DOF>::ComputeMassMatrix, "state"_a)
-      .def("compute_reflective_inertia", &dyn::Robot<DOF>::ComputeReflectiveInertia, "state"_a, "from"_a, "to"_a)
-      .def("compute_transformation", &dyn::Robot<DOF>::ComputeTransformation, "state"_a, "from"_a, "to"_a)
-      .def("compute_body_velocity", &dyn::Robot<DOF>::ComputeBodyVelocity, "state"_a, "from"_a, "to"_a)
-      .def("compute_space_jacobian", &dyn::Robot<DOF>::ComputeSpaceJacobian, "state"_a, "from"_a, "to"_a)
-      .def("compute_body_jacobian", &dyn::Robot<DOF>::ComputeBodyJacobian, "state"_a, "from"_a, "to"_a)
-      .def("compute_mass", &dyn::Robot<DOF>::ComputeMass, "state"_a, "target_link"_a)
+      .def("compute_reflective_inertia", &dyn::Robot<DOF>::ComputeReflectiveInertia, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_transformation", &dyn::Robot<DOF>::ComputeTransformation, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_body_velocity", &dyn::Robot<DOF>::ComputeBodyVelocity, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_space_jacobian", &dyn::Robot<DOF>::ComputeSpaceJacobian, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_body_jacobian", &dyn::Robot<DOF>::ComputeBodyJacobian, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_mass", &dyn::Robot<DOF>::ComputeMass, "state"_a, "target_link_index"_a)
       .def("compute_center_of_mass",
            static_cast<Eigen::Vector3d (dyn::Robot<DOF>::*)(std::shared_ptr<dyn::State<DOF>>, unsigned int,
                                                             unsigned int)>(&dyn::Robot<DOF>::ComputeCenterOfMass),
@@ -263,7 +263,7 @@ void bind_robot(py::module_& m) {
       .def_static("count_joints", &dyn::Robot<DOF>::CountJoints, "base_link"_a, "include_fixed"_a = false);
 }
 
-template <size_t DOF>
+template <int DOF>
 void bind_state(py::module_& m) {
   std::stringstream ss;
   ss << "State";
@@ -314,8 +314,17 @@ void pybind11_dynamics(py::module_& m) {
   bind_mobile_base(m);
   bind_robot_configuration(m);
 
+  bind_state<-1>(m);
+  bind_robot<-1>(m);
+
   bind_state<y1_model::A::kRobotDOF>(m);
   bind_robot<y1_model::A::kRobotDOF>(m);
+
+  bind_state<y1_model::T5::kRobotDOF>(m);
+  bind_robot<y1_model::T5::kRobotDOF>(m);
+
+  bind_state<y1_model::M::kRobotDOF>(m);
+  bind_robot<y1_model::M::kRobotDOF>(m);
 
   m.def("load_robot_from_urdf_data", &dyn::LoadRobotFromURDFData, "model"_a, "base_link_name"_a);
 

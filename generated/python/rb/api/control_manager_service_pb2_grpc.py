@@ -44,6 +44,11 @@ class ControlManagerServiceStub(object):
                 request_serializer=rb_dot_api_dot_control__manager__pb2.ControlManagerCommandRequest.SerializeToString,
                 response_deserializer=rb_dot_api_dot_control__manager__pb2.ControlManagerCommandResponse.FromString,
                 _registered_method=True)
+        self.CancelControl = channel.unary_unary(
+                '/rb.api.ControlManagerService/CancelControl',
+                request_serializer=rb_dot_api_dot_control__manager__pb2.CancelControlRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_control__manager__pb2.CancelControlResponse.FromString,
+                _registered_method=True)
         self.GetTimeScale = channel.unary_unary(
                 '/rb.api.ControlManagerService/GetTimeScale',
                 request_serializer=rb_dot_api_dot_control__manager__pb2.GetTimeScaleRequest.SerializeToString,
@@ -60,6 +65,12 @@ class ControlManagerServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def ControlManagerCommand(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CancelControl(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -84,6 +95,11 @@ def add_ControlManagerServiceServicer_to_server(servicer, server):
                     servicer.ControlManagerCommand,
                     request_deserializer=rb_dot_api_dot_control__manager__pb2.ControlManagerCommandRequest.FromString,
                     response_serializer=rb_dot_api_dot_control__manager__pb2.ControlManagerCommandResponse.SerializeToString,
+            ),
+            'CancelControl': grpc.unary_unary_rpc_method_handler(
+                    servicer.CancelControl,
+                    request_deserializer=rb_dot_api_dot_control__manager__pb2.CancelControlRequest.FromString,
+                    response_serializer=rb_dot_api_dot_control__manager__pb2.CancelControlResponse.SerializeToString,
             ),
             'GetTimeScale': grpc.unary_unary_rpc_method_handler(
                     servicer.GetTimeScale,
@@ -123,6 +139,33 @@ class ControlManagerService(object):
             '/rb.api.ControlManagerService/ControlManagerCommand',
             rb_dot_api_dot_control__manager__pb2.ControlManagerCommandRequest.SerializeToString,
             rb_dot_api_dot_control__manager__pb2.ControlManagerCommandResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CancelControl(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.ControlManagerService/CancelControl',
+            rb_dot_api_dot_control__manager__pb2.CancelControlRequest.SerializeToString,
+            rb_dot_api_dot_control__manager__pb2.CancelControlResponse.FromString,
             options,
             channel_credentials,
             insecure,

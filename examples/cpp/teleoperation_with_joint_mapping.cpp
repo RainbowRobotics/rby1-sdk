@@ -637,6 +637,8 @@ void control_loop_for_gripper(dynamixel::PortHandler* portHandler, dynamixel::Pa
   std::vector<Eigen::Matrix<double, 2, 1>> q_min_max_vector;
   q_min_max_vector.push_back(Eigen::Matrix<double, 2, 1>::Zero());
   q_min_max_vector.push_back(Eigen::Matrix<double, 2, 1>::Zero());
+  // q_min_max_vector.push_back((Eigen::Matrix<double, 2, 1>() << 100, -100).finished());
+  // q_min_max_vector.push_back((Eigen::Matrix<double, 2, 1>() << 100, -100).finished());
 
   while (1) {
     static int cnt = 0;

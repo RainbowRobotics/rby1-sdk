@@ -22,28 +22,28 @@ class State {
 
   template <typename Derived>
   void SetQ(const Eigen::MatrixBase<Derived>& new_q) {
-    Set(q, new_q.eval());
+    Set<Derived::RowsAtCompileTime>(q, new_q.eval());
   }
 
   Eigen::Vector<double, DOF> GetQ() { return q(utr_joint_map); }
 
   template <typename Derived>
   void SetQdot(const Eigen::MatrixBase<Derived>& new_qdot) {
-    Set(qdot, new_qdot.eval());
+    Set<Derived::RowsAtCompileTime>(qdot, new_qdot.eval());
   }
 
   Eigen::Vector<double, DOF> GetQdot() { return qdot(utr_joint_map); }
 
   template <typename Derived>
   void SetQddot(const Eigen::MatrixBase<Derived>& new_qddot) {
-    Set(qddot, new_qddot.eval());
+    Set<Derived::RowsAtCompileTime>(qddot, new_qddot.eval());
   }
 
   Eigen::Vector<double, DOF> GetQddot() { return qddot(utr_joint_map); }
 
   template <typename Derived>
   void SetTau(const Eigen::MatrixBase<Derived>& new_tau) {
-    Set(tau, new_tau.eval());
+    Set<Derived::RowsAtCompileTime>(tau, new_tau.eval());
   }
 
   Eigen::Vector<double, DOF> GetTau() { return tau(utr_joint_map); }

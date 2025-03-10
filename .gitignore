@@ -22,3 +22,6 @@ wheelhouse
 
 !.github/**
 !build.py
+
+.DS_Store
+.ipynb_checkpoints

@@ -14,6 +14,7 @@ jobs:
     outputs:
       new_sha: ${{ steps.out.outputs.SHA }}
       version: ${{ steps.out.outputs.VERSION }}
+      changed: ${{ steps.check-version.outputs.changed }}
     steps:
       - uses: actions/create-github-app-token@v1
         id: app-token
@@ -46,19 +47,30 @@ jobs:
       - name: Update PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+      - name: Check if version changed
+        id: check-version
+        run: |
+          echo "PREVIOUS_REVISION: ${{ env.PREVIOUS_REVISION }}"
+          echo "REVISION: ${{ env.REVISION }}"
+          if [ "${{ env.PREVIOUS_REVISION }}" == "${{ env.REVISION }}" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set outputs for next jobs
         id: out
         run: |
           new_sha=$(git rev-parse HEAD)
           version=$(poetry version -s)
-          echo $sha_new
+          echo $new_sha
           echo $version
           echo "SHA=$new_sha" >> "$GITHUB_OUTPUT"
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"
 
   build-wheels:
     needs: [ bump-version ]
-
+    if: needs.bump-version.outputs.changed == 'true'
     runs-on: ${{ matrix.os }}
     name: "Build wheels"
 

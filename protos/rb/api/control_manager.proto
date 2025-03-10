@@ -4,6 +4,7 @@ package rb.api;
 
 import "rb/api/header.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/duration.proto";
 
 message ControlManagerState {
   enum State {
@@ -77,4 +78,28 @@ message SetTimeScaleResponse {
   ResponseHeader response_header = 1;
 
   double current_time_scale = 2;
+}
+
+message CancelControlRequest {
+  // Request header
+  RequestHeader request_header = 1;
+}
+
+message CancelControlResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+}
+
+message WaitForControlReadyRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  google.protobuf.Duration timeout = 2;
+}
+
+message WaitForControlReadyResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  bool ready = 3;
 }

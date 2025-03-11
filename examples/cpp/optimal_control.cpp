@@ -193,7 +193,7 @@ int main() {
   int N = 200000;
   for (int i = 0; i < N; i++) {
     robot->ComputeForwardKinematics(state);
-    auto ret = optimal_control.Solve(input, state, control_period);
+    auto ret = optimal_control.Solve(input, state, control_period, robot->GetLimitQUpper(state), robot->GetLimitQdotUpper(state));
     if (ret.has_value()) {
       //      std::cout << ret.value().transpose() << std::endl;
       state->SetQdot(ret.value());

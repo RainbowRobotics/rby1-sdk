@@ -867,7 +867,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
                           .AddJointPositionTarget("right_arm_2", 3.141592 / 2., weight)
                           .AddJointPositionTarget("left_arm_2", -3.141592 / 2., weight)
                           .SetVelocityLimitScaling(0.05)
-                          .SetVelocityTrackingGain(velocity_tracking_gain)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)
                           .SetPatience(patience))))
@@ -901,7 +900,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
                           .AddCartesianTarget("base", "ee_left", T_left, weight, weight)
                           .AddJointPositionTarget("right_arm_2", 0., weight)
                           .AddJointPositionTarget("left_arm_2", -0., weight)
-                          .SetVelocityTrackingGain(velocity_tracking_gain)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)
                           .SetPatience(patience))))
@@ -940,7 +938,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
                           .AddJointPositionTarget("torso_2", -3.141592 / 2., weight)
                           .AddJointPositionTarget("right_arm_2", 3.141592 / 4., weight)
                           .AddJointPositionTarget("left_arm_2", -3.141592 / 4., weight)
-                          .SetVelocityTrackingGain(velocity_tracking_gain)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)
                           .SetPatience(patience))))
@@ -976,7 +973,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
                                   .AddJointPositionTarget("torso_2", -3.141592 / 2., weight)
                                   .AddJointPositionTarget("torso_0", 0., weight)
                                   .SetStopCost(stop_cost * 1e1)
-                                  .SetVelocityTrackingGain(velocity_tracking_gain)
                                   .SetMinDeltaCost(min_delta_cost)
                                   .SetPatience(patience))
                           .SetRightArmCommand(
@@ -1022,7 +1018,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
         .AddJointPositionTarget("torso_2", -3.141592 / 2., weight)
         .AddJointPositionTarget("torso_0", 0., weight)
         .SetStopCost(stop_cost)
-        .SetVelocityTrackingGain(velocity_tracking_gain)
         .SetMinDeltaCost(min_delta_cost / 10)
         .SetPatience(patience * 10);
 

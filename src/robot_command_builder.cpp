@@ -91,7 +91,9 @@ class JointPositionCommandBuilderImpl {
 
 class OptimalControlCommandBuilderImpl {
  public:
-  OptimalControlCommandBuilderImpl() : req_(std::make_unique<api::OptimalControlCommand::Request>()) {}
+  OptimalControlCommandBuilderImpl() : req_(std::make_unique<api::OptimalControlCommand::Request>()) {
+    req_->mutable_velocity_tracking_gain()->set_value(0);
+  }
 
   void SetCommandHeader(const CommandHeaderBuilder& builder) {
     req_->set_allocated_command_header(static_cast<api::CommandHeader::Request*>(builder.Build()));

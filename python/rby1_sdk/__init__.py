@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ._bindings import *
+from ._bindings import __version__
 # from ._robot_command import *
 
 from typing import overload

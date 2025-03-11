@@ -193,7 +193,7 @@ def example_cartesian_command_1(robot):
 
 def example_cartesian_command_2(robot):
     print("Cartesian command example 2")
-    
+
     q = robot.get_state().position
     m = robot.model()
 
@@ -260,8 +260,8 @@ def example_cartesian_command_2(robot):
                 ANGULAR_VELOCITY_LIMIT,
                 ACCELERATION_LIMIT,
             )
-            .add_joint_position_target("right_arm_1", -np.pi/3)
-            .add_joint_position_target("left_arm_1",  np.pi/3)
+            .add_joint_position_target("right_arm_1", -np.pi / 3)
+            .add_joint_position_target("left_arm_1", np.pi / 3)
             .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
             .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
             .set_minimum_time(MINIMUM_TIME)
@@ -269,7 +269,7 @@ def example_cartesian_command_2(robot):
     )
 
     rv = robot.send_command(rc, 10).get()
-    
+
     with np.printoptions(precision=3, suppress=True):
         print(np.rad2deg(robot.get_state().position))
 
@@ -346,8 +346,8 @@ def example_cartesian_command_3(robot):
                 ANGULAR_VELOCITY_LIMIT,
                 ACCELERATION_LIMIT,
             )
-            .add_joint_position_target("right_arm_1", -np.pi/3)
-            .add_joint_position_target("left_arm_1",  np.pi/3)
+            .add_joint_position_target("right_arm_1", -np.pi / 3)
+            .add_joint_position_target("left_arm_1", np.pi / 3)
             .set_stop_position_tracking_error(STOP_POSITION_TRACKING_ERROR)
             .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
             .set_minimum_time(MINIMUM_TIME)
@@ -997,13 +997,13 @@ def main(address, power_device, servo):
     print("Starting state update...")
     robot.start_state_update(cb, 0.1)
 
-    robot.factory_reset_all_parameters()
+    # robot.factory_reset_all_parameters()
     robot.set_parameter("default.acceleration_limit_scaling", "0.8")
     robot.set_parameter("joint_position_command.cutoff_frequency", "5")
     robot.set_parameter("cartesian_command.cutoff_frequency", "5")
     robot.set_parameter("default.linear_acceleration_limit", "5")
     robot.set_parameter("manipulability_threshold", "1e4")
-    robot.set_time_scale(1.0)
+    # robot.set_time_scale(1.0)
 
     print("parameters setting is done")
 
@@ -1049,7 +1049,7 @@ def main(address, power_device, servo):
     print("Control Manager state is normal. No faults detected.")
 
     print("Enabling the Control Manager...")
-    if not robot.enable_control_manager():
+    if not robot.enable_control_manager(unlimited_mode_enabled=True):
         print("Error: Failed to enable the Control Manager.")
         sys.exit(1)
     print("Control Manager enabled successfully.")

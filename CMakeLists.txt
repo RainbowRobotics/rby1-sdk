@@ -93,6 +93,11 @@ protobuf_generate(
         PROTOC_OUT_DIR ${PROTO_BINARY_DIR})
 ############################################################
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/version.h
+)
+
 add_subdirectory(third-party)
 add_subdirectory(src)
 
@@ -130,6 +135,7 @@ if ((NOT BUILD_PYTHON_BINDINGS)
 
     set_target_properties(rby1-sdk PROPERTIES EXPORT_NAME rby1-sdk)
 
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/version.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rby1-sdk)
     install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
     if (INSTALL_MODELS)
         install(DIRECTORY models/ DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/rby1-sdk/models)

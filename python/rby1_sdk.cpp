@@ -55,6 +55,7 @@ py::object create_robot(const std::string& address, const py::object& model) {
 
 PYBIND11_MODULE(_bindings, m) {
   m.doc() = "RBY1-SDK";  // optional module docstring
+  m.attr("__version__") = RBY1_SDK_VERSION;
 
   auto dyn_m = m.def_submodule("dynamics", "Dynamics module for rby1");
   pybind11_dynamics(dyn_m);

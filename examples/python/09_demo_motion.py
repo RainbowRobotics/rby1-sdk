@@ -242,7 +242,7 @@ def example_cartesian_command_2(robot):
                 T_torso,
                 LINEAR_VELOCITY_LIMIT,
                 ANGULAR_VELOCITY_LIMIT,
-                ACCELERATION_LIMIT * 10,
+                ACCELERATION_LIMIT,
             )
             .add_target(
                 "base",

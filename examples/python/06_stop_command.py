@@ -15,9 +15,10 @@ def main(address, model):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="06_stop_command")
-    parser.add_argument('--address', type=str, required=True, help="Robot address")
-    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
+    parser.add_argument("--address", type=str, required=True, help="Robot address")
+    parser.add_argument(
+        "--model", type=str, default="a", help="Robot Model Name (default: 'a')"
+    )
     args = parser.parse_args()
 
-    main(address=args.address,
-         model=args.model)
+    main(address=args.address, model=args.model)

@@ -98,8 +98,6 @@ class SampleGui(QWidget, Ui_MainForm):
             lambda: asyncio.ensure_future(self.control_manager_command(ControlCommand.ResetFault)))
         self.HS_TimeScale.valueChanged.connect(
             lambda value: asyncio.ensure_future(self.time_scale_value_changed(value)))
-        self.PB_Reflect.clicked.connect(lambda: asyncio.ensure_future(self.jp_reflect()))
-        self.PB_SendOnce.clicked.connect(lambda: asyncio.ensure_future(self.send_once()))
         self.PB_JogPositive.clicked.connect(lambda: asyncio.ensure_future(self.jog_positive()))
         self.PB_JogNegative.clicked.connect(lambda: asyncio.ensure_future(self.jog_negative()))
         self.PB_JogRelative.clicked.connect(lambda: asyncio.ensure_future(self.jog_relative()))
@@ -107,13 +105,6 @@ class SampleGui(QWidget, Ui_MainForm):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.update_TV_JointStates_column_widths()
-
-    async def send_once(self):
-        if self.robot_command_service is None:
-            return
-
-        await self.robot_command_service.RobotCommand(
-            robot_command_pb2.RobotCommandRequest(robot_command=self.make_control_input()))
 
     async def jp_reflect(self):
         for i, idx in enumerate(self.joint_position_table_model.target_index):
@@ -170,9 +161,6 @@ class SampleGui(QWidget, Ui_MainForm):
         self.CB_JointList.addItems([joint["name"] for joint in RobotState.joint_states])
 
         self.joint_position_table_model = JointPositionTableModel(robot_info.robot_info.body_joint_idx)
-        self.TV_JPTargetPosition.setModel(self.joint_position_table_model)
-        self.TV_JPTargetPosition.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.TV_JPTargetPosition.setItemDelegate(SpinBoxDelegate())
         self.joint_position_table_model.layoutChanged.emit()
 
         # await self.set_time_scale(self.HS_TimeScale.value() / 100.)
@@ -192,7 +180,6 @@ class SampleGui(QWidget, Ui_MainForm):
         self.PB_ZPReset.setEnabled(True)
         self.LE_TimeScale.setEnabled(True)
         self.HS_TimeScale.setEnabled(True)
-        self.PB_Reflect.setEnabled(True)
         self.connected = True
 
     def robot_disconnected(self):
@@ -208,7 +195,6 @@ class SampleGui(QWidget, Ui_MainForm):
         self.PB_ZPReset.setEnabled(False)
         self.LE_TimeScale.setEnabled(False)
         self.HS_TimeScale.setEnabled(False)
-        self.PB_Reflect.setEnabled(False)
         self.PB_JogPositive.setEnabled(False)
         self.PB_JogNegative.setEnabled(False)
         self.SB_JogRelative.setEnabled(False)
@@ -354,36 +340,6 @@ class SampleGui(QWidget, Ui_MainForm):
         await self.control_manager_service.SetTimeScale(
             control_manager_pb2.SetTimeScaleRequest(request_header=make_request_header(),
                                                     time_scale=value))
-
-    def make_control_input(self):
-        if self.TW_RobotCommand.currentWidget() == self.TB_WBC:
-            stop_command = basic_command_pb2.StopCommand.Request(
-                command_header=command_header_pb2.CommandHeader.Request(
-                    control_hold_time=duration_pb2.Duration(seconds=0, nanos=0)))
-            command = robot_command_pb2.RobotCommand.Request(
-                whole_body_command=whole_body_command_pb2.WholeBodyCommand.Request(
-                    stop_command=stop_command))
-        else:
-            body = None
-            if self.CB_EnableBody.isChecked():
-                if self.TB_CBCBody.currentWidget() == self.TB_CBCJP:
-                    minimum_time = float(self.SB_JP_MiminumTime.text())
-                    minimum_time_sec = math.floor(minimum_time)
-                    minimum_time_nano = math.floor((minimum_time - minimum_time_sec) * 1e9)
-                    control_hold_time = float(self.SB_JP_ControlHoldTime.text())
-                    control_hold_time_sec = math.floor(control_hold_time)
-                    control_hold_time_nano = math.floor((control_hold_time - control_hold_time_sec) * 1e9)
-                    jp = basic_command_pb2.JointPositionCommand.Request(
-                        command_header=command_header_pb2.CommandHeader.Request(
-                            control_hold_time=duration_pb2.Duration(seconds=control_hold_time_sec,
-                                                                    nanos=control_hold_time_nano)),
-                        minimum_time=duration_pb2.Duration(seconds=minimum_time_sec, nanos=minimum_time_nano),
-                        position=np.deg2rad(self.joint_position_table_model.target_position))
-                    body = body_command_pb2.BodyCommand.Request(joint_position_command=jp)
-            command = robot_command_pb2.RobotCommand.Request(
-                component_based_command=component_based_command_pb2.ComponentBasedCommand.Request(
-                    body_command=body))
-        return command
 
 
 if __name__ == '__main__':

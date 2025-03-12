@@ -184,7 +184,7 @@ int main() {
     Eigen::MatrixXd q_joint_opt;
     for (int i = 0; i < N; i++) {
       robot->ComputeForwardKinematics(state);
-      auto ret = optimal_control.Solve(input, state, control_period);
+      auto ret = optimal_control.Solve(input, state, control_period, 1, robot->GetLimitQUpper(state), robot->GetLimitQdotUpper(state));
 
       if (ret.has_value()) {
         auto err = optimal_control.GetError();

@@ -108,9 +108,11 @@ class OptimalControlCommandBuilder {
                                                        double weight                   //
   );
 
+  OptimalControlCommandBuilder& SetErrorScaling(double error_scaling);
+
   OptimalControlCommandBuilder& SetVelocityLimitScaling(double velocity_limit_scaling);
 
-  OptimalControlCommandBuilder& SetVelocityTrackingGain(double gain);
+  OptimalControlCommandBuilder& SetAccelerationLimitScaling(double acceleration_limit_scaling);
 
   OptimalControlCommandBuilder& SetStopCost(double stop_cost);
 
@@ -322,6 +324,8 @@ class CartesianCommandBuilder {
   CartesianCommandBuilder& SetStopPositionTrackingError(double stop_position_tracking_error);
 
   CartesianCommandBuilder& SetStopOrientationTrackingError(double stop_orientation_tracking_error);
+
+  CartesianCommandBuilder& SetStopJointPositionTrackingError(double stop_joint_position_tracking_error);
 
  private:
   [[nodiscard]] void* Build() const;

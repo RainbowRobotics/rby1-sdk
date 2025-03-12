@@ -33,9 +33,24 @@ if(NOT TARGET DynamixelSDK)
                         ${DynamixelSDK_SRC_PATH}/port_handler_linux.cpp
                 )
         endif()
-        message(STATUS "DynamixelSDK Sources: ${DynamixelSDK_SRCS}")
         add_library(DynamixelSDK
                 ${DynamixelSDK_SRCS}
         )
         target_include_directories(DynamixelSDK PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/DynamixelSDK/c++/include/dynamixel_sdk)
 endif()
+
+###############################################################
+# OSQP
+###############################################################
+set(OSQP_BUILD_DEMO_EXE OFF)
+set(PROFILING ON)
+add_subdirectory(osqp)
+add_library(osqp::osqp ALIAS osqpstatic)
+
+###############################################################
+# OSQP-Eigen
+###############################################################
+set(OSQP_IS_V1 ON)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+add_subdirectory(osqp-eigen)
+target_compile_definitions(OsqpEigen PUBLIC PROFILING)

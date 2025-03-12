@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
   q_joint_right_arm.setZero();
   q_joint_left_arm.setZero();
 
-  double minimum_time = 4.;
+  double minimum_time = 2.5;
 
   if (1) {
     std::cout << "joint position command example 1\n";
@@ -440,8 +440,8 @@ int main(int argc, char** argv) {
   }
 
   double velocity_tracking_gain = 0.01;
-  double stop_cost = 1e-2;
-  double weight = 0.001;
+  double stop_cost = 1e-3;
+  double weight = 1;
   double min_delta_cost = 1e-4;
   int patience = 10;
 
@@ -463,10 +463,9 @@ int main(int argc, char** argv) {
                           .AddCartesianTarget("base", "link_torso_5", T_torso, weight, weight)
                           .AddCartesianTarget("base", "ee_right", T_right, weight, weight)
                           .AddCartesianTarget("base", "ee_left", T_left, weight, weight)
-                          .AddJointPositionTarget("right_arm_2", 3.141592 / 2., weight)
-                          .AddJointPositionTarget("left_arm_2", -3.141592 / 2., weight)
-                          .SetVelocityLimitScaling(0.05)
-                          .SetVelocityTrackingGain(velocity_tracking_gain)
+                          .AddJointPositionTarget("right_arm_2", 3.141592 / 2., weight / 5)
+                          .AddJointPositionTarget("left_arm_2", -3.141592 / 2., weight / 5)
+                          .SetVelocityLimitScaling(0.5)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)
                           .SetPatience(patience))))
@@ -498,9 +497,8 @@ int main(int argc, char** argv) {
                           .AddCartesianTarget("base", "link_torso_5", T_torso, weight, weight)
                           .AddCartesianTarget("base", "ee_right", T_right, weight, weight)
                           .AddCartesianTarget("base", "ee_left", T_left, weight, weight)
-                          .AddJointPositionTarget("right_arm_2", 0., weight)
-                          .AddJointPositionTarget("left_arm_2", -0., weight)
-                          .SetVelocityTrackingGain(velocity_tracking_gain)
+                          .AddJointPositionTarget("right_arm_2", 0., weight / 2)
+                          .AddJointPositionTarget("left_arm_2", -0., weight / 2)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)
                           .SetPatience(patience))))
@@ -521,10 +519,10 @@ int main(int argc, char** argv) {
     T_torso.block(0, 3, 3, 1) << 0, 0, 1.0;
 
     T_right.block(0, 0, 3, 3) = math::SO3::RotY(-3.141592 / 2.);
-    T_right.block(0, 3, 3, 1) << 0.4, -0.3, 1.2;
+    T_right.block(0, 3, 3, 1) << 0.5, -0.3, 1.2;
 
     T_left.block(0, 0, 3, 3) = math::SO3::RotY(-3.141592 / 2.);
-    T_left.block(0, 3, 3, 1) << 0.4, 0.3, 1.2;
+    T_left.block(0, 3, 3, 1) << 0.5, 0.3, 1.2;
 
     Eigen::Vector<double, 3> COM;
     COM << 0., 0., 0.5;
@@ -532,14 +530,14 @@ int main(int argc, char** argv) {
     auto rv = robot
                   ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
                       OptimalControlCommandBuilder()
-                          .SetCenterOfMassTarget("base", COM, weight)
+                          .SetCenterOfMassTarget("base", COM, weight * 5)
+                          .AddCartesianTarget("base", "link_torso_5", Eigen::Matrix4d::Identity(), 0, weight)
                           .AddCartesianTarget("base", "ee_left", T_left, weight, weight)
                           .AddCartesianTarget("base", "ee_right", T_right, weight, weight)
-                          .AddJointPositionTarget("torso_4", 0., weight)
-                          .AddJointPositionTarget("torso_2", -3.141592 / 2., weight)
-                          .AddJointPositionTarget("right_arm_2", 3.141592 / 4., weight)
-                          .AddJointPositionTarget("left_arm_2", -3.141592 / 4., weight)
-                          .SetVelocityTrackingGain(velocity_tracking_gain)
+                          // .AddJointPositionTarget("torso_4", 0., weight)
+                          // .AddJointPositionTarget("torso_2", -3.141592 / 2., weight)
+                          .AddJointPositionTarget("right_arm_2", 3.141592 / 4., weight / 20)
+                          .AddJointPositionTarget("left_arm_2", -3.141592 / 4., weight / 20)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)
                           .SetPatience(patience))))
@@ -575,7 +573,6 @@ int main(int argc, char** argv) {
                                   .AddJointPositionTarget("torso_2", -3.141592 / 2., weight)
                                   .AddJointPositionTarget("torso_0", 0., weight)
                                   .SetStopCost(stop_cost * 1e1)
-                                  .SetVelocityTrackingGain(velocity_tracking_gain)
                                   .SetMinDeltaCost(min_delta_cost)
                                   .SetPatience(patience))
                           .SetRightArmCommand(
@@ -621,7 +618,6 @@ int main(int argc, char** argv) {
         .AddJointPositionTarget("torso_2", -3.141592 / 2., weight)
         .AddJointPositionTarget("torso_0", 0., weight)
         .SetStopCost(stop_cost)
-        .SetVelocityTrackingGain(velocity_tracking_gain)
         .SetMinDeltaCost(min_delta_cost / 10)
         .SetPatience(patience * 10);
 

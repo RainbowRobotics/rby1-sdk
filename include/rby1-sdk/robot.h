@@ -1,5 +1,7 @@
 #pragma once
 
+#include "version.h"
+
 #include <condition_variable>
 #include <functional>
 #include <string>

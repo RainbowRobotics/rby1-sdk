@@ -14,9 +14,8 @@ ACCELERATION_LIMIT = 1.0
 STOP_ORIENTATION_TRACKING_ERROR = 1e-5
 STOP_POSITION_TRACKING_ERROR = 1e-5
 WEIGHT = 1
-STOP_COST = 1e-3
-VELOCITY_TRACKING_GAIN = 0.1
-MIN_DELTA_COST = 1e-4
+STOP_COST = WEIGHT * WEIGHT * 1e-2
+MIN_DELTA_COST = WEIGHT * WEIGHT * 1e-3
 PATIENCE = 10
 
 
@@ -615,6 +614,7 @@ def example_optimal_control_1(robot):
         .add_joint_position_target("right_arm_2", np.pi / 2, WEIGHT / 5)
         .add_joint_position_target("left_arm_2", -np.pi / 2, WEIGHT / 5)
         .set_velocity_limit_scaling(0.5)
+        .set_error_scaling(1.5)
         .set_stop_cost(STOP_COST)
         .set_min_delta_cost(MIN_DELTA_COST)
         .set_patience(PATIENCE)
@@ -1001,7 +1001,8 @@ def main(address, power_device, servo):
     robot.set_parameter("default.acceleration_limit_scaling", "0.8")
     robot.set_parameter("joint_position_command.cutoff_frequency", "5")
     robot.set_parameter("cartesian_command.cutoff_frequency", "5")
-    robot.set_parameter("default.linear_acceleration_limit", "5")
+    robot.set_parameter("default.linear_acceleration_limit", "10")
+    robot.set_parameter("default.angular_acceleration_limit", "5")
     robot.set_parameter("manipulability_threshold", "1e4")
     # robot.set_time_scale(1.0)
 
@@ -1027,8 +1028,8 @@ def main(address, power_device, servo):
     control_manager_state = robot.get_control_manager_state()
 
     if (
-        control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault
-        or control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault
+            control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault
+            or control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault
     ):
 
         if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:

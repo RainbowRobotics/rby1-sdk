@@ -126,6 +126,8 @@ class OptimalControlCommandBuilderImpl {
     target.set_weight(weight);
   }
 
+  void SetErrorScaling(double error_scaling) { req_->mutable_error_scaling()->set_value(error_scaling); }
+
   void SetVelocityLimitScaling(double scaling) { req_->mutable_velocity_limit_scaling()->set_value(scaling); }
 
   void SetAccelerationLimitScaling(double scaling) { req_->mutable_acceleration_limit_scaling()->set_value(scaling); }
@@ -705,6 +707,11 @@ OptimalControlCommandBuilder& OptimalControlCommandBuilder::AddJointPositionTarg
                                                                                    double target_position,
                                                                                    double weight) {
   impl_->AddJointPositionTarget(joint_name, target_position, weight);
+  return *this;
+}
+
+OptimalControlCommandBuilder& OptimalControlCommandBuilder::SetErrorScaling(double error_scaling) {
+  impl_->SetErrorScaling(error_scaling);
   return *this;
 }
 

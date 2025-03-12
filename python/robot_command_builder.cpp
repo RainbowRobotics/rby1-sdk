@@ -30,6 +30,7 @@ void pybind11_robot_command_builder(py::module_& m) {
            "pose"_a, "weight"_a)
       .def("add_joint_position_target", &OptimalControlCommandBuilder::AddJointPositionTarget, "joint_name"_a,
            "target_position"_a, "weight"_a)
+      .def("set_error_scaling", &OptimalControlCommandBuilder::SetErrorScaling, "error_scaling"_a)
       .def("set_velocity_limit_scaling", &OptimalControlCommandBuilder::SetVelocityLimitScaling,
            "velocity_limit_scaling"_a)
       .def("set_acceleration_limit_scaling", &OptimalControlCommandBuilder::SetAccelerationLimitScaling,

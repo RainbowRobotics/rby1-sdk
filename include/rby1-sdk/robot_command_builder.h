@@ -108,6 +108,8 @@ class OptimalControlCommandBuilder {
                                                        double weight                   //
   );
 
+  OptimalControlCommandBuilder& SetErrorScaling(double error_scaling);
+
   OptimalControlCommandBuilder& SetVelocityLimitScaling(double velocity_limit_scaling);
 
   OptimalControlCommandBuilder& SetAccelerationLimitScaling(double acceleration_limit_scaling);

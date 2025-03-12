@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.18)
 if (NOT DEFINED SKBUILD_PROJECT_VERSION)
     file(READ ${CMAKE_CURRENT_SOURCE_DIR}/pyproject.toml PYPROJECT_STR)
     string(REGEX MATCHALL "[^\n\r]+" PYPROJECT_STR_LIST "${PYPROJECT_STR}")
@@ -41,30 +41,6 @@ find_package(gRPC REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(tinyxml2 REQUIRED)
 find_package(nlohmann_json REQUIRED)
-
-include(FetchContent)
-
-set(OSQP_BUILD_DEMO_EXE OFF)
-
-FetchContent_Declare(osqp
-        GIT_REPOSITORY https://github.com/osqp/osqp
-        GIT_TAG ff371613bef82e85fb431590343853846ff96203
-        OVERRIDE_FIND_PACKAGE
-        EXCLUDE_FROM_ALL
-)
-set(PROFILING ON)
-FetchContent_MakeAvailable(osqp)
-add_library(osqp::osqp INTERFACE IMPORTED)
-target_link_libraries(osqp::osqp INTERFACE osqpstatic)
-
-FetchContent_Declare(OsqpEigen
-        GIT_REPOSITORY https://github.com/robotology/osqp-eigen
-        GIT_TAG b9ce7391350e0f1c71e49f7574a8785fb617b5e6
-        OVERRIDE_FIND_PACKAGE
-        EXCLUDE_FROM_ALL
-)
-FetchContent_MakeAvailable(OsqpEigen)
-target_compile_definitions(OsqpEigen PUBLIC -DOSQP_EIGEN_OSQP_IS_V1 -DPROFILING)
 
 ############################################################
 # PROTO

@@ -71,7 +71,7 @@ class OptimalControl {
   }
 
   std::optional<Eigen::VectorXd> Solve(Input in, std::shared_ptr<dyn::State<DOF>> state, double dt,
-                                       Eigen::Vector<double, DOF> velocity_limit,
+                                       double error_scaling, Eigen::Vector<double, DOF> velocity_limit,
                                        Eigen::Vector<double, DOF> acceleration_limit,
                                        bool need_forward_kinematics = false) {
     double err_sum = 0;
@@ -100,6 +100,9 @@ class OptimalControl {
         Eigen::Matrix<double, 6, DOF> J =
             robot_->ComputeBodyJacobian(state, link_target.ref_link_index, link_target.link_index);
         J(Eigen::all, rev_joint_idx_).setZero();
+        Eigen::Vector<double, 6> w;
+        w.head<3>().fill(link_target.weight_orientation < 1e-6 ? 0. : link_target.weight_orientation);
+        w.tail<3>().fill(link_target.weight_position < 1e-6 ? 0. : link_target.weight_position);
 
         {
           Eigen::Matrix<double, 6, 6> A = J * J.transpose();
@@ -107,17 +110,9 @@ class OptimalControl {
           max_cond = std::max(max_cond, cond);
         }
 
-        Eigen::Matrix<double, 6, 1> err = 2 * SE3::Log(T_err) / dt - J * qdot;
+        Eigen::Matrix<double, 6, 1> err = w.asDiagonal() * (SE3::Log(T_err) / dt * error_scaling - J * qdot / 2);
+        J = w.asDiagonal() * J / 2;
 
-        if (link_target.weight_orientation < 1e-6) {
-          err.topRows(3).setZero();
-        }
-        if (link_target.weight_position < 1e-6) {
-          err.bottomRows(3).setZero();
-        }
-
-        err.topRows(3) = err.topRows(3) * link_target.weight_orientation;
-        err.bottomRows(3) = err.bottomRows(3) * link_target.weight_position;
         err_sum += err.squaredNorm();
 
         qp_solver_.AddCostFunction(J, err);
@@ -125,15 +120,19 @@ class OptimalControl {
     }
 
     if (in.com_target.has_value()) {
+      const auto& target = in.com_target.value();
+
       Eigen::Vector3d com;
       Eigen::Matrix<double, 3, DOF> J_com;
       J_com.resize(3, n_joints_);
       com.setZero();
       J_com.setZero();
 
-      com = robot_->ComputeCenterOfMass(state, in.com_target.value().ref_link_index);
-      J_com = robot_->ComputeCenterOfMassJacobian(state, in.com_target.value().ref_link_index);
+      com = robot_->ComputeCenterOfMass(state, target.ref_link_index);
+      J_com = robot_->ComputeCenterOfMassJacobian(state, target.ref_link_index);
       J_com(Eigen::all, rev_joint_idx_).setZero();
+      Eigen::Vector<double, 3> w;
+      w.fill(target.weight < 1e-6 ? 0. : target.weight);
 
       {
         Eigen::Matrix3d A = J_com * J_com.transpose();
@@ -141,30 +140,35 @@ class OptimalControl {
         max_cond = std::max(max_cond, cond);
       }
 
-      Eigen::Vector3d com_target = in.com_target.value().com;
-      Eigen::Vector3d err = 2 * (com_target - com) / dt - J_com * qdot;
+      Eigen::Vector3d err = w.asDiagonal() * ((target.com - com) / dt * error_scaling - J_com * qdot / 2);
+      J_com = w.asDiagonal() * J_com / 2;
 
-      err = err * in.com_target.value().weight;
       err_sum += err.squaredNorm();
 
       qp_solver_.AddCostFunction(J_com, err);
     }
 
     if (in.q_target.has_value()) {
-      Eigen::Matrix<double, DOF, 1> err;
-      err = 2 * (in.q_target.value().q - q) / dt - qdot;
+      const auto& target = in.q_target.value();
 
       Eigen::Matrix<double, DOF, DOF> J;
       J.resize(n_joints_, n_joints_);
-      J.setZero();
-      for (int i = 0; i < n_joints_; i++) {
-        if (in.q_target.value().weight[i] > 1e-6) {
-          J(i, i) = 1;
-        }
-      }
+      J.setIdentity();
       J(Eigen::all, rev_joint_idx_).setZero();
 
-      err = err.cwiseProduct(in.q_target.value().weight);
+      Eigen::Matrix<double, DOF, DOF> w;
+      w.resize(n_joints_, n_joints_);
+      w.setZero();
+      for (int i = 0; i < n_joints_; i++) {
+        if (target.weight[i] > 1e-6) {
+          w(i, i) = target.weight[i];
+        }
+      }
+
+      Eigen::Matrix<double, DOF, 1> err;
+      err = w * ((in.q_target.value().q - q) / dt * error_scaling - qdot / 2);
+      J = w * J / 2;
+
       err_sum += err.squaredNorm();
 
       qp_solver_.AddCostFunction(J, err);

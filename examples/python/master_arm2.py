@@ -1,5 +1,10 @@
 import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'third-party', 'DynamixelSDK', 'python', 'src'))
+
+sys.path.append(
+    os.path.join(
+        os.path.dirname(__file__), "..", "third-party", "DynamixelSDK", "python", "src"
+    )
+)
 
 import dynamixel_sdk as dxl
 import numpy as np
@@ -43,21 +48,29 @@ if not portHandler.setBaudRate(BAUDRATE):
     print("Failed to change the baudrate!")
     exit(1)
 
+
 # Functions
 def send_vibration(portHandler, packetHandler, id, level):
     if id > 0x80:
-        packetHandler.write2ByteTxOnly(portHandler, id, ADDR_GOAL_VIBRATION_LEVEL, level)
+        packetHandler.write2ByteTxOnly(
+            portHandler, id, ADDR_GOAL_VIBRATION_LEVEL, level
+        )
         time.sleep(0.0005)
 
+
 def read_button_status(portHandler, packetHandler, id):
-    result, position, dxl_error = packetHandler.read4ByteTxRx(portHandler, id, ADDR_PRESENT_BUTTON_STATUS)
+    result, position, dxl_error = packetHandler.read4ByteTxRx(
+        portHandler, id, ADDR_PRESENT_BUTTON_STATUS
+    )
     if result == dxl.COMM_SUCCESS:
-        button = (position >> 8) & 0xff
-        trigger = ((position >> 16) & 0xff) | (((position >> 24) & 0xff) << 8)
+        button = (position >> 8) & 0xFF
+        trigger = ((position >> 16) & 0xFF) | (((position >> 24) & 0xFF) << 8)
         return (id, (button, trigger))
     return None
 
+
 # Additional code will be needed to translate other functions such as control_loop, etc.
+
 
 # Main logic
 def main():
@@ -71,7 +84,9 @@ def main():
 
     # Example: Enable Torque
     for id in range(14):
-        packetHandler.write1ByteTxOnly(portHandler, id, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
+        packetHandler.write1ByteTxOnly(
+            portHandler, id, ADDR_TORQUE_ENABLE, TORQUE_ENABLE
+        )
         time.sleep(0.0005)
 
     # Example control loop
@@ -80,6 +95,7 @@ def main():
             # Do some control tasks
             pass
         time.sleep(0.01)
+
 
 if __name__ == "__main__":
     main()

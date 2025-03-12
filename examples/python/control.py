@@ -16,9 +16,7 @@ def cb(rs):
     recorded_velocity = recorded_velocity + [rs.target_position[11]]
 
 
-robot.start_state_update(cb,
-                         0.1  # (Hz)
-                         )
+robot.start_state_update(cb, 0.1)  # (Hz)
 
 robot.power_on(".*")
 robot.servo_on(".*")
@@ -41,7 +39,7 @@ def control(state: rby1_sdk.Robot_A_ControlState):
     i.target = state.position * 0.9
     i.feedback_gain.fill(10)
     i.feedforward_torque.fill(0)
-    i.finish = (count > 1000)
+    i.finish = count > 1000
 
     count = count + 1
 

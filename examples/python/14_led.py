@@ -3,8 +3,8 @@ import argparse
 import time
 
 
-def main(address):
-    robot = rby1_sdk.create_robot_a(address)
+def main(address, model):
+    robot = rby1_sdk.create_robot(address, model)
     robot.connect()
     if not robot.is_connected():
         print("Failed to connect robot")
@@ -58,6 +58,9 @@ def main(address):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="14_led")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
+    parser.add_argument(
+        "--model", type=str, default="a", help="Robot Model Name (default: 'a')"
+    )
     args = parser.parse_args()
 
-    main(address=args.address)
+    main(address=args.address, model=args.model)

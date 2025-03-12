@@ -1028,8 +1028,8 @@ def main(address, power_device, servo):
     control_manager_state = robot.get_control_manager_state()
 
     if (
-            control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault
-            or control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault
+        control_manager_state.state == rby1_sdk.ControlManagerState.State.MinorFault
+        or control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault
     ):
 
         if control_manager_state.state == rby1_sdk.ControlManagerState.State.MajorFault:

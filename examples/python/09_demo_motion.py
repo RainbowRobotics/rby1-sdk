@@ -515,8 +515,8 @@ def example_relative_command_1(robot):
         .set_command_header(CommandHeaderBuilder().set_control_hold_time(MINIMUM_TIME))
         .set_reference_link_name("ee_right")
         .set_link_name("ee_left")
-        .set_translation_weight([2000, 2000, 2000])
-        .set_rotation_weight([100, 100, 100])
+        .set_translation_weight([1000, 1000, 1000])
+        .set_rotation_weight([50, 50, 50])
         .set_transformation(T_diff)
     )
 
@@ -998,11 +998,11 @@ def main(address, power, servo):
     robot.start_state_update(cb, 0.1)
 
     # robot.factory_reset_all_parameters()
-    robot.set_parameter("default.acceleration_limit_scaling", "0.8")
+    robot.set_parameter("default.acceleration_limit_scaling", "1.0")
     robot.set_parameter("joint_position_command.cutoff_frequency", "5")
     robot.set_parameter("cartesian_command.cutoff_frequency", "5")
-    robot.set_parameter("default.linear_acceleration_limit", "10")
-    robot.set_parameter("default.angular_acceleration_limit", "5")
+    robot.set_parameter("default.linear_acceleration_limit", "15")
+    robot.set_parameter("default.angular_acceleration_limit", "10")
     robot.set_parameter("manipulability_threshold", "1e4")
     # robot.set_time_scale(1.0)
 

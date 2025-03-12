@@ -4,7 +4,7 @@ import argparse
 import time
 
 
-def main(address, power_device, model):
+def main(address, power, model):
     robot = rby1_sdk.create_robot(address, model)
     robot.connect()
 
@@ -12,8 +12,8 @@ def main(address, power_device, model):
         print("Robot is not connected")
         exit(1)
 
-    if not robot.is_power_on(power_device):
-        rv = robot.power_on(power_device)
+    if not robot.is_power_on(power):
+        rv = robot.power_on(power)
         if not rv:
             print("Failed to power on")
             exit(1)
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="18_check_firmware_version")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
-        "--device",
+        "--power",
         type=str,
         default=".*",
         help="Power device name regex pattern (default: '.*')",
@@ -37,4 +37,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main(address=args.address, power_device=args.device, model=args.model)
+    main(address=args.address, power=args.power, model=args.model)

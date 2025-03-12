@@ -67,6 +67,7 @@ protobuf_generate(
         USAGE_REQUIREMENT INTERFACE
         IMPORT_DIRS ${PROTO_IMPORT_DIR}
         PROTOC_OUT_DIR ${PROTO_BINARY_DIR})
+
 ############################################################
 
 configure_file(

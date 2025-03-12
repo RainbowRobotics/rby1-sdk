@@ -14,8 +14,8 @@ ACCELERATION_LIMIT = 1.0
 STOP_ORIENTATION_TRACKING_ERROR = 1e-5
 STOP_POSITION_TRACKING_ERROR = 1e-5
 WEIGHT = 1
-STOP_COST = WEIGHT * WEIGHT * 1e-2
-MIN_DELTA_COST = WEIGHT * WEIGHT * 1e-3
+STOP_COST = WEIGHT * WEIGHT * 2e-3
+MIN_DELTA_COST = WEIGHT * WEIGHT * 2e-4
 PATIENCE = 10
 
 
@@ -983,7 +983,7 @@ def go_to_home_pose_2(robot):
     return 0
 
 
-def main(address, power_device, servo):
+def main(address, power, servo):
     print("Attempting to connect to the robot...")
 
     robot = rby1_sdk.create_robot_a(address)
@@ -1012,8 +1012,8 @@ def main(address, power_device, servo):
         print("Robot is not connected")
         exit(1)
 
-    if not robot.is_power_on(power_device):
-        rv = robot.power_on(power_device)
+    if not robot.is_power_on(power):
+        rv = robot.power_on(power)
         if not rv:
             print("Failed to power on")
             exit(1)
@@ -1093,7 +1093,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="09_demo_motion")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
-        "--device",
+        "--power",
         type=str,
         default=".*",
         help="Power device name regex pattern (default: '.*')",
@@ -1106,4 +1106,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main(address=args.address, power_device=args.device, servo=args.servo)
+    main(address=args.address, power=args.power, servo=args.servo)

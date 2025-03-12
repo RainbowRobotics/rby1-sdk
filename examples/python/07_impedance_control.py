@@ -5,6 +5,10 @@ import numpy as np
 import math
 import sys
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 BODY_LINK_NAME = {"A": "link_torso_5", "T5": "link_torso_4", "M": "link_torso_5"}
 
 CARTESIAN_COMMAND_PARAMETER = {
@@ -158,15 +162,15 @@ def main(address, model, power, servo):
     robot.set_parameter("default.linear_acceleration_limit", "5")
 
     if not movej(
-            robot,
-            (
-                    np.deg2rad([0, 30, -60, 30, 0, 0])
-                    if robot.model().model_name != "T5"
-                    else np.deg2rad([30, -60, 30, 0, 0])
-            ),
-            np.deg2rad([30, -10, 0, -100, 0, 20, 0]),
-            np.deg2rad([30, 10, 0, -100, 0, 20, 0]),
-            5,
+        robot,
+        (
+            np.deg2rad([0, 30, -60, 30, 0, 0])
+            if robot.model().model_name != "T5"
+            else np.deg2rad([30, -60, 30, 0, 0])
+        ),
+        np.deg2rad([30, -10, 0, -100, 0, 20, 0]),
+        np.deg2rad([30, 10, 0, -100, 0, 20, 0]),
+        5,
     ):
         exit(1)
 

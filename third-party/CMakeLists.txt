@@ -43,8 +43,11 @@ endif()
 # OSQP
 ###############################################################
 set(OSQP_BUILD_DEMO_EXE OFF)
+set(OSQP_BUILD_SHARED_LIB OFF)
 set(PROFILING ON)
-add_subdirectory(osqp)
+set(CMAKE_SKIP_INSTALL_RULES ON)
+add_subdirectory(osqp EXCLUDE_FROM_ALL)
+set(CMAKE_SKIP_INSTALL_RULES OFF)
 add_library(osqp::osqp ALIAS osqpstatic)
 
 ###############################################################
@@ -52,5 +55,7 @@ add_library(osqp::osqp ALIAS osqpstatic)
 ###############################################################
 set(OSQP_IS_V1 ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-add_subdirectory(osqp-eigen)
+set(CMAKE_SKIP_INSTALL_RULES ON)
+add_subdirectory(osqp-eigen EXCLUDE_FROM_ALL)
+set(CMAKE_SKIP_INSTALL_RULES OFF)
 target_compile_definitions(OsqpEigen PUBLIC PROFILING)

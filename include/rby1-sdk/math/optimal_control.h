@@ -178,7 +178,7 @@ class OptimalControl {
     Eigen::Matrix<double, DOF, -1> J_pinv = J.completeOrthogonalDecomposition().pseudoInverse();
     Eigen::Matrix<double, DOF, DOF> P = Eigen::Matrix<double, DOF, DOF>::Identity(n_joints_, n_joints_) - J_pinv * J;
 
-    qp_solver_.AddCostFunction(P * 0.01, Eigen::Vector<double, DOF>::Zero(n_joints_));
+    qp_solver_.AddCostFunction(P * 1, Eigen::Vector<double, DOF>::Zero(n_joints_));
     qp_solver_.SetCostFunction(qp_solver_.GetACost(), qp_solver_.GetBCost());
 
     Eigen::Matrix<double, DOF, DOF> A_const;

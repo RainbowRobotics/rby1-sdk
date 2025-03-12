@@ -11,8 +11,8 @@ MINIMUM_TIME = 2.5
 LINEAR_VELOCITY_LIMIT = 1.5
 ANGULAR_VELOCITY_LIMIT = np.pi * 1.5
 ACCELERATION_LIMIT = 1.0
-STOP_ORIENTATION_TRACKING_ERROR = 1e-5
-STOP_POSITION_TRACKING_ERROR = 1e-5
+STOP_ORIENTATION_TRACKING_ERROR = 1e-4
+STOP_POSITION_TRACKING_ERROR = 1e-3
 WEIGHT = 1
 STOP_COST = WEIGHT * WEIGHT * 2e-3
 MIN_DELTA_COST = WEIGHT * WEIGHT * 2e-4
@@ -143,7 +143,7 @@ def example_cartesian_command_1(robot):
                     T_torso,
                     LINEAR_VELOCITY_LIMIT,
                     ANGULAR_VELOCITY_LIMIT,
-                    ACCELERATION_LIMIT / 2,
+                    ACCELERATION_LIMIT,
                 )
                 .set_minimum_time(MINIMUM_TIME * 2)
                 .set_stop_orientation_tracking_error(STOP_ORIENTATION_TRACKING_ERROR)
@@ -1000,8 +1000,8 @@ def main(address, power, servo):
     # robot.factory_reset_all_parameters()
     robot.set_parameter("default.acceleration_limit_scaling", "1.0")
     robot.set_parameter("joint_position_command.cutoff_frequency", "5")
-    robot.set_parameter("cartesian_command.cutoff_frequency", "5")
-    robot.set_parameter("default.linear_acceleration_limit", "15")
+    robot.set_parameter("cartesian_command.cutoff_frequency", "15")
+    robot.set_parameter("default.linear_acceleration_limit", "20")
     robot.set_parameter("default.angular_acceleration_limit", "10")
     robot.set_parameter("manipulability_threshold", "1e4")
     # robot.set_time_scale(1.0)

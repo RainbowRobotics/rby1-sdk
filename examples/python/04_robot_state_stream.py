@@ -6,7 +6,7 @@ import numpy as np
 
 
 def callback(robot_state, control_manager_state: rby1_sdk.ControlManagerState):
-    np.set_printoptions(precision=3, suppress=True, floatmode='fixed')
+    np.set_printoptions(precision=3, suppress=True, floatmode="fixed")
 
     print(robot_state)
     print(control_manager_state)
@@ -17,21 +17,19 @@ def callback(robot_state, control_manager_state: rby1_sdk.ControlManagerState):
 #     print(robot_state)
 
 
-def main(address, model, power_device):
+def main(address, model, power):
     robot = rby1_sdk.create_robot(address, model)
     robot.connect()
     if not robot.is_connected():
         print("Robot is not connected")
         exit(1)
-    if not robot.is_power_on(power_device):
-        rv = robot.power_on(power_device)
+    if not robot.is_power_on(power):
+        rv = robot.power_on(power)
         if not rv:
             print("Failed to power on")
             exit(1)
 
-    robot.start_state_update(callback,
-                             rate=10  # Hz
-                             )
+    robot.start_state_update(callback, rate=10)  # Hz
     try:
         time.sleep(100)
     except KeyboardInterrupt:
@@ -42,11 +40,16 @@ def main(address, model, power_device):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="04_robot_state_stream")
-    parser.add_argument('--address', type=str, required=True, help="Robot address")
-    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
-    parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
+    parser.add_argument("--address", type=str, required=True, help="Robot address")
+    parser.add_argument(
+        "--model", type=str, default="a", help="Robot Model Name (default: 'a')"
+    )
+    parser.add_argument(
+        "--power",
+        type=str,
+        default=".*",
+        help="Power device name regex pattern (default: '.*')",
+    )
     args = parser.parse_args()
 
-    main(address=args.address,
-         model=args.model,
-         power_device=args.device)
+    main(address=args.address, model=args.model, power=args.power)

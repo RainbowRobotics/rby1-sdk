@@ -26,8 +26,6 @@ def cb(rs):
     print(f"  output voltage: {rs.tool_flange_left.output_voltage}")
 
 
-robot.start_state_update(cb,
-                         10  # (Hz)
-                         )
+robot.start_state_update(cb, 10)  # (Hz)
 
 time.sleep(100)

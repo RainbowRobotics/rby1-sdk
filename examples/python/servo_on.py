@@ -9,4 +9,3 @@ if not robot.is_power_on("48v"):
     robot.power_on("48v")
 
 print("Result:", robot.servo_on(".*"))
-

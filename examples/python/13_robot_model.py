@@ -34,23 +34,25 @@ def main(address, model):
     # 현재 사용하고 있는 모델 중 head_1의 effort 리밋 값을 변경 (예시)
     model_tree = ET.ElementTree(ET.fromstring(model))
     model_root = model_tree.getroot()
-    for joint in model_root.findall('joint'):
-        if joint.get('name') == 'head_1':
-            joint.find('limit').set('effort', '500')
+    for joint in model_root.findall("joint"):
+        if joint.get("name") == "head_1":
+            joint.find("limit").set("effort", "500")
 
     # Upload model and save model with name 'temp'
     print(robot.import_robot_model("temp", ET.tostring(model_root).decode()))
 
     # Set robot model
-    robot.set_parameter("model_name", "\"temp\"")
+    robot.set_parameter("model_name", '"temp"')
 
     # After reboot, the robot will use uploaded robot model
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="13_robot_model")
-    parser.add_argument('--address', type=str, required=True, help="Robot address")
-    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
+    parser.add_argument("--address", type=str, required=True, help="Robot address")
+    parser.add_argument(
+        "--model", type=str, default="a", help="Robot Model Name (default: 'a')"
+    )
     args = parser.parse_args()
 
     main(address=args.address, model=args.model)

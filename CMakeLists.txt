@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.18)
 if (NOT DEFINED SKBUILD_PROJECT_VERSION)
     file(READ ${CMAKE_CURRENT_SOURCE_DIR}/pyproject.toml PYPROJECT_STR)
     string(REGEX MATCHALL "[^\n\r]+" PYPROJECT_STR_LIST "${PYPROJECT_STR}")
@@ -42,29 +42,6 @@ find_package(Eigen3 REQUIRED)
 find_package(tinyxml2 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
-include(FetchContent)
-
-set(OSQP_BUILD_DEMO_EXE OFF)
-
-FetchContent_Declare(osqp
-        GIT_REPOSITORY https://github.com/osqp/osqp
-        GIT_TAG ff371613bef82e85fb431590343853846ff96203
-        OVERRIDE_FIND_PACKAGE
-        EXCLUDE_FROM_ALL
-)
-FetchContent_MakeAvailable(osqp)
-add_library(osqp::osqp INTERFACE IMPORTED)
-target_link_libraries(osqp::osqp INTERFACE osqpstatic)
-
-FetchContent_Declare(OsqpEigen
-        GIT_REPOSITORY https://github.com/robotology/osqp-eigen
-        GIT_TAG b9ce7391350e0f1c71e49f7574a8785fb617b5e6
-        OVERRIDE_FIND_PACKAGE
-        EXCLUDE_FROM_ALL
-)
-FetchContent_MakeAvailable(OsqpEigen)
-target_compile_definitions(OsqpEigen PUBLIC -DOSQP_EIGEN_OSQP_IS_V1)
-
 ############################################################
 # PROTO
 ############################################################
@@ -90,7 +67,13 @@ protobuf_generate(
         USAGE_REQUIREMENT INTERFACE
         IMPORT_DIRS ${PROTO_IMPORT_DIR}
         PROTOC_OUT_DIR ${PROTO_BINARY_DIR})
+
 ############################################################
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/version.h
+)
 
 add_subdirectory(third-party)
 add_subdirectory(src)
@@ -129,6 +112,7 @@ if ((NOT BUILD_PYTHON_BINDINGS)
 
     set_target_properties(rby1-sdk PROPERTIES EXPORT_NAME rby1-sdk)
 
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/version.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rby1-sdk)
     install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
     if (INSTALL_MODELS)
         install(DIRECTORY models/ DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/rby1-sdk/models)

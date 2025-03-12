@@ -15,7 +15,7 @@ class QPSolver {
 
   ~QPSolver();
 
-  void Setup(int n_var, int n_const);
+  void Setup(int n_var, int n_const, double time_limit = 2e-3);
 
   void InitFunction();
 

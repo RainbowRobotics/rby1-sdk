@@ -17,11 +17,16 @@ def main(address, model, power_device):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="02_power")
-    parser.add_argument('--address', type=str, required=True, help="Robot address")
-    parser.add_argument('--model', type=str, default='a', help="Robot Model Name (default: 'a')")
-    parser.add_argument('--device', type=str, default=".*", help="Power device name regex pattern (default: '.*')")
+    parser.add_argument("--address", type=str, required=True, help="Robot address")
+    parser.add_argument(
+        "--model", type=str, default="a", help="Robot Model Name (default: 'a')"
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default=".*",
+        help="Power device name regex pattern (default: '.*')",
+    )
     args = parser.parse_args()
 
-    main(address=args.address,
-         model=args.model,
-         power_device=args.device)
+    main(address=args.address, model=args.model, power_device=args.device)

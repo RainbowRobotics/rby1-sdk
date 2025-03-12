@@ -14,9 +14,7 @@ def cb(state: rby1_sdk.RobotState_A):
     print(state)
 
 
-robot.start_state_update(cb,
-                         10  # (Hz)
-                         )
+robot.start_state_update(cb, 10)  # (Hz)
 
 robot.power_on(".*")
 robot.servo_on(".*")

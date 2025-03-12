@@ -91,7 +91,9 @@ class JointPositionCommandBuilderImpl {
 
 class OptimalControlCommandBuilderImpl {
  public:
-  OptimalControlCommandBuilderImpl() : req_(std::make_unique<api::OptimalControlCommand::Request>()) {}
+  OptimalControlCommandBuilderImpl() : req_(std::make_unique<api::OptimalControlCommand::Request>()) {
+    req_->mutable_velocity_tracking_gain()->set_value(0);
+  }
 
   void SetCommandHeader(const CommandHeaderBuilder& builder) {
     req_->set_allocated_command_header(static_cast<api::CommandHeader::Request*>(builder.Build()));
@@ -124,9 +126,11 @@ class OptimalControlCommandBuilderImpl {
     target.set_weight(weight);
   }
 
+  void SetErrorScaling(double error_scaling) { req_->mutable_error_scaling()->set_value(error_scaling); }
+
   void SetVelocityLimitScaling(double scaling) { req_->mutable_velocity_limit_scaling()->set_value(scaling); }
 
-  void SetVelocityTrackingGain(double gain) { req_->mutable_velocity_tracking_gain()->set_value(gain); }
+  void SetAccelerationLimitScaling(double scaling) { req_->mutable_acceleration_limit_scaling()->set_value(scaling); }
 
   void SetStopCost(double stop_cost) { req_->mutable_stop_cost()->set_value(stop_cost); }
 
@@ -364,6 +368,10 @@ class CartesianCommandBuilderImpl {
 
   void SetStopOrientationTrackingError(double stop_orientation_tracking_error) {
     req_->mutable_stop_orientation_tracking_error()->set_value(stop_orientation_tracking_error);
+  }
+
+  void SetStopJointPositionTrackingError(double stop_joint_position_tracking_error) {
+    req_->mutable_stop_joint_position_tracking_error()->set_value(stop_joint_position_tracking_error);
   }
 
   api::CartesianCommand::Request* Build() { return req_.release(); }
@@ -702,13 +710,19 @@ OptimalControlCommandBuilder& OptimalControlCommandBuilder::AddJointPositionTarg
   return *this;
 }
 
+OptimalControlCommandBuilder& OptimalControlCommandBuilder::SetErrorScaling(double error_scaling) {
+  impl_->SetErrorScaling(error_scaling);
+  return *this;
+}
+
 OptimalControlCommandBuilder& OptimalControlCommandBuilder::SetVelocityLimitScaling(double velocity_limit_scaling) {
   impl_->SetVelocityLimitScaling(velocity_limit_scaling);
   return *this;
 }
 
-OptimalControlCommandBuilder& OptimalControlCommandBuilder::SetVelocityTrackingGain(double gain) {
-  impl_->SetVelocityTrackingGain(gain);
+OptimalControlCommandBuilder& OptimalControlCommandBuilder::SetAccelerationLimitScaling(
+    double acceleration_limit_scaling) {
+  impl_->SetAccelerationLimitScaling(acceleration_limit_scaling);
   return *this;
 }
 
@@ -941,6 +955,12 @@ CartesianCommandBuilder& CartesianCommandBuilder::SetStopPositionTrackingError(d
 CartesianCommandBuilder& CartesianCommandBuilder::SetStopOrientationTrackingError(
     double stop_orientation_tracking_error) {
   impl_->SetStopOrientationTrackingError(stop_orientation_tracking_error);
+  return *this;
+}
+
+CartesianCommandBuilder& CartesianCommandBuilder::SetStopJointPositionTrackingError(
+    double stop_joint_position_tracking_error) {
+  impl_->SetStopJointPositionTrackingError(stop_joint_position_tracking_error);
   return *this;
 }
 

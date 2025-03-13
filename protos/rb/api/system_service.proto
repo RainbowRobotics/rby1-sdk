@@ -14,4 +14,14 @@ service SystemService {
   rpc SetBatteryConfig(SetBatteryConfigRequest) returns (SetBatteryConfigResponse) {}
 
   rpc ResetBatteryConfig(ResetBatteryConfigRequest) returns (ResetBatteryConfigResponse) {}
+
+  rpc ResetNetworkSetting(ResetNetworkSettingRequest) returns (ResetNetworkSettingResponse) {}
+
+  rpc ScanWifi(ScanWifiRequest) returns (ScanWifiResponse) {}
+
+  rpc ConnectWifi(ConnectWifiRequest) returns (ConnectWifiResponse) {}
+
+  rpc DisconnectWifi(DisconnectWifiRequest) returns (DisconnectWifiResponse) {}
+
+  rpc GetWifiStatus(GetWifiStatusRequest) returns (GetWifiStatusResponse) {}
 }

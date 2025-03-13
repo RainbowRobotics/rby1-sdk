@@ -130,7 +130,7 @@ message CartesianCommand {
   message TrackingError {
     double position_error = 1;
 
-    double rotation_error = 2;
+    double orientation_error = 2;
   }
 
   message Request {
@@ -152,7 +152,13 @@ message CartesianCommand {
   message Feedback {
     CommandHeader.Feedback command_header_feedback = 1;
 
-    repeated TrackingError tracking_errors = 2;
+    repeated TrackingError se3_pose_tracking_errors = 2;
+
+    repeated double joint_position_tracking_errors = 3;
+
+    double remain_time = 4;
+
+    double manipulability = 5;
   }
 }
 

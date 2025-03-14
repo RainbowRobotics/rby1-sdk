@@ -504,7 +504,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
   double right_arm_minimum_time = 1.;
   double left_arm_minimum_time = 1.;
-  double lpf_update_ratio = 0.1;
+  double lpf_update_ratio = 0.2;
   double torso_minimum_time = 1.0;
   double wheel_minimum_time = 0.5;
 
@@ -574,6 +574,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
   }
 
   std::unique_ptr<RobotCommandStreamHandler<y1_model::A>> stream;
+  // std::cout<<"test1111" <<std::endl;
   stream = robot->CreateCommandStream();
 
   bool flag_mode_change = false;
@@ -589,10 +590,12 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
   JoystickReceiver receiver(port, num_axes, num_buttons, num_hats);
   receiver.start();
-
+  // std::cout<<"test2222222" <<std::endl;
   while (1) {
     auto joy_stick_data = receiver.getJoystickData();
-
+    // for (auto item : joy_stick_data.buttons){
+    //   std::cout<<item <<std::endl;
+    // }
     if (joy_stick_data.buttons[6]) {
       if (!flag_mode_change) {
         redandancy_mode = !redandancy_mode;
@@ -739,7 +742,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
         Eigen::Matrix<double, 4, 4> T_right_from_torso, T_left_from_torso;
         T_right_from_torso = dyn->ComputeTransformation(dyn_state, 1, 2);
         T_left_from_torso = dyn->ComputeTransformation(dyn_state, 1, 3);
-        right_arm_command.AddTarget("link_torso_5", "ee_right", T_right_from_torso, 1, 3.141592, 100)
+        right_arm_command.AddTarget("link_torso_5", "ee_right", T_right_from_torso, 1, 3.141592, 1)
             .AddJointPositionTarget("right_arm_0", q_joint_right_target(0), 3.14, 100)
             .AddJointPositionTarget("right_arm_1", q_joint_right_target(1), 3.14, 100)
             .AddJointPositionTarget("right_arm_2", q_joint_right_target(2), 3.14, 100)
@@ -752,7 +755,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
             .SetStopPositionTrackingError(stop_position_tracking_error / 1000.0)
             .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time));
 
-        left_arm_command.AddTarget("link_torso_5", "ee_left", T_left_from_torso, 1, 3.141592, 100)
+        left_arm_command.AddTarget("link_torso_5", "ee_left", T_left_from_torso, 1, 3.141592, 1)
             .AddJointPositionTarget("left_arm_0", q_joint_left_target(0), 3.14, 100)
             .AddJointPositionTarget("left_arm_1", q_joint_left_target(1), 3.14, 100)
             .AddJointPositionTarget("left_arm_2", q_joint_left_target(2), 3.14, 100)
@@ -781,7 +784,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
         T_right_from_torso = dyn->ComputeTransformation(dyn_state, 0, 2);
         T_left_from_torso = dyn->ComputeTransformation(dyn_state, 0, 3);
         right_arm_command
-            .AddTarget("base", "ee_right", T_right_from_torso, 1, 3.141592, 100)
+            .AddTarget("base", "ee_right", T_right_from_torso, 3.141592, 3.141592, 1)
             // .AddJointPositionTarget("right_arm_2", q_joint_rby1_24x1(2+6+2) + joy_stick_data.axisRightX/10.0, 3.14, 100)
             .AddJointPositionTarget("right_arm_2", q_joint_rby1_24x1(2 + 6 + 2) + joy_stick_data.axes[3] / 10.0, 3.14,
                                     100)
@@ -791,7 +794,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
             .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time));
 
         left_arm_command
-            .AddTarget("base", "ee_left", T_left_from_torso, 1, 3.141592, 100)
+            .AddTarget("base", "ee_left", T_left_from_torso, 3.141592, 3.141592, 1)
             // .AddJointPositionTarget("left_arm_2", q_joint_rby1_24x1(2+6+2+7) + joy_stick_data.axisLeftX/10.0, 3.14, 100)
             .AddJointPositionTarget("left_arm_2", q_joint_rby1_24x1(2 + 6 + 2 + 7) + joy_stick_data.axes[0] / 10.0,
                                     3.14, 100)
@@ -818,7 +821,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
     {
       //torso command
-      torso_command.AddTarget("base", "link_torso_5", T_torso, 1, 3.141592, 3)
+      torso_command.AddTarget("base", "link_torso_5", T_torso, 3.141592, 3.141592, 1)
           .SetMinimumTime(torso_minimum_time)
           .SetStopOrientationTrackingError(stop_orientation_tracking_error)
           .SetStopPositionTrackingError(stop_position_tracking_error)
@@ -1284,7 +1287,7 @@ int main(int argc, char** argv) {
   std::cout << "Starting state update..." << std::endl;
 
   robot->SetParameter("joint_position_command.cutoff_frequency", "10.0", false);
-  robot->SetParameter("default.acceleration_limit_scaling", "1.0", false);
+  robot->SetParameter("default.acceleration_limit_scaling", "1.5", false);
 
   robot->StartStateUpdate(
       [&](const auto& state) {

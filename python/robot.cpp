@@ -319,6 +319,13 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("reset_battery_config", &Robot<T>::ResetBatteryConfig)
       .def("wait_for_control_ready", &Robot<T>::WaitForControlReady, "timeout_ms"_a)
 
+      .def("reset_network_setting", &Robot<T>::ResetNetworkSetting, py::call_guard<py::gil_scoped_release>())
+      .def("scan_wifi", &Robot<T>::ScanWifi, py::call_guard<py::gil_scoped_release>())
+      .def("connect_wifi", &Robot<T>::ConnectWifi, "ssid"_a, "password"_a = "", "use_dhcp"_a = true,
+           "ip_address"_a = "", "gateway"_a = "", "dns"_a = std::vector<std::string>{}, py::call_guard<py::gil_scoped_release>())
+      .def("disconnect_wifi", &Robot<T>::DisconnectWifi, py::call_guard<py::gil_scoped_release>())
+      .def("get_wifi_status", &Robot<T>::GetWifiStatus, py::call_guard<py::gil_scoped_release>())
+
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)
       .def("set_position_d_gain", &Robot<T>::SetPositionDGain, "dev_name"_a, "d_gain"_a)

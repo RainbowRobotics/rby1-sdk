@@ -7,13 +7,13 @@
 #include <string>
 
 #include "control_manager_state.h"
+#include "dynamics/robot.h"
 #include "log.h"
+#include "net/types.h"
 #include "robot_command_builder.h"
 #include "robot_command_feedback.h"
 #include "robot_info.h"
 #include "robot_state.h"
-
-#include "dynamics/robot.h"
 
 namespace rb {
 
@@ -83,15 +83,23 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool IsServoOn(const std::string& dev_name) const;
 
   bool SetPositionPGain(const std::string& dev_name, uint16_t p_gain) const;
+
   bool SetPositionIGain(const std::string& dev_name, uint16_t i_gain) const;
+
   bool SetPositionDGain(const std::string& dev_name, uint16_t d_gain) const;
+
   bool SetPositionPIDGain(const std::string& dev_name, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain) const;
+
   bool SetPositionPIDGain(const std::string& dev_name, const rb::PIDGain& pid_gain) const;
 
   std::vector<rb::PIDGain> GetTorsoPositionPIDGains() const;
+
   std::vector<rb::PIDGain> GetRightArmPositionPIDGains() const;
+
   std::vector<rb::PIDGain> GetLeftArmPositionPIDGains() const;
+
   std::vector<rb::PIDGain> GetHeadPositionPIDGains() const;
+
   rb::PIDGain GetPositionPIDGain(const std::string& dev_name) const;
 
   bool BreakEngage(const std::string& dev_name) const;
@@ -182,6 +190,18 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool ResetBatteryConfig() const;
 
   bool WaitForControlReady(long timeout_ms) const;
+
+  bool ResetNetworkSetting() const;
+
+  std::vector<WifiNetwork> ScanWifi() const;
+
+  bool ConnectWifi(const std::string& ssid, const std::string& password = "", bool use_dhcp = true,
+                   const std::string& ip_address = "", const std::string& gateway = "",
+                   const std::vector<std::string>& dns = {}) const;
+
+  bool DisconnectWifi() const;
+
+  std::optional<WifiStatus> GetWifiStatus() const;
 
  private:
   explicit Robot(std::string address);

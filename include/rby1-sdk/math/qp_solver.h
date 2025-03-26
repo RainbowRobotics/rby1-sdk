@@ -1,11 +1,27 @@
 #pragma once
 
+#include <exception>
 #include <memory>
 #include <optional>
 
 #include "Eigen/Core"
 
 namespace rb::math {
+
+class QPSolverException : public std::exception {
+ public:
+  explicit QPSolverException(int error_code);
+
+  const char* what() const noexcept override;
+
+  int code() const noexcept;
+
+  static std::string GenerateMessage(int code);
+
+ private:
+  int error_code_;
+  std::string message_;
+};
 
 class QPSolverImpl;
 
@@ -29,7 +45,12 @@ class QPSolver {
 
   void ResetIsFirst();
 
-  std::optional<Eigen::VectorXd> Solve();
+  /**
+   * Solve the QP problem
+   * @return Solution
+   * @throw QPSolverException
+   */
+  Eigen::VectorXd Solve();
 
   Eigen::MatrixXd GetACost() const;  // NOLINT
 

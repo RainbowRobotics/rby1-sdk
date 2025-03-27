@@ -523,8 +523,8 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
   Eigen::Matrix<double, 4, 4> T_torso;
   T_torso.setIdentity();
   T_torso.block(0, 3, 3, 1) << 0, 0, 1.1;
-  double stop_orientation_tracking_error = 1e-5;
-  double stop_position_tracking_error = 1e-5;
+  double stop_orientation_tracking_error = 0.5e-2;
+  double stop_position_tracking_error = 0.5e-2;
 
   Eigen::Vector<double, 7> q_joint_right_target, q_joint_left_target;
   q_joint_right_target.setZero();
@@ -742,27 +742,27 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
         Eigen::Matrix<double, 4, 4> T_right_from_torso, T_left_from_torso;
         T_right_from_torso = dyn->ComputeTransformation(dyn_state, 1, 2);
         T_left_from_torso = dyn->ComputeTransformation(dyn_state, 1, 3);
-        right_arm_command.AddTarget("link_torso_5", "ee_right", T_right_from_torso, 1, 3.141592, 1)
-            .AddJointPositionTarget("right_arm_0", q_joint_right_target(0), 3.14, 100)
-            .AddJointPositionTarget("right_arm_1", q_joint_right_target(1), 3.14, 100)
-            .AddJointPositionTarget("right_arm_2", q_joint_right_target(2), 3.14, 100)
-            .AddJointPositionTarget("right_arm_3", q_joint_right_target(3), 3.14, 100)
-            .AddJointPositionTarget("right_arm_4", q_joint_right_target(4), 3.14, 100)
-            .AddJointPositionTarget("right_arm_5", q_joint_right_target(5), 3.14, 100)
-            .AddJointPositionTarget("right_arm_6", q_joint_right_target(6), 3.14, 100)
+        right_arm_command.AddTarget("link_torso_5", "ee_right", T_right_from_torso, 1*1000, 3.141592*60, 1)
+            .AddJointPositionTarget("right_arm_0", q_joint_right_target(0), 3.14*60, 100*30)
+            .AddJointPositionTarget("right_arm_1", q_joint_right_target(1), 3.14*60, 100*30)
+            .AddJointPositionTarget("right_arm_2", q_joint_right_target(2), 3.14*60, 100*30)
+            .AddJointPositionTarget("right_arm_3", q_joint_right_target(3), 3.14*60, 100*30)
+            .AddJointPositionTarget("right_arm_4", q_joint_right_target(4), 3.14*60, 100*30)
+            .AddJointPositionTarget("right_arm_5", q_joint_right_target(5), 3.14*60, 100*30)
+            .AddJointPositionTarget("right_arm_6", q_joint_right_target(6), 3.14*60, 100*30)
             .SetMinimumTime(right_arm_minimum_time)
             .SetStopOrientationTrackingError(stop_orientation_tracking_error / 1000.0)
             .SetStopPositionTrackingError(stop_position_tracking_error / 1000.0)
             .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time));
 
-        left_arm_command.AddTarget("link_torso_5", "ee_left", T_left_from_torso, 1, 3.141592, 1)
-            .AddJointPositionTarget("left_arm_0", q_joint_left_target(0), 3.14, 100)
-            .AddJointPositionTarget("left_arm_1", q_joint_left_target(1), 3.14, 100)
-            .AddJointPositionTarget("left_arm_2", q_joint_left_target(2), 3.14, 100)
-            .AddJointPositionTarget("left_arm_3", q_joint_left_target(3), 3.14, 100)
-            .AddJointPositionTarget("left_arm_4", q_joint_left_target(4), 3.14, 100)
-            .AddJointPositionTarget("left_arm_5", q_joint_left_target(5), 3.14, 100)
-            .AddJointPositionTarget("left_arm_6", q_joint_left_target(6), 3.14, 100)
+        left_arm_command.AddTarget("link_torso_5", "ee_left", T_left_from_torso, 1*1000, 3.141592*60, 1)
+            .AddJointPositionTarget("left_arm_0", q_joint_left_target(0), 3.14*60, 100*30)
+            .AddJointPositionTarget("left_arm_1", q_joint_left_target(1), 3.14*60, 100*30)
+            .AddJointPositionTarget("left_arm_2", q_joint_left_target(2), 3.14*60, 100*30)
+            .AddJointPositionTarget("left_arm_3", q_joint_left_target(3), 3.14*60, 100*30)
+            .AddJointPositionTarget("left_arm_4", q_joint_left_target(4), 3.14*60, 100*30)
+            .AddJointPositionTarget("left_arm_5", q_joint_left_target(5), 3.14*60, 100*30)
+            .AddJointPositionTarget("left_arm_6", q_joint_left_target(6), 3.14*60, 100*30)
             .SetMinimumTime(left_arm_minimum_time)
             .SetStopOrientationTrackingError(stop_orientation_tracking_error / 1000.0)
             .SetStopPositionTrackingError(stop_position_tracking_error / 1000.0)
@@ -1260,7 +1260,7 @@ int main(int argc, char** argv) {
   std::string servo =
       "^(right_wheel|left_wheel|torso_0|torso_1|torso_2|torso_3|torso_4|torso_5|right_arm_0|right_arm_1|right_arm_2|"
       "right_arm_3|right_arm_4|right_arm_5|right_arm_6|left_arm_0|left_arm_1|left_arm_2|left_arm_3|left_arm_4|left_arm_"
-      "5|left_arm_6)$";  // 기본값
+      "5|left_arm_6|head_0|head_1)$";  // 기본값
 
   if (argc >= 3) {
     servo = argv[2];
@@ -1286,8 +1286,9 @@ int main(int argc, char** argv) {
 
   std::cout << "Starting state update..." << std::endl;
 
-  robot->SetParameter("joint_position_command.cutoff_frequency", "10.0", false);
-  robot->SetParameter("default.acceleration_limit_scaling", "1.5", false);
+  robot->SetParameter("cartesian_command.cutoff_frequency", "15.0", false);
+  robot->SetParameter("default.angular_acceleration_limit", "30", false);
+  robot->SetParameter("default.linear_acceleration_limit", "60", false);
 
   robot->StartStateUpdate(
       [&](const auto& state) {
@@ -1324,7 +1325,7 @@ int main(int argc, char** argv) {
   std::cout << "Checking servo status..." << std::endl;
   if (!robot->IsServoOn(servo)) {
     std::cout << "Servo is currently OFF. Attempting to activate servo..." << std::endl;
-    if (!robot->ServoOn(servo)) {
+    if (!robot->ServoOn(".*")) {
       std::cerr << "Error: Failed to activate servo." << std::endl;
       return 1;
     }

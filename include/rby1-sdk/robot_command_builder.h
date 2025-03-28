@@ -307,12 +307,12 @@ class CartesianCommandBuilder {
 
   CartesianCommandBuilder& SetMinimumTime(double minium_time);
 
-  CartesianCommandBuilder& AddTarget(const std::string& ref_link_name,  //
-                                     const std::string& link_name,      //
-                                     const math::SE3::MatrixType& T,    // Eigen::Matrix<double, 4, 4>
-                                     double linear_velocity_limit,      // (m/s)
-                                     double angular_velocity_limit,     // (rad/s)
-                                     double acceleration_limit = 1.     // (0, 1]
+  CartesianCommandBuilder& AddTarget(const std::string& ref_link_name,       //
+                                     const std::string& link_name,           //
+                                     const math::SE3::MatrixType& T,         // Eigen::Matrix<double, 4, 4>
+                                     double linear_velocity_limit,           // (m/s)
+                                     double angular_velocity_limit,          // (rad/s)
+                                     double acceleration_limit_scaling = 1.  // (0, 1]
   );
 
   CartesianCommandBuilder& AddJointPositionTarget(const std::string& joint_name,                           //

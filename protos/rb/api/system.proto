@@ -62,3 +62,77 @@ message ResetBatteryConfigRequest {
 message ResetBatteryConfigResponse {
   ResponseHeader response_header = 1;
 }
+
+message ResetNetworkSettingRequest {
+  RequestHeader request_header = 1;
+}
+
+message ResetNetworkSettingResponse {
+  ResponseHeader response_header = 1;
+}
+
+message ScanWifiRequest {
+  RequestHeader request_header = 1;
+}
+
+message WifiNetwork {
+  string ssid = 1;
+
+  int32 signal_strength = 2;  // dBm
+
+  bool secured = 3;
+}
+
+message ScanWifiResponse {
+  ResponseHeader response_header = 1;
+
+  repeated WifiNetwork networks = 2;
+}
+
+message ConnectWifiRequest {
+  RequestHeader request_header = 1;
+
+  string ssid = 2;
+
+  string password = 3;
+
+  bool use_dhcp = 4;
+
+  string ip_address = 5;
+
+  string gateway = 6;
+
+  repeated string dns = 7;
+}
+
+message ConnectWifiResponse {
+  ResponseHeader response_header = 1;
+
+  bool success = 2;
+}
+
+message DisconnectWifiRequest {
+  RequestHeader request_header = 1;
+}
+
+message DisconnectWifiResponse {
+  ResponseHeader response_header = 1;
+}
+
+message GetWifiStatusRequest {
+  RequestHeader request_header = 1;
+}
+
+message GetWifiStatusResponse {
+  ResponseHeader response_header = 1;
+
+  string ssid = 2;
+
+  string ip_address = 3;
+
+  string gateway = 4;
+
+  repeated string dns = 5;
+
+  bool connected = 6;
+}

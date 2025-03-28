@@ -225,7 +225,7 @@ def main(address, model, power, servo):
         if not robot.set_tool_flange_output_voltage(arm, 12):
             logging.error(f"Failed to set tool flange output voltage ({arm}) as 12v")
             exit(1)
-    robot.set_parameter("joint_position_command.cutoff_frequency", "3")
+    robot.set_parameter("joint_position_command.cutoff_frequency", "5")
     move_j(robot, READY_POSE[model.model_name], 5)
 
     def robot_state_callback(state: rby.RobotState_A):
@@ -363,7 +363,7 @@ def main(address, model, power, servo):
                     )
                 )
                 .set_velocity_limit(robot_max_qdot[model.right_arm_idx])
-                .set_acceleration_limit(robot_max_qddot[model.right_arm_idx] * 1.5)
+                .set_acceleration_limit(robot_max_qddot[model.right_arm_idx] * 30)
                 .set_minimum_time(right_minimum_time)
             )
         else:
@@ -387,7 +387,7 @@ def main(address, model, power, servo):
                     )
                 )
                 .set_velocity_limit(robot_max_qdot[model.left_arm_idx])
-                .set_acceleration_limit(robot_max_qddot[model.left_arm_idx] * 1.5)
+                .set_acceleration_limit(robot_max_qddot[model.left_arm_idx] * 30)
                 .set_minimum_time(left_minimum_time)
             )
         else:

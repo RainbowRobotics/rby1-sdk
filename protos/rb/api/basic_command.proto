@@ -130,7 +130,7 @@ message CartesianCommand {
   message TrackingError {
     double position_error = 1;
 
-    double rotation_error = 2;
+    double orientation_error = 2;
   }
 
   message Request {
@@ -152,7 +152,13 @@ message CartesianCommand {
   message Feedback {
     CommandHeader.Feedback command_header_feedback = 1;
 
-    repeated TrackingError tracking_errors = 2;
+    repeated TrackingError se3_pose_tracking_errors = 2;
+
+    repeated double joint_position_tracking_errors = 3;
+
+    double remain_time = 4;
+
+    double manipulability = 5;
   }
 }
 
@@ -239,6 +245,7 @@ message OptimalControlCommand {
     google.protobuf.DoubleValue velocity_limit_scaling = 5;
 
     // acceleration scaling factor: qddot_limit * default.acceleration_limit_scaling * acceleration_limit_scaling
+    // default: 1.0, range: (0, ∞)
     google.protobuf.DoubleValue acceleration_limit_scaling = 10;
 
     // velocity tracking gain
@@ -248,19 +255,17 @@ message OptimalControlCommand {
     // Therefore, to prevent this issue, this value is forcibly set to 0.
     google.protobuf.DoubleValue velocity_tracking_gain = 6;
 
-    // Like step size
+    // Like step size, range: (0, ∞)
     google.protobuf.DoubleValue error_scaling = 11;
 
     // stop cost
     // default: default.optimal_control_command.stop_cost, range: (0, ∞)
     google.protobuf.DoubleValue stop_cost = 7;
 
-    // minimum delta cost
-    // range: (0, ∞)
+    // minimum delta cost, optional, range: (0, ∞)
     google.protobuf.DoubleValue min_delta_cost = 8;
 
-    // patience parameter
-    // range: (0, ∞)
+    // patience parameter, optional, range: (0, ∞)
     google.protobuf.Int32Value patience = 9;
   }
 

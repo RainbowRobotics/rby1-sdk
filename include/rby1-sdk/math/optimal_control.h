@@ -13,6 +13,13 @@ namespace rb {
 template <int DOF>
 class OptimalControl {
  public:
+  enum class ExitCode : int {
+    kNoError = 0,
+
+    kInequalityConstraintViolation,
+    kQPSolverError
+  };
+
   struct LinkTarget {
     int ref_link_index{};
     int link_index{};
@@ -74,6 +81,9 @@ class OptimalControl {
                                        double error_scaling, Eigen::Vector<double, DOF> velocity_limit,
                                        Eigen::Vector<double, DOF> acceleration_limit,
                                        bool need_forward_kinematics = false) {
+    exit_code_ = ExitCode::kNoError;
+    exit_code_msg_ = "";
+
     double err_sum = 0;
     double max_cond = 1.0;
     Eigen::Vector<double, DOF> q = state->GetQ();
@@ -178,7 +188,7 @@ class OptimalControl {
     Eigen::Matrix<double, DOF, -1> J_pinv = J.completeOrthogonalDecomposition().pseudoInverse();
     Eigen::Matrix<double, DOF, DOF> P = Eigen::Matrix<double, DOF, DOF>::Identity(n_joints_, n_joints_) - J_pinv * J;
 
-    qp_solver_.AddCostFunction(P * 0.01, Eigen::Vector<double, DOF>::Zero(n_joints_));
+    qp_solver_.AddCostFunction(P * 1e-3, Eigen::Vector<double, DOF>::Zero(n_joints_));
     qp_solver_.SetCostFunction(qp_solver_.GetACost(), qp_solver_.GetBCost());
 
     Eigen::Matrix<double, DOF, DOF> A_const;
@@ -196,14 +206,31 @@ class OptimalControl {
     qdot_ub = qdot_ub.cwiseMin(qdot + acceleration_limit * dt);
     qdot_lb = qdot_lb.cwiseMax(2 * (q_lb - q) / dt - qdot);
     qdot_ub = qdot_ub.cwiseMin(2 * (q_ub - q) / dt - qdot);
-
     qdot_lb(rev_joint_idx_) = qdot(rev_joint_idx_);
     qdot_ub(rev_joint_idx_) = qdot(rev_joint_idx_);
 
     if ((qdot_lb.array() <= qdot_ub.array()).all())
       ;
     else {
-      return {};
+      // acceleration limit 를 제외 하고 다시 시도
+      qdot_lb = -velocity_limit;
+      qdot_ub = velocity_limit;
+      qdot_lb = qdot_lb.cwiseMax(2 * (q_lb - q) / dt - qdot);
+      qdot_ub = qdot_ub.cwiseMin(2 * (q_ub - q) / dt - qdot);
+      qdot_lb(rev_joint_idx_) = qdot(rev_joint_idx_);
+      qdot_ub(rev_joint_idx_) = qdot(rev_joint_idx_);
+
+      if ((qdot_lb.array() <= qdot_ub.array()).all())
+        ;
+      else {
+        Eigen::IOFormat eigen_fmt(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", ", ", "", "", "", "");
+        std::stringstream ss;
+        ss << "Inequality constraint violation - qdot_lb: [" << qdot_lb.format(eigen_fmt) << "], qdot_ub: ["
+           << qdot_ub.format(eigen_fmt) << "]";
+        exit_code_ = ExitCode::kInequalityConstraintViolation;
+        exit_code_msg_ = ss.str();
+        return {};
+      }
     }
 
     qp_solver_.SetConstraintsFunction(A_const, qdot_lb, qdot_ub);
@@ -213,19 +240,25 @@ class OptimalControl {
       qp_solver_.SetPrimalVariable(qdot_lb);
     }
 
-    auto ret = qp_solver_.Solve();
-
-    Eigen::MatrixXd err;
-    if (ret.has_value()) {
-      err_ = std::sqrt(err_sum);
+    Eigen::VectorXd solution;
+    try {
+      solution = qp_solver_.Solve();
+    } catch (math::QPSolverException& e) {
+      std::stringstream ss;
+      ss << "QPSolver error - " << e.what();
+      exit_code_ = ExitCode::kQPSolverError;
+      exit_code_msg_ = ss.str();
+      return {};
     }
+
+    err_ = std::sqrt(err_sum);
     manipulability_ = max_cond;
-
-    if (ret.has_value()) {
-      return ret;
-    }
-    return {};
+    return solution;
   }
+
+  ExitCode GetExitCode() const { return exit_code_; }
+
+  std::string GetExitCodeMessage() const { return exit_code_msg_; }
 
   double GetError() const { return err_; }
 
@@ -245,6 +278,9 @@ class OptimalControl {
   }
 
  private:
+  ExitCode exit_code_{ExitCode::kNoError};
+  std::string exit_code_msg_{};
+
   double err_{};
   double manipulability_{};
   math::QPSolver qp_solver_;

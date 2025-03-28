@@ -135,4 +135,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main(address=args.address)
+    main(address=args.address, model=args.model)

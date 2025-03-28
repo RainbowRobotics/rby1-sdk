@@ -39,9 +39,14 @@ void pybind11_robot_command_feedback(py::module_& m) {
   py::class_<CartesianCommandFeedback::TrackingError>(ccf, "TrackingError")
       .def(py::init<>())
       .def_readonly("position_error", &CartesianCommandFeedback::TrackingError::position_error)
-      .def_readonly("rotation_error", &CartesianCommandFeedback::TrackingError::rotation_error);
+      .def_readonly("orientation_error", &CartesianCommandFeedback::TrackingError::orientation_error);
 
-  ccf.def(py::init<>()).def_property_readonly("tracking_errors", &CartesianCommandFeedback::tracking_errors);
+  ccf.def(py::init<>())
+      .def_property_readonly("se3_pose_tracking_errors", &CartesianCommandFeedback::se3_pose_tracking_errors)
+      .def_property_readonly("joint_position_tracking_errors",
+                             &CartesianCommandFeedback::joint_position_tracking_errors)
+      .def_property_readonly("remain_time", &CartesianCommandFeedback::remain_time)
+      .def_property_readonly("manipulability", &CartesianCommandFeedback::manipulability);
 
   py::class_<GravityCompensationCommandFeedback, CommandFeedback>(m, "GravityCompensationCommandFeedback")
       .def(py::init<>());

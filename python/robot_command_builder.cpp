@@ -96,7 +96,7 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_command_header", &CartesianCommandBuilder::SetCommandHeader, "command_header_builder"_a)
       .def("set_minimum_time", &CartesianCommandBuilder::SetMinimumTime, "minimum_time"_a)
       .def("add_target", &CartesianCommandBuilder::AddTarget, "ref_link_name"_a, "link_name"_a, "T"_a,
-           "linear_velocity_limit"_a, "angular_velocity_limit"_a, "acceleration_limit"_a)
+           "linear_velocity_limit"_a, "angular_velocity_limit"_a, "acceleration_limit_scaling"_a)
       .def("add_joint_position_target", &CartesianCommandBuilder::AddJointPositionTarget, "joint_name"_a,
            "target_position"_a, "velocity_limit"_a = py::none(), "acceleration_limit"_a = py::none())
       .def("set_stop_position_tracking_error", &CartesianCommandBuilder::SetStopPositionTrackingError,

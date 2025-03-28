@@ -1,3 +1,48 @@
+## v0.5.0 (2025-03-28)
+
+### ✨ Features
+
+- support wifi functions in python
+- add wifi proto files
+- add pos/orientation error in cartesian command feedback
+- add error_scaling parameter for optimal control
+- calculate manipulability
+- support master arm class in python
+- add wait_for_control_ready function
+- add time_based_progress and position_based_progress feedback to joint position command (#83)
+
+### 🐛 Fixes
+
+- parameter change
+- typo
+- change qp solver exception (error) mechanism
+- rename cartesian command builder parameter
+- change parameter for demo motion
+- resolve bugs in qc_gui and demo motion
+- update qc_gui to support A, T5, and M models
+- modify python teleoperation example to support M and T5 models
+- update python example code for multi-model support (#84)
+- adjust wrist yaw2 range of motion in model.urdf for A, T5, and M models (#85)
+- typo
+- set velocity_tracking_gain as zero
+- restore gripper thread and refine gripper min/max detection in teleoperation example
+- add teleoperation example using master arm class
+- typo
+- modify optimal control formulation with null space projection
+- mark limits as reuiqred argument
+- apply velocity limit
+- change the way to calculate error in optimal control
+- remove velocity tracking gain in optimal control command
+- consider current velocity in optimal controller
+- master arm class initialization failed
+- fix link error on windows
+- notebook example
+- notebook example
+- include chrono header
+- use CancelControl() in Command and CommandStream handler
+- rename parameters
+- minor typo
+
 ## v0.4.1 (2025-02-21)
 
 ### 🐛 Fixes

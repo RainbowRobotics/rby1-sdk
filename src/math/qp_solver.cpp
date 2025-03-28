@@ -4,14 +4,48 @@
 
 namespace rb::math {
 
+QPSolverException::QPSolverException(int error_code) : error_code_(error_code), message_(GenerateMessage(error_code)) {}
+
+const char* QPSolverException::what() const noexcept {
+  return message_.c_str();
+}
+
+int QPSolverException::code() const noexcept {
+  return error_code_;
+}
+
+std::string QPSolverException::GenerateMessage(int code) {
+  static const std::unordered_map<int, std::string> error_messages = {
+      {OSQP_DATA_VALIDATION_ERROR, "Data validation error"},
+      {OSQP_SETTINGS_VALIDATION_ERROR, "Settings validation error"},
+#ifdef OSQP_EIGEN_OSQP_IS_V1
+      {OSQP_ALGEBRA_LOAD_ERROR, "Linear system solver load error"},
+#else
+      {OSQP_LINSYS_SOLVER_LOAD_ERROR, "Linear system solver load error"},
+#endif
+      {OSQP_LINSYS_SOLVER_INIT_ERROR, "Linear system solver initialization error"},
+      {OSQP_NONCVX_ERROR, "Non-convex error"},
+      {OSQP_MEM_ALLOC_ERROR, "Memory allocation error"},
+      {OSQP_WORKSPACE_NOT_INIT_ERROR, "Workspace not initialized"},
+      {-1, "General solver error or matrix update failure"},
+  };
+
+  auto it = error_messages.find(code);
+  if (it != error_messages.end()) {
+    return it->second;
+  }
+  return "Unknown solver error (code: " + std::to_string(code) + ")";
+}
+
 class QPSolverImpl {
  public:
-  void SetupImpl(int n_var, int n_const) {
+  void SetupImpl(int n_var, int n_const, double time_limit = 2e-3) {
     n_var_ = n_var;
     n_const_ = n_const;
 
     solver_.settings()->setWarmStart(true);
     solver_.settings()->setVerbosity(false);
+    solver_.settings()->setTimeLimit(time_limit);
 
     solver_.data()->setNumberOfVariables(n_var);
     solver_.data()->setNumberOfConstraints(n_const);
@@ -21,7 +55,6 @@ class QPSolverImpl {
 
     is_first_ = true;
 
-    err_code_ = 0;
     n_hessian_element_ = 0;
   }
 
@@ -88,56 +121,57 @@ class QPSolverImpl {
 
   void ResetIsFirstImpl() { is_first_ = true; }
 
-  std::optional<Eigen::VectorXd> SolveImpl() {
+  Eigen::VectorXd SolveImpl() {
     Eigen::MatrixXd ret;
 
-    int err = 0;
+    bool need_init = false;
 
     if (!is_first_) {
       if (n_hessian_element_ == hessian_.nonZeros()) {
         if (!solver_.updateHessianMatrix(hessian_)) {
-          err = -1;
+          need_init = true;
         }
         if (!solver_.updateGradient(gradient_)) {
-          err = -1;
+          need_init = true;
         }
         if (!solver_.updateLinearConstraintsMatrix(linearMatrix_)) {
-          err = -1;
+          need_init = true;
         }
         if (!solver_.updateBounds(lowerBound_, upperBound_)) {
-          err = -1;
+          need_init = true;
         }
       } else {
-        err = -1;
+        need_init = true;
       }
+    } else {
+      need_init = true;
     }
 
-    if ((err == -1) || is_first_) {
+    if (need_init) {
       solver_.data()->clearHessianMatrix();
       solver_.data()->clearLinearConstraintsMatrix();
       solver_.clearSolver();
-      err = 0;
 
       n_hessian_element_ = (int)hessian_.nonZeros();
 
       if (!solver_.data()->setHessianMatrix(hessian_)) {
-        err = -1;
+        throw QPSolverException(-1);
       }
       if (!solver_.data()->setGradient(gradient_)) {
-        err = -1;
+        throw QPSolverException(-1);
       }
       if (!solver_.data()->setLinearConstraintsMatrix(linearMatrix_)) {
-        err = -1;
+        throw QPSolverException(-1);
       }
       if (!solver_.data()->setLowerBound(lowerBound_)) {
-        err = -1;
+        throw QPSolverException(-1);
       }
       if (!solver_.data()->setUpperBound(upperBound_)) {
-        err = -1;
+        throw QPSolverException(-1);
       }
 
       if (!solver_.initSolver()) {
-        err = -1;
+        throw QPSolverException(-1);
       }
 
       solver_.setPrimalVariable(primal_variable_for_warmstart_);
@@ -145,19 +179,12 @@ class QPSolverImpl {
       is_first_ = false;
     }
 
-    if (solver_.solveProblem() != OsqpEigen::ErrorExitFlag::NoError) {
-      err = -1;
+    const auto result = solver_.solveProblem();
+    if (result != OsqpEigen::ErrorExitFlag::NoError) {
+      throw QPSolverException(static_cast<int>(result));
     }
 
-    if (err == 0) {
-      ret = solver_.getSolution();
-    } else {
-      return {};
-    }
-
-    err_code_ = err;
-
-    return ret;
+    return solver_.getSolution();
   }
 
   Eigen::MatrixXd GetACostImpl() const {  // NOLINT
@@ -214,8 +241,8 @@ QPSolver::QPSolver() {
 
 QPSolver::~QPSolver() = default;
 
-void QPSolver::Setup(int n_var, int n_const) {
-  impl_->SetupImpl(n_var, n_const);
+void QPSolver::Setup(int n_var, int n_const, double time_limit) {
+  impl_->SetupImpl(n_var, n_const, time_limit);
 }
 
 void QPSolver::InitFunction() {
@@ -242,7 +269,7 @@ void QPSolver::ResetIsFirst() {
   impl_->ResetIsFirstImpl();
 }
 
-std::optional<Eigen::VectorXd> QPSolver::Solve() {
+Eigen::VectorXd QPSolver::Solve() {
   return impl_->SolveImpl();
 }
 

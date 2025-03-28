@@ -9,4 +9,4 @@ print(model)
 # model = model + "\n" + "<!-- ABC -->"
 # print(robot.import_robot_model("abc", model))
 #
-robot.set_parameter("model_name", "\"\"")
+robot.set_parameter("model_name", '""')

@@ -153,7 +153,7 @@ rb::EMOInfo ProtoToEMOInfo(const api::EMOInfo& msg) {
 
 rb::JointInfo ProtoToJointInfo(const api::JointInfo& msg) {
   rb::JointInfo ji;
-  
+
   ji.name = msg.name();
   ji.has_brake = msg.has_brake();
   ji.product_name = msg.product_name();
@@ -215,7 +215,10 @@ class RobotCommandHandlerImpl {
                                                           [=](grpc::Status status) { OnResponseReceived(status); });
   }
 
-  ~RobotCommandHandlerImpl() { Cancel(); }
+  ~RobotCommandHandlerImpl() {
+    Cancel();
+    Wait();
+  }
 
   bool IsDone() const { return done_.load(); }
 
@@ -229,7 +232,11 @@ class RobotCommandHandlerImpl {
     return cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms), [this] { return done_.load(); });
   }
 
-  void Cancel() { context_.TryCancel(); }
+  void Cancel() {
+    if (!IsDone()) {
+      context_.TryCancel();
+    }
+  }
 
   api::RobotCommand::Feedback Get() {
     Wait();
@@ -276,10 +283,8 @@ class RobotCommandStreamHandlerImpl
   }
 
   ~RobotCommandStreamHandlerImpl() override {
-    if (!IsDone()) {
-      Cancel();
-      Wait();
-    }
+    Cancel();
+    Wait();
   }
 
   bool IsDone() const { return done_.load(); }
@@ -341,7 +346,11 @@ class RobotCommandStreamHandlerImpl
     return SendCommand(rb::RobotCommandBuilder(), timeout_ms);
   }
 
-  void Cancel() { context_.TryCancel(); }
+  void Cancel() {
+    if (!IsDone()) {
+      context_.TryCancel();
+    }
+  }
 
   void OnWriteDone(bool ok) override {
     {
@@ -1261,7 +1270,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     if (!status.ok()) {
       std::stringstream error_msg_ss;
       error_msg_ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
-         << gRPCStatusToString(status.error_code()) << ")";
+                   << gRPCStatusToString(status.error_code()) << ")";
       if (!status.error_message().empty()) {
         error_msg_ss << ", Message: " << status.error_message();
       }
@@ -1760,6 +1769,183 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       return res.response_header().error().code() == api::CommonError::CODE_OK;
     }
     return true;
+  }
+
+  bool WaitForControlReady(long timeout_ms) const {
+    api::WaitForControlReadyRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    if (timeout_ms >= 0) {
+      auto& t = *req.mutable_timeout();
+      t.set_seconds(timeout_ms / 1000);
+      t.set_nanos((timeout_ms % 1000) * 1000000);
+    }
+
+    api::WaitForControlReadyResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = control_manager_service_->WaitForControlReady(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    return res.ready();
+  }
+
+  bool ResetNetworkSetting() const {
+    api::ResetNetworkSettingRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::ResetNetworkSettingResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->ResetNetworkSetting(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+    return true;
+  }
+
+  std::vector<WifiNetwork> ScanWifi() const {
+    api::ScanWifiRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::ScanWifiResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->ScanWifi(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.response_header().has_error()) {
+      if (res.response_header().error().code() != api::CommonError::CODE_OK) {
+        std::cerr << "Error: " << res.response_header().error().message() << std::endl;
+        return {};
+      }
+    }
+
+    std::vector<WifiNetwork> wifi_networks;
+
+    for (const auto& n : res.networks()) {
+      WifiNetwork network;
+      network.ssid = n.ssid();
+      network.signal_strength = n.signal_strength();
+      network.secured = n.secured();
+      wifi_networks.push_back(network);
+    }
+
+    return wifi_networks;
+  }
+
+  bool ConnectWifi(const std::string& ssid, const std::string& password, bool use_dhcp,
+                   const std::string& ip_address, const std::string& gateway,
+                   const std::vector<std::string>& dns) const {
+    api::ConnectWifiRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_ssid(ssid);
+    req.set_password(password);
+    req.set_use_dhcp(use_dhcp);
+    req.set_ip_address(ip_address);
+    req.set_gateway(gateway);
+    for(const auto& d : dns) {
+      *req.add_dns() = d;
+    }
+
+    api::ConnectWifiResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->ConnectWifi(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+    return true;
+  }
+
+  bool DisconnectWifi() const {
+    api::DisconnectWifiRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::DisconnectWifiResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->DisconnectWifi(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.response_header().has_error()) {
+      return res.response_header().error().code() == api::CommonError::CODE_OK;
+    }
+    return true;
+  }
+
+  std::optional<WifiStatus> GetWifiStatus() const {
+    api::GetWifiStatusRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::GetWifiStatusResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = system_service_->GetWifiStatus(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.response_header().has_error()) {
+      if (res.response_header().error().code() != api::CommonError::CODE_OK) {
+        return std::nullopt;
+      }
+    }
+
+    WifiStatus wifi_status;
+    wifi_status.ssid = res.ssid();
+    wifi_status.ip_address = res.ip_address();
+    wifi_status.gateway = res.gateway();
+    for (const auto& d : res.dns()) {
+      wifi_status.dns.push_back(d);
+    }
+    wifi_status.connected = res.connected();
+
+    return wifi_status;
   }
 
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
@@ -2509,6 +2695,38 @@ bool Robot<T>::SetBatteryConfig(double cutoff_voltage, double fully_charged_volt
 template <typename T>
 bool Robot<T>::ResetBatteryConfig() const {
   return impl_->ResetBatteryConfig();
+}
+
+template <typename T>
+bool Robot<T>::WaitForControlReady(long timeout_ms) const {
+  return impl_->WaitForControlReady(timeout_ms);
+}
+
+template <typename T>
+bool Robot<T>::ResetNetworkSetting() const {
+  return impl_->ResetNetworkSetting();
+}
+
+template <typename T>
+std::vector<WifiNetwork> Robot<T>::ScanWifi() const {
+  return impl_->ScanWifi();
+}
+
+template <typename T>
+bool Robot<T>::ConnectWifi(const std::string& ssid, const std::string& password, bool use_dhcp,
+                           const std::string& ip_address, const std::string& gateway,
+                           const std::vector<std::string>& dns) const {
+  return impl_->ConnectWifi(ssid, password, use_dhcp, ip_address, gateway, dns);
+}
+
+template <typename T>
+bool Robot<T>::DisconnectWifi() const {
+  return impl_->DisconnectWifi();
+}
+
+template <typename T>
+std::optional<WifiStatus> Robot<T>::GetWifiStatus() const {
+  return impl_->GetWifiStatus();
 }
 
 template <typename T>

@@ -1,67 +1,116 @@
 # rby1-sdk
 
-![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+<p>
+<a href="https://github.com/RainbowRobotics/rby1-sdk/actions">
+<img src="https://img.shields.io/github/actions/workflow/status/RainbowRobotics/rby1-sdk/release.yml" alt="CI">
+</a>
+<a href="https://github.com/RainbowRobotics/rby1-sdk/issues">
+<img src="https://img.shields.io/github/issues/RainbowRobotics/rby1-sdk" alt="Issues">
+</a>
+<a href="https://github.com/RainbowRobotics/rby1-sdk/releases">
+<img src="https://img.shields.io/github/v/release/RainbowRobotics/rby1-sdk" alt="Releases">
+</a>
+<a href="https://github.com/RainbowRobotics/rby1-sdk/blob/main/LICENSE">
+<img src="https://img.shields.io/github/license/RainbowRobotics/rby1-sdk" alt="Apache-2.0">
+</a>
+<a href="https://pypi.org/project/rby1-sdk/">
+<img src="https://img.shields.io/pypi/pyversions/rby1-sdk" alt="python">
+</a>
+</p>
 
-## Prerequisites
+**rby1-sdk** is an SDK designed for seamless control and development with the RB-Y1 robot. It provides Python and C++
+APIs,
+making it easy to integrate into various applications, from basic scripting to advanced real-time control.
 
-- **CMake**: Version 3.30 or higher  
-  Install using snap:
-  ```bash
-  snap install cmake
-  ```
+# Installation
 
-- **Conan**: C++ package manager required for dependency management  
-  Install using pip:
-  ```bash
-  pip install conan
-  ```
+## Python
 
-- **Poetry**: Python dependency management and packaging tool  
-  Install using curl:
-  ```bash
-  curl -sSL https://install.python-poetry.org | python3 -
-  source ~/.profile
-  ```
+Install SDK via ``pip``:
 
-## Installation
+```bash
+pip install rby1-sdk
+```
 
-Clone the repository with submodules:
+Alternatively, install from source:
+
+```bash
+pip install .
+# or
+poetry install
+```
+
+## C++
+
+### Build From Source
+
+#### Step 1: Install Conan
+
+[Conan](https://conan.io/) is required for dependency management:
+
+```bash
+pip install conan
+```
+
+#### Step 2: Clone the Repository
 
 ```bash
 git clone --recurse-submodules git@github.com:RainbowRobotics/rby1-sdk.git
 ```
 
-### Configure
-
-Configure Conan dependencies and build settings:
+#### Step 3: Install or Build Dependencies
 
 ```bash
 conan install . -s build_type=Release -b missing -of build
 ```
 
-### Build
+#### Step 4: Configure, Build, and Install
 
-Build the project using CMake:
+##### (Option 1) CMake >= 3.23
 
 ```bash
 cmake --preset conan-release -D BUILD_EXAMPLES=ON
 cmake --build --preset conan-release
+
+# Install
+cmake --build --preset conan-release --target install
 ```
 
-### Usage
+##### (Option 2) CMake < 3.23
 
-Run the examples:
+```bash
+cd build
+cmake .. -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=./conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=Release
+cmake --build . # or make
 
-- **C++ Example**:
-  ```bash
-  ./build/examples/example_demo_motion [RPC IP]:50051
-  ```
+# Install
+make install
+```
 
-- **Python Example**:
-  ```bash
-  poetry shell
-  python examples_python/demo_motion.py 
-  ```
+# Get Started
+
+## Python Example
+
+```python
+import rby1_sdk as rby
+
+robot = rby.create_robot("localhost:50051", "a")
+robot.connect()
+print(robot.get_robot_info())
+```
+
+## C++ Example
+
+```c++
+#include "rby1-sdk/robot.h"
+#include "rby1-sdk/model.h"
+
+int main() {
+  auto robot = rb::Robot<rb::y1_model::A>::Create("localhost:50051");
+  robot->Connect();
+  std::cout << robot->GetRobotInfo().robot_version << std::endl;
+}
+```
 
 ## ARM Intellisense Issue
 

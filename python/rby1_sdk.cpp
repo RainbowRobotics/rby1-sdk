@@ -12,7 +12,10 @@ namespace py = pybind11;
 using namespace rb;
 using namespace py::literals;
 
+void pybind11_net(py::module_& m);
 void pybind11_dynamics(py::module_& m);
+void pybind11_dynamixel_bus(py::module_& m);
+void pybind11_upc(py::module_& m);
 
 void pybind11_robot_state(py::module_& m);
 void pybind11_model(py::module_& m);
@@ -53,9 +56,17 @@ py::object create_robot(const std::string& address, const py::object& model) {
 
 PYBIND11_MODULE(_bindings, m) {
   m.doc() = "RBY1-SDK";  // optional module docstring
+  m.attr("__version__") = RBY1_SDK_VERSION;
+
+  pybind11_net(m);
 
   auto dyn_m = m.def_submodule("dynamics", "Dynamics module for rby1");
   pybind11_dynamics(dyn_m);
+
+  pybind11_dynamixel_bus(m);
+
+  auto upc_m = m.def_submodule("upc", "Modeul for UPC (User PC)");
+  pybind11_upc(upc_m);
 
   pybind11_robot_state(m);
   pybind11_control_manager_state(m);
@@ -66,7 +77,7 @@ PYBIND11_MODULE(_bindings, m) {
   pybind11_robot_command_feedback(m);
   pybind11_robot(m);
 
-  m.def("create_robot", &create_robot, "Creates a robot based on the provided model and address.", py::arg("address"),
+  m.def("_create_robot", &create_robot, "Creates a robot based on the provided model and address.", py::arg("address"),
         py::arg("model") = "a");
 
   m.def(

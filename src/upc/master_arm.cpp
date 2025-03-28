@@ -20,13 +20,17 @@ void MasterArm::SetModelPath(const std::string& model_path) {
   model_path_ = model_path;
 }
 
-std::vector<int> MasterArm::Initialize() {
+std::vector<int> MasterArm::Initialize(bool verbose) {
   if (!handler_->OpenPort()) {
-    std::cerr << "Failed to open the port!" << std::endl;
+    if (verbose) {
+      std::cerr << "Failed to open the port!" << std::endl;
+    }
     return {};
   }
   if (!handler_->SetBaudRate(DynamixelBus::kDefaultBaudrate)) {
-    std::cerr << "Failed to change the baudrate!" << std::endl;
+    if (verbose) {
+      std::cerr << "Failed to change the baudrate!" << std::endl;
+    }
     return {};
   }
 
@@ -34,24 +38,36 @@ std::vector<int> MasterArm::Initialize() {
 
   for (int id = 0; id < 14; ++id) {
     if (handler_->Ping(id)) {
-      std::cout << "Dynamixel ID " << id << " is active." << std::endl;
+      if (verbose) {
+        std::cout << "Dynamixel ID " << id << " is active." << std::endl;
+      }
       active_ids.push_back(id);
     } else {
-      std::cerr << "Dynamixel ID " << id << " is not active." << std::endl;
+      if (verbose) {
+        std::cerr << "Dynamixel ID " << id << " is not active." << std::endl;
+      }
     }
   }
   for (int id = 0x80; id < 0x80 + 2; id++) {
     if (handler_->Ping(id)) {
-      std::cout << "Dynamixel ID " << id << " is active." << std::endl;
+      if (verbose) {
+        std::cout << "Dynamixel ID " << id << " is active." << std::endl;
+      }
       active_ids.push_back(id);
     } else {
-      std::cerr << "Dynamixel ID " << id << " is not active." << std::endl;
+      if (verbose) {
+        std::cerr << "Dynamixel ID " << id << " is not active." << std::endl;
+      }
     }
   }
   if (active_ids.size() != 16) {
-    std::cerr << "Unable to ping all devices for master arm" << std::endl;
+    if (verbose) {
+      std::cerr << "Unable to ping all devices for master arm" << std::endl;
+    }
     Eigen::Map<Eigen::VectorXi> ids(active_ids.data(), (long)active_ids.size());
-    std::cerr << "active ids: " << ids.transpose() << std::endl;
+    if (verbose) {
+      std::cerr << "active ids: " << ids.transpose() << std::endl;
+    }
     exit(1);
   }
 
@@ -84,8 +100,10 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
   const int kRightLinkId = 7;
   const int kLeftLinkId = 14;
 
+  std::vector<int> motor_ids;
   for (int id : active_ids_) {
     if (id < 0x80) {
+      motor_ids.push_back(id);
       if (!handler_->SendOperationMode(id, DynamixelBus::kCurrentControlMode)) {
         std::cerr << "Failed to write current control mode value: " << handler_->ReadOperationMode(id).value_or(-1)
                   << std::endl;
@@ -93,6 +111,8 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
       handler_->SendTorqueEnable(id, DynamixelBus::kTorqueEnable);
     }
   }
+
+  operation_mode_init_ = false;
 
   state_.q_joint.setZero();
   state_.operation_mode.setConstant(-1);
@@ -120,6 +140,8 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
               state_.operation_mode(ret.first) = ret.second;
             }
           }
+        } else {
+          return;
         }
 
         // std::optional<std::vector<std::pair<int, double>>> temp_q_joint_vector = handler_->BulkReadEncoder(active_ids_);
@@ -133,7 +155,7 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
         // }
 
         std::optional<std::vector<std::pair<int, DynamixelBus::MotorState>>> temp_ms_vector =
-            handler_->BulkReadMotorState(active_ids_);
+            handler_->BulkReadMotorState(motor_ids);
         if (temp_ms_vector.has_value()) {
           for (auto const& ret : temp_ms_vector.value()) {
             if (ret.first < kDOF) {
@@ -165,7 +187,7 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
           std::vector<std::pair<int, double>> id_torque;
 
           for (int i = 0; i < kDOF; i++) {
-            if (state_.operation_mode(i) != input.target_operation_mode(i)) {
+            if (state_.operation_mode(i) != input.target_operation_mode(i) || !operation_mode_init_) {
               changed_id.push_back(i);
               changed_id_mode.emplace_back(i, input.target_operation_mode(i));
             } else {
@@ -181,6 +203,8 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
           handler_->BulkWriteTorqueEnable(changed_id, 0);
           handler_->BulkWriteOperationMode(changed_id_mode);
           handler_->BulkWriteTorqueEnable(changed_id, 1);
+
+          operation_mode_init_ = true;
 
           handler_->BulkWriteSendTorque(id_torque);
           handler_->BulkWriteSendPosition(id_position);

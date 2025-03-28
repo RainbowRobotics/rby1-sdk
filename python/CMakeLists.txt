@@ -27,6 +27,7 @@ endif ()
 pybind11_add_module(_bindings
         rby1_sdk.cpp
         common.cpp
+        net.cpp
         model.cpp
         robot_state.cpp
         robot_command_builder.cpp
@@ -36,6 +37,8 @@ pybind11_add_module(_bindings
         robot_command_feedback.cpp
         control_manager_state.cpp
         dynamics.cpp
+        dynamixel_bus.cpp
+        upc.cpp
 )
 target_link_libraries(_bindings PRIVATE rby1-sdk Eigen3::Eigen)
 

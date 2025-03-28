@@ -13,7 +13,7 @@ class Feedback {
   bool valid() const { return valid_; }
 
  private:
-  bool valid_;
+  bool valid_{false};
 
   friend class RobotCommandFeedbackParserImpl;
 };
@@ -79,7 +79,14 @@ class JointVelocityCommandFeedback : public CommandFeedback {
 
 class JointPositionCommandFeedback : public CommandFeedback {
  public:
+  double time_based_progress() const { return time_based_progress_; }
+
+  double position_based_progress() const { return position_based_progress_; }
+
  protected:
+  double time_based_progress_;
+  double position_based_progress_;
+
  private:
   friend class RobotCommandFeedbackParserImpl;
 };
@@ -88,13 +95,22 @@ class CartesianCommandFeedback : public CommandFeedback {
  public:
   struct TrackingError {
     double position_error;
-    double rotation_error;
+    double orientation_error;
   };
 
-  const std::vector<TrackingError>& tracking_errors() const { return tracking_errors_; }
+  const std::vector<TrackingError>& se3_pose_tracking_errors() const { return se3_pose_tracking_errors_; }
+
+  const std::vector<double>& joint_position_tracking_errors() const { return joint_position_tracking_errors_; }
+
+  double remain_time() const { return remain_time_; }
+
+  double manipulability() const { return manipulability_; }
 
  protected:
-  std::vector<TrackingError> tracking_errors_;
+  std::vector<TrackingError> se3_pose_tracking_errors_;
+  std::vector<double> joint_position_tracking_errors_;
+  double remain_time_;
+  double manipulability_;
 
  private:
   friend class RobotCommandFeedbackParserImpl;

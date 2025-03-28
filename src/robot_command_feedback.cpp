@@ -62,6 +62,8 @@ class RobotCommandFeedbackParserImpl {
     if (feedback->has_command_header_feedback()) {
       ParseCommandHeaderFeedback(self.command_header_, feedback->mutable_command_header_feedback());
     }
+    self.time_based_progress_ = feedback->time_based_progress();
+    self.position_based_progress_ = feedback->position_based_progress();
   }
 
   void ParseCartesianCommandFeedback(CartesianCommandFeedback& self, api::CartesianCommand::Feedback* feedback) {
@@ -70,9 +72,16 @@ class RobotCommandFeedbackParserImpl {
     if (feedback->has_command_header_feedback()) {
       ParseCommandHeaderFeedback(self.command_header_, feedback->mutable_command_header_feedback());
     }
-    for (const auto& tracking_error : feedback->tracking_errors()) {
-      self.tracking_errors_.push_back({tracking_error.position_error(), tracking_error.rotation_error()});
+    self.se3_pose_tracking_errors_.clear();
+    for (const auto& e : feedback->se3_pose_tracking_errors()) {
+      self.se3_pose_tracking_errors_.push_back({e.position_error(), e.orientation_error()});
     }
+    self.joint_position_tracking_errors_.clear();
+    for (const auto& e : feedback->joint_position_tracking_errors()) {
+      self.joint_position_tracking_errors_.push_back(e);
+    }
+    self.remain_time_ = feedback->remain_time();
+    self.manipulability_ = feedback->manipulability();
   }
 
   void ParseGravityCompensationCommandFeedback(GravityCompensationCommandFeedback& self,

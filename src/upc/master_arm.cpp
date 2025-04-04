@@ -104,24 +104,28 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
   for (int id : active_ids_) {
     if (id < 0x80) {
       motor_ids.push_back(id);
-      if (!handler_->SendOperationMode(id, DynamixelBus::kCurrentControlMode)) {
-        std::cerr << "Failed to write current control mode value: " << handler_->ReadOperationMode(id).value_or(-1)
-                  << std::endl;
+      if (!handler_->SendOperatingMode(id, DynamixelBus::kCurrentControlMode)) {
+        std::cerr << "Failed to write current control mode value: "
+                  << handler_->ReadOperatingMode(id, true).value_or(-1) << std::endl;
       }
       handler_->SendTorqueEnable(id, DynamixelBus::kTorqueEnable);
     }
   }
 
-  operation_mode_init_ = false;
+  operating_mode_init_ = false;
 
   state_.q_joint.setZero();
-  state_.operation_mode.setConstant(-1);
+  state_.operating_mode.setConstant(-1);
   state_updated_ = false;
   ev_.PushCyclicTask(
       [=] {
+        static double duration_sum = 0.;
+        static int duration_count = 0;
+
+        auto start_time = std::chrono::steady_clock::now();
         for (int id : active_ids_) {
           if (id >= kRightToolId) {
-            //for hand board
+            // for hand board
             const auto& temp_button_status = handler_->ReadButtonStatus(id);
             if (temp_button_status.has_value()) {
               if (id == kRightToolId) {
@@ -133,29 +137,19 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
           }
         }
 
-        auto temp_operation_mode_vector = handler_->BulkReadOperationMode(active_ids_);
+        auto temp_operation_mode_vector = handler_->GroupFastSyncReadOperatingMode(active_ids_, true);
         if (temp_operation_mode_vector.has_value()) {
           for (auto const& ret : temp_operation_mode_vector.value()) {
             if (ret.first < kDOF) {
-              state_.operation_mode(ret.first) = ret.second;
+              state_.operating_mode(ret.first) = ret.second;
             }
           }
         } else {
           return;
         }
 
-        // std::optional<std::vector<std::pair<int, double>>> temp_q_joint_vector = handler_->BulkReadEncoder(active_ids_);
-        // if (temp_q_joint_vector.has_value()) {
-        //   for (auto const& ret : temp_q_joint_vector.value()) {
-        //     state_.q_joint(ret.first) = ret.second;
-        //   }
-        //   state_updated_ = true;
-        // } else {
-        //   return;
-        // }
-
         std::optional<std::vector<std::pair<int, DynamixelBus::MotorState>>> temp_ms_vector =
-            handler_->BulkReadMotorState(motor_ids);
+            handler_->GetMotorStates(motor_ids);
         if (temp_ms_vector.has_value()) {
           for (auto const& ret : temp_ms_vector.value()) {
             if (ret.first < kDOF) {
@@ -177,37 +171,54 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
         state_.T_left = dyn_robot_->ComputeTransformation(dyn_state_, kBaseLinkId, kLeftLinkId);
 
         // Control
-        if (control_ && state_updated_) {
-          auto input = control_(state_);
+        if (control_ && state_updated_ && !ctrl_running_.load()) {
+          ctrl_running_ = true;
 
-          std::vector<std::pair<int, int>> changed_id_mode;
-          std::vector<int> changed_id;
+          ctrl_ev_.PushTask([this, state = state_, operating_mode_init = operating_mode_init_] {
+            auto input = control_(state);
 
-          std::vector<std::pair<int, double>> id_position;
-          std::vector<std::pair<int, double>> id_torque;
+            std::vector<std::pair<int, int>> changed_id_mode;
+            std::vector<int> changed_id;
 
-          for (int i = 0; i < kDOF; i++) {
-            if (state_.operation_mode(i) != input.target_operation_mode(i) || !operation_mode_init_) {
-              changed_id.push_back(i);
-              changed_id_mode.emplace_back(i, input.target_operation_mode(i));
-            } else {
-              if (state_.operation_mode(i) == DynamixelBus::kCurrentControlMode) {
-                id_torque.emplace_back(i, input.target_torque(i));
-              } else if (state_.operation_mode(i) == DynamixelBus::kCurrentBasedPositionControlMode) {
-                id_torque.emplace_back(i, kMaximumTorque);
-                id_position.emplace_back(i, input.target_position(i));
+            std::vector<std::pair<int, double>> id_position;
+            std::vector<std::pair<int, double>> id_torque;
+
+            for (int i = 0; i < kDOF; i++) {
+              if (state.operating_mode(i) != input.target_operating_mode(i) || !operating_mode_init) {
+                changed_id.push_back(i);
+                changed_id_mode.emplace_back(i, input.target_operating_mode(i));
+              } else {
+                if (state.operating_mode(i) == DynamixelBus::kCurrentControlMode) {
+                  id_torque.emplace_back(i, input.target_torque(i));
+                } else if (state.operating_mode(i) == DynamixelBus::kCurrentBasedPositionControlMode) {
+                  id_torque.emplace_back(i, kMaximumTorque);
+                  id_position.emplace_back(i, input.target_position(i));
+                }
               }
             }
+
+            ev_.PushTask([=] {
+              handler_->GroupSyncWriteTorqueEnable(changed_id, 0);
+              handler_->GroupSyncWriteOperatingMode(changed_id_mode);
+              handler_->GroupSyncWriteTorqueEnable(changed_id, 1);
+
+              operating_mode_init_ = true;
+
+              handler_->GroupSyncWriteSendTorque(id_torque);
+              handler_->GroupSyncWriteSendPosition(id_position);
+            });
+
+            ctrl_running_ = false;
+          });
+
+          auto end_time = std::chrono::steady_clock::now();
+
+          duration_sum += std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() / 1.0e9;
+          duration_count++;
+          if (duration_count % 100 == 0) {
+            std::cout << "avg: " << duration_sum / duration_count * 1000 << " ms" << " (count: " << duration_count
+                      << ")" << std::endl;
           }
-
-          handler_->BulkWriteTorqueEnable(changed_id, 0);
-          handler_->BulkWriteOperationMode(changed_id_mode);
-          handler_->BulkWriteTorqueEnable(changed_id, 1);
-
-          operation_mode_init_ = true;
-
-          handler_->BulkWriteSendTorque(id_torque);
-          handler_->BulkWriteSendPosition(id_position);
         }
       },
       std::chrono::nanoseconds((long)(control_period_ * 1e9)));
@@ -216,6 +227,11 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
 void MasterArm::StopControl() {
   {  // Remove all tasks in current event loop
     ev_.Pause();
+
+    ctrl_ev_.Pause();
+    ctrl_ev_.WaitForTasks();
+    ctrl_ev_.PurgeTasks();
+
     ev_.WaitForTasks();
     ev_.PurgeTasks();
   }

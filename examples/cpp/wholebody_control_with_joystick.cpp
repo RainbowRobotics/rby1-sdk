@@ -548,6 +548,8 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
   double control_hold_time = 1e6;
 
+  const float SPEED = 2.;
+
   {
     //go to init pos
     auto rv = robot
@@ -587,6 +589,10 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
   float axes[num_axes];
   uint8_t buttons[num_buttons];
   uint8_t hat_variables[num_hats];  // hat 데이터를 네 변수로 받기
+
+  Eigen::Vector<double, 3> torso_pos_command = Eigen::Vector<double, 3>::Zero();  // torso command
+  Eigen::Vector<double, 3> torso_ori_command = Eigen::Vector<double, 3>::Zero();  // torso command
+  
 
   JoystickReceiver receiver(port, num_axes, num_buttons, num_hats);
   receiver.start();
@@ -670,22 +676,26 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
     dyn->ComputeForwardKinematics(dyn_state);
     T_torso = dyn->ComputeTransformation(dyn_state, 0, 1);
 
-    Eigen::Vector<double, 3> torso_pos_command = Eigen::Vector<double, 3>::Zero();  // torso command
-    Eigen::Vector<double, 3> torso_ori_command = Eigen::Vector<double, 3>::Zero();  // torso command
+    Eigen::Vector<double, 3> torso_pos_command_last = Eigen::Vector<double, 3>::Zero();  // torso command
+    Eigen::Vector<double, 3> torso_ori_command_last = Eigen::Vector<double, 3>::Zero();  // torso command
 
     // torso_pos_command << joy_stick_data.buttons[11] - joy_stick_data.buttons[12],
     //     joy_stick_data.buttons[14] - joy_stick_data.buttons[13], joy_stick_data.buttons[5] - joy_stick_data.triggerLeft;
     // torso_ori_command << joy_stick_data.buttons[1] - joy_stick_data.buttons[2],
     //     joy_stick_data.buttons[3] - joy_stick_data.buttons[0], joy_stick_data.buttons[4] - joy_stick_data.triggerRight;
 
-    torso_pos_command << (int)joy_stick_data.hats[2] - (int)joy_stick_data.hats[3],
+    torso_pos_command_last << (int)joy_stick_data.hats[2] - (int)joy_stick_data.hats[3],
         (int)joy_stick_data.hats[0] - (int)joy_stick_data.hats[1],
         (int)joy_stick_data.buttons[4] - (joy_stick_data.axes[2] + 1) / 2;
-    torso_ori_command << (int)joy_stick_data.buttons[1] - (int)joy_stick_data.buttons[2],
+    torso_ori_command_last << (int)joy_stick_data.buttons[1] - (int)joy_stick_data.buttons[2],
         (int)joy_stick_data.buttons[3] - (int)joy_stick_data.buttons[0],
         (int)joy_stick_data.buttons[5] - (joy_stick_data.axes[5] + 1) / 2;
-    Eigen::Vector<double, 3> torso_se3v_ori = math::SO3::Log(T_torso.block(0, 0, 3, 3)) + torso_ori_command / 10.0;
-    Eigen::Vector<double, 3> torso_se3v_pos = T_torso.block(0, 3, 3, 1) + torso_pos_command / 20.0;
+
+    torso_pos_command = 0.8 * torso_pos_command + 0.2 * torso_pos_command_last;
+    torso_ori_command = 0.8 * torso_ori_command + 0.2 * torso_ori_command_last;
+
+    Eigen::Vector<double, 3> torso_se3v_ori = math::SO3::Log(T_torso.block(0, 0, 3, 3)) + SPEED * torso_ori_command / 10.0;
+    Eigen::Vector<double, 3> torso_se3v_pos = T_torso.block(0, 3, 3, 1) + SPEED * torso_pos_command / 20.0;
 
     for (int i = 0; i < 3; i++) {
       torso_se3v_ori(i) = std::min(std::max(torso_se3v_ori(i), -0.5236), 0.5236);
@@ -786,7 +796,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
         right_arm_command
             .AddTarget("base", "ee_right", T_right_from_torso, 3.141592, 3.141592, 1)
             // .AddJointPositionTarget("right_arm_2", q_joint_rby1_24x1(2+6+2) + joy_stick_data.axisRightX/10.0, 3.14, 100)
-            .AddJointPositionTarget("right_arm_2", q_joint_rby1_24x1(2 + 6 + 2) + joy_stick_data.axes[3] / 10.0, 3.14,
+            .AddJointPositionTarget("right_arm_2", q_joint_rby1_24x1(2 + 6 + 2) + SPEED * joy_stick_data.axes[3] / 10.0, 3.14,
                                     100)
             .SetMinimumTime(right_arm_minimum_time)
             .SetStopOrientationTrackingError(stop_orientation_tracking_error)
@@ -796,7 +806,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
         left_arm_command
             .AddTarget("base", "ee_left", T_left_from_torso, 3.141592, 3.141592, 1)
             // .AddJointPositionTarget("left_arm_2", q_joint_rby1_24x1(2+6+2+7) + joy_stick_data.axisLeftX/10.0, 3.14, 100)
-            .AddJointPositionTarget("left_arm_2", q_joint_rby1_24x1(2 + 6 + 2 + 7) + joy_stick_data.axes[0] / 10.0,
+            .AddJointPositionTarget("left_arm_2", q_joint_rby1_24x1(2 + 6 + 2 + 7) + SPEED * joy_stick_data.axes[0] / 10.0,
                                     3.14, 100)
             .SetMinimumTime(left_arm_minimum_time)
             .SetStopOrientationTrackingError(stop_orientation_tracking_error)
@@ -1286,7 +1296,7 @@ int main(int argc, char** argv) {
 
   std::cout << "Starting state update..." << std::endl;
 
-  robot->SetParameter("cartesian_command.cutoff_frequency", "15.0", false);
+  robot->SetParameter("cartesian_command.cutoff_frequency", "8.0", false);
   robot->SetParameter("default.angular_acceleration_limit", "30", false);
   robot->SetParameter("default.linear_acceleration_limit", "60", false);
 

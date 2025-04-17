@@ -636,6 +636,27 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return true;
   }
 
+  bool ServoOff(const std::string& dev_name) const {
+    api::ServoOffRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(dev_name);
+
+    api::ServoOffResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = joint_operation_service_->ServoOff(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    return res.status() == api::ServoOffResponse::STATUS_SUCCESS;
+  }
+
   bool SetPositionGain(const std::string& dev_name, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain,
                        std::optional<uint16_t> d_gain) const {
     api::SetPositionPIDGainRequest req;
@@ -2431,6 +2452,11 @@ bool Robot<T>::ServoOn(const std::string& dev_name) const {
 template <typename T>
 bool Robot<T>::IsServoOn(const std::string& dev_name) const {
   return impl_->IsServoOn(dev_name);
+}
+
+template <typename T>
+bool Robot<T>::ServoOff(const std::string& dev_name) const {
+  return impl_->ServoOff(dev_name);
 }
 
 template <typename T>

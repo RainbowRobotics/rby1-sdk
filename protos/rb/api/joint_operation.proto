@@ -16,7 +16,6 @@ message ServoOnRequest {
   string name = 2;
 }
 
-
 message ServoOnResponse {
   // Response header
   ResponseHeader response_header = 1;
@@ -29,6 +28,27 @@ message ServoOnResponse {
   Status status = 2;
 
   // Human-readable message for status
+  string message = 3;
+}
+
+message ServoOffRequest {
+  // Request header
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+message ServoOffResponse {
+  // Response header
+  ResponseHeader response_header = 1;
+
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_INTERNAL_ERROR = 2;
+  }
+  Status status = 2;
+
   string message = 3;
 }
 
@@ -146,10 +166,10 @@ message GetPositionPIDGainRequest {
     LEFT_ARM = 3;
     HEAD = 4;
   }
-  oneof command {  
-    string dev_name = 2;  
-    TargetComponent target_component = 3;  
-  }  
+  oneof command {
+    string dev_name = 2;
+    TargetComponent target_component = 3;
+  }
 }
 
 message GetPositionPIDGainResponse {

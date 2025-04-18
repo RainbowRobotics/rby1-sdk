@@ -130,8 +130,6 @@ struct RobotState {
 
   // Temperatures
   std::vector<int> temperatures;
-
-  bool ready_for_command{false};
 };
 
 inline std::string to_string(PowerState::State s) {

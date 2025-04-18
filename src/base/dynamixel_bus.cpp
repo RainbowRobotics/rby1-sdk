@@ -89,30 +89,14 @@ class DynamixelBusImpl {
     std::optional<uint16_t> i_gain;
     std::optional<uint16_t> d_gain;
 
-    uint16_t read_value;
+    uint8_t values[3 * 2];
     uint8_t dxl_error;
-    std::this_thread::sleep_for(50ms);
-    int dxl_comm_result =
-        packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionPGain, &read_value, &dxl_error);
 
-    if (dxl_comm_result == COMM_SUCCESS) {
-      p_gain = read_value;
-    }
-
-    std::this_thread::sleep_for(50ms);
-    dxl_comm_result =
-        packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionIGain, &read_value, &dxl_error);
-
-    if (dxl_comm_result == COMM_SUCCESS) {
-      i_gain = read_value;
-    }
-
-    std::this_thread::sleep_for(50ms);
-    dxl_comm_result =
-        packet_handler_->read2ByteTxRx(port_handler_, id, DynamixelBus::kAddrPositionDGain, &read_value, &dxl_error);
-
-    if (dxl_comm_result == COMM_SUCCESS) {
-      d_gain = read_value;
+    int result = packet_handler_->readTxRx(port_handler_, id, DynamixelBus::kAddrPositionDGain, 6, &values[0], &dxl_error);
+    if(result == COMM_SUCCESS) {
+      p_gain = DXL_MAKEWORD(values[4], values[5]);
+      i_gain = DXL_MAKEWORD(values[2], values[3]);
+      d_gain = DXL_MAKEWORD(values[0], values[1]);
     }
 
     return std::make_tuple(p_gain, i_gain, d_gain);
@@ -569,14 +553,10 @@ std::optional<uint16_t> DynamixelBus::GetPositionDGain(int id) {
 
 std::optional<DynamixelBus::PIDGain> DynamixelBus::GetPositionPIDGain(int id) {
   auto [p_gain, i_gain, d_gain] = impl_->GetPositionGain(id);
-
   if (!p_gain.has_value() || !i_gain.has_value() || !d_gain.has_value()) {
     return std::nullopt;
   }
-
-  DynamixelBus::PIDGain pid_gain{p_gain.value(), i_gain.value(), d_gain.value()};
-
-  return pid_gain;
+  return DynamixelBus::PIDGain{.p_gain = p_gain.value(), .i_gain = i_gain.value(), .d_gain = d_gain.value()};
 }
 
 // std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> DynamixelBus::GetPositionGain(

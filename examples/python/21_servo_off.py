@@ -14,18 +14,6 @@ logging.basicConfig(
 def main(address, model, power, servo):
     robot = initialize_robot(address, model, power, servo)
 
-    model = robot.model()
-    torso_dof = len(model.torso_idx)
-    right_arm_dof = len(model.right_arm_idx)
-    left_arm_dof = len(model.left_arm_idx)
-    movej(
-        robot,
-        np.zeros(torso_dof),
-        np.zeros(right_arm_dof),
-        np.zeros(left_arm_dof),
-        minimum_time=5,
-    )
-
     robot.disable_control_manager()
     robot.servo_off("^(head).*")
 

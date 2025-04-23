@@ -174,6 +174,8 @@ class ImpedanceControlCommandBuilderImpl {
     w.set_z(weight(2));
   }
 
+  void SetDampingRatio(double damping_ratio) { req_->mutable_damping_ratio()->set_value(damping_ratio); }
+
   api::ImpedanceControlCommand::Request* Build() { return req_.release(); }
 
  private:
@@ -777,6 +779,11 @@ ImpedanceControlCommandBuilder& ImpedanceControlCommandBuilder::SetTranslationWe
 
 ImpedanceControlCommandBuilder& ImpedanceControlCommandBuilder::SetRotationWeight(const Eigen::Vector3d& weight) {
   impl_->SetRotationWeight(weight);
+  return *this;
+}
+
+ImpedanceControlCommandBuilder& ImpedanceControlCommandBuilder::SetDampingRatio(double damping_ratio) {
+  impl_->SetDampingRatio(damping_ratio);
   return *this;
 }
 

@@ -148,6 +148,8 @@ class ImpedanceControlCommandBuilder {
 
   ImpedanceControlCommandBuilder& SetRotationWeight(const Eigen::Vector3d& weight);
 
+  ImpedanceControlCommandBuilder& SetDampingRatio(double damping_ratio);
+
  private:
   [[nodiscard]] void* Build() const;
 

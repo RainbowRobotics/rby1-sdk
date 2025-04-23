@@ -193,6 +193,8 @@ message ImpedanceControlCommand {
     Vec3 translation_weight = 6;
 
     Vec3 rotation_weight = 7;
+
+    google.protobuf.DoubleValue damping_ratio = 8; // default = 1
   }
 
   message Feedback {

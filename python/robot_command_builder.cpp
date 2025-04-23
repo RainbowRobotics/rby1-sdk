@@ -46,7 +46,8 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_link_name", &ImpedanceControlCommandBuilder::SetLinkName, "link_name"_a)
       .def("set_transformation", &ImpedanceControlCommandBuilder::SetTransformation, "T"_a)
       .def("set_translation_weight", &ImpedanceControlCommandBuilder::SetTranslationWeight, "weight"_a)
-      .def("set_rotation_weight", &ImpedanceControlCommandBuilder::SetRotationWeight, "weight"_a);
+      .def("set_rotation_weight", &ImpedanceControlCommandBuilder::SetRotationWeight, "weight"_a)
+      .def("set_damping_ratio", &ImpedanceControlCommandBuilder::SetDampingRatio, "damping_ratio"_a);
 
   py::class_<JointVelocityCommandBuilder>(m, "JointVelocityCommandBuilder")
       .def(py::init<>())

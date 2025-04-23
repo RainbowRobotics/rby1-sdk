@@ -14,15 +14,17 @@ logging.basicConfig(
 def main(address, model, power, servo):
     robot = initialize_robot(address, model, power, servo)
 
-    robot.disable_control_manager()
-    robot.servo_off("^(head).*")
+    logging.info(
+        "Robot was successfully brought up. The control manager will be disabled and the servo will be turned off in "
+        "5 second.")
+    time.sleep(5)
 
-    time.sleep(1)
-    print(robot.get_state())
+    robot.disable_control_manager()
+    robot.servo_off(servo)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="07_impedance_control")
+    parser = argparse.ArgumentParser(description="21_servo_off")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"
@@ -36,7 +38,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--servo",
         type=str,
-        default=".*",
+        default="^(head).*",
         help="Servo name regex pattern (default: '.*')",
     )
     args = parser.parse_args()

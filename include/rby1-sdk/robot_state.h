@@ -129,7 +129,7 @@ struct RobotState {
   std::vector<dyn::CollisionResult> collisions;
 
   // Temperature
-  Eigen::Vector<int, T::kRobotDOF> temperature{Eigen::Vector<double, T::kRobotDOF>::Zero()};
+  Eigen::Vector<int, T::kRobotDOF> temperature{Eigen::Vector<int, T::kRobotDOF>::Zero()};
 };
 
 inline std::string to_string(PowerState::State s) {

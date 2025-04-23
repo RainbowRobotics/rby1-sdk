@@ -706,10 +706,14 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       }
       throw std::runtime_error(ss.str());
     }
-    auto res_gains = res.position_gain();
-    std::vector<rb::PIDGain> result;
 
-    for (auto gain : res_gains) {
+    auto res_gains = res.position_gain();
+    if (res_gains.empty()) {
+      throw std::runtime_error("Failed to retrieve torso PID gains");
+    }
+
+    std::vector<rb::PIDGain> result;
+    for (const auto& gain : res_gains) {
       result.push_back(rb::PIDGain{static_cast<uint16_t>(gain.p_gain()), static_cast<uint16_t>(gain.i_gain()),
                                    static_cast<uint16_t>(gain.d_gain())});
     }
@@ -735,9 +739,12 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       throw std::runtime_error(ss.str());
     }
     auto res_gains = res.position_gain();
-    std::vector<rb::PIDGain> result;
+    if (res_gains.empty()) {
+      throw std::runtime_error("Failed to retrieve right arm PID gains");
+    }
 
-    for (auto gain : res_gains) {
+    std::vector<rb::PIDGain> result;
+    for (const auto& gain : res_gains) {
       result.push_back(rb::PIDGain{static_cast<uint16_t>(gain.p_gain()), static_cast<uint16_t>(gain.i_gain()),
                                    static_cast<uint16_t>(gain.d_gain())});
     }
@@ -763,9 +770,12 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       throw std::runtime_error(ss.str());
     }
     auto res_gains = res.position_gain();
-    std::vector<rb::PIDGain> result;
+    if (res_gains.empty()) {
+      throw std::runtime_error("Failed to retrieve right arm PID gains");
+    }
 
-    for (auto gain : res_gains) {
+    std::vector<rb::PIDGain> result;
+    for (const auto& gain : res_gains) {
       result.push_back(rb::PIDGain{static_cast<uint16_t>(gain.p_gain()), static_cast<uint16_t>(gain.i_gain()),
                                    static_cast<uint16_t>(gain.d_gain())});
     }
@@ -791,9 +801,12 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       throw std::runtime_error(ss.str());
     }
     auto res_gains = res.position_gain();
-    std::vector<rb::PIDGain> result;
+    if (res_gains.empty()) {
+      throw std::runtime_error("Failed to retrieve head PID gains");
+    }
 
-    for (auto gain : res_gains) {
+    std::vector<rb::PIDGain> result;
+    for (const auto& gain : res_gains) {
       result.push_back(rb::PIDGain{static_cast<uint16_t>(gain.p_gain()), static_cast<uint16_t>(gain.i_gain()),
                                    static_cast<uint16_t>(gain.d_gain())});
     }
@@ -1878,9 +1891,8 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return wifi_networks;
   }
 
-  bool ConnectWifi(const std::string& ssid, const std::string& password, bool use_dhcp,
-                   const std::string& ip_address, const std::string& gateway,
-                   const std::vector<std::string>& dns) const {
+  bool ConnectWifi(const std::string& ssid, const std::string& password, bool use_dhcp, const std::string& ip_address,
+                   const std::string& gateway, const std::vector<std::string>& dns) const {
     api::ConnectWifiRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_ssid(ssid);
@@ -1888,7 +1900,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     req.set_use_dhcp(use_dhcp);
     req.set_ip_address(ip_address);
     req.set_gateway(gateway);
-    for(const auto& d : dns) {
+    for (const auto& d : dns) {
       *req.add_dns() = d;
     }
 

@@ -2335,6 +2335,19 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       rs.collisions.push_back(cs);
     }
 
+    if (msg.temperature_size() == 0) {
+      // Backward-compatability issue
+      for (int i = 0; i < T::kRobotDOF; i++) {
+        rs.temperature[i] = 0;
+      }
+    } else if (msg.temperature_size() == T::kRobotDOF) {
+      for (int i = 0; i < T::kRobotDOF; i++) {
+        rs.temperature[i] = msg.temperature(i);
+      }
+    } else {
+      throw std::runtime_error("The size of 'temperature' vector does not match the DOF.");
+    }
+
     return rs;
   }
 

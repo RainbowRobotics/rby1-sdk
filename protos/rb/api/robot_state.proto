@@ -165,6 +165,9 @@ message RobotState {
   // Collisions
   repeated Collision collisions = 47;
 
+  // Temperature
+  repeated int32 temperature = 48;
+
 }
 
 message GetRobotStateRequest {

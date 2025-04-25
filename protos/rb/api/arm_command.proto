@@ -17,6 +17,8 @@ message ArmCommand {
       CartesianCommand.Request cartesian_command = 4;
 
       ImpedanceControlCommand.Request impedance_control_command = 5;
+
+      JointImpedanceControlCommand.Request joint_impedance_control_command = 6;
     }
   }
 
@@ -31,6 +33,8 @@ message ArmCommand {
       CartesianCommand.Feedback cartesian_command_feedback = 4;
 
       ImpedanceControlCommand.Feedback impedance_control_command_feedback = 5;
+
+      JointImpedanceControlCommand.Feedback joint_impedance_control_command_feedback = 6;
     }
   }
 }

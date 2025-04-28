@@ -468,4 +468,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main(args.address, args.model, args.power, args.servo)
+    main(args.address, args.model, args.power, args.servo, args.mode)

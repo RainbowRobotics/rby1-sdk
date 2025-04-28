@@ -42,6 +42,8 @@ class Joint : public std::enable_shared_from_this<Joint> {
   void SetLimitQdot(double lower, double upper);
 
   void SetLimitQddot(double lower, double upper);
+  
+  void SetLimitTorque(double value);
 
   double GetLimitQLower() const;
 
@@ -54,6 +56,8 @@ class Joint : public std::enable_shared_from_this<Joint> {
   double GetLimitQddotLower() const;
 
   double GetLimitQddotUpper() const;
+
+  double GetLimitTorque() const;
 
   void SetLimitQLower(double val);
 
@@ -84,6 +88,7 @@ class Joint : public std::enable_shared_from_this<Joint> {
   std::string name_{};
   bool fixed_;
   math::se3v::MatrixType S_;
+  double limit_torque_{(std::numeric_limits<double>::max)()};
   double limit_q_lower_{-(std::numeric_limits<double>::max)()};
   double limit_q_upper_{(std::numeric_limits<double>::max)()};
   double limit_qdot_lower_{-(std::numeric_limits<double>::max)()};

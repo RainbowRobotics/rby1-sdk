@@ -197,6 +197,9 @@ RobotConfiguration _load_robot_from_urdf(tinyxml2::XMLDocument& doc, const std::
 
     XMLElement* limit_element = joint->FirstChildElement("limit");
     if (limit_element) {
+      if (limit_element->FindAttribute("effort")) {
+        joint_ptr->SetLimitTorque(limit_element->DoubleAttribute("effort"));
+      }
       if (limit_element->FindAttribute("lower")) {
         joint_ptr->SetLimitQLower(limit_element->DoubleAttribute("lower"));
       }

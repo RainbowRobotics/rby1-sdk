@@ -126,12 +126,14 @@ void bind_link_joint(py::module_& m) {
       .def("set_limit_q", &dyn::Joint::SetLimitQ, "lower"_a, "upper"_a)
       .def("set_limit_qdot", &dyn::Joint::SetLimitQdot, "lower"_a, "upper"_a)
       .def("set_limit_qddot", &dyn::Joint::SetLimitQddot, "lower"_a, "upper"_a)
+      .def("set_limit_torque", &dyn::Joint::SetLimitTorque, "torque"_a)
       .def("get_limit_q_lower", &dyn::Joint::GetLimitQLower)
       .def("get_limit_q_upper", &dyn::Joint::GetLimitQUpper)
       .def("get_limit_qdot_lower", &dyn::Joint::GetLimitQdotLower)
       .def("get_limit_qdot_upper", &dyn::Joint::GetLimitQdotUpper)
       .def("get_limit_qddot_lower", &dyn::Joint::GetLimitQddotLower)
       .def("get_limit_qddot_upper", &dyn::Joint::GetLimitQddotUpper)
+      .def("get_limit_torque", &dyn::Joint::GetLimitTorque)
       .def("set_limit_q_lower", &dyn::Joint::SetLimitQLower, "val"_a)
       .def("set_limit_q_upper", &dyn::Joint::SetLimitQUpper, "val"_a)
       .def("set_limit_qdot_lower", &dyn::Joint::SetLimitQdotLower, "val"_a)
@@ -213,11 +215,16 @@ void bind_robot(py::module_& m) {
       .def("compute_inverse_dynamics", &dyn::Robot<DOF>::ComputeInverseDynamics, "state"_a)
       .def("compute_gravity_term", &dyn::Robot<DOF>::ComputeGravityTerm, "state"_a)
       .def("compute_mass_matrix", &dyn::Robot<DOF>::ComputeMassMatrix, "state"_a)
-      .def("compute_reflective_inertia", &dyn::Robot<DOF>::ComputeReflectiveInertia, "state"_a, "reference_link_index"_a, "target_link_index"_a)
-      .def("compute_transformation", &dyn::Robot<DOF>::ComputeTransformation, "state"_a, "reference_link_index"_a, "target_link_index"_a)
-      .def("compute_body_velocity", &dyn::Robot<DOF>::ComputeBodyVelocity, "state"_a, "reference_link_index"_a, "target_link_index"_a)
-      .def("compute_space_jacobian", &dyn::Robot<DOF>::ComputeSpaceJacobian, "state"_a, "reference_link_index"_a, "target_link_index"_a)
-      .def("compute_body_jacobian", &dyn::Robot<DOF>::ComputeBodyJacobian, "state"_a, "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_reflective_inertia", &dyn::Robot<DOF>::ComputeReflectiveInertia, "state"_a,
+           "reference_link_index"_a, "target_link_index"_a)
+      .def("compute_transformation", &dyn::Robot<DOF>::ComputeTransformation, "state"_a, "reference_link_index"_a,
+           "target_link_index"_a)
+      .def("compute_body_velocity", &dyn::Robot<DOF>::ComputeBodyVelocity, "state"_a, "reference_link_index"_a,
+           "target_link_index"_a)
+      .def("compute_space_jacobian", &dyn::Robot<DOF>::ComputeSpaceJacobian, "state"_a, "reference_link_index"_a,
+           "target_link_index"_a)
+      .def("compute_body_jacobian", &dyn::Robot<DOF>::ComputeBodyJacobian, "state"_a, "reference_link_index"_a,
+           "target_link_index"_a)
       .def("compute_mass", &dyn::Robot<DOF>::ComputeMass, "state"_a, "target_link_index"_a)
       .def("compute_center_of_mass",
            static_cast<Eigen::Vector3d (dyn::Robot<DOF>::*)(std::shared_ptr<dyn::State<DOF>>, unsigned int,
@@ -250,6 +257,7 @@ void bind_robot(py::module_& m) {
       .def("get_limit_qdot_upper", &dyn::Robot<DOF>::GetLimitQdotUpper, "state"_a)
       .def("get_limit_qddot_lower", &dyn::Robot<DOF>::GetLimitQddotLower, "state"_a)
       .def("get_limit_qddot_upper", &dyn::Robot<DOF>::GetLimitQddotUpper, "state"_a)
+      .def("get_limit_torque", &dyn::Robot<DOF>::GetLimitTorque, "state"_a)
       .def("get_joint_property", &dyn::Robot<DOF>::GetJointProperty, "state"_a, "getter"_a)
       .def("compute_mobility_inverse_diff_kinematics",
            static_cast<void (dyn::Robot<DOF>::*)(std::shared_ptr<dyn::State<DOF>>, const Eigen::Vector2d&, double)>(

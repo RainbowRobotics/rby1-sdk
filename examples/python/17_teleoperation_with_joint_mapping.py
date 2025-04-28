@@ -188,13 +188,14 @@ def move_j(
     return handler.get() == rby.RobotCommandFeedback.FinishCode.Ok
 
 
-def main(address, model, power, servo):
+def main(address, model, power, servo, control_mode):
     # ===== SETUP ROBOT =====
     robot = rby.create_robot(address, model)
     if not robot.connect():
         logging.error(f"Failed to connect robot {address}")
         exit(1)
     supported_model = ["A", "T5", "M"]
+    supported_control_mode = ["position", "impedance"]
     model = robot.model()
     dyn_model = robot.get_dynamics()
     dyn_state = dyn_model.make_state([], model.robot_joint_names)
@@ -203,7 +204,7 @@ def main(address, model, power, servo):
     robot_min_q = dyn_model.get_limit_q_lower(dyn_state)
     robot_max_qdot = dyn_model.get_limit_qdot_upper(dyn_state)
     robot_max_qddot = dyn_model.get_limit_qddot_upper(dyn_state)
-    
+
     robot_max_qdot[model.right_arm_idx[-1]] *= 10
     robot_max_qdot[model.left_arm_idx[-1]] *= 10
 
@@ -212,6 +213,12 @@ def main(address, model, power, servo):
             f"Model {model.model_name} not supported (Current supported model is {supported_model})"
         )
         exit(1)
+    if not control_mode in supported_control_mode:
+        logging.error(
+            f"Control mode {control_mode} not supported (Current supported control mode is {supported_control_mode})"
+        )
+        exit(1)
+    position_mode = control_mode == "position"
     if not robot.is_power_on(power):
         if not robot.power_on(power):
             logging.error(f"Failed to turn power ({power}) on")
@@ -353,9 +360,13 @@ def main(address, model, power, servo):
             right_minimum_time = max(
                 right_minimum_time, Settings.master_arm_loop_period * 1.01
             )
-            rc.set_right_arm_command(
+            right_arm_builder = (
                 rby.JointPositionCommandBuilder()
-                .set_command_header(
+                if position_mode
+                else rby.JointImpedanceControlCommandBuilder()
+            )
+            (
+                right_arm_builder.set_command_header(
                     rby.CommandHeaderBuilder().set_control_hold_time(1e6)
                 )
                 .set_position(
@@ -369,6 +380,13 @@ def main(address, model, power, servo):
                 .set_acceleration_limit(robot_max_qddot[model.right_arm_idx] * 30)
                 .set_minimum_time(right_minimum_time)
             )
+            if not position_mode:
+                (
+                    right_arm_builder.set_stiffness([100.0] * len(model.right_arm_idx))
+                    .set_damping_ratio(1.0)
+                    .set_torque_limit([20.0] * len(model.right_arm_idx))
+                )
+            rc.set_right_arm_command(right_arm_builder)
         else:
             right_minimum_time = 0.8
 
@@ -424,7 +442,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="20_teleoperation")
+    parser = argparse.ArgumentParser(description="17_teleoperation_with_joint_mapping")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"
@@ -433,13 +451,20 @@ if __name__ == "__main__":
         "--power",
         type=str,
         default=".*",
-        help="Power device name regex pattern (default: '.*')",
+        help="Regex pattern for power device names (default: '.*')",
     )
     parser.add_argument(
         "--servo",
         type=str,
         default="torso_.*|right_arm_.*|left_arm_.*",
-        help="Servo name regex pattern (default: 'torso_.*|right_arm_.*|left_arm_.*'",
+        help="Regex pattern for servo names (default: 'torso_.*|right_arm_.*|left_arm_.*')",
+    )
+    parser.add_argument(
+        "--mode",
+        type=str,
+        default="position",
+        choices=["position", "impedance"],
+        help="Control mode to use: 'position' or 'impedance' (default: 'position')",
     )
     args = parser.parse_args()
 

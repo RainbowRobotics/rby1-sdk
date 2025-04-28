@@ -37,29 +37,44 @@ def main(address, model, power, servo):
         np.zeros(len(model.torso_idx)),
         np.zeros(len(model.right_arm_idx)),
         np.zeros(len(model.left_arm_idx)),
-        minimum_time=2,
+        minimum_time=5,
     )
     movej(  # Ready Pose
         robot,
         READY_POSE[model.model_name]["toros"],
         READY_POSE[model.model_name]["right_arm"],
         READY_POSE[model.model_name]["left_arm"],
-        minimum_time=2,
+        minimum_time=5,
     )
 
     # Joint Impedance Control
     rc_builder = rby.RobotCommandBuilder().set_command(
         rby.ComponentBasedCommandBuilder().set_body_command(
-            rby.BodyComponentBasedCommandBuilder().set_torso_command(
+            rby.BodyComponentBasedCommandBuilder()
+            # -- Torso --
+            # .set_torso_command(
+            #     rby.JointImpedanceControlCommandBuilder()
+            #     .set_command_header(
+            #         rby.CommandHeaderBuilder().set_control_hold_time(10)
+            #     )
+            #     .set_position([0.0] * len(model.torso_idx))
+            #     # .set_velocity_limit([np.inf] * len(model.torso_idx))
+            #     # .set_acceleration_limit([np.inf] * len(model.torso_idx))
+            #     .set_minimum_time(5)
+            #     .set_stiffness([100.0] * len(model.torso_idx))
+            #     .set_damping_ratio(1.0)
+            #     # .set_torque_limit([100] * len(model.torso_idx))
+            # )
+            .set_right_arm_command(
                 rby.JointImpedanceControlCommandBuilder()
-                .set_command_header(rby.CommandHeaderBuilder().set_control_hold_time(10))
-                .set_position([0.0] * len(model.torso_idx))
-                # .set_velocity_limit([np.inf] * len(model.torso_idx))
-                # .set_acceleration_limit([np.inf] * len(model.torso_idx))
+                .set_command_header(
+                    rby.CommandHeaderBuilder().set_control_hold_time(10)
+                )
+                .set_position([0.0] * len(model.right_arm_idx))
                 .set_minimum_time(5)
-                .set_stiffness([100.0] * len(model.torso_idx))
+                .set_stiffness([100.0] * len(model.right_arm_idx))
                 .set_damping_ratio(1.0)
-                # .set_torque_limit([100] * len(model.torso_idx))
+                .set_torque_limit([10] * len(model.right_arm_idx))
             )
         )
     )

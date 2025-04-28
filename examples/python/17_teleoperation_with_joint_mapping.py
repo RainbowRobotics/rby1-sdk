@@ -149,7 +149,28 @@ class Gripper:
             self.target_q = (1 - normalized_q) * (self.max_q - self.min_q) + self.min_q
 
 
-def joint_position_command_builder(pose: Pose, minimum_time, control_hold_time=0):
+def joint_position_command_builder(
+    pose: Pose, minimum_time, control_hold_time=0, position_mode=True
+):
+    right_arm_builder = (
+        rby.JointPositionCommandBuilder()
+        if position_mode
+        else rby.JointImpedanceControlCommandBuilder()
+    )
+    (
+        right_arm_builder.set_command_header(
+            rby.CommandHeaderBuilder().set_control_hold_time(control_hold_time)
+        )
+        .set_position(pose.right_arm)
+        .set_minimum_time(minimum_time)
+    )
+    if not position_mode:
+        (
+            right_arm_builder.set_stiffness([100.0] * len(pose.right_arm))
+            .set_damping_ratio(1.0)
+            .set_torque_limit([20.0] * len(pose.right_arm))
+        )
+
     return rby.RobotCommandBuilder().set_command(
         rby.ComponentBasedCommandBuilder().set_body_command(
             rby.BodyComponentBasedCommandBuilder()
@@ -161,14 +182,7 @@ def joint_position_command_builder(pose: Pose, minimum_time, control_hold_time=0
                 .set_position(pose.toros)
                 .set_minimum_time(minimum_time)
             )
-            .set_right_arm_command(
-                rby.JointPositionCommandBuilder()
-                .set_command_header(
-                    rby.CommandHeaderBuilder().set_control_hold_time(control_hold_time)
-                )
-                .set_position(pose.right_arm)
-                .set_minimum_time(minimum_time)
-            )
+            .set_right_arm_command(right_arm_builder)
             .set_left_arm_command(
                 rby.JointPositionCommandBuilder()
                 .set_command_header(
@@ -280,10 +294,13 @@ def main(address, model, power, servo, control_mode):
     left_q = None
     right_minimum_time = 1.0
     left_minimum_time = 1.0
-    stream = robot.create_command_stream(priority=1)
+    stream = robot.create_command_stream(priority=1)  # TODO
     stream.send_command(
         joint_position_command_builder(
-            READY_POSE[model.model_name], minimum_time=5, control_hold_time=1e6
+            READY_POSE[model.model_name],
+            minimum_time=5,
+            control_hold_time=1e6,
+            position_mode=position_mode,
         )
     )
 

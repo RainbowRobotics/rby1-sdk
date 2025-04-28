@@ -33,6 +33,10 @@ class Pose:
 class Settings:
     master_arm_loop_period = 1 / 100
 
+    impedance_stiffness = 30
+    impedance_damping_ratio = 1.0
+    impedance_torque_limit = 10.0
+
 
 READY_POSE = {
     "A": Pose(
@@ -166,9 +170,32 @@ def joint_position_command_builder(
     )
     if not position_mode:
         (
-            right_arm_builder.set_stiffness([100.0] * len(pose.right_arm))
-            .set_damping_ratio(1.0)
-            .set_torque_limit([20.0] * len(pose.right_arm))
+            right_arm_builder.set_stiffness(
+                [Settings.impedance_stiffness] * len(pose.right_arm)
+            )
+            .set_damping_ratio(Settings.impedance_damping_ratio)
+            .set_torque_limit([Settings.impedance_torque_limit] * len(pose.right_arm))
+        )
+
+    left_arm_builder = (
+        rby.JointPositionCommandBuilder()
+        if position_mode
+        else rby.JointImpedanceControlCommandBuilder()
+    )
+    (
+        left_arm_builder.set_command_header(
+            rby.CommandHeaderBuilder().set_control_hold_time(control_hold_time)
+        )
+        .set_position(pose.left_arm)
+        .set_minimum_time(minimum_time)
+    )
+    if not position_mode:
+        (
+            left_arm_builder.set_stiffness(
+                [Settings.impedance_stiffness] * len(pose.left_arm)
+            )
+            .set_damping_ratio(Settings.impedance_damping_ratio)
+            .set_torque_limit([Settings.impedance_torque_limit] * len(pose.left_arm))
         )
 
     return rby.RobotCommandBuilder().set_command(
@@ -183,14 +210,7 @@ def joint_position_command_builder(
                 .set_minimum_time(minimum_time)
             )
             .set_right_arm_command(right_arm_builder)
-            .set_left_arm_command(
-                rby.JointPositionCommandBuilder()
-                .set_command_header(
-                    rby.CommandHeaderBuilder().set_control_hold_time(control_hold_time)
-                )
-                .set_position(pose.left_arm)
-                .set_minimum_time(minimum_time)
-            )
+            .set_left_arm_command(left_arm_builder)
         )
     )
 
@@ -305,7 +325,7 @@ def main(address, model, power, servo, control_mode):
     )
 
     def master_arm_control_loop(state: rby.upc.MasterArm.State):
-        nonlocal right_q, left_q, right_minimum_time, left_minimum_time
+        nonlocal position_mode, right_q, left_q, right_minimum_time, left_minimum_time
 
         if right_q is None:
             right_q = state.q_joint[0:7]
@@ -399,9 +419,13 @@ def main(address, model, power, servo, control_mode):
             )
             if not position_mode:
                 (
-                    right_arm_builder.set_stiffness([100.0] * len(model.right_arm_idx))
-                    .set_damping_ratio(1.0)
-                    .set_torque_limit([20.0] * len(model.right_arm_idx))
+                    right_arm_builder.set_stiffness(
+                        [Settings.impedance_stiffness] * len(model.right_arm_idx)
+                    )
+                    .set_damping_ratio(Settings.impedance_damping_ratio)
+                    .set_torque_limit(
+                        [Settings.impedance_torque_limit] * len(model.right_arm_idx)
+                    )
                 )
             rc.set_right_arm_command(right_arm_builder)
         else:
@@ -412,9 +436,13 @@ def main(address, model, power, servo, control_mode):
             left_minimum_time = max(
                 left_minimum_time, Settings.master_arm_loop_period * 1.01
             )
-            rc.set_left_arm_command(
+            left_arm_builder = (
                 rby.JointPositionCommandBuilder()
-                .set_command_header(
+                if position_mode
+                else rby.JointImpedanceControlCommandBuilder()
+            )
+            (
+                left_arm_builder.set_command_header(
                     rby.CommandHeaderBuilder().set_control_hold_time(1e6)
                 )
                 .set_position(
@@ -428,6 +456,17 @@ def main(address, model, power, servo, control_mode):
                 .set_acceleration_limit(robot_max_qddot[model.left_arm_idx] * 30)
                 .set_minimum_time(left_minimum_time)
             )
+            if not position_mode:
+                (
+                    left_arm_builder.set_stiffness(
+                        [Settings.impedance_stiffness] * len(model.left_arm_idx)
+                    )
+                    .set_damping_ratio(Settings.impedance_damping_ratio)
+                    .set_torque_limit(
+                        [Settings.impedance_torque_limit] * len(model.left_arm_idx)
+                    )
+                )
+            rc.set_left_arm_command(left_arm_builder)
         else:
             left_minimum_time = 0.8
         stream.send_command(

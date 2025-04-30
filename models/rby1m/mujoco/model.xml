@@ -1,6 +1,6 @@
 <mujoco model="rby1">
   <option timestep="0.002" solver="CG" iterations="30" tolerance="1e-6" />
-  <size nuserdata="144" />
+  <size nuserdata="156" />
 
   <default>
     <motor ctrlrange="-3000000 3000000" ctrllimited="true" />

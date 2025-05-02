@@ -18,7 +18,7 @@ int main() {
   // Offline
   tmg.Update(input);
   for (double t = step; t < 10; t += step) {
-    const auto& [p, v] = tmg(t);
+    const auto& [p, v, _] = tmg(t);
     std::cout << t << " " << p.transpose() << " " << v.transpose() << std::endl;
 
     if (tmg.IsReached(t))

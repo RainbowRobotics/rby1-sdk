@@ -1,3 +1,25 @@
+## v0.6.0 (2025-05-02)
+
+### ♻️ Refactor
+
+- **example**: update examples for get/set pid gains
+
+### ✨ Features
+
+- retrieve torque limit from urdf and support joint impedance control command in builder
+- add proto for joint impedance control command
+- **impedance_control**: introduce damping ratio for adjusting damping gain
+- **robot_state**: add temperature in robot state
+
+### 🐛 Fixes
+
+- remove designated initializers
+- change dynamixel interval time
+- change m model userdata size
+- typo
+- **osqp,-osqp-eigen**: update version of osqp and osqp-eigen to v1.0.0 and v0.10.0, repectively
+- remove ready_for_command from state
+
 ## v0.5.0 (2025-03-28)
 
 ### ✨ Features

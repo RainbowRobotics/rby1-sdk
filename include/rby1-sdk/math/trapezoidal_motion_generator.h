@@ -22,6 +22,7 @@ class TrapezoidalMotionGenerator {
   struct Output {
     Eigen::Vector<double, N> position;
     Eigen::Vector<double, N> velocity;
+    Eigen::Vector<double, N> acceleration;
   };
 
   struct Coeff {
@@ -253,10 +254,13 @@ class TrapezoidalMotionGenerator {
     out.position.fill(0.);
     out.velocity.resize(n_joints_);
     out.velocity.fill(0.);
+    out.acceleration.resize(n_joints_);
+    out.acceleration.fill(0.);
 
     if (IsReached(t)) {
       out.position = last_input_.target_position;
       out.velocity.setZero();
+      out.acceleration.setZero();
     } else {
       for (int i = 0; i < n_joints_; i++) {
         double stretch = (spline_coeffs_(i, 3).end_t / total_time_);
@@ -276,6 +280,7 @@ class TrapezoidalMotionGenerator {
         }
         out.position(i) = p + v * dt + 0.5 * a * dt * dt;
         out.velocity(i) = (v + a * dt) * stretch;
+        out.acceleration(i) = a;
       }
     }
 

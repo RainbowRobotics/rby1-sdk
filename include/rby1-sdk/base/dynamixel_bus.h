@@ -84,6 +84,8 @@ class DynamixelBus {
   void SetPositionPIDGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain,
                           std::optional<uint16_t> d_gain);
 
+  void SetPositionPIDGain(int id, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain);
+
   void SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain);
 
   std::optional<uint16_t> GetPositionPGain(int id);
@@ -115,7 +117,8 @@ class DynamixelBus {
   std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> GroupFastSyncReadEncoder(
       const std::vector<int>& ids);
 
-  std::optional<std::vector<std::pair<int, int>>> GroupFastSyncReadOperatingMode(const std::vector<int>& ids, bool use_cache = false);
+  std::optional<std::vector<std::pair<int, int>>> GroupFastSyncReadOperatingMode(const std::vector<int>& ids,
+                                                                                 bool use_cache = false);
 
   std::optional<std::vector<std::pair<int, int>>> GroupFastSyncReadTorqueEnable(const std::vector<int>& ids);
 

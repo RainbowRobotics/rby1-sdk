@@ -73,6 +73,10 @@ void Joint::SetLimitQddot(double lower, double upper) {
   limit_qddot_upper_ = upper;
 }
 
+void Joint::SetLimitTorque(double value) {
+  limit_torque_ = value;
+}
+
 double Joint::GetLimitQLower() const {
   return limit_q_lower_;
 }
@@ -95,6 +99,10 @@ double Joint::GetLimitQddotLower() const {
 
 double Joint::GetLimitQddotUpper() const {
   return limit_qddot_upper_;
+}
+
+double Joint::GetLimitTorque() const {
+  return limit_torque_;
 }
 
 void Joint::SetLimitQLower(double val) {

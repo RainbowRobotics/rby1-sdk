@@ -54,6 +54,7 @@ add_library(osqp::osqp ALIAS osqpstatic)
 # OSQP-Eigen
 ###############################################################
 set(OSQP_IS_V1 ON)
+set(OSQP_IS_V1_FINAL ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_SKIP_INSTALL_RULES ON)
 add_subdirectory(osqp-eigen EXCLUDE_FROM_ALL)

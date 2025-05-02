@@ -1,10 +1,12 @@
 import time
-import os, sys
+
 import rby1_sdk
-from rby1_sdk import *
 import argparse
-import numpy as np
-import sys
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 def main(address, model):
@@ -12,73 +14,55 @@ def main(address, model):
     robot.connect()
 
     if not robot.is_connected():
-        print("Robot is not connected")
+        logging.error("Robot connection failed")
         exit(1)
 
     if not robot.is_power_on(".*"):
         rv = robot.power_on(".*")
         if not rv:
-            print("Failed to power on")
+            logging.error("Failed to power on the robot")
             exit(1)
 
-    print(">>> Using Component Name")
-    gain_list = robot.get_torso_position_pid_gains()
-    [
-        print(
-            f"[torso_{i}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-        )
-        for i, gain in enumerate(gain_list)
-    ]
+    time.sleep(0.5)  # Waits for all actuators to be fully powered on
 
-    gain_list = robot.get_right_arm_position_pid_gains()
-    [
-        print(
-            f"[right_arm_{i}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-        )
-        for i, gain in enumerate(gain_list)
-    ]
+    logging.info(">>> Retrieving PID gains using component names")
 
-    gain_list = robot.get_left_arm_position_pid_gains()
-    [
-        print(
-            f"[left_arm_{i}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-        )
-        for i, gain in enumerate(gain_list)
-    ]
+    try:
+        gain_list = robot.get_torso_position_pid_gains()
+        for i, gain in enumerate(gain_list):
+            logging.info(f"[torso_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+    except RuntimeError:
+        logging.error("Failed to get torso PID gains")
 
-    gain_list = robot.get_head_position_pid_gains()
-    [
-        print(
-            f"[head_{i}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-        )
-        for i, gain in enumerate(gain_list)
-    ]
+    try:
+        gain_list = robot.get_right_arm_position_pid_gains()
+        for i, gain in enumerate(gain_list):
+            logging.info(f"[right_arm_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+    except RuntimeError:
+        logging.error("Failed to get right arm PID gains")
 
-    print("\n\n>>> Using Joint Name")
+    try:
+        gain_list = robot.get_left_arm_position_pid_gains()
+        for i, gain in enumerate(gain_list):
+            logging.info(f"[left_arm_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+    except RuntimeError:
+        logging.error("Failed to get left arm PID gains")
 
-    joint_name = "torso_0"
-    gain = robot.get_position_pid_gain(joint_name)
-    print(
-        f"[{joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+    try:
+        gain_list = robot.get_head_position_pid_gains()
+        for i, gain in enumerate(gain_list):
+            logging.info(f"[head_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+    except RuntimeError:
+        logging.error("Failed to get head PID gains")
 
-    joint_name = "right_arm_0"
-    gain = robot.get_position_pid_gain(joint_name)
-    print(
-        f"[{joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+    logging.info(">>> Retrieving PID gains using joint names")
 
-    joint_name = "left_arm_0"
-    gain = robot.get_position_pid_gain(joint_name)
-    print(
-        f"[{joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
-
-    joint_name = "head_0"
-    gain = robot.get_position_pid_gain(joint_name)
-    print(
-        f"[{joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+    for joint_name in ["torso_0", "right_arm_0", "left_arm_0", "head_0"]:
+        try:
+            gain = robot.get_position_pid_gain(joint_name)
+            logging.info(f"[{joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+        except RuntimeError:
+            logging.error(f"Failed to get PID gain for joint '{joint_name}'")
 
 
 if __name__ == "__main__":

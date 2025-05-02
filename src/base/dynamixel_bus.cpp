@@ -597,7 +597,11 @@ std::optional<DynamixelBus::PIDGain> DynamixelBus::GetPositionPIDGain(int id) {
   if (!p_gain.has_value() || !i_gain.has_value() || !d_gain.has_value()) {
     return std::nullopt;
   }
-  return DynamixelBus::PIDGain{.p_gain = p_gain.value(), .i_gain = i_gain.value(), .d_gain = d_gain.value()};
+  DynamixelBus::PIDGain pid;
+  pid.p_gain = p_gain.value();
+  pid.i_gain = i_gain.value();
+  pid.d_gain = d_gain.value();
+  return pid;
 }
 
 // std::tuple<std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>> DynamixelBus::GetPositionGain(

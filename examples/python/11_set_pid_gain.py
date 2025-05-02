@@ -1,110 +1,116 @@
 import time
-import os, sys
 import rby1_sdk
-from rby1_sdk import *
+from rby1_sdk import PIDGain
 import argparse
-import numpy as np
-import sys
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 def main(address, model):
+    logging.info(f"Creating robot with address='{address}', model='{model}'")
     robot = rby1_sdk.create_robot(address, model)
     robot.connect()
 
     if not robot.is_connected():
-        print("Robot is not connected")
+        logging.error("Robot is not connected")
         exit(1)
 
     if not robot.is_power_on(".*"):
-        rv = robot.power_on(".*")
-        if not rv:
-            print("Failed to power on")
+        logging.info("Robot power is off. Attempting to power on...")
+        if not robot.power_on(".*"):
+            logging.error("Failed to power on")
             exit(1)
 
-    """
-    Right Arm 3, Set Only P Gain
-    """
+    time.sleep(0.5)  # Waits for all actuators to be fully powered on
+
+    # === Joint PID Gain Setting Sequences ===
+
+    # Joint: right_arm_3, set only P gain
     target_joint_name = "right_arm_3"
-    print(">>> Before")
-    gain = robot.get_position_pid_gain(target_joint_name)
-    print(
-        f"[{target_joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+    try:
+        logging.info(f">>> [START] {target_joint_name}")
+        original_gain = robot.get_position_pid_gain(target_joint_name)
+        logging.info(
+            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}")
 
-    # Set P Gain
-    robot.set_position_p_gain(target_joint_name, 100)
+        robot.set_position_p_gain(target_joint_name, 100)
+        time.sleep(0.05)
+        gain = robot.get_position_pid_gain(target_joint_name)
+        logging.info(f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
 
-    print(">>> After")
-    # Ensure PID Gain update compleation
-    time.sleep(0.05)
-    gain = robot.get_position_pid_gain(target_joint_name)
-    print(
-        f"[{target_joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+        robot.set_position_pid_gain(target_joint_name, original_gain)
+        time.sleep(0.05)
+        restored = robot.get_position_pid_gain(target_joint_name)
+        logging.info(
+            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}")
+    except RuntimeError as e:
+        logging.error(f"Failed on {target_joint_name}: {e}")
 
-    """
-    Left Arm 3,  Set all PID gains
-    """
+    # Joint: left_arm_3, set all PID gains
     target_joint_name = "left_arm_3"
-    print(">>> Before")
-    gain = robot.get_position_pid_gain(target_joint_name)
-    print(
-        f"[{target_joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+    try:
+        logging.info(f">>> [START] {target_joint_name}")
+        original_gain = robot.get_position_pid_gain(target_joint_name)
+        logging.info(
+            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}")
 
-    # Set all PID gains (P, I, D) for the target joint using individual gain values
-    robot.set_position_pid_gain(target_joint_name, 60, 10, 100)
+        robot.set_position_pid_gain(target_joint_name, 60, 10, 100)
+        time.sleep(0.05)
+        gain = robot.get_position_pid_gain(target_joint_name)
+        logging.info(f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
 
-    print(">>> After")
-    # Ensure PID Gain update compleation
-    time.sleep(0.05)
-    gain = robot.get_position_pid_gain(target_joint_name)
-    print(
-        f"[{target_joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+        robot.set_position_pid_gain(target_joint_name, original_gain)
+        time.sleep(0.05)
+        restored = robot.get_position_pid_gain(target_joint_name)
+        logging.info(
+            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}")
+    except RuntimeError as e:
+        logging.error(f"Failed on {target_joint_name}: {e}")
 
-    """
-    Head 0, PIDGain
-    """
+    # Joint: head_0, set all gains via PIDGain
     target_joint_name = "head_0"
-    print(">>> Before")
-    gain = robot.get_position_pid_gain(target_joint_name)
-    print(
-        f"[{target_joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+    try:
+        logging.info(f">>> [START] {target_joint_name}")
+        original_gain = robot.get_position_pid_gain(target_joint_name)
+        logging.info(
+            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}")
 
-    # Set all PID gains (P, I, D) for the target joint using a predefined PIDGain object
-    target_gain = PIDGain(700, 0, 3500)
-    robot.set_position_pid_gain(target_joint_name, target_gain)
+        robot.set_position_pid_gain(target_joint_name, PIDGain(700, 0, 3500))
+        time.sleep(0.05)
+        gain = robot.get_position_pid_gain(target_joint_name)
+        logging.info(f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
 
-    print(">>> After")
-    # Ensure PID Gain update compleation
-    time.sleep(0.05)
-    gain = robot.get_position_pid_gain(target_joint_name)
-    print(
-        f"[{target_joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+        robot.set_position_pid_gain(target_joint_name, original_gain)
+        time.sleep(0.05)
+        restored = robot.get_position_pid_gain(target_joint_name)
+        logging.info(
+            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}")
+    except RuntimeError as e:
+        logging.error(f"Failed on {target_joint_name}: {e}")
 
-    """
-    Head 1, PIDGain
-    """
+    # Joint: head_1, set only P gain
     target_joint_name = "head_1"
-    print(">>> Before")
-    gain = robot.get_position_pid_gain(target_joint_name)
-    print(
-        f"[{target_joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+    try:
+        logging.info(f">>> [START] {target_joint_name}")
+        original_gain = robot.get_position_pid_gain(target_joint_name)
+        logging.info(
+            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}")
 
-    # Set all PID gains (P, I, D) for the target joint using a predefined PIDGain object
-    robot.set_position_p_gain(target_joint_name, 300)
+        robot.set_position_p_gain(target_joint_name, 300)
+        time.sleep(0.05)
+        gain = robot.get_position_pid_gain(target_joint_name)
+        logging.info(f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
 
-    print(">>> After")
-    # Ensure PID Gain update compleation
-    time.sleep(0.05)
-    gain = robot.get_position_pid_gain(target_joint_name)
-    print(
-        f"[{target_joint_name}] p gain: {gain.p_gain}, i gain: {gain.i_gain}, d gain: {gain.d_gain}"
-    )
+        robot.set_position_pid_gain(target_joint_name, original_gain)
+        time.sleep(0.05)
+        restored = robot.get_position_pid_gain(target_joint_name)
+        logging.info(
+            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}")
+    except RuntimeError as e:
+        logging.error(f"Failed on {target_joint_name}: {e}")
 
 
 if __name__ == "__main__":

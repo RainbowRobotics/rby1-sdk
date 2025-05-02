@@ -99,6 +99,34 @@ message JointPositionCommand {
   }
 }
 
+message JointImpedanceControlCommand {
+  message Request {
+    CommandHeader.Request command_header = 1;
+
+    google.protobuf.Duration minimum_time = 2;
+
+    repeated double position = 3;
+
+    repeated double velocity_limit = 4;
+
+    repeated double acceleration_limit = 5;
+
+    repeated double stiffness = 6;
+
+    google.protobuf.DoubleValue damping_ratio = 7; // default = 1
+
+    repeated double torque_limit = 8;
+  }
+
+  message Feedback {
+    CommandHeader.Feedback command_header_feedback = 1;
+
+    repeated double set_position = 2;
+
+    repeated double error = 3;
+  }
+}
+
 message CartesianCommand {
   message SE3PoseTarget {
     string ref_link_name = 1;
@@ -190,9 +218,11 @@ message ImpedanceControlCommand {
 
     SE3Pose T = 5;
 
-    Vec3 translation_weight = 6;
+    Vec3 translation_weight = 6; // Translation part of stiffness
 
-    Vec3 rotation_weight = 7;
+    Vec3 rotation_weight = 7; // Rotation part of stiffness
+
+    google.protobuf.DoubleValue damping_ratio = 8; // default = 1
   }
 
   message Feedback {

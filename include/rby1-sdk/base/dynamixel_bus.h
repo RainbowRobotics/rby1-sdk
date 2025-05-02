@@ -53,7 +53,7 @@ class DynamixelBus {
     int temperature;
   };
 
-  struct PIDGain{
+  struct PIDGain {
     uint16_t p_gain;
     uint16_t i_gain;
     uint16_t d_gain;
@@ -81,7 +81,10 @@ class DynamixelBus {
 
   void SetPositionDGain(int id, uint16_t d_gain);
 
-  void SetPositionPIDGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain, std::optional<uint16_t> d_gain);
+  void SetPositionPIDGain(int id, std::optional<uint16_t> p_gain, std::optional<uint16_t> i_gain,
+                          std::optional<uint16_t> d_gain);
+
+  void SetPositionPIDGain(int id, uint16_t p_gain, uint16_t i_gain, uint16_t d_gain);
 
   void SetPositionPIDGain(int id, const DynamixelBus::PIDGain& pid_gain);
 
@@ -99,9 +102,9 @@ class DynamixelBus {
 
   void SendGoalPosition(int id, int goal_position);
 
-  std::optional<int> ReadOperationMode(int id);
+  std::optional<int> ReadOperatingMode(int id, bool use_cache = false);
 
-  bool SendOperationMode(int id, int operation_mode);
+  bool SendOperatingMode(int id, int mode);
 
   void SendTorque(int id, double joint_torque);
 
@@ -109,28 +112,28 @@ class DynamixelBus {
 
   std::optional<int> ReadTemperature(int id);
 
-  std::optional<std::vector<std::pair<int, int>>> BulkRead(const std::vector<int>& ids, int addr, int len);
+  std::optional<std::vector<std::pair<int, int>>> GroupFastSyncRead(const std::vector<int>& ids, int addr, int len);
 
-  std::optional<std::vector<std::pair<int, int16_t>>> ReadCurrent(const std::vector<int>& ids);
-
-  std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> BulkReadEncoder(
+  std::optional<std::vector<std::pair<int /* id */, double /* enc (rad) */>>> GroupFastSyncReadEncoder(
       const std::vector<int>& ids);
 
-  std::optional<std::vector<std::pair<int, int>>> BulkReadOperationMode(const std::vector<int>& ids);
+  std::optional<std::vector<std::pair<int, int>>> GroupFastSyncReadOperatingMode(const std::vector<int>& ids,
+                                                                                 bool use_cache = false);
 
-  std::optional<std::vector<std::pair<int, int>>> BulkReadTorqueEnable(const std::vector<int>& ids);
+  std::optional<std::vector<std::pair<int, int>>> GroupFastSyncReadTorqueEnable(const std::vector<int>& ids);
 
-  std::optional<std::vector<std::pair<int, MotorState>>> BulkReadMotorState(const std::vector<int>& ids);
+  //
+  std::optional<std::vector<std::pair<int, MotorState>>> GetMotorStates(const std::vector<int>& ids);
 
-  void BulkWriteTorqueEnable(const std::vector<std::pair<int, int>>& id_and_eanble_vector);
+  void GroupSyncWriteTorqueEnable(const std::vector<std::pair<int, int>>& id_and_eanble_vector);
 
-  void BulkWriteTorqueEnable(const std::vector<int>& ids, int enable);
+  void GroupSyncWriteTorqueEnable(const std::vector<int>& ids, int enable);
 
-  void BulkWriteOperationMode(const std::vector<std::pair<int, int>>& id_and_mode_vector);
+  void GroupSyncWriteOperatingMode(const std::vector<std::pair<int, int>>& id_and_mode_vector);
 
-  void BulkWriteSendPosition(const std::vector<std::pair<int, double>>& id_and_position_vector);
+  void GroupSyncWriteSendPosition(const std::vector<std::pair<int, double>>& id_and_position_vector);
 
-  void BulkWriteSendTorque(const std::vector<std::pair<int, double>>& id_and_torque_vector);
+  void GroupSyncWriteSendTorque(const std::vector<std::pair<int, double>>& id_and_torque_vector);
 
   void SendVibration(int id, int level);
 

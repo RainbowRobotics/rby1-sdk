@@ -82,6 +82,8 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool IsServoOn(const std::string& dev_name) const;
 
+  bool ServoOff(const std::string& dev_name) const;
+
   bool SetPositionPGain(const std::string& dev_name, uint16_t p_gain) const;
 
   bool SetPositionIGain(const std::string& dev_name, uint16_t i_gain) const;

@@ -11,6 +11,7 @@ namespace rb {
 
 class CommandHeaderBuilderImpl;
 class JointPositionCommandBuilderImpl;
+class JointImpedanceControlCommandBuilderImpl;
 class OptimalControlCommandBuilderImpl;
 class GravityCompensationCommandBuilderImpl;
 class CartesianCommandBuilderImpl;
@@ -46,6 +47,7 @@ class CommandHeaderBuilder {
 
   friend class GravityCompensationCommandBuilderImpl;
   friend class JointPositionCommandBuilderImpl;
+  friend class JointImpedanceControlCommandBuilderImpl;
   friend class CartesianCommandBuilderImpl;
   friend class OptimalControlCommandBuilderImpl;
   friend class ImpedanceControlCommandBuilderImpl;
@@ -76,6 +78,40 @@ class JointPositionCommandBuilder {
 
  private:
   std::unique_ptr<JointPositionCommandBuilderImpl> impl_;
+
+  friend class ArmCommandBuilderImpl;
+  friend class TorsoCommandBuilderImpl;
+  friend class BodyCommandBuilderImpl;
+  friend class HeadCommandBuilderImpl;
+};
+
+class JointImpedanceControlCommandBuilder {
+ public:
+  JointImpedanceControlCommandBuilder();
+
+  ~JointImpedanceControlCommandBuilder();
+
+  JointImpedanceControlCommandBuilder& SetCommandHeader(const CommandHeaderBuilder& builder);
+
+  JointImpedanceControlCommandBuilder& SetMinimumTime(double minimum_time);
+
+  JointImpedanceControlCommandBuilder& SetPosition(const Eigen::VectorXd& position);
+
+  JointImpedanceControlCommandBuilder& SetVelocityLimit(const Eigen::VectorXd& velocity_limit);
+
+  JointImpedanceControlCommandBuilder& SetAccelerationLimit(const Eigen::VectorXd& acceleration_limit);
+
+  JointImpedanceControlCommandBuilder& SetStiffness(const Eigen::VectorXd& stiffness);
+
+  JointImpedanceControlCommandBuilder& SetTorqueLimit(const Eigen::VectorXd& torque_limit);
+
+  JointImpedanceControlCommandBuilder& SetDampingRatio(double damping_ratio);
+
+ private:
+  [[nodiscard]] void* Build() const;
+
+ private:
+  std::unique_ptr<JointImpedanceControlCommandBuilderImpl> impl_;
 
   friend class ArmCommandBuilderImpl;
   friend class TorsoCommandBuilderImpl;
@@ -147,6 +183,8 @@ class ImpedanceControlCommandBuilder {
   ImpedanceControlCommandBuilder& SetTranslationWeight(const Eigen::Vector3d& weight);
 
   ImpedanceControlCommandBuilder& SetRotationWeight(const Eigen::Vector3d& weight);
+
+  ImpedanceControlCommandBuilder& SetDampingRatio(double damping_ratio);
 
  private:
   [[nodiscard]] void* Build() const;
@@ -371,6 +409,8 @@ class ArmCommandBuilder {
 
   ArmCommandBuilder(const ImpedanceControlCommandBuilder& builder);
 
+  ArmCommandBuilder(const JointImpedanceControlCommandBuilder& builder);
+
   ~ArmCommandBuilder();
 
   ArmCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -380,6 +420,8 @@ class ArmCommandBuilder {
   ArmCommandBuilder& SetCommand(const CartesianCommandBuilder& builder);
 
   ArmCommandBuilder& SetCommand(const ImpedanceControlCommandBuilder& builder);
+
+  ArmCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;
@@ -404,6 +446,8 @@ class TorsoCommandBuilder {
 
   TorsoCommandBuilder(const OptimalControlCommandBuilder& builder);
 
+  TorsoCommandBuilder(const JointImpedanceControlCommandBuilder& builder);
+
   ~TorsoCommandBuilder();
 
   TorsoCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -415,6 +459,8 @@ class TorsoCommandBuilder {
   TorsoCommandBuilder& SetCommand(const ImpedanceControlCommandBuilder& builder);
 
   TorsoCommandBuilder& SetCommand(const OptimalControlCommandBuilder& builder);
+
+  TorsoCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;
@@ -460,6 +506,8 @@ class BodyCommandBuilder {
 
   BodyCommandBuilder(const BodyComponentBasedCommandBuilder& builder);
 
+  BodyCommandBuilder(const JointImpedanceControlCommandBuilder& builder);
+
   ~BodyCommandBuilder();
 
   BodyCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -471,6 +519,8 @@ class BodyCommandBuilder {
   BodyCommandBuilder& SetCommand(const CartesianCommandBuilder& builder);
 
   BodyCommandBuilder& SetCommand(const BodyComponentBasedCommandBuilder& builder);
+
+  BodyCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;

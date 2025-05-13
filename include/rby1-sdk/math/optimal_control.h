@@ -13,12 +13,7 @@ namespace rb {
 template <int DOF>
 class OptimalControl {
  public:
-  enum class ExitCode : int {
-    kNoError = 0,
-
-    kInequalityConstraintViolation,
-    kQPSolverError
-  };
+  enum class ExitCode : int { kNoError = 0, kInequalityConstraintViolation, kQPSolverError };
 
   struct LinkTarget {
     int ref_link_index{};
@@ -38,16 +33,17 @@ class OptimalControl {
     explicit JointAngleTarget(int n_joints) {
       q.resize(n_joints);
       weight.resize(n_joints);
-
       q.setZero();
       weight.setZero();
     }
 
     JointAngleTarget() {
-      static_assert(DOF > 0);
-
-      q.setZero();
-      weight.setZero();
+      if constexpr (DOF > 0) {
+        q.setZero();
+        weight.setZero();
+      } else {
+        static_assert(DOF > 0, "JointAngleTarget() is only available for fixed-size DOF");
+      }
     }
 
     Eigen::Vector<double, DOF> q;
@@ -77,10 +73,16 @@ class OptimalControl {
     }
   }
 
-  std::optional<Eigen::VectorXd> Solve(Input in, std::shared_ptr<dyn::State<DOF>> state, double dt,
-                                       double error_scaling, Eigen::Vector<double, DOF> velocity_limit,
-                                       Eigen::Vector<double, DOF> acceleration_limit,
-                                       bool need_forward_kinematics = false) {
+  std::optional<Eigen::VectorXd> Solve(Input in,                                                //
+                                       std::shared_ptr<dyn::State<DOF>> state,                  //
+                                       double dt,                                               //
+                                       double error_scaling,                                    //
+                                       const Eigen::Vector<double, DOF>& position_lower_limit,  //
+                                       const Eigen::Vector<double, DOF>& position_upper_limit,  //
+                                       const Eigen::Vector<double, DOF>& velocity_limit,        //
+                                       const Eigen::Vector<double, DOF>& acceleration_limit,    //
+                                       bool need_forward_kinematics = false                     //
+  ) {
     exit_code_ = ExitCode::kNoError;
     exit_code_msg_ = "";
 
@@ -198,8 +200,8 @@ class OptimalControl {
     Eigen::Vector<double, DOF> q_lb, q_ub, qdot_lb, qdot_ub;
     qdot_lb.resize(n_joints_);
     qdot_ub.resize(n_joints_);
-    q_lb = robot_->GetLimitQLower(state);
-    q_ub = robot_->GetLimitQUpper(state);
+    q_lb = position_lower_limit;
+    q_ub = position_upper_limit;
     qdot_lb = -velocity_limit;
     qdot_ub = velocity_limit;
     qdot_lb = qdot_lb.cwiseMax(qdot - acceleration_limit * dt);
@@ -237,7 +239,17 @@ class OptimalControl {
     if ((qdot_lb.array() <= qdot.array()).all() && (qdot.array() <= qdot_ub.array()).all()) {
       qp_solver_.SetPrimalVariable(qdot);
     } else {
-      qp_solver_.SetPrimalVariable(qdot_lb);
+      Eigen::VectorXd primal_variable = qdot;
+      //      qp_solver_.SetPrimalVariable((qdot_lb + qdot_ub) / 2);
+      for (int i = 0; i < n_joints_; i++) {
+        if (primal_variable(i) < qdot_lb(i)) {
+          primal_variable(i) = qdot_lb(i);
+        }
+        if (primal_variable(i) > qdot_ub(i)) {
+          primal_variable(i) = qdot_ub(i);
+        }
+      }
+      qp_solver_.SetPrimalVariable(primal_variable);
     }
 
     Eigen::VectorXd solution;
@@ -254,6 +266,18 @@ class OptimalControl {
     err_ = std::sqrt(err_sum);
     manipulability_ = max_cond;
     return solution;
+  }
+
+  std::optional<Eigen::VectorXd> Solve(Input in,                                              //
+                                       std::shared_ptr<dyn::State<DOF>> state,                //
+                                       double dt,                                             //
+                                       double error_scaling,                                  //
+                                       const Eigen::Vector<double, DOF>& velocity_limit,      //
+                                       const Eigen::Vector<double, DOF>& acceleration_limit,  //
+                                       bool need_forward_kinematics = false                   //
+  ) {
+    return Solve(in, state, dt, error_scaling, robot_->GetLimitQLower(state), robot_->GetLimitQUpper(state),
+                 velocity_limit, acceleration_limit, need_forward_kinematics);
   }
 
   ExitCode GetExitCode() const { return exit_code_; }

@@ -446,6 +446,107 @@ class CartesianCommandBuilderImpl {
   std::unique_ptr<api::CartesianCommand::Request> req_;
 };
 
+class CartesianImpedanceControlCommandBuilderImpl {
+ public:
+  CartesianImpedanceControlCommandBuilderImpl()
+      : req_(std::make_unique<api::CartesianImpedanceControlCommand::Request>()) {}
+
+  ~CartesianImpedanceControlCommandBuilderImpl() = default;
+
+  void SetCommandHeader(const CommandHeaderBuilder& builder) {
+    req_->set_allocated_command_header(static_cast<api::CommandHeader::Request*>(builder.Build()));
+  }
+
+  void SetMinimumTime(double minimum_time) {
+    auto seconds = (int64_t)(std::floor(minimum_time));
+    auto nanos = (int32_t)((minimum_time - (double)seconds) * 1.e9);
+    auto& t = *req_->mutable_minimum_time();
+    t.set_seconds(seconds);
+    t.set_nanos(nanos);
+  }
+
+  void AddTarget(const std::string& ref_link_name,                 //
+                 const std::string& link_name,                     //
+                 const math::SE3::MatrixType& T,                   //
+                 std::optional<double> linear_velocity_limit,      //
+                 std::optional<double> angular_velocity_limit,     //
+                 std::optional<double> linear_acceleration_limit,  //
+                 std::optional<double> angular_acceleration_limit  //
+  ) {
+    auto& target = *req_->add_targets();
+    target.set_ref_link_name(ref_link_name);
+    target.set_link_name(link_name);
+    *target.mutable_t() = ToProto(T);
+    if (linear_velocity_limit.has_value()) {
+      target.mutable_linear_velocity_limit()->set_value(linear_velocity_limit.value());
+    }
+    if (angular_velocity_limit.has_value()) {
+      target.mutable_angular_velocity_limit()->set_value(angular_velocity_limit.value());
+    }
+    if (linear_acceleration_limit.has_value()) {
+      target.mutable_linear_acceleration_limit()->set_value(linear_acceleration_limit.value());
+    }
+    if (angular_acceleration_limit.has_value()) {
+      target.mutable_angular_acceleration_limit()->set_value(angular_acceleration_limit.value());
+    }
+  }
+
+  void AddJointPositionTarget(const std::string& joint_name, double target_position,
+                              std::optional<double> velocity_limit, std::optional<double> acceleration_limit) {
+    auto& target = *req_->add_joint_position_targets();
+    target.set_joint_name(joint_name);
+    target.set_target_position(target_position);
+    if (velocity_limit.has_value()) {
+      target.mutable_velocity_limit()->set_value(velocity_limit.value());
+    }
+    if (acceleration_limit.has_value()) {
+      target.mutable_acceleration_limit()->set_value(acceleration_limit.value());
+    }
+  }
+
+  void SetStopPositionTrackingError(double stop_position_tracking_error) {
+    req_->mutable_stop_position_tracking_error()->set_value(stop_position_tracking_error);
+  }
+
+  void SetStopOrientationTrackingError(double stop_orientation_tracking_error) {
+    req_->mutable_stop_orientation_tracking_error()->set_value(stop_orientation_tracking_error);
+  }
+
+  void SetStopJointPositionTrackingError(double stop_joint_position_tracking_error) {
+    req_->mutable_stop_joint_position_tracking_error()->set_value(stop_joint_position_tracking_error);
+  }
+
+  template <typename Derived, typename = std::enable_if_t<Derived::IsVectorAtCompileTime, void>>
+  void SetJointStiffness(const Eigen::MatrixBase<Derived>& v) {
+    req_->clear_joint_stiffness();
+    for (int i = 0; i < v.size(); i++) {
+      req_->add_joint_stiffness(v(i));
+    }
+  }
+
+  template <typename Derived, typename = std::enable_if_t<Derived::IsVectorAtCompileTime, void>>
+  void SetJointTorqueLimit(const Eigen::MatrixBase<Derived>& v) {
+    req_->clear_joint_torque_limit();
+    for (int i = 0; i < v.size(); i++) {
+      req_->add_joint_torque_limit(v(i));
+    }
+  }
+
+  void SetJointDampingRatio(double damping_ratio) { req_->mutable_joint_damping_ratio()->set_value(damping_ratio); }
+
+  void AddJointLimit(const std::string& joint_name, double lower, double upper) {
+    auto& joint_limit = *req_->add_joint_limits();
+    joint_limit.set_joint_name(joint_name);
+    joint_limit.set_lower(lower);
+    joint_limit.set_upper(upper);
+  }
+
+  api::CartesianImpedanceControlCommand::Request* Build() { return req_.release(); }
+
+ private:
+  std::unique_ptr<api::CartesianImpedanceControlCommand::Request> req_;
+};
+
 class GravityCompensationCommandBuilderImpl {
  public:
   GravityCompensationCommandBuilderImpl() : req_(std::make_unique<api::GravityCompensationCommand::Request>()) {}
@@ -490,6 +591,11 @@ class ArmCommandBuilderImpl {
   void SetCommand(const JointImpedanceControlCommandBuilder& builder) {
     req_->set_allocated_joint_impedance_control_command(
         static_cast<api::JointImpedanceControlCommand::Request*>(builder.Build()));
+  }
+
+  void SetCommand(const CartesianImpedanceControlCommandBuilder& builder) {
+    req_->set_allocated_cartesian_impedance_control_command(
+        static_cast<api::CartesianImpedanceControlCommand::Request*>(builder.Build()));
   }
 
   api::ArmCommand::Request* Build() { return req_.release(); }
@@ -1109,6 +1215,90 @@ void* CartesianCommandBuilder::Build() const {
   return static_cast<void*>(impl_->Build());
 }
 
+CartesianImpedanceControlCommandBuilder::CartesianImpedanceControlCommandBuilder() {
+  impl_ = std::make_unique<CartesianImpedanceControlCommandBuilderImpl>();
+}
+
+CartesianImpedanceControlCommandBuilder::~CartesianImpedanceControlCommandBuilder() = default;
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetCommandHeader(
+    const rb::CommandHeaderBuilder& builder) {
+  impl_->SetCommandHeader(builder);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetMinimumTime(double minium_time) {
+  impl_->SetMinimumTime(minium_time);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::AddTarget(
+    const std::string& ref_link_name,                 //
+    const std::string& link_name,                     //
+    const math::SE3::MatrixType& T,                   //
+    std::optional<double> linear_velocity_limit,      //
+    std::optional<double> angular_velocity_limit,     //
+    std::optional<double> linear_acceleration_limit,  //
+    std::optional<double> angular_acceleration_limit  //
+) {
+  impl_->AddTarget(ref_link_name, link_name, T, linear_velocity_limit, angular_velocity_limit,
+                   linear_acceleration_limit, angular_acceleration_limit);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::AddJointPositionTarget(
+    const std::string& joint_name, double target_position, std::optional<double> velocity_limit,
+    std::optional<double> acceleration_limit) {
+  impl_->AddJointPositionTarget(joint_name, target_position, velocity_limit, acceleration_limit);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetStopPositionTrackingError(
+    double stop_position_tracking_error) {
+  impl_->SetStopPositionTrackingError(stop_position_tracking_error);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetStopOrientationTrackingError(
+    double stop_orientation_tracking_error) {
+  impl_->SetStopOrientationTrackingError(stop_orientation_tracking_error);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetStopJointPositionTrackingError(
+    double stop_joint_position_tracking_error) {
+  impl_->SetStopJointPositionTrackingError(stop_joint_position_tracking_error);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetJointStiffness(
+    const Eigen::VectorXd& stiffness) {
+  impl_->SetJointStiffness(stiffness);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetJointTorqueLimit(
+    const Eigen::VectorXd& torque_limit) {
+  impl_->SetJointTorqueLimit(torque_limit);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetJointDampingRatio(
+    double damping_ratio) {
+  impl_->SetJointDampingRatio(damping_ratio);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::AddJointLimit(
+    const std::string& joint_name, double lower, double upper) {
+  impl_->AddJointLimit(joint_name, lower, upper);
+  return *this;
+}
+
+void* CartesianImpedanceControlCommandBuilder::Build() const {
+  return static_cast<void*>(impl_->Build());
+}
+
 GravityCompensationCommandBuilder::GravityCompensationCommandBuilder() {
   impl_ = std::make_unique<GravityCompensationCommandBuilderImpl>();
 }
@@ -1154,6 +1344,10 @@ ArmCommandBuilder::ArmCommandBuilder(const JointImpedanceControlCommandBuilder& 
   SetCommand(builder);
 }
 
+ArmCommandBuilder::ArmCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder) : ArmCommandBuilder() {
+  SetCommand(builder);
+}
+
 ArmCommandBuilder::~ArmCommandBuilder() = default;
 
 ArmCommandBuilder& ArmCommandBuilder::SetCommand(const JointPositionCommandBuilder& builder) {
@@ -1177,6 +1371,11 @@ ArmCommandBuilder& ArmCommandBuilder::SetCommand(const ImpedanceControlCommandBu
 }
 
 ArmCommandBuilder& ArmCommandBuilder::SetCommand(const JointImpedanceControlCommandBuilder& builder) {
+  impl_->SetCommand(builder);
+  return *this;
+}
+
+ArmCommandBuilder& ArmCommandBuilder::SetCommand(const CartesianImpedanceControlCommandBuilder& builder) {
   impl_->SetCommand(builder);
   return *this;
 }

@@ -15,6 +15,7 @@ class JointImpedanceControlCommandBuilderImpl;
 class OptimalControlCommandBuilderImpl;
 class GravityCompensationCommandBuilderImpl;
 class CartesianCommandBuilderImpl;
+class CartesianImpedanceControlCommandBuilderImpl;
 class ImpedanceControlCommandBuilderImpl;
 class JointVelocityCommandBuilderImpl;
 class JogCommandBuilderImpl;
@@ -49,6 +50,7 @@ class CommandHeaderBuilder {
   friend class JointPositionCommandBuilderImpl;
   friend class JointImpedanceControlCommandBuilderImpl;
   friend class CartesianCommandBuilderImpl;
+  friend class CartesianImpedanceControlCommandBuilderImpl;
   friend class OptimalControlCommandBuilderImpl;
   friend class ImpedanceControlCommandBuilderImpl;
   friend class JointVelocityCommandBuilderImpl;
@@ -376,6 +378,56 @@ class CartesianCommandBuilder {
   friend class BodyCommandBuilderImpl;
 };
 
+class CartesianImpedanceControlCommandBuilder {
+ public:
+  CartesianImpedanceControlCommandBuilder();
+
+  ~CartesianImpedanceControlCommandBuilder();
+
+  CartesianImpedanceControlCommandBuilder& SetCommandHeader(const CommandHeaderBuilder& builder);
+
+  CartesianImpedanceControlCommandBuilder& SetMinimumTime(double minium_time);
+
+  CartesianImpedanceControlCommandBuilder& AddTarget(
+      const std::string& ref_link_name,                                //
+      const std::string& link_name,                                    //
+      const math::SE3::MatrixType& T,                                  // Eigen::Matrix<double, 4, 4>
+      std::optional<double> linear_velocity_limit = std::nullopt,      // (m/s)
+      std::optional<double> angular_velocity_limit = std::nullopt,     // (rad/s)
+      std::optional<double> linear_acceleration_limit = std::nullopt,  //
+      std::optional<double> angular_acceleration_limit = std::nullopt  //
+  );
+
+  CartesianImpedanceControlCommandBuilder& AddJointPositionTarget(
+      const std::string& joint_name,                           //
+      double target_position,                                  //
+      std::optional<double> velocity_limit = std::nullopt,     //
+      std::optional<double> acceleration_limit = std::nullopt  //
+  );
+
+  CartesianImpedanceControlCommandBuilder& SetStopPositionTrackingError(double stop_position_tracking_error);
+
+  CartesianImpedanceControlCommandBuilder& SetStopOrientationTrackingError(double stop_orientation_tracking_error);
+
+  CartesianImpedanceControlCommandBuilder& SetStopJointPositionTrackingError(double stop_joint_position_tracking_error);
+
+  CartesianImpedanceControlCommandBuilder& SetJointStiffness(const Eigen::VectorXd& stiffness);
+
+  CartesianImpedanceControlCommandBuilder& SetJointDampingRatio(double damping_ratio);
+
+  CartesianImpedanceControlCommandBuilder& SetJointTorqueLimit(const Eigen::VectorXd& torque_limit);
+
+  CartesianImpedanceControlCommandBuilder& AddJointLimit(const std::string& joint_name, double lower, double upper);
+
+ private:
+  [[nodiscard]] void* Build() const;
+
+ private:
+  std::unique_ptr<CartesianImpedanceControlCommandBuilderImpl> impl_;
+
+  friend class ArmCommandBuilderImpl;
+};
+
 class GravityCompensationCommandBuilder {
  public:
   GravityCompensationCommandBuilder();
@@ -411,6 +463,8 @@ class ArmCommandBuilder {
 
   ArmCommandBuilder(const JointImpedanceControlCommandBuilder& builder);
 
+  ArmCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder);
+
   ~ArmCommandBuilder();
 
   ArmCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -422,6 +476,8 @@ class ArmCommandBuilder {
   ArmCommandBuilder& SetCommand(const ImpedanceControlCommandBuilder& builder);
 
   ArmCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
+
+  ArmCommandBuilder& SetCommand(const CartesianImpedanceControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;

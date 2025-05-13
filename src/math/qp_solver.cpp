@@ -183,6 +183,9 @@ class QPSolverImpl {
     if (result != OsqpEigen::ErrorExitFlag::NoError) {
       throw QPSolverException(static_cast<int>(result));
     }
+    if (solver_.getStatus() != OsqpEigen::Status::Solved) {
+      throw QPSolverException((int)QPSolverException::kStatusOffset + static_cast<int>(solver_.getStatus()));
+    }
 
     return solver_.getSolution();
   }

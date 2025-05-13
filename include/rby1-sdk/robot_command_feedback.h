@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <Eigen/Core>
+
 namespace rb {
 
 class RobotCommandFeedbackParserImpl;
@@ -84,8 +86,8 @@ class JointPositionCommandFeedback : public CommandFeedback {
   double position_based_progress() const { return position_based_progress_; }
 
  protected:
-  double time_based_progress_;
-  double position_based_progress_;
+  double time_based_progress_{};
+  double position_based_progress_{};
 
  private:
   friend class RobotCommandFeedbackParserImpl;
@@ -109,6 +111,23 @@ class CartesianCommandFeedback : public CommandFeedback {
  protected:
   std::vector<TrackingError> se3_pose_tracking_errors_;
   std::vector<double> joint_position_tracking_errors_;
+  double remain_time_;
+  double manipulability_;
+
+ private:
+  friend class RobotCommandFeedbackParserImpl;
+};
+
+class CartesianImpedanceControlCommandFeedback : public CommandFeedback {
+ public:
+  Eigen::VectorXd set_position() const { return set_position_; }
+
+  double remain_time() const { return remain_time_; }
+
+  double manipulability() const { return manipulability_; }
+
+ private:
+  Eigen::VectorXd set_position_;
   double remain_time_;
   double manipulability_;
 
@@ -162,6 +181,7 @@ class OptimalControlCommandFeedback : public CommandFeedback {
 class WholeBodyCommandFeedback : public CommandFeedback {
  public:
   const StopCommandFeedback& stop_command() const { return stop_command_; }
+
   const RealtimeControlCommandFeedback& realtime_control_command() const { return realtime_control_command_; }
 
  protected:
@@ -184,11 +204,14 @@ class ArmCommandFeedback : public CommandFeedback {
 
   const ImpedanceControlCommandFeedback& impedance_control_command() const { return impedance_control_command_; }
 
+  const CartesianImpedanceControlCommandFeedback& cartesian_impedance_control_command() const { return cartesian_impedance_control_command_; }
+
  protected:
   JointPositionCommandFeedback joint_position_command_;
   GravityCompensationCommandFeedback gravity_compensation_command_;
   CartesianCommandFeedback cartesian_command_;
   ImpedanceControlCommandFeedback impedance_control_command_;
+  CartesianImpedanceControlCommandFeedback cartesian_impedance_control_command_;
 
  private:
   friend class RobotCommandFeedbackParserImpl;

@@ -21,6 +21,8 @@ message TorsoCommand {
       OptimalControlCommand.Request optimal_control_command = 6;
 
       JointImpedanceControlCommand.Request joint_impedance_control_command = 7;
+
+      CartesianImpedanceControlCommand.Request cartesian_impedance_control_command = 8;
     }
   }
 
@@ -39,6 +41,8 @@ message TorsoCommand {
       OptimalControlCommand.Feedback optimal_control_command_feedback = 6;
 
       JointImpedanceControlCommand.Feedback joint_impedance_control_command_feedback = 7;
+
+      CartesianImpedanceControlCommand.Feedback cartesian_impedance_control_command_feedback = 8;
     }
   }
 }

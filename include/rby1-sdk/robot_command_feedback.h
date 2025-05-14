@@ -204,7 +204,9 @@ class ArmCommandFeedback : public CommandFeedback {
 
   const ImpedanceControlCommandFeedback& impedance_control_command() const { return impedance_control_command_; }
 
-  const CartesianImpedanceControlCommandFeedback& cartesian_impedance_control_command() const { return cartesian_impedance_control_command_; }
+  const CartesianImpedanceControlCommandFeedback& cartesian_impedance_control_command() const {
+    return cartesian_impedance_control_command_;
+  }
 
  protected:
   JointPositionCommandFeedback joint_position_command_;
@@ -231,12 +233,17 @@ class TorsoCommandFeedback : public CommandFeedback {
 
   const OptimalControlCommandFeedback& optimal_control_command() const { return optimal_control_command_; }
 
+  const CartesianImpedanceControlCommandFeedback& cartesian_impedance_control_command() const {
+    return cartesian_impedance_control_command_;
+  }
+
  protected:
   JointPositionCommandFeedback joint_position_command_;
   GravityCompensationCommandFeedback gravity_compensation_command_;
   CartesianCommandFeedback cartesian_command_;
   ImpedanceControlCommandFeedback impedance_control_command_;
   OptimalControlCommandFeedback optimal_control_command_;
+  CartesianImpedanceControlCommandFeedback cartesian_impedance_control_command_;
 
  private:
   friend class RobotCommandFeedbackParserImpl;
@@ -286,12 +293,17 @@ class BodyCommandFeedback : public CommandFeedback {
     return body_component_based_command_;
   }
 
+  const CartesianImpedanceControlCommandFeedback& cartesian_impedance_control_command() const {
+    return cartesian_impedance_control_command_;
+  }
+
  protected:
   JointPositionCommandFeedback joint_position_command_;
   OptimalControlCommandFeedback optimal_control_command_;
   GravityCompensationCommandFeedback gravity_compensation_command_;
   CartesianCommandFeedback cartesian_command_;
   BodyComponentBasedCommandFeedback body_component_based_command_;
+  CartesianImpedanceControlCommandFeedback cartesian_impedance_control_command_;
 
  private:
   friend class RobotCommandFeedbackParserImpl;

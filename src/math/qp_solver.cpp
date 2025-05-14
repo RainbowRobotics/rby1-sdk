@@ -27,6 +27,19 @@ std::string QPSolverException::GenerateMessage(int code) {
       {OSQP_NONCVX_ERROR, "Non-convex error"},
       {OSQP_MEM_ALLOC_ERROR, "Memory allocation error"},
       {OSQP_WORKSPACE_NOT_INIT_ERROR, "Workspace not initialized"},
+
+      {QPSolverException::kStatusOffset + OSQP_SOLVED, "Solved"},
+      {QPSolverException::kStatusOffset + OSQP_SOLVED_INACCURATE, "Solved inaccurate"},
+      {QPSolverException::kStatusOffset + OSQP_PRIMAL_INFEASIBLE, "Primal infeasible"},
+      {QPSolverException::kStatusOffset + OSQP_PRIMAL_INFEASIBLE_INACCURATE, "Primal infeasible inaccurate"},
+      {QPSolverException::kStatusOffset + OSQP_DUAL_INFEASIBLE, "Dual infeasible"},
+      {QPSolverException::kStatusOffset + OSQP_DUAL_INFEASIBLE_INACCURATE, "Dual infeasible inaccurate"},
+      {QPSolverException::kStatusOffset + OSQP_MAX_ITER_REACHED, "Maximum iterations reached"},
+      {QPSolverException::kStatusOffset + OSQP_TIME_LIMIT_REACHED, "Run time limit reached"},
+      {QPSolverException::kStatusOffset + OSQP_NON_CVX, "Problem non convex"},
+      {QPSolverException::kStatusOffset + OSQP_SIGINT, "Interrupted"},
+      {QPSolverException::kStatusOffset + OSQP_UNSOLVED, "Unsolved"},
+
       {-1, "General solver error or matrix update failure"},
   };
 
@@ -76,7 +89,8 @@ class QPSolverImpl {
 
   void AddCostFunctionImpl(const Eigen::MatrixXd& A, const Eigen::VectorXd& b) {
     if (A.rows() != b.rows()) {
-      std::cerr << "OSQP Solver Add cost function failed: Size issue Ax = b" << std::endl;
+      std::cerr << "OSQP Solver Add cost function failed: Size issue Ax = b (A.rows(): " << A.rows()
+                << ", b.rows(): " << b.rows() << ")" << std::endl;
       return;
     }
 

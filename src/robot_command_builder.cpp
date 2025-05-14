@@ -636,6 +636,11 @@ class TorsoCommandBuilderImpl {
         static_cast<api::JointImpedanceControlCommand::Request*>(builder.Build()));
   }
 
+  void SetCommand(const CartesianImpedanceControlCommandBuilder& builder) {
+    req_->set_allocated_cartesian_impedance_control_command(
+        static_cast<api::CartesianImpedanceControlCommand::Request*>(builder.Build()));
+  }
+
   api::TorsoCommand::Request* Build() { return req_.release(); }
 
  private:
@@ -697,6 +702,11 @@ class BodyCommandBuilderImpl {
   void SetCommand(const JointImpedanceControlCommandBuilder& builder) {
     req_->set_allocated_joint_impedance_control_command(
         static_cast<api::JointImpedanceControlCommand::Request*>(builder.Build()));
+  }
+
+  void SetCommand(const CartesianImpedanceControlCommandBuilder& builder) {
+    req_->set_allocated_cartesian_impedance_control_command(
+        static_cast<api::CartesianImpedanceControlCommand::Request*>(builder.Build()));
   }
 
   api::BodyCommand::Request* Build() { return req_.release(); }
@@ -1410,6 +1420,10 @@ TorsoCommandBuilder::TorsoCommandBuilder(const JointImpedanceControlCommandBuild
   SetCommand(builder);
 }
 
+TorsoCommandBuilder::TorsoCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder) : TorsoCommandBuilder() {
+  SetCommand(builder);
+}
+
 TorsoCommandBuilder::~TorsoCommandBuilder() = default;
 
 TorsoCommandBuilder& TorsoCommandBuilder::SetCommand(const JointPositionCommandBuilder& builder) {
@@ -1438,6 +1452,11 @@ TorsoCommandBuilder& TorsoCommandBuilder::SetCommand(const OptimalControlCommand
 }
 
 TorsoCommandBuilder& TorsoCommandBuilder::SetCommand(const JointImpedanceControlCommandBuilder& builder) {
+  impl_->SetCommand(builder);
+  return *this;
+}
+
+TorsoCommandBuilder& TorsoCommandBuilder::SetCommand(const CartesianImpedanceControlCommandBuilder& builder) {
   impl_->SetCommand(builder);
   return *this;
 }
@@ -1502,6 +1521,10 @@ BodyCommandBuilder::BodyCommandBuilder(const JointImpedanceControlCommandBuilder
   SetCommand(builder);
 }
 
+BodyCommandBuilder::BodyCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder) : BodyCommandBuilder() {
+  SetCommand(builder);
+}
+
 BodyCommandBuilder::~BodyCommandBuilder() = default;
 
 BodyCommandBuilder& BodyCommandBuilder::SetCommand(const JointPositionCommandBuilder& builder) {
@@ -1530,6 +1553,11 @@ BodyCommandBuilder& BodyCommandBuilder::SetCommand(const BodyComponentBasedComma
 }
 
 BodyCommandBuilder& BodyCommandBuilder::SetCommand(const JointImpedanceControlCommandBuilder& builder) {
+  impl_->SetCommand(builder);
+  return *this;
+}
+
+BodyCommandBuilder& BodyCommandBuilder::SetCommand(const CartesianImpedanceControlCommandBuilder& builder) {
   impl_->SetCommand(builder);
   return *this;
 }

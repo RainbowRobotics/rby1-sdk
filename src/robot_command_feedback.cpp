@@ -199,6 +199,10 @@ class RobotCommandFeedbackParserImpl {
         ParseBodyComponentBasedCommandFeedback(self.body_component_based_command_,
                                                feedback->mutable_body_component_based_command_feedback());
         break;
+      case api::BodyCommand_Feedback::kCartesianImpedanceControlCommandFeedback:
+        ParseCartesianImpedanceControlCommandFeedback(self.cartesian_impedance_control_command_,
+                                                      feedback->mutable_cartesian_impedance_control_command_feedback());
+        break;
       case api::BodyCommand_Feedback::FEEDBACK_NOT_SET:
         break;
     }
@@ -281,6 +285,10 @@ class RobotCommandFeedbackParserImpl {
       case api::TorsoCommand_Feedback::kOptimalControlCommandFeedback:
         ParseOptimalControlCommandFeedback(self.optimal_control_command_,
                                            feedback->mutable_optimal_control_command_feedback());
+        break;
+      case api::TorsoCommand_Feedback::kCartesianImpedanceControlCommandFeedback:
+        ParseCartesianImpedanceControlCommandFeedback(self.cartesian_impedance_control_command_,
+                                                      feedback->mutable_cartesian_impedance_control_command_feedback());
         break;
       case api::TorsoCommand_Feedback::FEEDBACK_NOT_SET:
         break;

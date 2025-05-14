@@ -426,6 +426,8 @@ class CartesianImpedanceControlCommandBuilder {
   std::unique_ptr<CartesianImpedanceControlCommandBuilderImpl> impl_;
 
   friend class ArmCommandBuilderImpl;
+  friend class TorsoCommandBuilderImpl;
+  friend class BodyCommandBuilderImpl;
 };
 
 class GravityCompensationCommandBuilder {
@@ -504,6 +506,8 @@ class TorsoCommandBuilder {
 
   TorsoCommandBuilder(const JointImpedanceControlCommandBuilder& builder);
 
+  TorsoCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder);
+
   ~TorsoCommandBuilder();
 
   TorsoCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -517,6 +521,8 @@ class TorsoCommandBuilder {
   TorsoCommandBuilder& SetCommand(const OptimalControlCommandBuilder& builder);
 
   TorsoCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
+
+  TorsoCommandBuilder& SetCommand(const CartesianImpedanceControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;
@@ -564,6 +570,8 @@ class BodyCommandBuilder {
 
   BodyCommandBuilder(const JointImpedanceControlCommandBuilder& builder);
 
+  BodyCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder);
+
   ~BodyCommandBuilder();
 
   BodyCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -577,6 +585,8 @@ class BodyCommandBuilder {
   BodyCommandBuilder& SetCommand(const BodyComponentBasedCommandBuilder& builder);
 
   BodyCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
+
+  BodyCommandBuilder& SetCommand(const CartesianImpedanceControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;

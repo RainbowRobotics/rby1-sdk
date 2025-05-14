@@ -247,6 +247,8 @@ message CartesianImpedanceControlCommand {
     repeated double joint_torque_limit = 10;
 
     repeated JointLimit joint_limits = 11;
+
+    google.protobuf.BoolValue reset_reference = 12; // default = false
   }
 
   message Feedback {

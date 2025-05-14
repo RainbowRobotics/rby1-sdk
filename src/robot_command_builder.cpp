@@ -541,6 +541,10 @@ class CartesianImpedanceControlCommandBuilderImpl {
     joint_limit.set_upper(upper);
   }
 
+  void SetResetReference(bool reset_reference) {
+    req_->mutable_reset_reference()->set_value(reset_reference);
+  }
+
   api::CartesianImpedanceControlCommand::Request* Build() { return req_.release(); }
 
  private:
@@ -1305,6 +1309,12 @@ CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder
   return *this;
 }
 
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetResetReference(
+    bool reset_reference) {
+  impl_->SetResetReference(reset_reference);
+  return *this;
+}
+
 void* CartesianImpedanceControlCommandBuilder::Build() const {
   return static_cast<void*>(impl_->Build());
 }
@@ -1420,7 +1430,8 @@ TorsoCommandBuilder::TorsoCommandBuilder(const JointImpedanceControlCommandBuild
   SetCommand(builder);
 }
 
-TorsoCommandBuilder::TorsoCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder) : TorsoCommandBuilder() {
+TorsoCommandBuilder::TorsoCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder)
+    : TorsoCommandBuilder() {
   SetCommand(builder);
 }
 

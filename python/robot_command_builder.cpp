@@ -139,7 +139,8 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_joint_torque_limit", &CartesianImpedanceControlCommandBuilder::SetJointTorqueLimit, "torque_limit"_a)
       .def("set_joint_damping_ratio", &CartesianImpedanceControlCommandBuilder::SetJointDampingRatio, "damping_ratio"_a)
       .def("add_joint_limit", &CartesianImpedanceControlCommandBuilder::AddJointLimit, "joint_name"_a, "lower"_a,
-           "upper"_a);
+           "upper"_a)
+      .def("set_reset_reference", &CartesianImpedanceControlCommandBuilder::SetResetReference, "reset_reference"_a);
 
   py::class_<GravityCompensationCommandBuilder>(m, "GravityCompensationCommandBuilder")
       .def(py::init<>())

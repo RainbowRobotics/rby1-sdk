@@ -419,6 +419,8 @@ class CartesianImpedanceControlCommandBuilder {
 
   CartesianImpedanceControlCommandBuilder& AddJointLimit(const std::string& joint_name, double lower, double upper);
 
+  CartesianImpedanceControlCommandBuilder& SetResetReference(bool reset_reference);
+
  private:
   [[nodiscard]] void* Build() const;
 

@@ -58,7 +58,6 @@ class QPSolverImpl {
 
     solver_.settings()->setWarmStart(true);
     solver_.settings()->setVerbosity(false);
-    solver_.settings()->setPolish(false);
     solver_.settings()->setTimeLimit(time_limit);
 
     solver_.data()->setNumberOfVariables(n_var);

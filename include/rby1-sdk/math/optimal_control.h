@@ -134,13 +134,17 @@ class OptimalControl {
       for (int i = 0; i < n_joints_; i++) {
         if (q(joint_idx_[i]) > position_upper_limit(joint_idx_[i]) - safety_margin) {
           const double alpha = std::clamp(
-              (safety_margin - (position_upper_limit(joint_idx_[i]) - q(joint_idx_[i]))) / safety_margin, 0., 1.0);
+              (safety_margin - (position_upper_limit(joint_idx_[i]) - q(joint_idx_[i]))) / safety_margin, 1.e-4, 1.0);
           upper_penalty(i, n_joints_ + i) = weight * alpha;
+        } else {
+          upper_penalty(i, n_joints_ + i) = 1.e-4;  // DUMMY FOR PATTERN LOCK
         }
         if (q(joint_idx_[i]) < position_lower_limit(joint_idx_[i]) + safety_margin) {
           const double alpha = std::clamp(
-              (safety_margin - (q(joint_idx_[i]) - position_lower_limit(joint_idx_[i]))) / safety_margin, 0., 1.0);
+              (safety_margin - (q(joint_idx_[i]) - position_lower_limit(joint_idx_[i]))) / safety_margin, 1.e-4, 1.0);
           lower_penalty(i, 2 * n_joints_ + i) = weight * alpha;
+        } else {
+          lower_penalty(i, 2 * n_joints_ + i) = 1.e-4;  // DUMMY FOR PATTERN LOCK
         }
       }
       qp_solver_.AddCostFunction(upper_penalty, Eigen::VectorXd::Zero(n_joints_));
@@ -166,7 +170,8 @@ class OptimalControl {
 
     try {
       Eigen::VectorXd solution = state->GetQdot();
-      solution(joint_idx_) = qp_solver_.Solve();
+      const auto& result = qp_solver_.Solve();
+      solution(joint_idx_) = result.head(n_joints_);
       err_ = std::sqrt(err_sum);
       manipulability_ = max_cond;
       return solution;

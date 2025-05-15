@@ -58,6 +58,7 @@ class QPSolverImpl {
 
     solver_.settings()->setWarmStart(true);
     solver_.settings()->setVerbosity(false);
+    solver_.settings()->setPolish(false);
     solver_.settings()->setTimeLimit(time_limit);
 
     solver_.data()->setNumberOfVariables(n_var);
@@ -188,10 +189,10 @@ class QPSolverImpl {
         throw QPSolverException(-1);
       }
 
-      solver_.setPrimalVariable(primal_variable_for_warmstart_);
-
       is_first_ = false;
     }
+
+    solver_.setPrimalVariable(primal_variable_for_warmstart_);
 
     const auto result = solver_.solveProblem();
     if (result != OsqpEigen::ErrorExitFlag::NoError) {

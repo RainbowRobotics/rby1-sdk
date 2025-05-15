@@ -134,17 +134,17 @@ class OptimalControl {
       for (int i = 0; i < n_joints_; i++) {
         if (q(joint_idx_[i]) > position_upper_limit(joint_idx_[i]) - safety_margin) {
           const double alpha = std::clamp(
-              (safety_margin - (position_upper_limit(joint_idx_[i]) - q(joint_idx_[i]))) / safety_margin, 1.e-4, 1.0);
+              (safety_margin - (position_upper_limit(joint_idx_[i]) - q(joint_idx_[i]))) / safety_margin, 1.e-6, 1.0);
           upper_penalty(i, n_joints_ + i) = weight * alpha;
         } else {
-          upper_penalty(i, n_joints_ + i) = 1.e-4;  // DUMMY FOR PATTERN LOCK
+          upper_penalty(i, n_joints_ + i) = 1.e-6;  // DUMMY FOR PATTERN LOCK
         }
         if (q(joint_idx_[i]) < position_lower_limit(joint_idx_[i]) + safety_margin) {
           const double alpha = std::clamp(
-              (safety_margin - (q(joint_idx_[i]) - position_lower_limit(joint_idx_[i]))) / safety_margin, 1.e-4, 1.0);
+              (safety_margin - (q(joint_idx_[i]) - position_lower_limit(joint_idx_[i]))) / safety_margin, 1.e-6, 1.0);
           lower_penalty(i, 2 * n_joints_ + i) = weight * alpha;
         } else {
-          lower_penalty(i, 2 * n_joints_ + i) = 1.e-4;  // DUMMY FOR PATTERN LOCK
+          lower_penalty(i, 2 * n_joints_ + i) = 1.e-6;  // DUMMY FOR PATTERN LOCK
         }
       }
       qp_solver_.AddCostFunction(upper_penalty, Eigen::VectorXd::Zero(n_joints_));
@@ -165,7 +165,7 @@ class OptimalControl {
     }
 
     Eigen::VectorXd primal_variable = Eigen::VectorXd::Zero(n_vars_);
-    primal_variable.head(n_joints_) = state->GetQ()(joint_idx_);
+    primal_variable.head(n_joints_) = state->GetQdot()(joint_idx_);
     qp_solver_.SetPrimalVariable(primal_variable);
 
     try {

@@ -28,7 +28,7 @@ void bind_master_arm(py::module_& m) {
       .def_readonly("qvel_joint", &MasterArm::State::qvel_joint)
       .def_readonly("torque_joint", &MasterArm::State::torque_joint)
       .def_readonly("gravity_term", &MasterArm::State::gravity_term)
-      .def_readonly("operation_mode", &MasterArm::State::operation_mode)
+      .def_readonly("operating_mode", &MasterArm::State::operating_mode)
       .def_readonly("button_right", &MasterArm::State::button_right)
       .def_readonly("button_left", &MasterArm::State::button_left)
       .def_readonly("T_right", &MasterArm::State::T_right)
@@ -37,12 +37,12 @@ void bind_master_arm(py::module_& m) {
   py::class_<MasterArm::ControlInput>(ma_m, "ControlInput")
       .def(py::init<>())
       .def_property(
-          "target_operation_mode",
+          "target_operating_mode",
           [](MasterArm::ControlInput& self) -> Eigen::Vector<int, MasterArm::kDOF>& {
-            return self.target_operation_mode;
+            return self.target_operating_mode;
           },
           [](MasterArm::ControlInput& self, const Eigen::Vector<int, MasterArm::kDOF>& mat) {
-            self.target_operation_mode = mat;
+            self.target_operating_mode = mat;
           },
           py::return_value_policy::reference_internal)
       .def_property(

@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
 
 #include "rby1-sdk/robot_command_feedback.h"
 
@@ -48,6 +49,12 @@ void pybind11_robot_command_feedback(py::module_& m) {
       .def_property_readonly("remain_time", &CartesianCommandFeedback::remain_time)
       .def_property_readonly("manipulability", &CartesianCommandFeedback::manipulability);
 
+  py::class_<CartesianImpedanceControlCommandFeedback, CommandFeedback>(m, "CartesianImpedanceControlCommandFeedback")
+      .def(py::init<>())
+      .def_property_readonly("set_position", &CartesianImpedanceControlCommandFeedback::set_position)
+      .def_property_readonly("remain_time", &CartesianImpedanceControlCommandFeedback::remain_time)
+      .def_property_readonly("manipulability", &CartesianImpedanceControlCommandFeedback::manipulability);
+
   py::class_<GravityCompensationCommandFeedback, CommandFeedback>(m, "GravityCompensationCommandFeedback")
       .def(py::init<>());
 
@@ -76,7 +83,8 @@ void pybind11_robot_command_feedback(py::module_& m) {
       .def_property_readonly("joint_position_command", &ArmCommandFeedback::joint_position_command)
       .def_property_readonly("gravity_compensation_command", &ArmCommandFeedback::gravity_compensation_command)
       .def_property_readonly("cartesian_command", &ArmCommandFeedback::cartesian_command)
-      .def_property_readonly("impedance_control_command", &ArmCommandFeedback::impedance_control_command);
+      .def_property_readonly("impedance_control_command", &ArmCommandFeedback::impedance_control_command)
+      .def_property_readonly("cartesian_impedance_control_command", &ArmCommandFeedback::cartesian_impedance_control_command);
 
   py::class_<TorsoCommandFeedback, CommandFeedback>(m, "TorsoCommandFeedback")
       .def(py::init<>())

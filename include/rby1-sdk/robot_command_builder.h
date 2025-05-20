@@ -11,9 +11,11 @@ namespace rb {
 
 class CommandHeaderBuilderImpl;
 class JointPositionCommandBuilderImpl;
+class JointImpedanceControlCommandBuilderImpl;
 class OptimalControlCommandBuilderImpl;
 class GravityCompensationCommandBuilderImpl;
 class CartesianCommandBuilderImpl;
+class CartesianImpedanceControlCommandBuilderImpl;
 class ImpedanceControlCommandBuilderImpl;
 class JointVelocityCommandBuilderImpl;
 class JogCommandBuilderImpl;
@@ -46,7 +48,9 @@ class CommandHeaderBuilder {
 
   friend class GravityCompensationCommandBuilderImpl;
   friend class JointPositionCommandBuilderImpl;
+  friend class JointImpedanceControlCommandBuilderImpl;
   friend class CartesianCommandBuilderImpl;
+  friend class CartesianImpedanceControlCommandBuilderImpl;
   friend class OptimalControlCommandBuilderImpl;
   friend class ImpedanceControlCommandBuilderImpl;
   friend class JointVelocityCommandBuilderImpl;
@@ -76,6 +80,40 @@ class JointPositionCommandBuilder {
 
  private:
   std::unique_ptr<JointPositionCommandBuilderImpl> impl_;
+
+  friend class ArmCommandBuilderImpl;
+  friend class TorsoCommandBuilderImpl;
+  friend class BodyCommandBuilderImpl;
+  friend class HeadCommandBuilderImpl;
+};
+
+class JointImpedanceControlCommandBuilder {
+ public:
+  JointImpedanceControlCommandBuilder();
+
+  ~JointImpedanceControlCommandBuilder();
+
+  JointImpedanceControlCommandBuilder& SetCommandHeader(const CommandHeaderBuilder& builder);
+
+  JointImpedanceControlCommandBuilder& SetMinimumTime(double minimum_time);
+
+  JointImpedanceControlCommandBuilder& SetPosition(const Eigen::VectorXd& position);
+
+  JointImpedanceControlCommandBuilder& SetVelocityLimit(const Eigen::VectorXd& velocity_limit);
+
+  JointImpedanceControlCommandBuilder& SetAccelerationLimit(const Eigen::VectorXd& acceleration_limit);
+
+  JointImpedanceControlCommandBuilder& SetStiffness(const Eigen::VectorXd& stiffness);
+
+  JointImpedanceControlCommandBuilder& SetTorqueLimit(const Eigen::VectorXd& torque_limit);
+
+  JointImpedanceControlCommandBuilder& SetDampingRatio(double damping_ratio);
+
+ private:
+  [[nodiscard]] void* Build() const;
+
+ private:
+  std::unique_ptr<JointImpedanceControlCommandBuilderImpl> impl_;
 
   friend class ArmCommandBuilderImpl;
   friend class TorsoCommandBuilderImpl;
@@ -147,6 +185,8 @@ class ImpedanceControlCommandBuilder {
   ImpedanceControlCommandBuilder& SetTranslationWeight(const Eigen::Vector3d& weight);
 
   ImpedanceControlCommandBuilder& SetRotationWeight(const Eigen::Vector3d& weight);
+
+  ImpedanceControlCommandBuilder& SetDampingRatio(double damping_ratio);
 
  private:
   [[nodiscard]] void* Build() const;
@@ -338,6 +378,60 @@ class CartesianCommandBuilder {
   friend class BodyCommandBuilderImpl;
 };
 
+class CartesianImpedanceControlCommandBuilder {
+ public:
+  CartesianImpedanceControlCommandBuilder();
+
+  ~CartesianImpedanceControlCommandBuilder();
+
+  CartesianImpedanceControlCommandBuilder& SetCommandHeader(const CommandHeaderBuilder& builder);
+
+  CartesianImpedanceControlCommandBuilder& SetMinimumTime(double minium_time);
+
+  CartesianImpedanceControlCommandBuilder& AddTarget(
+      const std::string& ref_link_name,                                //
+      const std::string& link_name,                                    //
+      const math::SE3::MatrixType& T,                                  // Eigen::Matrix<double, 4, 4>
+      std::optional<double> linear_velocity_limit = std::nullopt,      // (m/s)
+      std::optional<double> angular_velocity_limit = std::nullopt,     // (rad/s)
+      std::optional<double> linear_acceleration_limit = std::nullopt,  //
+      std::optional<double> angular_acceleration_limit = std::nullopt  //
+  );
+
+  CartesianImpedanceControlCommandBuilder& AddJointPositionTarget(
+      const std::string& joint_name,                           //
+      double target_position,                                  //
+      std::optional<double> velocity_limit = std::nullopt,     //
+      std::optional<double> acceleration_limit = std::nullopt  //
+  );
+
+  CartesianImpedanceControlCommandBuilder& SetStopPositionTrackingError(double stop_position_tracking_error);
+
+  CartesianImpedanceControlCommandBuilder& SetStopOrientationTrackingError(double stop_orientation_tracking_error);
+
+  CartesianImpedanceControlCommandBuilder& SetStopJointPositionTrackingError(double stop_joint_position_tracking_error);
+
+  CartesianImpedanceControlCommandBuilder& SetJointStiffness(const Eigen::VectorXd& stiffness);
+
+  CartesianImpedanceControlCommandBuilder& SetJointDampingRatio(double damping_ratio);
+
+  CartesianImpedanceControlCommandBuilder& SetJointTorqueLimit(const Eigen::VectorXd& torque_limit);
+
+  CartesianImpedanceControlCommandBuilder& AddJointLimit(const std::string& joint_name, double lower, double upper);
+
+  CartesianImpedanceControlCommandBuilder& SetResetReference(bool reset_reference);
+
+ private:
+  [[nodiscard]] void* Build() const;
+
+ private:
+  std::unique_ptr<CartesianImpedanceControlCommandBuilderImpl> impl_;
+
+  friend class ArmCommandBuilderImpl;
+  friend class TorsoCommandBuilderImpl;
+  friend class BodyCommandBuilderImpl;
+};
+
 class GravityCompensationCommandBuilder {
  public:
   GravityCompensationCommandBuilder();
@@ -371,6 +465,10 @@ class ArmCommandBuilder {
 
   ArmCommandBuilder(const ImpedanceControlCommandBuilder& builder);
 
+  ArmCommandBuilder(const JointImpedanceControlCommandBuilder& builder);
+
+  ArmCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder);
+
   ~ArmCommandBuilder();
 
   ArmCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -380,6 +478,10 @@ class ArmCommandBuilder {
   ArmCommandBuilder& SetCommand(const CartesianCommandBuilder& builder);
 
   ArmCommandBuilder& SetCommand(const ImpedanceControlCommandBuilder& builder);
+
+  ArmCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
+
+  ArmCommandBuilder& SetCommand(const CartesianImpedanceControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;
@@ -404,6 +506,10 @@ class TorsoCommandBuilder {
 
   TorsoCommandBuilder(const OptimalControlCommandBuilder& builder);
 
+  TorsoCommandBuilder(const JointImpedanceControlCommandBuilder& builder);
+
+  TorsoCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder);
+
   ~TorsoCommandBuilder();
 
   TorsoCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -415,6 +521,10 @@ class TorsoCommandBuilder {
   TorsoCommandBuilder& SetCommand(const ImpedanceControlCommandBuilder& builder);
 
   TorsoCommandBuilder& SetCommand(const OptimalControlCommandBuilder& builder);
+
+  TorsoCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
+
+  TorsoCommandBuilder& SetCommand(const CartesianImpedanceControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;
@@ -460,6 +570,10 @@ class BodyCommandBuilder {
 
   BodyCommandBuilder(const BodyComponentBasedCommandBuilder& builder);
 
+  BodyCommandBuilder(const JointImpedanceControlCommandBuilder& builder);
+
+  BodyCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder);
+
   ~BodyCommandBuilder();
 
   BodyCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -471,6 +585,10 @@ class BodyCommandBuilder {
   BodyCommandBuilder& SetCommand(const CartesianCommandBuilder& builder);
 
   BodyCommandBuilder& SetCommand(const BodyComponentBasedCommandBuilder& builder);
+
+  BodyCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
+
+  BodyCommandBuilder& SetCommand(const CartesianImpedanceControlCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;

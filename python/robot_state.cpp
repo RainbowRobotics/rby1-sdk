@@ -102,11 +102,11 @@ void bind_tool_flange(py::module_& m) {
         ss << std::fixed << std::setprecision(kDoublePrecision)  //
            << "ToolFlangeState("                                 //
            << "time_since_last_update=" << self.time_since_last_update.tv_sec << "." << std::setw(9)
-           << std::setfill('0') << self.time_since_last_update.tv_nsec                     //
-           << ", gyro=" << np.attr("array2string")(self.gyro).cast<std::string>()          //
-           << ", acceleration=" << np.attr("array2string")(self.gyro).cast<std::string>()  //
-           << ", switch_A=" << (self.switch_A ? "True" : "False")                          //
-           << ", output_voltage=" << self.output_voltage                                   //
+           << std::setfill('0') << self.time_since_last_update.tv_nsec                             //
+           << ", gyro=" << np.attr("array2string")(self.gyro).cast<std::string>()                  //
+           << ", acceleration=" << np.attr("array2string")(self.acceleration).cast<std::string>()  //
+           << ", switch_A=" << (self.switch_A ? "True" : "False")                                  //
+           << ", output_voltage=" << self.output_voltage                                           //
            << ")";
         return ss.str();
       });
@@ -171,6 +171,7 @@ void bind_joint_state(py::module_& m) {
       .def_readonly("target_velocity", &JointState::target_velocity)
       .def_readonly("target_feedback_gain", &JointState::target_feedback_gain)
       .def_readonly("target_feedforward_torque", &JointState::target_feedforward_torque)
+      .def_readonly("temperature", &JointState::temperature)
       .def("__repr__", [](const JointState& self) {
         py::object np = py::module_::import("numpy");
         std::stringstream ss;
@@ -219,6 +220,7 @@ void bind_robot_state(py::module_& m, const std::string& robot_state_name) {
       .def_readonly("odometry", &RobotState<T>::odometry)
       .def_readonly("center_of_mass", &RobotState<T>::center_of_mass)
       .def_readonly("collisions", &RobotState<T>::collisions)
+      .def_readonly("temperature", &RobotState<T>::temperature)
       .def("__repr__", [](const RobotState<T>& self) {
         auto timestamp = timespec_to_time_point(self.timestamp);
         py::object np = py::module_::import("numpy");

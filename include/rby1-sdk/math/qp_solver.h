@@ -10,6 +10,8 @@ namespace rb::math {
 
 class QPSolverException : public std::exception {
  public:
+  static constexpr unsigned int kStatusOffset = 100;
+
   explicit QPSolverException(int error_code);
 
   const char* what() const noexcept override;

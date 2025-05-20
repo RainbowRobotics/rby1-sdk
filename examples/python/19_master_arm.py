@@ -30,7 +30,7 @@ def main(address, model):
     master_arm_model = f"{os.path.dirname(os.path.realpath(__file__))}/../../models/master_arm/model.urdf"
     master_arm = rby.upc.MasterArm(rby.upc.MasterArmDeviceName)
     master_arm.set_model_path(master_arm_model)
-    master_arm.set_control_period(0.05)
+    master_arm.set_control_period(0.01)
     active_ids = master_arm.initialize(verbose=True)
     if len(active_ids) != rby.upc.MasterArm.DeviceCount:
         print("Error: Mismatch in the number of devices detected for RBY Master Arm.")
@@ -47,7 +47,7 @@ def main(address, model):
 
         input = rby.upc.MasterArm.ControlInput()
 
-        input.target_operation_mode.fill(rby.DynamixelBus.CurrentControlMode)
+        input.target_operating_mode.fill(rby.DynamixelBus.CurrentControlMode)
         input.target_torque = state.gravity_term
 
         return input

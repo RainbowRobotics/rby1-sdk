@@ -554,6 +554,10 @@ class Robot {
     return GetJointProperty(state, [](auto j) { return j->GetLimitQddotUpper(); });
   }
 
+  Eigen::Vector<double, DOF> GetLimitTorque(const std::shared_ptr<State<DOF>>& state) {
+    return GetJointProperty(state, [](auto j) { return j->GetLimitTorque(); });
+  }
+
   Eigen::Vector<double, DOF> GetJointProperty(const std::shared_ptr<State<DOF>>& state,
                                               const std::function<double(std::shared_ptr<Joint>)>& getter) {
     Eigen::Vector<double, DOF> prop;

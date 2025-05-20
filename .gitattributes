@@ -1,0 +1,4 @@
+# Ignore all files in the "third-party" directory from language stats
+third-party/** linguist-vendored
+
+*.ipynb linguist-vendored

@@ -99,6 +99,34 @@ message JointPositionCommand {
   }
 }
 
+message JointImpedanceControlCommand {
+  message Request {
+    CommandHeader.Request command_header = 1;
+
+    google.protobuf.Duration minimum_time = 2;
+
+    repeated double position = 3;
+
+    repeated double velocity_limit = 4;
+
+    repeated double acceleration_limit = 5;
+
+    repeated double stiffness = 6;
+
+    google.protobuf.DoubleValue damping_ratio = 7; // default = 1
+
+    repeated double torque_limit = 8;
+  }
+
+  message Feedback {
+    CommandHeader.Feedback command_header_feedback = 1;
+
+    repeated double set_position = 2;
+
+    repeated double error = 3;
+  }
+}
+
 message CartesianCommand {
   message SE3PoseTarget {
     string ref_link_name = 1;
@@ -162,6 +190,78 @@ message CartesianCommand {
   }
 }
 
+message CartesianImpedanceControlCommand {
+  message SE3PoseTarget {
+    string ref_link_name = 1;
+
+    string link_name = 2;
+
+    SE3Pose T = 3;
+
+    google.protobuf.DoubleValue linear_velocity_limit = 4; // (m/s)
+
+    google.protobuf.DoubleValue angular_velocity_limit = 5; // (rad/s)
+
+    google.protobuf.DoubleValue linear_acceleration_limit = 6; // (m/s^2)
+
+    google.protobuf.DoubleValue angular_acceleration_limit = 7; // (rad/s^2)
+  }
+
+  message JointPositionTarget {
+    string joint_name = 1;
+
+    double target_position = 2;
+
+    google.protobuf.DoubleValue velocity_limit = 3;
+
+    google.protobuf.DoubleValue acceleration_limit = 4;
+  }
+
+  message JointLimit {
+    string joint_name = 1;
+
+    double lower = 2;
+
+    double upper = 3;
+  }
+
+  message Request {
+    CommandHeader.Request command_header = 1;
+
+    google.protobuf.Duration minimum_time = 2; // default = 0
+
+    repeated SE3PoseTarget targets = 3;
+
+    repeated JointPositionTarget joint_position_targets = 4;
+
+    google.protobuf.DoubleValue stop_position_tracking_error = 5;
+
+    google.protobuf.DoubleValue stop_orientation_tracking_error = 6;
+
+    google.protobuf.DoubleValue stop_joint_position_tracking_error = 7;
+
+    repeated double joint_stiffness = 8;
+
+    google.protobuf.DoubleValue joint_damping_ratio = 9; // default = 1
+
+    repeated double joint_torque_limit = 10;
+
+    repeated JointLimit joint_limits = 11;
+
+    google.protobuf.BoolValue reset_reference = 12; // default = false
+  }
+
+  message Feedback {
+    CommandHeader.Feedback command_header_feedback = 1;
+
+    repeated double set_position = 2;
+
+    double remain_time = 3;
+
+    double manipulability = 4;
+  }
+}
+
 message GravityCompensationCommand {
   message Request {
     CommandHeader.Request command_header = 1;
@@ -190,9 +290,11 @@ message ImpedanceControlCommand {
 
     SE3Pose T = 5;
 
-    Vec3 translation_weight = 6;
+    Vec3 translation_weight = 6; // Translation part of stiffness
 
-    Vec3 rotation_weight = 7;
+    Vec3 rotation_weight = 7; // Rotation part of stiffness
+
+    google.protobuf.DoubleValue damping_ratio = 8; // default = 1
   }
 
   message Feedback {

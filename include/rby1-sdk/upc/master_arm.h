@@ -28,7 +28,7 @@ class MasterArm {
     Eigen::Vector<double, kDOF> torque_joint;
     Eigen::Vector<double, kDOF> gravity_term;
 
-    Eigen::Vector<int, kDOF> operation_mode;
+    Eigen::Vector<int, kDOF> operating_mode;
 
     DynamixelBus::ButtonState button_right;
     DynamixelBus::ButtonState button_left;
@@ -38,7 +38,7 @@ class MasterArm {
   };
 
   struct ControlInput {
-    Eigen::Vector<int, kDOF> target_operation_mode;
+    Eigen::Vector<int, kDOF> target_operating_mode;
     Eigen::Vector<double, kDOF> target_position;
     Eigen::Vector<double, kDOF> target_torque;
   };
@@ -62,6 +62,9 @@ class MasterArm {
   double control_period_;  // (sec)
   std::vector<double> torque_constant_;
 
+  EventLoop ctrl_ev_;
+  std::atomic<bool> ctrl_running_{false};
+
   std::shared_ptr<DynamixelBus> handler_;
   std::shared_ptr<dyn::Robot<kDOF>> dyn_robot_;
   std::shared_ptr<dyn::State<kDOF>> dyn_state_;
@@ -72,7 +75,7 @@ class MasterArm {
   std::vector<int> active_ids_;
   bool state_updated_;
   State state_;
-  bool operation_mode_init_{false};
+  bool operating_mode_init_{false};
 
   std::function<ControlInput(const State& state)> control_;
 };

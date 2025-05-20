@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rby1-sdk"
-version = "0.4.1"
+version = "0.6.0"
 description = ""
 authors = ["Keunjun Choi <keunjun.choi@rainbow-robotics.com>"]
 license = "Apache-2.0"
@@ -51,7 +51,7 @@ requires = [
     "setuptools",
     "scikit-build>=0.17.3",
     "skbuild-conan",
-    "cmake>=3.28",
+    "cmake>=3.28,<4.0",
     "ninja",
     "pybind11-stubgen",
     "poetry-core",

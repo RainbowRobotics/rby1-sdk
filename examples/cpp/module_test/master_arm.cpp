@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
   
   master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
-  master_arm->SetControlPeriod(0.05); // 20Hz
+  master_arm->SetControlPeriod(0.01); // 100Hz
 
   auto active_ids = master_arm->Initialize();
   if (active_ids.size() != upc::MasterArm::kDeivceCount) {
@@ -81,20 +81,20 @@ int main(int argc, char** argv) {
     }
 
     if (state.button_right.button == 1) {
-      input.target_operation_mode(Eigen::seq(0, 6)).setConstant(DynamixelBus::kCurrentControlMode);
+      input.target_operating_mode(Eigen::seq(0, 6)).setConstant(DynamixelBus::kCurrentControlMode);
       input.target_torque(Eigen::seq(0, 6)) = state.gravity_term(Eigen::seq(0, 6));
       q_right = state.q_joint(Eigen::seq(0, 6));
     } else {
-      input.target_operation_mode(Eigen::seq(0, 6)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
+      input.target_operating_mode(Eigen::seq(0, 6)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
       input.target_position(Eigen::seq(0, 6)) = q_right;
     }
 
     if (state.button_left.button == 1) {
-      input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentControlMode);
+      input.target_operating_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentControlMode);
       input.target_torque(Eigen::seq(7, 13)) = state.gravity_term(Eigen::seq(7, 13));
       q_left = state.q_joint(Eigen::seq(7, 13));
     } else {
-      input.target_operation_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
+      input.target_operating_mode(Eigen::seq(7, 13)).setConstant(DynamixelBus::kCurrentBasedPositionControlMode);
       input.target_position(Eigen::seq(7, 13)) = q_left;
     }
     std::cout << "button : [" << state.button_right.button << ", " << state.button_left.button << "]" << std::endl;

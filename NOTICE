@@ -1,5 +1,45 @@
-This project includes the following submodules:
+This product includes software developed by Rainbow Robotics.
 
-1. DynamixelSDK
-   Licensed under the Apache License, Version 2.0.
-   http://www.apache.org/licenses/LICENSE-2.0
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+---
+
+This project includes the following third-party libraries:
+
+1. **DynamixelSDK**  
+   Licensed under the Apache License, Version 2.0  
+   https://github.com/ROBOTIS-GIT/DynamixelSDK
+
+2. **OSQP**  
+   Licensed under the Apache License, Version 2.0  
+   https://github.com/osqp/osqp
+
+3. **osqp-eigen**  
+   Licensed under the BSD 3-Clause License  
+   https://github.com/robotology/osqp-eigen
+
+4. **Eigen**  
+   Licensed under the Mozilla Public License Version 2.0 (MPL-2.0)  
+   https://gitlab.com/libeigen/eigen
+
+5. **gRPC**  
+   Licensed under the Apache License, Version 2.0  
+   https://github.com/grpc/grpc
+
+6. **tinyxml2**  
+   Licensed under the zlib License  
+   https://github.com/leethomason/tinyxml2
+
+7. **nlohmann_json**  
+   Licensed under the MIT License  
+   https://github.com/nlohmann/json

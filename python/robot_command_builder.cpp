@@ -21,6 +21,17 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_velocity_limit", &JointPositionCommandBuilder::SetVelocityLimit, "velocity_limit"_a)
       .def("set_acceleration_limit", &JointPositionCommandBuilder::SetAccelerationLimit, "acceleration_limit"_a);
 
+  py::class_<JointImpedanceControlCommandBuilder>(m, "JointImpedanceControlCommandBuilder")
+      .def(py::init<>())
+      .def("set_command_header", &JointImpedanceControlCommandBuilder::SetCommandHeader, "command_header_builder"_a)
+      .def("set_minimum_time", &JointImpedanceControlCommandBuilder::SetMinimumTime, "minimum_time"_a)
+      .def("set_position", &JointImpedanceControlCommandBuilder::SetPosition, "position"_a)
+      .def("set_velocity_limit", &JointImpedanceControlCommandBuilder::SetVelocityLimit, "velocity_limit"_a)
+      .def("set_acceleration_limit", &JointImpedanceControlCommandBuilder::SetAccelerationLimit, "acceleration_limit"_a)
+      .def("set_stiffness", &JointImpedanceControlCommandBuilder::SetStiffness, "stiffness"_a)
+      .def("set_torque_limit", &JointImpedanceControlCommandBuilder::SetTorqueLimit, "torque_limit"_a)
+      .def("set_damping_ratio", &JointImpedanceControlCommandBuilder::SetDampingRatio, "damping_ratio"_a);
+
   py::class_<OptimalControlCommandBuilder>(m, "OptimalControlCommandBuilder")
       .def(py::init<>())
       .def("set_command_header", &OptimalControlCommandBuilder::SetCommandHeader, "command_header_builder"_a)
@@ -46,7 +57,8 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_link_name", &ImpedanceControlCommandBuilder::SetLinkName, "link_name"_a)
       .def("set_transformation", &ImpedanceControlCommandBuilder::SetTransformation, "T"_a)
       .def("set_translation_weight", &ImpedanceControlCommandBuilder::SetTranslationWeight, "weight"_a)
-      .def("set_rotation_weight", &ImpedanceControlCommandBuilder::SetRotationWeight, "weight"_a);
+      .def("set_rotation_weight", &ImpedanceControlCommandBuilder::SetRotationWeight, "weight"_a)
+      .def("set_damping_ratio", &ImpedanceControlCommandBuilder::SetDampingRatio, "damping_ratio"_a);
 
   py::class_<JointVelocityCommandBuilder>(m, "JointVelocityCommandBuilder")
       .def(py::init<>())
@@ -106,6 +118,30 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_stop_joint_position_tracking_error", &CartesianCommandBuilder::SetStopJointPositionTrackingError,
            "stop_joint_position_tracking_error"_a);
 
+  py::class_<CartesianImpedanceControlCommandBuilder>(m, "CartesianImpedanceControlCommandBuilder")
+      .def(py::init<>())
+      .def("set_command_header", &CartesianImpedanceControlCommandBuilder::SetCommandHeader, "command_header_builder"_a)
+      .def("set_minimum_time", &CartesianImpedanceControlCommandBuilder::SetMinimumTime, "minimum_time"_a)
+      .def("add_target", &CartesianImpedanceControlCommandBuilder::AddTarget, "ref_link_name"_a, "link_name"_a, "T"_a,
+           "linear_velocity_limit"_a = py::none(), "angular_velocity_limit"_a = py::none(),
+           "linear_acceleration_limit"_a = py::none(), "angular_acceleration_limit"_a = py::none())
+      .def("add_joint_position_target", &CartesianImpedanceControlCommandBuilder::AddJointPositionTarget,
+           "joint_name"_a, "target_position"_a, "velocity_limit"_a = py::none(), "acceleration_limit"_a = py::none())
+      .def("set_stop_position_tracking_error", &CartesianImpedanceControlCommandBuilder::SetStopPositionTrackingError,
+           "stop_position_tracking_error"_a)
+      .def("set_stop_orientation_tracking_error",
+           &CartesianImpedanceControlCommandBuilder::SetStopOrientationTrackingError,
+           "stop_orientation_tracking_error"_a)
+      .def("set_stop_joint_position_tracking_error",
+           &CartesianImpedanceControlCommandBuilder::SetStopJointPositionTrackingError,
+           "stop_joint_position_tracking_error"_a)
+      .def("set_joint_stiffness", &CartesianImpedanceControlCommandBuilder::SetJointStiffness, "stiffness"_a)
+      .def("set_joint_torque_limit", &CartesianImpedanceControlCommandBuilder::SetJointTorqueLimit, "torque_limit"_a)
+      .def("set_joint_damping_ratio", &CartesianImpedanceControlCommandBuilder::SetJointDampingRatio, "damping_ratio"_a)
+      .def("add_joint_limit", &CartesianImpedanceControlCommandBuilder::AddJointLimit, "joint_name"_a, "lower"_a,
+           "upper"_a)
+      .def("set_reset_reference", &CartesianImpedanceControlCommandBuilder::SetResetReference, "reset_reference"_a);
+
   py::class_<GravityCompensationCommandBuilder>(m, "GravityCompensationCommandBuilder")
       .def(py::init<>())
       .def("set_command_header", &GravityCompensationCommandBuilder::SetCommandHeader,
@@ -118,6 +154,8 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def(py::init<const GravityCompensationCommandBuilder&>())
       .def(py::init<const CartesianCommandBuilder&>())
       .def(py::init<const ImpedanceControlCommandBuilder&>())
+      .def(py::init<const JointImpedanceControlCommandBuilder&>())
+      .def(py::init<const CartesianImpedanceControlCommandBuilder&>())
       .def("set_command", py::overload_cast<const JointPositionCommandBuilder&>(&ArmCommandBuilder::SetCommand),
            "joint_position_command_builder"_a)
       .def("set_command", py::overload_cast<const GravityCompensationCommandBuilder&>(&ArmCommandBuilder::SetCommand),
@@ -125,7 +163,12 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_command", py::overload_cast<const CartesianCommandBuilder&>(&ArmCommandBuilder::SetCommand),
            "cartesian_command_builder"_a)
       .def("set_command", py::overload_cast<const ImpedanceControlCommandBuilder&>(&ArmCommandBuilder::SetCommand),
-           "impedance_control_command_builder"_a);
+           "impedance_control_command_builder"_a)
+      .def("set_command", py::overload_cast<const JointImpedanceControlCommandBuilder&>(&ArmCommandBuilder::SetCommand),
+           "joint_impedance_control_command_builder"_a)
+      .def("set_command",
+           py::overload_cast<const CartesianImpedanceControlCommandBuilder&>(&ArmCommandBuilder::SetCommand),
+           "cartesian_impedance_control_command_builder"_a);
 
   py::class_<TorsoCommandBuilder>(m, "TorsoCommandBuilder")
       .def(py::init<>())
@@ -134,6 +177,8 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def(py::init<const CartesianCommandBuilder&>())
       .def(py::init<const ImpedanceControlCommandBuilder&>())
       .def(py::init<const OptimalControlCommandBuilder&>())
+      .def(py::init<const JointImpedanceControlCommandBuilder&>())
+      .def(py::init<const CartesianImpedanceControlCommandBuilder&>())
       .def("set_command", py::overload_cast<const JointPositionCommandBuilder&>(&TorsoCommandBuilder::SetCommand),
            "joint_position_command_builder"_a)
       .def("set_command", py::overload_cast<const GravityCompensationCommandBuilder&>(&TorsoCommandBuilder::SetCommand),
@@ -143,7 +188,13 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_command", py::overload_cast<const ImpedanceControlCommandBuilder&>(&TorsoCommandBuilder::SetCommand),
            "impedance_control_command_builder"_a)
       .def("set_command", py::overload_cast<const OptimalControlCommandBuilder&>(&TorsoCommandBuilder::SetCommand),
-           "optimal_control_command_builder"_a);
+           "optimal_control_command_builder"_a)
+      .def("set_command",
+           py::overload_cast<const JointImpedanceControlCommandBuilder&>(&TorsoCommandBuilder::SetCommand),
+           "joint_impedance_control_command_builder"_a)
+      .def("set_command",
+           py::overload_cast<const CartesianImpedanceControlCommandBuilder&>(&TorsoCommandBuilder::SetCommand),
+           "cartesian_impedance_control_command_builder"_a);
 
   py::class_<BodyComponentBasedCommandBuilder>(m, "BodyComponentBasedCommandBuilder")
       .def(py::init<>())
@@ -158,6 +209,8 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def(py::init<const GravityCompensationCommandBuilder&>())
       .def(py::init<const CartesianCommandBuilder&>())
       .def(py::init<const BodyComponentBasedCommandBuilder&>())
+      .def(py::init<const JointImpedanceControlCommandBuilder&>())
+      .def(py::init<const CartesianImpedanceControlCommandBuilder&>())
       .def("set_command", py::overload_cast<const JointPositionCommandBuilder&>(&BodyCommandBuilder::SetCommand),
            "joint_position_command_builder"_a)
       .def("set_command", py::overload_cast<const OptimalControlCommandBuilder&>(&BodyCommandBuilder::SetCommand),
@@ -167,7 +220,13 @@ void pybind11_robot_command_builder(py::module_& m) {
       .def("set_command", py::overload_cast<const CartesianCommandBuilder&>(&BodyCommandBuilder::SetCommand),
            "cartesian_command_builder"_a)
       .def("set_command", py::overload_cast<const BodyComponentBasedCommandBuilder&>(&BodyCommandBuilder::SetCommand),
-           "body_component_based_command_builder"_a);
+           "body_component_based_command_builder"_a)
+      .def("set_command",
+           py::overload_cast<const JointImpedanceControlCommandBuilder&>(&BodyCommandBuilder::SetCommand),
+           "joint_impedance_control_command_builder"_a)
+      .def("set_command",
+           py::overload_cast<const CartesianImpedanceControlCommandBuilder&>(&BodyCommandBuilder::SetCommand),
+           "cartesian_impedance_control_command_builder"_a);
 
   py::class_<MobilityCommandBuilder>(m, "MobilityCommandBuilder")
       .def(py::init<>())
@@ -220,18 +279,24 @@ void pybind11_robot_command_builder(py::module_& m) {
   py::implicitly_convertible<GravityCompensationCommandBuilder, ArmCommandBuilder>();
   py::implicitly_convertible<CartesianCommandBuilder, ArmCommandBuilder>();
   py::implicitly_convertible<ImpedanceControlCommandBuilder, ArmCommandBuilder>();
+  py::implicitly_convertible<JointImpedanceControlCommandBuilder, ArmCommandBuilder>();
+  py::implicitly_convertible<CartesianImpedanceControlCommandBuilder, ArmCommandBuilder>();
 
   py::implicitly_convertible<JointPositionCommandBuilder, TorsoCommandBuilder>();
   py::implicitly_convertible<GravityCompensationCommandBuilder, TorsoCommandBuilder>();
   py::implicitly_convertible<CartesianCommandBuilder, TorsoCommandBuilder>();
   py::implicitly_convertible<ImpedanceControlCommandBuilder, TorsoCommandBuilder>();
   py::implicitly_convertible<OptimalControlCommandBuilder, TorsoCommandBuilder>();
+  py::implicitly_convertible<JointImpedanceControlCommandBuilder, TorsoCommandBuilder>();
+  py::implicitly_convertible<CartesianImpedanceControlCommandBuilder, TorsoCommandBuilder>();
 
   py::implicitly_convertible<JointPositionCommandBuilder, BodyCommandBuilder>();
   py::implicitly_convertible<OptimalControlCommandBuilder, BodyCommandBuilder>();
   py::implicitly_convertible<GravityCompensationCommandBuilder, BodyCommandBuilder>();
   py::implicitly_convertible<CartesianCommandBuilder, BodyCommandBuilder>();
   py::implicitly_convertible<BodyComponentBasedCommandBuilder, BodyCommandBuilder>();
+  py::implicitly_convertible<JointImpedanceControlCommandBuilder, BodyCommandBuilder>();
+  py::implicitly_convertible<CartesianImpedanceControlCommandBuilder, BodyCommandBuilder>();
 
   py::implicitly_convertible<JointVelocityCommandBuilder, MobilityCommandBuilder>();
   py::implicitly_convertible<SE2VelocityCommandBuilder, MobilityCommandBuilder>();

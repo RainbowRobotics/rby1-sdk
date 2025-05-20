@@ -20,6 +20,18 @@
 using namespace rb;
 using namespace std::chrono_literals;
 
+/**********************************************
+ * 여기에 있는 상수를 조절해서 사용해주세요.
+ **********************************************/
+constexpr double kArmJointStiffness = 60.0;
+constexpr double kArmTorqueLimit = 20.0;
+constexpr double kTorsoStiffness = 400.0;
+constexpr double kLinearAccelerationLimit = 60;
+constexpr double kAngularAccelerationLimit = 30.0;
+/**********************************************
+ *
+ **********************************************/
+
 // Protocol version
 #define PROTOCOL_VERSION 2.0  // See which protocol version is used in the Dynamixel
 
@@ -592,7 +604,6 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
   Eigen::Vector<double, 3> torso_pos_command = Eigen::Vector<double, 3>::Zero();  // torso command
   Eigen::Vector<double, 3> torso_ori_command = Eigen::Vector<double, 3>::Zero();  // torso command
-  
 
   JoystickReceiver receiver(port, num_axes, num_buttons, num_hats);
   receiver.start();
@@ -615,9 +626,19 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
     // std::cout << "start !" << std::endl;
     MobilityCommandBuilder mobility_command;
-    CartesianCommandBuilder right_arm_command;
-    CartesianCommandBuilder left_arm_command;
-    CartesianCommandBuilder torso_command;
+    CartesianImpedanceControlCommandBuilder right_arm_command;
+    CartesianImpedanceControlCommandBuilder left_arm_command;
+    CartesianImpedanceControlCommandBuilder torso_command;
+
+    right_arm_command.SetJointStiffness(Eigen::Vector<double, 7>::Constant(kArmJointStiffness))
+        .SetJointDampingRatio(1.0)
+        .SetJointTorqueLimit(Eigen::Vector<double, 7>::Constant(kArmTorqueLimit));
+
+    left_arm_command.SetJointStiffness(Eigen::Vector<double, 7>::Constant(kArmJointStiffness))
+        .SetJointDampingRatio(1.0)
+        .SetJointTorqueLimit(Eigen::Vector<double, 7>::Constant(kArmTorqueLimit));
+
+    torso_command.SetJointStiffness(Eigen::Vector<double, 6>::Constant(kTorsoStiffness)).SetJointDampingRatio(1.0);
 
     {
       std::lock_guard<std::mutex> lg(mtx_q_joint_ma_info);
@@ -667,7 +688,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
     // angular_velocity = -joy_stick_data.axisLeftX / 2.0;     // mobility command
 
     linear_velocity << -joy_stick_data.axes[4] / 2.0, 0;  // mobility command
-    angular_velocity = -joy_stick_data.axes[0] / 2.0;    // mobility command
+    angular_velocity = -joy_stick_data.axes[0] / 2.0;     // mobility command
 
     // linear_velocity << 0, 0;  // mobility command
     // angular_velocity = 0;     // mobility command
@@ -694,7 +715,8 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
     torso_pos_command = 0.8 * torso_pos_command + 0.2 * torso_pos_command_last;
     torso_ori_command = 0.8 * torso_ori_command + 0.2 * torso_ori_command_last;
 
-    Eigen::Vector<double, 3> torso_se3v_ori = math::SO3::Log(T_torso.block(0, 0, 3, 3)) + SPEED * torso_ori_command / 10.0;
+    Eigen::Vector<double, 3> torso_se3v_ori =
+        math::SO3::Log(T_torso.block(0, 0, 3, 3)) + SPEED * torso_ori_command / 10.0;
     Eigen::Vector<double, 3> torso_se3v_pos = T_torso.block(0, 3, 3, 1) + SPEED * torso_pos_command / 20.0;
 
     for (int i = 0; i < 3; i++) {
@@ -752,27 +774,27 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
         Eigen::Matrix<double, 4, 4> T_right_from_torso, T_left_from_torso;
         T_right_from_torso = dyn->ComputeTransformation(dyn_state, 1, 2);
         T_left_from_torso = dyn->ComputeTransformation(dyn_state, 1, 3);
-        right_arm_command.AddTarget("link_torso_5", "ee_right", T_right_from_torso, 1*1000, 3.141592*60, 1)
-            .AddJointPositionTarget("right_arm_0", q_joint_right_target(0), 3.14*60, 100*30)
-            .AddJointPositionTarget("right_arm_1", q_joint_right_target(1), 3.14*60, 100*30)
-            .AddJointPositionTarget("right_arm_2", q_joint_right_target(2), 3.14*60, 100*30)
-            .AddJointPositionTarget("right_arm_3", q_joint_right_target(3), 3.14*60, 100*30)
-            .AddJointPositionTarget("right_arm_4", q_joint_right_target(4), 3.14*60, 100*30)
-            .AddJointPositionTarget("right_arm_5", q_joint_right_target(5), 3.14*60, 100*30)
-            .AddJointPositionTarget("right_arm_6", q_joint_right_target(6), 3.14*60, 100*30)
+        right_arm_command.AddTarget("link_torso_5", "ee_right", T_right_from_torso, 1 * 1000, 3.141592 * 60, kLinearAccelerationLimit, kAngularAccelerationLimit)
+            .AddJointPositionTarget("right_arm_0", q_joint_right_target(0), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("right_arm_1", q_joint_right_target(1), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("right_arm_2", q_joint_right_target(2), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("right_arm_3", q_joint_right_target(3), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("right_arm_4", q_joint_right_target(4), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("right_arm_5", q_joint_right_target(5), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("right_arm_6", q_joint_right_target(6), 3.14 * 60, 100 * 30)
             .SetMinimumTime(right_arm_minimum_time)
             .SetStopOrientationTrackingError(stop_orientation_tracking_error / 1000.0)
             .SetStopPositionTrackingError(stop_position_tracking_error / 1000.0)
             .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time));
 
-        left_arm_command.AddTarget("link_torso_5", "ee_left", T_left_from_torso, 1*1000, 3.141592*60, 1)
-            .AddJointPositionTarget("left_arm_0", q_joint_left_target(0), 3.14*60, 100*30)
-            .AddJointPositionTarget("left_arm_1", q_joint_left_target(1), 3.14*60, 100*30)
-            .AddJointPositionTarget("left_arm_2", q_joint_left_target(2), 3.14*60, 100*30)
-            .AddJointPositionTarget("left_arm_3", q_joint_left_target(3), 3.14*60, 100*30)
-            .AddJointPositionTarget("left_arm_4", q_joint_left_target(4), 3.14*60, 100*30)
-            .AddJointPositionTarget("left_arm_5", q_joint_left_target(5), 3.14*60, 100*30)
-            .AddJointPositionTarget("left_arm_6", q_joint_left_target(6), 3.14*60, 100*30)
+        left_arm_command.AddTarget("link_torso_5", "ee_left", T_left_from_torso, 1 * 1000, 3.141592 * 60, kLinearAccelerationLimit, kAngularAccelerationLimit)
+            .AddJointPositionTarget("left_arm_0", q_joint_left_target(0), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("left_arm_1", q_joint_left_target(1), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("left_arm_2", q_joint_left_target(2), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("left_arm_3", q_joint_left_target(3), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("left_arm_4", q_joint_left_target(4), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("left_arm_5", q_joint_left_target(5), 3.14 * 60, 100 * 30)
+            .AddJointPositionTarget("left_arm_6", q_joint_left_target(6), 3.14 * 60, 100 * 30)
             .SetMinimumTime(left_arm_minimum_time)
             .SetStopOrientationTrackingError(stop_orientation_tracking_error / 1000.0)
             .SetStopPositionTrackingError(stop_position_tracking_error / 1000.0)
@@ -794,20 +816,20 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
         T_right_from_torso = dyn->ComputeTransformation(dyn_state, 0, 2);
         T_left_from_torso = dyn->ComputeTransformation(dyn_state, 0, 3);
         right_arm_command
-            .AddTarget("base", "ee_right", T_right_from_torso, 3.141592, 3.141592, 1)
+            .AddTarget("base", "ee_right", T_right_from_torso, 3.141592, 3.141592, kLinearAccelerationLimit, kAngularAccelerationLimit)
             // .AddJointPositionTarget("right_arm_2", q_joint_rby1_24x1(2+6+2) + joy_stick_data.axisRightX/10.0, 3.14, 100)
-            .AddJointPositionTarget("right_arm_2", q_joint_rby1_24x1(2 + 6 + 2) + SPEED * joy_stick_data.axes[3] / 10.0, 3.14,
-                                    100)
+            .AddJointPositionTarget("right_arm_2", q_joint_rby1_24x1(2 + 6 + 2) + SPEED * joy_stick_data.axes[3] / 10.0,
+                                    3.14, 100)
             .SetMinimumTime(right_arm_minimum_time)
             .SetStopOrientationTrackingError(stop_orientation_tracking_error)
             .SetStopPositionTrackingError(stop_position_tracking_error)
             .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(control_hold_time));
 
         left_arm_command
-            .AddTarget("base", "ee_left", T_left_from_torso, 3.141592, 3.141592, 1)
+            .AddTarget("base", "ee_left", T_left_from_torso, 3.141592, 3.141592, kLinearAccelerationLimit, kAngularAccelerationLimit)
             // .AddJointPositionTarget("left_arm_2", q_joint_rby1_24x1(2+6+2+7) + joy_stick_data.axisLeftX/10.0, 3.14, 100)
-            .AddJointPositionTarget("left_arm_2", q_joint_rby1_24x1(2 + 6 + 2 + 7) + SPEED * joy_stick_data.axes[0] / 10.0,
-                                    3.14, 100)
+            .AddJointPositionTarget("left_arm_2",
+                                    q_joint_rby1_24x1(2 + 6 + 2 + 7) + SPEED * joy_stick_data.axes[0] / 10.0, 3.14, 100)
             .SetMinimumTime(left_arm_minimum_time)
             .SetStopOrientationTrackingError(stop_orientation_tracking_error)
             .SetStopPositionTrackingError(stop_position_tracking_error)
@@ -831,7 +853,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
 
     {
       //torso command
-      torso_command.AddTarget("base", "link_torso_5", T_torso, 3.141592, 3.141592, 1)
+      torso_command.AddTarget("base", "link_torso_5", T_torso, 3.141592, 3.141592, kLinearAccelerationLimit, kAngularAccelerationLimit)
           .SetMinimumTime(torso_minimum_time)
           .SetStopOrientationTrackingError(stop_orientation_tracking_error)
           .SetStopPositionTrackingError(stop_position_tracking_error)

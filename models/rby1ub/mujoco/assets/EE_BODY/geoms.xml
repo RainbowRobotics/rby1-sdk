@@ -1,0 +1,4 @@
+<mujoco>
+  <geom material="70,70,70" mesh="EE_BODY" class="visual"/>
+  <geom mesh="EE_BODY" class="collision"/>
+</mujoco>

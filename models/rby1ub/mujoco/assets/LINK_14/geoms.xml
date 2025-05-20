@@ -1,0 +1,4 @@
+<mujoco>
+  <geom material="10,10,10" mesh="LINK_14" class="visual" />
+  <geom mesh="LINK_14" class="collision" />
+</mujoco>

@@ -1,0 +1,4 @@
+<mujoco>
+  <mesh file="LINK_16_0.obj" />
+  <mesh file="LINK_16_1.obj" />
+</mujoco>

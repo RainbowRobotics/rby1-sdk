@@ -1,0 +1,24 @@
+<mujoco model="EE_FINGER">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="191,191,191.006" specular="0.0" shininess="0.225" rgba="0.749020 0.749020 0.749020 1.000000"/>
+    <material name="70,70,70.007" specular="0.0" shininess="0.225" rgba="0.274510 0.274510 0.274510 1.000000"/>
+    <mesh file="EE_FINGER_0.obj"/>
+    <mesh file="EE_FINGER_1.obj"/>
+  </asset>
+  <worldbody>
+    <body name="EE_FINGER">
+      <geom mesh="EE_FINGER_0" material="191,191,191.006" class="visual"/>
+      <geom mesh="EE_FINGER_1" material="70,70,70.007" class="visual"/>
+      <geom mesh="EE_FINGER_0" class="collision"/>
+      <geom mesh="EE_FINGER_1" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,6 @@
+<mujoco>
+  <geom mesh="EE_FINGER_0" material="191,191,191" class="visual" />
+  <geom mesh="EE_FINGER_1" material="70,70,70" class="visual" />
+  <geom mesh="EE_FINGER_0" class="collision" />
+  <geom mesh="EE_FINGER_1" class="collision" />
+</mujoco>

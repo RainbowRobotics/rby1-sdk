@@ -1,0 +1,5 @@
+<mujoco>
+  <mesh file="UB_LINK_BASE_0.obj" />
+  <!-- <mesh file="UB_LINK_BASE_1.obj" /> -->
+  <mesh file="UB_LINK_BASE_2.obj" />
+</mujoco>

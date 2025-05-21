@@ -1328,13 +1328,13 @@ int main(int argc, char** argv) {
           std::cout << "State Update Received:" << std::endl;
           std::cout << "  Timestamp: " << state.timestamp.tv_sec << ".";
           std::cout << std::setw(9) << std::setfill('0') << state.timestamp.tv_nsec << std::endl;
-          std::cout << "  wasit [deg]     : " << state.position.block(2, 0, 6, 1).transpose() * R2D << std::endl;
-          std::cout << "  right arm [deg] : " << state.position.block(2 + 6, 0, 7, 1).transpose() * R2D << std::endl;
-          std::cout << "  left arm [deg]  : " << state.position.block(2 + 6 + 7, 0, 7, 1).transpose() * R2D
+          std::cout << "  wasit [deg]     : " << state.target_position.block(2, 0, 6, 1).transpose() * R2D << std::endl;
+          std::cout << "  right arm [deg] : " << state.target_position.block(2 + 6, 0, 7, 1).transpose() * R2D << std::endl;
+          std::cout << "  left arm [deg]  : " << state.target_position.block(2 + 6 + 7, 0, 7, 1).transpose() * R2D
                     << std::endl;
         }
 
-        q_joint_rby1_24x1.block(2, 0, 20, 1) = state.position.block(2, 0, 20, 1);
+        q_joint_rby1_24x1.block(2, 0, 20, 1) = state.target_position.block(2, 0, 20, 1);
       },
       100 /* Hz */);
 

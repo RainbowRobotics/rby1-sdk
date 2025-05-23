@@ -14,6 +14,7 @@
 #include "robot_command_feedback.h"
 #include "robot_info.h"
 #include "robot_state.h"
+#include "serial/types.h"
 
 namespace rb {
 
@@ -204,6 +205,8 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool DisconnectWifi() const;
 
   std::optional<WifiStatus> GetWifiStatus() const;
+
+  std::vector<SerialDevice> GetSerialDeviceList() const;
 
  private:
   explicit Robot(std::string address);

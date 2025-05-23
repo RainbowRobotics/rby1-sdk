@@ -6,5 +6,6 @@ import "rb/api/serial.proto";
 
 service SerialService {
   rpc GetSerialDeviceList(GetSerialDeviceListRequest) returns (GetSerialDeviceListResponse) {}
+  
   rpc OpenSerialStream(stream OpenSerialStreamRequest) returns (stream OpenSerialStreamResponse) {}
 }

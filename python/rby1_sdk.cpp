@@ -13,6 +13,7 @@ using namespace rb;
 using namespace py::literals;
 
 void pybind11_net(py::module_& m);
+void pybind11_serial(py::module_& m);
 void pybind11_dynamics(py::module_& m);
 void pybind11_dynamixel_bus(py::module_& m);
 void pybind11_upc(py::module_& m);
@@ -61,6 +62,7 @@ PYBIND11_MODULE(_bindings, m) {
   m.attr("__version__") = RBY1_SDK_VERSION;
 
   pybind11_net(m);
+  pybind11_serial(m);
 
   auto dyn_m = m.def_submodule("dynamics", "Dynamics module for rby1");
   pybind11_dynamics(dyn_m);

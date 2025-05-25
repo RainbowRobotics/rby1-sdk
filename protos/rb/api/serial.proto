@@ -3,6 +3,7 @@ syntax = "proto3";
 package rb.api;
 
 import "rb/api/header.proto";
+import "google/protobuf/wrappers.proto";
 
 message SerialDeviceInfo {
   string path = 1;
@@ -11,8 +12,10 @@ message SerialDeviceInfo {
 
 message SerialOpenRequest {
   string device_path = 1;
-  int32 baud_rate = 2;
-  int32 timeout_ms = 3;
+  int32 baudrate = 2;
+  google.protobuf.Int32Value bytesize = 3; // default: 8
+  google.protobuf.Int32Value parity = 4; // default: 'N'
+  google.protobuf.Int32Value stopbits = 5; // defaulat: 1
 }
 
 message SerialConnectionStatus {

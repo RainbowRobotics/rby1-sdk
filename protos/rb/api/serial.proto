@@ -15,7 +15,7 @@ message SerialOpenRequest {
   int32 baudrate = 2;
   google.protobuf.Int32Value bytesize = 3; // default: 8
   google.protobuf.Int32Value parity = 4; // default: 'N'
-  google.protobuf.Int32Value stopbits = 5; // defaulat: 1
+  google.protobuf.Int32Value stopbits = 5; // default: 1
 }
 
 message SerialConnectionStatus {

@@ -14,7 +14,6 @@
 #include "robot_command_feedback.h"
 #include "robot_info.h"
 #include "robot_state.h"
-#include "serial/types.h"
 
 namespace rb {
 
@@ -45,6 +44,12 @@ struct ControlState;
 struct PIDGain;
 
 struct Color;
+
+struct SerialDevice;
+
+class SerialStream;
+
+class SerialStreamImpl;
 
 }  // namespace rb
 
@@ -208,6 +213,9 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   std::vector<SerialDevice> GetSerialDeviceList() const;
 
+  std::unique_ptr<SerialStream> OpenSerialStream(const std::string& device_path, int buadrate, int bytesize,
+                                                 char parity, int stopbits) const;
+
  private:
   explicit Robot(std::string address);
 
@@ -298,6 +306,38 @@ struct Color {
   uint8_t r{0};
   uint8_t g{0};
   uint8_t b{0};
+};
+
+struct SerialDevice {
+  std::string path;
+  std::string description;
+};
+
+class SerialStream {
+ public:
+  bool IsOpened() const;
+
+  bool IsCancelled() const;
+
+  bool IsDone() const;
+
+  void SetReadCallback(const std::function<void(const std::string&)>& cb);
+
+  void Write(const std::string& data);
+
+  void Write(const char* data);
+
+  void Write(const char* data, int n);
+
+  void WriteByte(char ch);
+
+ private:
+  explicit SerialStream(std::unique_ptr<SerialStreamImpl> impl);
+
+  std::unique_ptr<SerialStreamImpl> impl_;
+
+  template <typename T>
+  friend class RobotImpl;
 };
 
 }  // namespace rb

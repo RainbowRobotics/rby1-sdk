@@ -18,7 +18,16 @@ message SerialOpenRequest {
   google.protobuf.Int32Value stopbits = 5; // default: 1
 }
 
+message SerialWriteRequest {
+  bytes data = 1;
+}
+
 message SerialConnectionStatus {
+  bool success = 1;
+  string message = 2;
+}
+
+message SerialWriteResult {
   bool success = 1;
   string message = 2;
 }
@@ -38,7 +47,7 @@ message OpenSerialStreamRequest {
 
   oneof payload {
     SerialOpenRequest connect = 2;
-    bytes data = 3;
+    SerialWriteRequest write = 3;
   }
 }
 
@@ -46,7 +55,8 @@ message OpenSerialStreamResponse {
   ResponseHeader response_header = 1;
 
   oneof payload {
-    SerialConnectionStatus status = 2;
-    bytes data = 3;
+    SerialConnectionStatus connect_result = 2;
+    SerialWriteResult write_result = 3;
+    bytes read_data = 4;
   }
 }

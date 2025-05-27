@@ -38,6 +38,18 @@ void bind_color(pybind11::module_& m) {
       .def_readwrite("b", &Color::b);
 }
 
+void bind_serial_types(py::module_& m) {
+  py::class_<SerialDevice>(m, "SerialDevice")
+      .def(py::init<>())
+      .def_readonly("path", &SerialDevice::path)
+      .def_readonly("description", &SerialDevice::description)
+      .def("__repr__", [](const SerialDevice& self) {
+        std::stringstream ss;
+        ss << "SerialDevice(path='" << self.path << "', description='" << self.description << "')";
+        return ss.str();
+      });
+}
+
 template <typename T>
 void bind_robot_command_handler(py::module_& m, const std::string& handler_name) {
   py::class_<RobotCommandHandler<T>>(m, handler_name.c_str())
@@ -323,7 +335,8 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("reset_network_setting", &Robot<T>::ResetNetworkSetting, py::call_guard<py::gil_scoped_release>())
       .def("scan_wifi", &Robot<T>::ScanWifi, py::call_guard<py::gil_scoped_release>())
       .def("connect_wifi", &Robot<T>::ConnectWifi, "ssid"_a, "password"_a = "", "use_dhcp"_a = true,
-           "ip_address"_a = "", "gateway"_a = "", "dns"_a = std::vector<std::string>{}, py::call_guard<py::gil_scoped_release>())
+           "ip_address"_a = "", "gateway"_a = "", "dns"_a = std::vector<std::string>{},
+           py::call_guard<py::gil_scoped_release>())
       .def("disconnect_wifi", &Robot<T>::DisconnectWifi, py::call_guard<py::gil_scoped_release>())
       .def("get_wifi_status", &Robot<T>::GetWifiStatus, py::call_guard<py::gil_scoped_release>())
 
@@ -350,6 +363,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
 void pybind11_robot(py::module_& m) {
   bind_pid_gain(m);
   bind_color(m);
+  bind_serial_types(m);
   bind_robot<y1_model::A>(m, "Robot_A");
   bind_robot<y1_model::T5>(m, "Robot_T5");
   bind_robot<y1_model::M>(m, "Robot_M");

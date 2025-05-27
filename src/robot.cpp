@@ -416,23 +416,20 @@ class SerialStreamImpl : public grpc::ClientBidiReactor<api::OpenSerialStreamReq
     Wait();
   }
 
-  bool IsDone() {
-    std::unique_lock<std::mutex> lock(mtx_);
-    return done_;
-  }
+  bool IsDone() const { return done_.load(); }
 
   bool IsOpened() const { return is_opened_.load(); }
 
-  bool IsCancelled() { return IsDone(); }
+  bool IsCancelled() const { return IsDone(); }
 
   void Wait() {
     std::unique_lock<std::mutex> lock(mtx_);
-    cv_.wait(lock, [this] { return done_; });
+    cv_.wait(lock, [this] { return done_.load(); });
   }
 
   bool WaitFor(int timeout_ms) {
     std::unique_lock<std::mutex> lock(mtx_);
-    return cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms), [this] { return done_; });
+    return cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms), [this] { return done_.load(); });
   }
 
   void SetReadCallback(const std::function<void(const std::string&)>& read_cb) {
@@ -652,7 +649,8 @@ class SerialStreamImpl : public grpc::ClientBidiReactor<api::OpenSerialStreamReq
 
   std::mutex mtx_;
   std::condition_variable cv_;
-  bool write_done_{true}, read_done_{true}, done_{false};
+  bool write_done_{true}, read_done_{true};
+  std::atomic<bool> done_{false};
 
   std::mutex callback_mtx_;
   std::function<void(const std::string&)> read_cb_;

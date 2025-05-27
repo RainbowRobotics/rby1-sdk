@@ -71,7 +71,13 @@ void bind_serial(py::module_& m) {
       .def("is_opened", &SerialStream::IsOpened)
       .def("is_cancelled", &SerialStream::IsCancelled)
       .def("is_done", &SerialStream::IsDone)
-      .def("set_read_callback", &SerialStream::SetReadCallback, "cb"_a)
+      .def("set_read_callback",
+           [](SerialStream& self, std::function<void(py::bytes)> cb) {
+             self.SetReadCallback([=](const std::string& data) {
+               py::gil_scoped_acquire gil;
+               cb(py::bytes(data));
+             });
+           })
       .def("write", py::overload_cast<const std::string&>(&SerialStream::Write), "data"_a,
            py::call_guard<py::gil_scoped_release>())
       .def("write", py::overload_cast<const char*>(&SerialStream::Write), "data"_a,

@@ -28,7 +28,6 @@ pybind11_add_module(_bindings
         rby1_sdk.cpp
         common.cpp
         net.cpp
-        serial.cpp
         model.cpp
         robot_state.cpp
         robot_command_builder.cpp

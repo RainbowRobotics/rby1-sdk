@@ -315,6 +315,16 @@ struct SerialDevice {
 
 class SerialStream {
  public:
+  ~SerialStream();
+
+  bool Connect(bool verbose) const;
+
+  void Disconnect() const;
+
+  void Wait() const;
+
+  bool WaitFor(int timeout_ms) const;
+
   bool IsOpened() const;
 
   bool IsCancelled() const;
@@ -323,13 +333,13 @@ class SerialStream {
 
   void SetReadCallback(const std::function<void(const std::string&)>& cb);
 
-  void Write(const std::string& data);
+  bool Write(const std::string& data);
 
-  void Write(const char* data);
+  bool Write(const char* data);
 
-  void Write(const char* data, int n);
+  bool Write(const char* data, int n);
 
-  void WriteByte(char ch);
+  bool WriteByte(char ch);
 
  private:
   explicit SerialStream(std::unique_ptr<SerialStreamImpl> impl);

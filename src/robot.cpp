@@ -43,7 +43,7 @@ void InitializeRequestHeader(rb::api::RequestHeader* req_header) {
 }
 
 struct timespec DurationToTimespec(const google::protobuf::Duration& duration) {
-  struct timespec t{};
+  struct timespec t {};
 
   t.tv_sec = duration.seconds();
   t.tv_nsec = duration.nanos();
@@ -399,11 +399,21 @@ class RobotCommandStreamHandlerImpl
 class SerialStreamImpl : public grpc::ClientBidiReactor<api::OpenSerialStreamRequest, api::OpenSerialStreamResponse> {
  public:
   SerialStreamImpl(api::SerialService::Stub* stub, const std::string& device_path, int baudrate, int bytesize,
-                   char parity, int stopbits, int timeout_ms = 1000) {
+                   char parity, int stopbits, int timeout_ms = 1000)
+      : device_path_(device_path),
+        baudrate_(baudrate),
+        bytesize_(bytesize),
+        parity_(parity),
+        stopbits_(stopbits),
+        timeout_ms_(timeout_ms) {
     stub->async()->OpenSerialStream(&context_, this);
     StartCall();
+    Read(&res_);
+  }
 
-    Connect(device_path, baudrate, bytesize, parity, stopbits, timeout_ms);
+  ~SerialStreamImpl() override {
+    Cancel();
+    Wait();
   }
 
   bool IsDone() {
@@ -411,7 +421,7 @@ class SerialStreamImpl : public grpc::ClientBidiReactor<api::OpenSerialStreamReq
     return done_;
   }
 
-  bool IsOpened() { return is_opened_.load(); }
+  bool IsOpened() const { return is_opened_.load(); }
 
   bool IsCancelled() { return IsDone(); }
 
@@ -420,34 +430,112 @@ class SerialStreamImpl : public grpc::ClientBidiReactor<api::OpenSerialStreamReq
     cv_.wait(lock, [this] { return done_; });
   }
 
+  bool WaitFor(int timeout_ms) {
+    std::unique_lock<std::mutex> lock(mtx_);
+    return cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms), [this] { return done_; });
+  }
+
   void SetReadCallback(const std::function<void(const std::string&)>& read_cb) {
     std::unique_lock<std::mutex> lock(callback_mtx_);
     read_cb_ = read_cb;
   }
 
-  void Connect(const std::string& device_path, int buadrate, int bytesize, char parity, int stopbits, int timeout_ms) {
+  bool Connect(bool verbose) {
+    if (IsOpened()) {
+      if (verbose) {
+        std::cerr << "Already opened" << std::endl;
+      }
+      return false;
+    }
+
+    if (IsDone()) {
+      if (verbose) {
+        std::cerr << "Stream is already disconnected" << std::endl;
+      }
+      return false;
+    }
+
     api::OpenSerialStreamRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     auto& connect = *req.mutable_connect();
-    connect.set_device_path(device_path);
-    connect.set_baudrate(buadrate);
-    connect.mutable_bytesize()->set_value(bytesize);
-    connect.mutable_parity()->set_value(parity);
-    connect.mutable_stopbits()->set_value(stopbits);
+    connect.set_device_path(device_path_);
+    connect.set_baudrate(baudrate_);
+    connect.mutable_bytesize()->set_value(bytesize_);
+    connect.mutable_parity()->set_value(parity_);
+    connect.mutable_stopbits()->set_value(stopbits_);
 
-    std::unique_lock<std::mutex> lock(write_mtx_);  // TODO 여기에 들어가는게 맞는가?
+    std::unique_lock<std::mutex> lock(connect_mtx_);
     connect_result_ = std::nullopt;
 
     Write(&req);
-    Read(&res_);
 
-    if (!write_cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms),
-                            [this] { return connect_result_.has_value(); })) {
+    if (!connect_cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms_),
+                              [this] { return connect_result_.has_value(); })) {
       Cancel();
-      throw std::runtime_error("Timeout");
+      if (verbose) {
+        std::cerr << "Timeout" << std::endl;
+      }
+      return false;
     }
     if (connect_result_->has_response_header()) {
       auto& response_header = connect_result_->response_header();
+      if (response_header.has_error()) {
+        if (response_header.error().code() != api::CommonError::CODE_OK) {
+          std::stringstream ss;
+          ss << "Connect Call Error: " << response_header.error().code() << ", " << response_header.error().message();
+          if (verbose) {
+            std::cerr << ss.str() << std::endl;
+          }
+          return false;
+        }
+      }
+    }
+    if (!connect_result_->has_connect_result()) {
+      if (verbose) {
+        std::cerr << "Response has no connect result" << std::endl;
+      }
+      return false;
+    }
+    if (!connect_result_->connect_result().success()) {
+      if (verbose) {
+        std::cerr << "Connect result: Fail (" << connect_result_->connect_result().message() << ")" << std::endl;
+      }
+      return false;
+    }
+    is_opened_ = connect_result_->connect_result().success();
+    return is_opened_;
+  }
+
+  void Disconnect() {
+    Cancel();
+    Wait();
+  }
+
+  bool WriteData(const std::string& data) {
+    if (!IsOpened()) {
+      return false;
+    }
+
+    if (IsDone()) {
+      return false;
+    }
+
+    api::OpenSerialStreamRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    auto& write = *req.mutable_write();
+    write.set_data(data);
+
+    std::unique_lock<std::mutex> lock(write_mtx_);
+    write_result_ = std::nullopt;
+
+    Write(&req);
+
+    if (!write_cv_.wait_for(lock, std::chrono::seconds(1), [this] { return write_result_.has_value(); })) {
+      Cancel();
+      throw std::runtime_error("Timeout");
+    }
+    if (write_result_->has_response_header()) {
+      auto& response_header = write_result_->response_header();
       if (response_header.has_error()) {
         if (response_header.error().code() != api::CommonError::CODE_OK) {
           std::stringstream ss;
@@ -456,11 +544,18 @@ class SerialStreamImpl : public grpc::ClientBidiReactor<api::OpenSerialStreamReq
         }
       }
     }
-    if (!connect_result_->has_connect_result()) {
-      throw std::runtime_error("Response has no connect result");
+    if (!write_result_->has_write_result()) {
+      std::cout << "********************** " << data << std::endl;
+      throw std::runtime_error("Response has no write result");
     }
-    is_opened_ = connect_result_->connect_result().success();
+    return write_result_->write_result().success();
   }
+
+  bool WriteData(const char* data) { return WriteData(std::string(data)); }
+
+  bool WriteData(const char* data, int n) { return WriteData(std::string(data, n)); }
+
+  bool WriteByteData(char ch) { return WriteData(&ch, 1); }
 
   void Write(api::OpenSerialStreamRequest* req) {
     std::unique_lock<std::mutex> lock(mtx_);
@@ -497,29 +592,31 @@ class SerialStreamImpl : public grpc::ClientBidiReactor<api::OpenSerialStreamReq
   }
 
   void OnReadDone(bool ok) override {
+    api::OpenSerialStreamResponse res;
     {
       std::unique_lock<std::mutex> lock(mtx_);
+      res = res_;
       read_done_ = true;
     }
     cv_.notify_all();
 
     if (ok) {
-      if (res_.has_connect_result()) {
+      if (res.has_connect_result()) {
         {
           std::unique_lock<std::mutex> lock(connect_mtx_);
-          connect_result_ = res_;
+          connect_result_ = res;
         }
         connect_cv_.notify_all();
-      } else if (res_.has_write_result()) {
+      } else if (res.has_write_result()) {
         {
           std::unique_lock<std::mutex> lock(write_mtx_);
-          write_result_ = res_;
+          write_result_ = res;
         }
         write_cv_.notify_all();
-      } else if (res_.has_read_data()) {
+      } else if (res.has_read_data()) {
         std::unique_lock<std::mutex> lock(callback_mtx_);
         if (read_cb_) {
-          read_cb_(res_.read_data());
+          read_cb_(res.read_data());
         }
       }
 
@@ -541,14 +638,21 @@ class SerialStreamImpl : public grpc::ClientBidiReactor<api::OpenSerialStreamReq
 
  private:
   grpc::ClientContext context_;
-  std::atomic<bool> is_opened_;
+  std::atomic<bool> is_opened_{};
+
+  std::string device_path_;
+  int baudrate_;
+  int bytesize_;
+  char parity_;
+  int stopbits_;
+  int timeout_ms_;
 
   api::OpenSerialStreamResponse res_;
   grpc::Status status_;
 
   std::mutex mtx_;
   std::condition_variable cv_;
-  bool write_done_, read_done_, done_;
+  bool write_done_{true}, read_done_{true}, done_{false};
 
   std::mutex callback_mtx_;
   std::function<void(const std::string&)> read_cb_;
@@ -1335,7 +1439,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     int recv_pkt_size_{0};
     std::array<unsigned char, kMaxPacketLength> recv_packet{};
 
-    struct sockaddr_storage client_addr{};
+    struct sockaddr_storage client_addr {};
 
     while (!handler->IsDone()) {
       {
@@ -1858,7 +1962,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       throw std::runtime_error(ss.str());
     }
 
-    struct timespec utc_time{};
+    struct timespec utc_time {};
 
     if (res.has_utc_time()) {
       utc_time.tv_sec = res.utc_time().seconds();
@@ -3102,6 +3206,24 @@ RobotCommandFeedback RobotCommandStreamHandler<T>::RequestFeedback(int timeout_m
 
 SerialStream::SerialStream(std::unique_ptr<SerialStreamImpl> impl) : impl_(std::move(impl)) {}
 
+SerialStream::~SerialStream() = default;
+
+bool SerialStream::Connect(bool verbose) const {
+  return impl_->Connect(verbose);
+}
+
+void SerialStream::Disconnect() const {
+  impl_->Disconnect();
+}
+
+void SerialStream::Wait() const {
+  impl_->Wait();
+}
+
+bool SerialStream::WaitFor(int timeout_ms) const {
+  return impl_->WaitFor(timeout_ms);
+}
+
 bool SerialStream::IsOpened() const {
   return impl_->IsOpened();
 }
@@ -3118,20 +3240,20 @@ void SerialStream::SetReadCallback(const std::function<void(const std::string&)>
   impl_->SetReadCallback(cb);
 }
 
-void SerialStream::Write(const std::string& data) {
-  impl_->Write(data);
+bool SerialStream::Write(const std::string& data) {
+  return impl_->WriteData(data);
 }
 
-void SerialStream::Write(const char* data) {
-  impl_->Write(data);
+bool SerialStream::Write(const char* data) {
+  return impl_->WriteData(data);
 }
 
-void SerialStream::Write(const char* data, int n) {
-  impl_->Write(data, n);
+bool SerialStream::Write(const char* data, int n) {
+  return impl_->WriteData(data, n);
 }
 
-void SerialStream::WriteByte(char ch) {
-  impl_->WriteByte(ch);
+bool SerialStream::WriteByte(char ch) {
+  return impl_->WriteByteData(ch);
 }
 
 }  // namespace rb

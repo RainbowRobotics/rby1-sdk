@@ -38,7 +38,7 @@ void bind_color(pybind11::module_& m) {
       .def_readwrite("b", &Color::b);
 }
 
-void bind_serial_types(py::module_& m) {
+void bind_serial(py::module_& m) {
   py::class_<SerialDevice>(m, "SerialDevice")
       .def(py::init<>())
       .def_readonly("path", &SerialDevice::path)
@@ -48,6 +48,37 @@ void bind_serial_types(py::module_& m) {
         ss << "SerialDevice(path='" << self.path << "', description='" << self.description << "')";
         return ss.str();
       });
+
+  py::class_<SerialStream>(m, "SerialStream")
+      .def("connect", &SerialStream::Connect, "verbose"_a)
+      .def("disconnect", &SerialStream::Disconnect)
+      .def("wait",
+           [](SerialStream& self) {
+             while (true) {
+               {
+                 py::gil_scoped_release release;
+                 if (self.WaitFor(10 /* msec */)) {
+                   return;
+                 }
+               }
+
+               if (PyErr_CheckSignals() != 0) {
+                 throw py::error_already_set();
+               }
+             }
+           })
+      .def("wait_for", &SerialStream::WaitFor, "timeout_ms"_a, py::call_guard<py::gil_scoped_release>())
+      .def("is_opened", &SerialStream::IsOpened)
+      .def("is_cancelled", &SerialStream::IsCancelled)
+      .def("is_done", &SerialStream::IsDone)
+      .def("set_read_callback", &SerialStream::SetReadCallback, "cb"_a)
+      .def("write", py::overload_cast<const std::string&>(&SerialStream::Write), "data"_a,
+           py::call_guard<py::gil_scoped_release>())
+      .def("write", py::overload_cast<const char*>(&SerialStream::Write), "data"_a,
+           py::call_guard<py::gil_scoped_release>())
+      .def("write", py::overload_cast<const char*, int>(&SerialStream::Write), "data"_a, "n"_a,
+           py::call_guard<py::gil_scoped_release>())
+      .def("write_byte", &SerialStream::WriteByte, "ch"_a, py::call_guard<py::gil_scoped_release>());
 }
 
 template <typename T>
@@ -341,6 +372,8 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("get_wifi_status", &Robot<T>::GetWifiStatus, py::call_guard<py::gil_scoped_release>())
 
       .def("get_serial_device_list", &Robot<T>::GetSerialDeviceList, py::call_guard<py::gil_scoped_release>())
+      .def("open_serial_stream", &Robot<T>::OpenSerialStream, "device_path"_a, "baudrate"_a, "bytesize"_a = 8,
+           "parity"_a = 'N', "stopbits"_a = 1)
 
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)
@@ -363,7 +396,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
 void pybind11_robot(py::module_& m) {
   bind_pid_gain(m);
   bind_color(m);
-  bind_serial_types(m);
+  bind_serial(m);
   bind_robot<y1_model::A>(m, "Robot_A");
   bind_robot<y1_model::T5>(m, "Robot_T5");
   bind_robot<y1_model::M>(m, "Robot_M");

@@ -168,6 +168,8 @@ rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
 
   info.robot_version = msg.robot_version();
 
+  info.robot_model_name = msg.robot_model_name();
+
   info.sdk_commit_id = msg.sdk_commit_id();
 
   if (msg.has_battery_info()) {
@@ -198,6 +200,18 @@ rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
 
   for (const auto& idx : msg.head_joint_idx()) {
     info.head_joint_idx.push_back(idx);
+  }
+
+  for (const auto& idx : msg.torso_joint_idx()) {
+    info.torso_joint_idx.push_back(idx);
+  }
+
+  for (const auto& idx : msg.right_arm_joint_idx()) {
+    info.right_arm_joint_idx.push_back(idx);
+  }
+
+  for (const auto& idx : msg.left_arm_joint_idx()) {
+    info.left_arm_joint_idx.push_back(idx);
   }
 
   return info;

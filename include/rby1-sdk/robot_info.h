@@ -23,7 +23,12 @@ struct JointInfo {
 };
 
 struct RobotInfo {
+  /**
+   * @deprecated Use `robot_model_name` instead.
+   */
   std::string robot_version{};
+
+  std::string robot_model_name{};
 
   std::string sdk_commit_id{};
 
@@ -42,6 +47,12 @@ struct RobotInfo {
   std::vector<unsigned int> body_joint_idx{};
 
   std::vector<unsigned int> head_joint_idx{};
+
+  std::vector<unsigned int> torso_joint_idx{};
+
+  std::vector<unsigned int> right_arm_joint_idx{};
+
+  std::vector<unsigned int> left_arm_joint_idx{};
 };
 
 }  // namespace rb

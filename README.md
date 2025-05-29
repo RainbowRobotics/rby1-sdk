@@ -64,6 +64,13 @@ git clone --recurse-submodules git@github.com:RainbowRobotics/rby1-sdk.git
 conan install . -s build_type=Release -b missing -of build
 ```
 
+> [!NOTE]
+> On `aarch64` platforms (e.g., ARM64 Ubuntu runners), please make sure to set the appropriate compiler explicitly:
+>
+> ```bash
+> export CC=/usr/bin/aarch64-linux-gnu-gcc
+> ```
+
 #### Step 4: Configure, Build, and Install
 
 ##### (Option 1) CMake >= 3.23

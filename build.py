@@ -4,6 +4,7 @@ Reference: https://github.com/tueda/test-poetry-scikit-build
 """
 
 import shutil
+import os
 from distutils import log as distutils_log
 from pathlib import Path
 from typing import Any, Dict
@@ -18,7 +19,7 @@ __all__ = ("build",)
 
 def build(setup_kwargs: Dict[str, Any]) -> None:
     """Build Conan-based C++ project"""
-    skbuild_conan.setup(**setup_kwargs, script_args=["build_ext"])
+    skbuild_conan.setup(**setup_kwargs, script_args=["build_ext"], conan_env={"CC": os.environ.get("CC", ""), "CXX": os.environ.get("CXX", "")})
 
     src_dir = Path(skbuild.constants.CMAKE_INSTALL_DIR()) / "python" / "rby1_sdk"
     dest_dir = Path("rby1_sdk")

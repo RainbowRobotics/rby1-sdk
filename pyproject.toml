@@ -31,10 +31,7 @@ script = "build.py"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-grpcio = "1.65.2"
-grpcio-tools = "1.65.2"
 numpy = "^2.0.1"
-dynamixel-sdk = "^3.7.31"
 
 [tool.commitizen]
 name = "cz_conventional_commits"

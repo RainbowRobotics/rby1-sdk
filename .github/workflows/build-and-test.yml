@@ -29,3 +29,4 @@ jobs:
         run: pip install .
         env:
           CC: ${{ matrix.os == 'ubuntu-22.04-arm' && '/usr/bin/aarch64-linux-gnu-gcc' || '' }}
+          BUILD_CC: ${{ matrix.os == 'ubuntu-22.04-arm' && '/usr/bin/aarch64-linux-gnu-gcc' || '' }}

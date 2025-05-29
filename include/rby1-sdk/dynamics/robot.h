@@ -646,10 +646,10 @@ class Robot {
       }
       case MobileBaseType::kMecanum: {
         auto mb = std::static_pointer_cast<MobileBaseMecanum>(mobile_base_);
-        double w_1 = -state->qdot(mb->fl_wheel_idx);
-        double w_2 = -state->qdot(mb->fr_wheel_idx);
-        double w_3 = -state->qdot(mb->rl_wheel_idx);
-        double w_4 = -state->qdot(mb->rr_wheel_idx);
+        double w_1 = state->qdot(mb->fl_wheel_idx);
+        double w_2 = state->qdot(mb->fr_wheel_idx);
+        double w_3 = state->qdot(mb->rl_wheel_idx);
+        double w_4 = state->qdot(mb->rr_wheel_idx);
         double v_x = mb->wheel_radius / 4 * (w_1 + w_2 + w_3 + w_4);
         double v_y = mb->wheel_radius / 4 * (-w_1 + w_2 + w_3 - w_4);
         double w = mb->wheel_radius / (4 * (mb->L_x + mb->L_y)) * (-w_1 + w_2 - w_3 + w_4);

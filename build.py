@@ -23,17 +23,19 @@ def build(setup_kwargs: Dict[str, Any]) -> None:
 
     arch = platform.machine()
     system = platform.system().lower()
-    cc_env = "" 
-    cxx_env = "" # os.environ.get("CXX", "")
+    conan_env = None
 
-    if system == "linux" and arch in ("aarch64", "arm64") and not cc_env:
-        cc_env = os.environ.get("CC", "/usr/bin/aarch64-linux-gnu-gcc")
+    if system == "linux" and arch in ("aarch64", "arm64"):
+        conan_env = {
+            "CC": os.environ.get("CC", "/usr/bin/aarch64-linux-gnu-gcc")
+        }
+        # cc_env = os.environ.get("CC", "/usr/bin/aarch64-linux-gnu-gcc")
         # cxx_env = "/usr/bin/aarch64-linux-gnu-g++"
 
     skbuild_conan.setup(
         **setup_kwargs,
         script_args=["build_ext"],
-        conan_env={"CC": cc_env, "CXX": cxx_env},
+        conan_env=conan_env,
     )
 
     src_dir = Path(skbuild.constants.CMAKE_INSTALL_DIR()) / "python" / "rby1_sdk"

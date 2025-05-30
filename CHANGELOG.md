@@ -1,3 +1,26 @@
+## v0.7.0 (2025-05-30)
+
+### ♻️ Refactor
+
+- serial header
+
+### ✨ Features
+
+- add python wrapper for serial comm
+- add device list rpc
+- add serial
+- add standard upper body model
+- add cartesian impedance control command
+
+### 🐛 Fixes
+
+- **build**: override CC env variable for libcap
+- change wheel rotation direction on m model
+- python wrapper string to bytes
+- typo
+- typo
+- osqp
+
 ## v0.6.0 (2025-05-02)
 
 ### ♻️ Refactor

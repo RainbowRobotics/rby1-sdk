@@ -22,11 +22,12 @@ def build(setup_kwargs: Dict[str, Any]) -> None:
     """Build Conan-based C++ project"""
 
     arch = platform.machine()
-    cc_env = os.environ.get("CC", "")
-    cxx_env = os.environ.get("CXX", "")
+    system = platform.system().lower()
+    cc_env = "" 
+    cxx_env = "" # os.environ.get("CXX", "")
 
-    if arch in ("aarch64", "arm64") and not cc_env:
-        cc_env = "/usr/bin/aarch64-linux-gnu-gcc"
+    if system == "linux" and arch in ("aarch64", "arm64") and not cc_env:
+        cc_env = os.environ.get("CC", "/usr/bin/aarch64-linux-gnu-gcc")
         # cxx_env = "/usr/bin/aarch64-linux-gnu-g++"
 
     skbuild_conan.setup(

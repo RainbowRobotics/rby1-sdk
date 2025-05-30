@@ -31,10 +31,7 @@ script = "build.py"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-grpcio = "1.65.2"
-grpcio-tools = "1.65.2"
 numpy = "^2.0.1"
-dynamixel-sdk = "^3.7.31"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -47,7 +44,7 @@ change_type_map = { "BREAKING CHANGE" = "❗ BREAKING CHANGE", "fix" = "🐛 Fix
 
 [build-system]
 requires = [
-    "conan==2.0.14",
+    "conan>=2.4",
     "setuptools",
     "scikit-build>=0.17.3",
     "skbuild-conan",

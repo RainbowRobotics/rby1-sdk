@@ -7,8 +7,7 @@
 namespace py = pybind11;
 using namespace rb;
 
-void bind_types(py::module_& m) {
-
+void bind_net_types(py::module_& m) {
   py::class_<WifiNetwork>(m, "WifiNetwork")
       .def(py::init<>())
       .def_readonly("ssid", &WifiNetwork::ssid)
@@ -49,5 +48,5 @@ void bind_types(py::module_& m) {
 }
 
 void pybind11_net(py::module_& m) {
-  bind_types(m);
+  bind_net_types(m);
 }

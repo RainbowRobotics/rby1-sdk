@@ -1,0 +1,20 @@
+<mujoco model="EE_BODY">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="70,70,70" specular="0.0" shininess="0.225" rgba="0.274510 0.274510 0.274510 1.000000"/>
+    <mesh file="EE_BODY.obj"/>
+  </asset>
+  <worldbody>
+    <body name="EE_BODY">
+      <geom material="70,70,70" mesh="EE_BODY" class="visual"/>
+      <geom mesh="EE_BODY" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

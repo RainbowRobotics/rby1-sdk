@@ -1,0 +1,4 @@
+<mujoco>
+  <mesh file="EE_FINGER_0.obj" />
+  <mesh file="EE_FINGER_1.obj" />
+</mujoco>

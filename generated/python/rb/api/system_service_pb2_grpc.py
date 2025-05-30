@@ -64,6 +64,31 @@ class SystemServiceStub(object):
                 request_serializer=rb_dot_api_dot_system__pb2.ResetBatteryConfigRequest.SerializeToString,
                 response_deserializer=rb_dot_api_dot_system__pb2.ResetBatteryConfigResponse.FromString,
                 _registered_method=True)
+        self.ResetNetworkSetting = channel.unary_unary(
+                '/rb.api.SystemService/ResetNetworkSetting',
+                request_serializer=rb_dot_api_dot_system__pb2.ResetNetworkSettingRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_system__pb2.ResetNetworkSettingResponse.FromString,
+                _registered_method=True)
+        self.ScanWifi = channel.unary_unary(
+                '/rb.api.SystemService/ScanWifi',
+                request_serializer=rb_dot_api_dot_system__pb2.ScanWifiRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_system__pb2.ScanWifiResponse.FromString,
+                _registered_method=True)
+        self.ConnectWifi = channel.unary_unary(
+                '/rb.api.SystemService/ConnectWifi',
+                request_serializer=rb_dot_api_dot_system__pb2.ConnectWifiRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_system__pb2.ConnectWifiResponse.FromString,
+                _registered_method=True)
+        self.DisconnectWifi = channel.unary_unary(
+                '/rb.api.SystemService/DisconnectWifi',
+                request_serializer=rb_dot_api_dot_system__pb2.DisconnectWifiRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_system__pb2.DisconnectWifiResponse.FromString,
+                _registered_method=True)
+        self.GetWifiStatus = channel.unary_unary(
+                '/rb.api.SystemService/GetWifiStatus',
+                request_serializer=rb_dot_api_dot_system__pb2.GetWifiStatusRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_system__pb2.GetWifiStatusResponse.FromString,
+                _registered_method=True)
 
 
 class SystemServiceServicer(object):
@@ -99,6 +124,36 @@ class SystemServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ResetNetworkSetting(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ScanWifi(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ConnectWifi(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DisconnectWifi(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetWifiStatus(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_SystemServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -126,6 +181,31 @@ def add_SystemServiceServicer_to_server(servicer, server):
                     servicer.ResetBatteryConfig,
                     request_deserializer=rb_dot_api_dot_system__pb2.ResetBatteryConfigRequest.FromString,
                     response_serializer=rb_dot_api_dot_system__pb2.ResetBatteryConfigResponse.SerializeToString,
+            ),
+            'ResetNetworkSetting': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResetNetworkSetting,
+                    request_deserializer=rb_dot_api_dot_system__pb2.ResetNetworkSettingRequest.FromString,
+                    response_serializer=rb_dot_api_dot_system__pb2.ResetNetworkSettingResponse.SerializeToString,
+            ),
+            'ScanWifi': grpc.unary_unary_rpc_method_handler(
+                    servicer.ScanWifi,
+                    request_deserializer=rb_dot_api_dot_system__pb2.ScanWifiRequest.FromString,
+                    response_serializer=rb_dot_api_dot_system__pb2.ScanWifiResponse.SerializeToString,
+            ),
+            'ConnectWifi': grpc.unary_unary_rpc_method_handler(
+                    servicer.ConnectWifi,
+                    request_deserializer=rb_dot_api_dot_system__pb2.ConnectWifiRequest.FromString,
+                    response_serializer=rb_dot_api_dot_system__pb2.ConnectWifiResponse.SerializeToString,
+            ),
+            'DisconnectWifi': grpc.unary_unary_rpc_method_handler(
+                    servicer.DisconnectWifi,
+                    request_deserializer=rb_dot_api_dot_system__pb2.DisconnectWifiRequest.FromString,
+                    response_serializer=rb_dot_api_dot_system__pb2.DisconnectWifiResponse.SerializeToString,
+            ),
+            'GetWifiStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetWifiStatus,
+                    request_deserializer=rb_dot_api_dot_system__pb2.GetWifiStatusRequest.FromString,
+                    response_serializer=rb_dot_api_dot_system__pb2.GetWifiStatusResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -263,6 +343,141 @@ class SystemService(object):
             '/rb.api.SystemService/ResetBatteryConfig',
             rb_dot_api_dot_system__pb2.ResetBatteryConfigRequest.SerializeToString,
             rb_dot_api_dot_system__pb2.ResetBatteryConfigResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ResetNetworkSetting(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.SystemService/ResetNetworkSetting',
+            rb_dot_api_dot_system__pb2.ResetNetworkSettingRequest.SerializeToString,
+            rb_dot_api_dot_system__pb2.ResetNetworkSettingResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ScanWifi(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.SystemService/ScanWifi',
+            rb_dot_api_dot_system__pb2.ScanWifiRequest.SerializeToString,
+            rb_dot_api_dot_system__pb2.ScanWifiResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ConnectWifi(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.SystemService/ConnectWifi',
+            rb_dot_api_dot_system__pb2.ConnectWifiRequest.SerializeToString,
+            rb_dot_api_dot_system__pb2.ConnectWifiResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DisconnectWifi(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.SystemService/DisconnectWifi',
+            rb_dot_api_dot_system__pb2.DisconnectWifiRequest.SerializeToString,
+            rb_dot_api_dot_system__pb2.DisconnectWifiResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetWifiStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.SystemService/GetWifiStatus',
+            rb_dot_api_dot_system__pb2.GetWifiStatusRequest.SerializeToString,
+            rb_dot_api_dot_system__pb2.GetWifiStatusResponse.FromString,
             options,
             channel_credentials,
             insecure,

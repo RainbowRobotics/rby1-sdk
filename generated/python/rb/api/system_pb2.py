@@ -16,7 +16,7 @@ from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__
 from rb.api import header_pb2 as rb_dot_api_dot_header__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13rb/api/system.proto\x12\x06rb.api\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x13rb/api/header.proto\"E\n\x14GetSystemTimeRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"\x9d\x01\n\x15GetSystemTimeResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12,\n\x08utc_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x11\n\ttime_zone\x18\x03 \x01(\t\x12\x12\n\nlocal_time\x18\x04 \x01(\t\"\x86\x01\n\x14SetSystemTimeRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12,\n\x08utc_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x11\n\ttime_zone\x18\x03 \x01(\t\"H\n\x15SetSystemTimeResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"V\n\x16SetBatteryLevelRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\r\n\x05level\x18\x02 \x01(\x01\"J\n\x17SetBatteryLevelResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"\x96\x01\n\x17SetBatteryConfigRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x17\n\x0f\x63ut_off_voltage\x18\x02 \x01(\x01\x12\x1d\n\x15\x66ully_charged_voltage\x18\x03 \x01(\x01\x12\x14\n\x0c\x63oefficients\x18\x04 \x03(\x01\"K\n\x18SetBatteryConfigResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"J\n\x19ResetBatteryConfigRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"M\n\x1aResetBatteryConfigResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeaderb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13rb/api/system.proto\x12\x06rb.api\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x13rb/api/header.proto\"E\n\x14GetSystemTimeRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"\x9d\x01\n\x15GetSystemTimeResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12,\n\x08utc_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x11\n\ttime_zone\x18\x03 \x01(\t\x12\x12\n\nlocal_time\x18\x04 \x01(\t\"\x86\x01\n\x14SetSystemTimeRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12,\n\x08utc_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x11\n\ttime_zone\x18\x03 \x01(\t\"H\n\x15SetSystemTimeResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"V\n\x16SetBatteryLevelRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\r\n\x05level\x18\x02 \x01(\x01\"J\n\x17SetBatteryLevelResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"\x96\x01\n\x17SetBatteryConfigRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x17\n\x0f\x63ut_off_voltage\x18\x02 \x01(\x01\x12\x1d\n\x15\x66ully_charged_voltage\x18\x03 \x01(\x01\x12\x14\n\x0c\x63oefficients\x18\x04 \x03(\x01\"K\n\x18SetBatteryConfigResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"J\n\x19ResetBatteryConfigRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"M\n\x1aResetBatteryConfigResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"K\n\x1aResetNetworkSettingRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"N\n\x1bResetNetworkSettingResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"@\n\x0fScanWifiRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"E\n\x0bWifiNetwork\x12\x0c\n\x04ssid\x18\x01 \x01(\t\x12\x17\n\x0fsignal_strength\x18\x02 \x01(\x05\x12\x0f\n\x07secured\x18\x03 \x01(\x08\"j\n\x10ScanWifiResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12%\n\x08networks\x18\x02 \x03(\x0b\x32\x13.rb.api.WifiNetwork\"\xa7\x01\n\x12\x43onnectWifiRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\x12\x0c\n\x04ssid\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\x12\x10\n\x08use_dhcp\x18\x04 \x01(\x08\x12\x12\n\nip_address\x18\x05 \x01(\t\x12\x0f\n\x07gateway\x18\x06 \x01(\t\x12\x0b\n\x03\x64ns\x18\x07 \x03(\t\"W\n\x13\x43onnectWifiResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x0f\n\x07success\x18\x02 \x01(\x08\"F\n\x15\x44isconnectWifiRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"I\n\x16\x44isconnectWifiResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\"E\n\x14GetWifiStatusRequest\x12-\n\x0erequest_header\x18\x01 \x01(\x0b\x32\x15.rb.api.RequestHeader\"\x9b\x01\n\x15GetWifiStatusResponse\x12/\n\x0fresponse_header\x18\x01 \x01(\x0b\x32\x16.rb.api.ResponseHeader\x12\x0c\n\x04ssid\x18\x02 \x01(\t\x12\x12\n\nip_address\x18\x03 \x01(\t\x12\x0f\n\x07gateway\x18\x04 \x01(\t\x12\x0b\n\x03\x64ns\x18\x05 \x03(\t\x12\x11\n\tconnected\x18\x06 \x01(\x08\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -43,4 +43,26 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_RESETBATTERYCONFIGREQUEST']._serialized_end=995
   _globals['_RESETBATTERYCONFIGRESPONSE']._serialized_start=997
   _globals['_RESETBATTERYCONFIGRESPONSE']._serialized_end=1074
+  _globals['_RESETNETWORKSETTINGREQUEST']._serialized_start=1076
+  _globals['_RESETNETWORKSETTINGREQUEST']._serialized_end=1151
+  _globals['_RESETNETWORKSETTINGRESPONSE']._serialized_start=1153
+  _globals['_RESETNETWORKSETTINGRESPONSE']._serialized_end=1231
+  _globals['_SCANWIFIREQUEST']._serialized_start=1233
+  _globals['_SCANWIFIREQUEST']._serialized_end=1297
+  _globals['_WIFINETWORK']._serialized_start=1299
+  _globals['_WIFINETWORK']._serialized_end=1368
+  _globals['_SCANWIFIRESPONSE']._serialized_start=1370
+  _globals['_SCANWIFIRESPONSE']._serialized_end=1476
+  _globals['_CONNECTWIFIREQUEST']._serialized_start=1479
+  _globals['_CONNECTWIFIREQUEST']._serialized_end=1646
+  _globals['_CONNECTWIFIRESPONSE']._serialized_start=1648
+  _globals['_CONNECTWIFIRESPONSE']._serialized_end=1735
+  _globals['_DISCONNECTWIFIREQUEST']._serialized_start=1737
+  _globals['_DISCONNECTWIFIREQUEST']._serialized_end=1807
+  _globals['_DISCONNECTWIFIRESPONSE']._serialized_start=1809
+  _globals['_DISCONNECTWIFIRESPONSE']._serialized_end=1882
+  _globals['_GETWIFISTATUSREQUEST']._serialized_start=1884
+  _globals['_GETWIFISTATUSREQUEST']._serialized_end=1953
+  _globals['_GETWIFISTATUSRESPONSE']._serialized_start=1956
+  _globals['_GETWIFISTATUSRESPONSE']._serialized_end=2111
 # @@protoc_insertion_point(module_scope)

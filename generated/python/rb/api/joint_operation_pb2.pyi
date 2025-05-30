@@ -35,6 +35,32 @@ class ServoOnResponse(_message.Message):
     message: str
     def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., status: _Optional[_Union[ServoOnResponse.Status, str]] = ..., message: _Optional[str] = ...) -> None: ...
 
+class ServoOffRequest(_message.Message):
+    __slots__ = ("request_header", "name")
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    name: str
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ..., name: _Optional[str] = ...) -> None: ...
+
+class ServoOffResponse(_message.Message):
+    __slots__ = ("response_header", "status", "message")
+    class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        STATUS_UNKNOWN: _ClassVar[ServoOffResponse.Status]
+        STATUS_SUCCESS: _ClassVar[ServoOffResponse.Status]
+        STATUS_INTERNAL_ERROR: _ClassVar[ServoOffResponse.Status]
+    STATUS_UNKNOWN: ServoOffResponse.Status
+    STATUS_SUCCESS: ServoOffResponse.Status
+    STATUS_INTERNAL_ERROR: ServoOffResponse.Status
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    status: ServoOffResponse.Status
+    message: str
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., status: _Optional[_Union[ServoOffResponse.Status, str]] = ..., message: _Optional[str] = ...) -> None: ...
+
 class BrakeEngageRequest(_message.Message):
     __slots__ = ("request_header", "name")
     REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]

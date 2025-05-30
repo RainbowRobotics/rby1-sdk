@@ -1,0 +1,28 @@
+<mujoco model="PAN_TILT_1">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="191,191,191" specular="0.0" shininess="0.225" rgba="0.749020 0.749020 0.749020 1.000000"/>
+    <material name="254,254,255" specular="0.0" shininess="0.225" rgba="0.996078 0.996078 1.000000 1.000000"/>
+    <material name="69,69,69" specular="0.0" shininess="0.225" rgba="0.270588 0.270588 0.270588 1.000000"/>
+    <mesh file="PAN_TILT_1_0.obj"/>
+    <mesh file="PAN_TILT_1_1.obj"/>
+    <mesh file="PAN_TILT_1_2.obj"/>
+  </asset>
+  <worldbody>
+    <body name="PAN_TILT_1">
+      <geom mesh="PAN_TILT_1_0" material="69,69,69" class="visual"/>
+      <geom mesh="PAN_TILT_1_1" material="191,191,191" class="visual"/>
+      <geom mesh="PAN_TILT_1_2" material="254,254,255" class="visual"/>
+      <geom mesh="PAN_TILT_1_0" class="collision"/>
+      <geom mesh="PAN_TILT_1_1" class="collision"/>
+      <geom mesh="PAN_TILT_1_2" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

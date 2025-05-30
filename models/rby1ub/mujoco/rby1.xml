@@ -1,0 +1,263 @@
+<mujoco model="RB_Y1_UpperBody_V1.0.1">
+  <compiler angle="radian" autolimits="true" eulerseq="xyz" />
+
+  <default>
+    <joint armature="10" damping="50" range="-3.14 3.14" />
+    <material specular="0" shininess="0" />
+  </default>
+
+  <visual>
+    <map force="0.1" zfar="30" />
+    <rgba haze="0.15 0.25 0.35 1" />
+    <quality shadowsize="4096" />
+    <global offwidth="800" offheight="800" />
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="512" />
+    <texture name="plane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" width="512" height="512" mark="cross" markrgb=".8 .8 .8" />
+    <material name="plane" reflectance="0.3" texture="plane" texrepeat="1 1" texuniform="true" />
+
+    <include file="./assets/materials.xml" />
+    <include file="./assets/EE_BODY/assets.xml" />
+    <include file="./assets/EE_FINGER/assets.xml" />
+    <include file="./assets/FT_SENSOR_R/assets.xml" />
+    <include file="./assets/FT_SENSOR_L/assets.xml" />
+    <include file="./assets/UB_LINK_BASE/assets.xml" />
+    <include file="./assets/UB_LINK_HP/assets.xml" />
+    <include file="./assets/LINK_6/assets.xml" />
+    <include file="./assets/LINK_7/assets.xml" />
+    <include file="./assets/LINK_8/assets.xml" />
+    <include file="./assets/LINK_9/assets.xml" />
+    <include file="./assets/LINK_10/assets.xml" />
+    <include file="./assets/LINK_11/assets.xml" />
+    <include file="./assets/LINK_12/assets.xml" />
+    <include file="./assets/LINK_13/assets.xml" />
+    <include file="./assets/LINK_14/assets.xml" />
+    <include file="./assets/LINK_15/assets.xml" />
+    <include file="./assets/LINK_16/assets.xml" />
+    <include file="./assets/LINK_17/assets.xml" />
+    <include file="./assets/LINK_18/assets.xml" />
+    <include file="./assets/LINK_19/assets.xml" />
+    <include file="./assets/LINK_20/assets.xml" />
+    <include file="./assets/PAN_TILT_1/assets.xml" />
+    <include file="./assets/PAN_TILT_2/assets.xml" />
+    <include file="./assets/PAN_TILT_3/assets.xml" />
+  </asset>
+
+  <worldbody>
+    <geom name="floor" pos="0 0 0" size="0 0 .25" type="plane" material="plane" condim="1" solimp="0.95 0.99 0.001 0.5 2" friction="0.05 0.001 0.05" />
+    <light directional="true" diffuse=".8 .8 .8" specular="0 0 0" pos="0 0 5" dir="0 0 -1" castshadow="false" />
+
+    <body name="link_torso_base" pos="0 0 0.3">
+      <include file="./assets/UB_LINK_BASE/geoms.xml" />
+      <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="UB_LINK_BASE"/> -->
+      <body name="link_torso_hp" pos="0 0 0.153">
+        <inertial pos="-0.00286246 -0.0195226 0.0236476" quat="0.664055 -0.153917 0.0414556 0.730494" mass="8.52507" diaginertia="0.0405481 0.0387914 0.0256673"/>
+        <joint name="torso_hp" pos="0 0 0" axis="0 1 0" range="-1.5708 1.5708" limited="true" />
+        <include file="./assets/UB_LINK_HP/geoms.xml" />
+        <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="UB_LINK_HP"/> -->
+        <geom size="0.105 0.05" pos="-0.00 0 0.0385" type="capsule" class="in-model-collision" />
+        <body name="link_torso_5" pos="0 0 0.332327">
+          <inertial pos="-0.0132199 0.000254676 -0.0318761" quat="0.998675 -0.00438307 -0.0510462 0.00477378" mass="12.6659" diaginertia="0.21618 0.167212 0.132309"/>
+          <joint name="torso_5" pos="0 0 0" axis="0 0 1" range="-2.35619 2.35619" limited="true" />
+          <include file="./assets/LINK_6/geoms.xml" />
+          <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_6"/> -->
+          <geom size="0.155 0.0675" pos="0 0 0.0075" type="capsule" class="in-model-collision" />
+          <include file="./assets/PAN_TILT_1/geoms.xml" />
+          <!-- <geom pos="0.022 0 0.120073" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="PAN_TILT_1"/> -->
+          <body name="link_right_arm_0" pos="0 -0.22 0.0800735">
+            <inertial pos="-0.00316662 0.0343718 -3e-07" quat="0.536676 0.553304 0.439546 0.461122" mass="1.26164" diaginertia="0.00433912 0.00432154 0.00223129"/>
+            <joint name="right_arm_0" pos="0 0 0" axis="0 0.939693 -0.34202" range="-3.14159 3.14159" limited="true" />
+            <include file="./assets/LINK_7/geoms.xml" />
+            <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_7"/> -->
+            <geom size="0.075 0.035" pos="-0.015 0.018 -0.008" quat="0.707105 0 0.707108 0" type="capsule" class="in-model-collision" />
+            <body name="link_right_arm_1">
+              <inertial pos="-0.00307855 -0.00124741 -0.0129432" quat="0.691024 -0.061096 -0.016345 0.72006" mass="2.27287" diaginertia="0.00447747 0.0038967 0.00286448"/>
+              <joint name="right_arm_1" pos="0 0 0" axis="1 0 0" range="-3.14159 0.0174533" limited="true" />
+              <include file="./assets/LINK_8/geoms.xml" />
+              <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_8"/> -->
+              <geom size="0.05 0.1" pos="0 0 -0.1" type="capsule" class="in-model-collision" />
+              <body name="link_right_arm_2">
+                <inertial pos="0.00115434 -0.00196635 -0.161925" quat="0.998316 -0.0390505 -0.0388849 0.0181103" mass="2.46909" diaginertia="0.0098447 0.00928024 0.00322202"/>
+                <joint name="right_arm_2" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" limited="true" />
+                <include file="./assets/LINK_9/geoms.xml" />
+                <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_9"/> -->
+                <geom size="0.05 0.04" pos="0.026 0 -0.276" quat="0.707105 0.707108 0 0" type="capsule" class="in-model-collision" />
+                <body name="link_right_arm_3" pos="0.031 0 -0.276">
+                  <inertial pos="-0.0160313 -0.00692891 -0.0454981" quat="0.950945 0.0932571 0.100342 0.277377" mass="2.26099" diaginertia="0.0086724 0.00849326 0.00187523"/>
+                  <joint name="right_arm_3" pos="0 0 0" axis="0 1 0" range="-2.61799 0.0174533" limited="true" />
+                  <include file="./assets/LINK_10/geoms.xml" />
+                  <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_10"/> -->
+                  <geom size="0.04 0.0575" pos="-0.031 0 -0.1075" type="capsule" class="in-model-collision" />
+                  <body name="link_right_arm_4" pos="-0.031 0 -0.256">
+                    <inertial pos="-1.1e-07 -0.0269604 0.0618211" quat="0.686909 -0.167796 0.167796 0.686909" mass="0.425087" diaginertia="0.000885625 0.00082466 0.000266295"/>
+                    <joint name="right_arm_4" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" limited="true" />
+                    <include file="./assets/LINK_11/geoms.xml" />
+                    <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_11"/> -->
+                    <geom size="0.035 0.0475" pos="0 -0.038 0.0175" type="capsule" class="in-model-collision" />
+                    <body name="link_right_arm_5">
+                      <inertial pos="0.00318034 -0.00532264 -0.0280966" quat="0.559407 0.0608226 -0.0803636 0.822743" mass="1.59194" diaginertia="0.00262685 0.00255036 0.00151658"/>
+                      <joint name="right_arm_5" pos="0 0 0" axis="0 1 0" range="-1.5708 1.91986" limited="true" />
+                      <include file="./assets/LINK_12/geoms.xml" />
+                      <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_12"/> -->
+                      <geom size="0.075 0.125" pos="0 0 -0.1" type="capsule" class="in-model-collision" />
+                      <body name="link_right_arm_6">
+                        <inertial pos="0.00101419 0.000398553 -0.149904" quat="0.730015 -0.0098152 -0.00428736 0.683347" mass="1.16921" diaginertia="0.00296506 0.00265919 0.00114611"/>
+                        <joint name="right_arm_6" pos="0 0 0" axis="0 0 1" range="-2.70526 2.70526" limited="true" />
+                        <include file="./assets/LINK_13/geoms.xml" />
+                        <body name="FT_SENSOR_R" pos="0 0 -0.1087">
+                          <inertial pos="0 0 0" mass="0" />
+                          <include file="./assets/FT_SENSOR_R/geoms.xml" />
+                        </body>
+                        <body name="EE_BODY_R" pos="0 0 -0.1548">
+                          <inertial pos="0 0 0" mass="0" />
+                          <include file="./assets/EE_BODY/geoms.xml" />
+                        </body>
+                        <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_13"/> -->
+                        <!-- <geom pos="0 0 -0.1087" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="FT_SENSOR_R"/> -->
+                        <!-- <geom pos="0 0 -0.1548" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="EE_BODY"/> -->
+                        <body name="ee_finger_r1" pos="0.003 0 -0.2278">
+                          <inertial pos="0.00278346 -3.29e-06 -0.0257011" quat="0.999784 0 0.0208044 0" mass="0.03327" diaginertia="1.23275e-05 1.066e-05 2.22251e-06"/>
+                          <joint name="gripper_finger_r1" pos="0 0 0" axis="-1 0 0" type="slide" range="-0.05 0" limited="true" />
+                          <include file="./assets/EE_FINGER/geoms.xml" />
+                          <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="EE_FINGER"/> -->
+                        </body>
+                        <body name="ee_finger_r2" pos="-0.003 0 -0.2278" quat="4.48966e-11 0 0 1">
+                          <inertial pos="0.00278346 -3.29e-06 -0.0257011" quat="0.999784 0 0.0208044 0" mass="0.03327" diaginertia="1.23275e-05 1.066e-05 2.22251e-06"/>
+                          <joint name="gripper_finger_r2" pos="0 0 0" axis="1 0 0" type="slide" range="0 0.05" limited="true" />
+                          <include file="./assets/EE_FINGER/geoms.xml" />
+                          <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="EE_FINGER"/> -->
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+          <body name="link_left_arm_0" pos="0 0.22 0.0800735">
+            <inertial pos="-0.00316662 -0.0343715 2.42e-06" quat="0.441442 0.459281 0.538276 0.551768" mass="1.26164" diaginertia="0.0043391 0.00432158 0.00223133"/>
+            <joint name="left_arm_0" pos="0 0 0" axis="0 0.939693 0.34202" range="-3.14159 3.14159" limited="true" />
+            <include file="./assets/LINK_14/geoms.xml" />
+            <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_14"/> -->
+            <geom size="0.075 0.035" pos="-0.015 -0.018 -0.008" quat="0.707105 0 0.707108 0" type="capsule" class="in-model-collision" />
+            <body name="link_left_arm_1">
+              <inertial pos="-0.0018347 0.00040596 -0.0100873" quat="0.701113 -0.0246572 -0.049881 0.710875" mass="1.88139" diaginertia="0.00355382 0.00296561 0.0022966"/>
+              <joint name="left_arm_1" pos="0 0 0" axis="1 0 0" range="-0.0174533 3.14159" limited="true" />
+              <include file="./assets/LINK_15/geoms.xml" />
+              <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_15"/> -->
+              <geom size="0.05 0.1" pos="0 0 -0.1" type="capsule" class="in-model-collision" />
+              <body name="link_left_arm_2">
+                <inertial pos="0.00066086 -0.00038583 -0.15743" quat="0.999413 -0.00635373 -0.0335732 -0.00246859" mass="2.35634" diaginertia="0.00845197 0.00802394 0.00293109"/>
+                <joint name="left_arm_2" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" limited="true" />
+                <include file="./assets/LINK_16/geoms.xml" />
+                <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_16"/> -->
+                <geom size="0.05 0.04" pos="0.026 0 -0.276" quat="0.707105 0.707108 0 0" type="capsule" class="in-model-collision" />
+                <body name="link_left_arm_3" pos="0.031 0 -0.276">
+                  <inertial pos="-0.015653 0.00793126 -0.0499794" quat="0.977098 -0.0897025 0.113811 -0.15582" mass="2.00906" diaginertia="0.00798526 0.00783637 0.00146823"/>
+                  <joint name="left_arm_3" pos="0 0 0" axis="0 1 0" range="-2.61799 0.0174533" limited="true" />
+                  <include file="./assets/LINK_17/geoms.xml" />
+                  <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_17"/> -->
+                  <geom size="0.04 0.0575" pos="-0.031 0 -0.1075" type="capsule" class="in-model-collision" />
+                  <body name="link_left_arm_4" pos="-0.031 0 -0.256">
+                    <inertial pos="1.1e-07 0.0269604 0.0618211" quat="0.686909 0.167796 -0.167796 0.686909" mass="0.425087" diaginertia="0.000885625 0.00082466 0.000266295"/>
+                    <joint name="left_arm_4" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" limited="true" />
+                    <include file="./assets/LINK_18/geoms.xml" />
+                    <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_18"/> -->
+                    <geom size="0.035 0.0475" pos="0 0.038 0.0175" type="capsule" class="in-model-collision" />
+                    <body name="link_left_arm_5">
+                      <inertial pos="0.00340082 0.00576824 -0.0250731" quat="0.874666 -0.0845974 0.0492323 0.474742" mass="1.44265" diaginertia="0.00238544 0.00231489 0.00134498"/>
+                      <joint name="left_arm_5" pos="0 0 0" axis="0 1 0" range="-1.5708 1.91986" limited="true" />
+                      <include file="./assets/LINK_19/geoms.xml" />
+                      <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_19"/> -->
+                      <geom size="0.075 0.125" pos="0 0 -0.1" type="capsule" class="in-model-collision" />
+                      <body name="link_left_arm_6">
+                        <inertial pos="0.000685128 -0.00039364 -0.149904" quat="0.729905 -0.00824405 -0.0146334 0.683342" mass="1.16921" diaginertia="0.0029657 0.00266024 0.00114574"/>
+                        <joint name="left_arm_6" pos="0 0 0" axis="0 0 1" range="-2.70526 2.70526" limited="true" />
+                        <include file="./assets/LINK_20/geoms.xml" />
+                        <body name="FT_SENSOR_L" pos="0 0 -0.1087">
+                          <inertial pos="0 0 0" mass="0" />
+                          <include file="./assets/FT_SENSOR_L/geoms.xml" />
+                        </body>
+                        <body name="EE_BODY_L" pos="0 0 -0.1548">
+                          <inertial pos="0 0 0" mass="0" />
+                          <include file="./assets/EE_BODY/geoms.xml" />
+                        </body>
+                        <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="LINK_20"/> -->
+                        <!-- <geom pos="0 0 -0.1087" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="FT_SENSOR_L"/> -->
+                        <!-- <geom pos="0 0 -0.1548" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="EE_BODY"/> -->
+                        <body name="ee_finger_l1" pos="0.003 0 -0.2278">
+                          <inertial pos="0.00278346 -3.29e-06 -0.0257011" quat="0.999784 0 0.0208044 0" mass="0.03327" diaginertia="1.23275e-05 1.066e-05 2.22251e-06"/>
+                          <joint name="gripper_finger_l1" pos="0 0 0" axis="-1 0 0" type="slide" range="-0.05 0" limited="true" />
+                          <include file="./assets/EE_FINGER/geoms.xml" />
+                          <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="EE_FINGER"/> -->
+                        </body>
+                        <body name="ee_finger_l2" pos="-0.003 0 -0.2278" quat="4.48966e-11 0 0 1">
+                          <inertial pos="0.00278346 -3.29e-06 -0.0257011" quat="0.999784 0 0.0208044 0" mass="0.03327" diaginertia="1.23275e-05 1.066e-05 2.22251e-06"/>
+                          <joint name="gripper_finger_l2" pos="0 0 0" axis="1 0 0" type="slide" range="0 0.05" limited="true" />
+                          <include file="./assets/EE_FINGER/geoms.xml" />
+                          <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="EE_FINGER"/> -->
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+          <body name="link_head_1" pos="0.022 0 0.140073">
+            <inertial pos="-0.0115068 -0.0011427 -0.00031579" quat="0.354317 0.578329 0.650884 0.341093" mass="0.0745058" diaginertia="2.45449e-05 2.18237e-05 1.72614e-05"/>
+            <joint name="head_0" pos="0 0 0" axis="0 0 1" range="-0.523 0.523" limited="true" />
+            <include file="./assets/PAN_TILT_2/geoms.xml" />
+            <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="PAN_TILT_2"/> -->
+            <body name="link_head_2">
+              <inertial pos="-0.00081966 0.00099024 0.022837" quat="0.797736 0.60274 0.0137914 -0.0114992" mass="0.0358537" diaginertia="2.04697e-05 1.31161e-05 1.02242e-05"/>
+              <joint name="head_1" pos="0 0 0" axis="0 1 0" range="-0.35 1.57" limited="true" />
+              <include file="./assets/PAN_TILT_3/geoms.xml" />
+              <!-- <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="PAN_TILT_3"/> -->
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <equality>
+    <joint name="right_finger" joint1="gripper_finger_r1" joint2="gripper_finger_r2" polycoef="0 -1 0 0 0" />
+    <joint name="left_finger" joint1="gripper_finger_l1" joint2="gripper_finger_l2" polycoef="0 -1 0 0 0" />
+  </equality>
+
+  <contact>
+    <exclude body1="link_torso_base" body2="link_torso_hp"/>
+    <exclude body1="link_torso_hp" body2="link_torso_5"/>
+
+    <exclude body1="link_torso_5" body2="link_right_arm_0"/>
+    <exclude body1="link_right_arm_0" body2="link_right_arm_1"/>
+    <exclude body1="link_right_arm_1" body2="link_right_arm_2"/>
+    <exclude body1="link_right_arm_2" body2="link_right_arm_3"/>
+    <exclude body1="link_right_arm_3" body2="link_right_arm_4"/>
+    <exclude body1="link_right_arm_4" body2="link_right_arm_5"/>
+    <exclude body1="link_right_arm_5" body2="link_right_arm_6"/>
+    <exclude body1="link_right_arm_6" body2="FT_SENSOR_R"/>
+    <exclude body1="FT_SENSOR_R" body2="EE_BODY_R"/>
+    <exclude body1="EE_BODY_R" body2="ee_finger_r1"/>
+    <exclude body1="EE_BODY_R" body2="ee_finger_r2"/>
+
+    <exclude body1="link_torso_5" body2="link_left_arm_0"/>
+    <exclude body1="link_left_arm_0" body2="link_left_arm_1"/>
+    <exclude body1="link_left_arm_1" body2="link_left_arm_2"/>
+    <exclude body1="link_left_arm_2" body2="link_left_arm_3"/>
+    <exclude body1="link_left_arm_3" body2="link_left_arm_4"/>
+    <exclude body1="link_left_arm_4" body2="link_left_arm_5"/>
+    <exclude body1="link_left_arm_5" body2="link_left_arm_6"/>
+    <exclude body1="link_left_arm_6" body2="FT_SENSOR_L"/>
+    <exclude body1="FT_SENSOR_L" body2="EE_BODY_L"/>
+    <exclude body1="EE_BODY_L" body2="ee_finger_l1"/>
+    <exclude body1="EE_BODY_L" body2="ee_finger_l2"/>
+
+    <exclude body1="link_torso_hp" body2="link_torso_5"/>
+    <exclude body1="link_torso_5" body2="link_head_1"/>
+    <exclude body1="link_head_1" body2="link_head_2"/>
+  </contact>
+</mujoco>

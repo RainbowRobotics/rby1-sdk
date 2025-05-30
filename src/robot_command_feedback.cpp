@@ -104,6 +104,21 @@ class RobotCommandFeedbackParserImpl {
     self.tracking_error_.rotation_error = feedback->tracking_error().rotation_error();
   }
 
+  void ParseCartesianImpedanceControlCommandFeedback(CartesianImpedanceControlCommandFeedback& self,
+                                                     api::CartesianImpedanceControlCommand::Feedback* feedback) {
+    self.valid_ = true;
+
+    if (feedback->has_command_header_feedback()) {
+      ParseCommandHeaderFeedback(self.command_header_, feedback->mutable_command_header_feedback());
+    }
+    self.set_position_.resize(feedback->set_position_size());
+    for (int i = 0; i < feedback->set_position_size(); i++) {
+      self.set_position_(i) = feedback->set_position(i);
+    }
+    self.remain_time_ = feedback->remain_time();
+    self.manipulability_ = feedback->manipulability();
+  }
+
   void ParseOptimalControlCommandFeedback(OptimalControlCommandFeedback& self,
                                           api::OptimalControlCommand::Feedback* feedback) {
     self.valid_ = true;
@@ -184,6 +199,10 @@ class RobotCommandFeedbackParserImpl {
         ParseBodyComponentBasedCommandFeedback(self.body_component_based_command_,
                                                feedback->mutable_body_component_based_command_feedback());
         break;
+      case api::BodyCommand_Feedback::kCartesianImpedanceControlCommandFeedback:
+        ParseCartesianImpedanceControlCommandFeedback(self.cartesian_impedance_control_command_,
+                                                      feedback->mutable_cartesian_impedance_control_command_feedback());
+        break;
       case api::BodyCommand_Feedback::FEEDBACK_NOT_SET:
         break;
     }
@@ -232,6 +251,9 @@ class RobotCommandFeedbackParserImpl {
         ParseImpedanceControlCommandFeedback(self.impedance_control_command_,
                                              feedback->mutable_impedance_control_command_feedback());
         break;
+      case api::ArmCommand_Feedback::kCartesianImpedanceControlCommandFeedback:
+        ParseCartesianImpedanceControlCommandFeedback(self.cartesian_impedance_control_command_,
+                                                      feedback->mutable_cartesian_impedance_control_command_feedback());
       case api::ArmCommand_Feedback::FEEDBACK_NOT_SET:
         break;
     }
@@ -263,6 +285,10 @@ class RobotCommandFeedbackParserImpl {
       case api::TorsoCommand_Feedback::kOptimalControlCommandFeedback:
         ParseOptimalControlCommandFeedback(self.optimal_control_command_,
                                            feedback->mutable_optimal_control_command_feedback());
+        break;
+      case api::TorsoCommand_Feedback::kCartesianImpedanceControlCommandFeedback:
+        ParseCartesianImpedanceControlCommandFeedback(self.cartesian_impedance_control_command_,
+                                                      feedback->mutable_cartesian_impedance_control_command_feedback());
         break;
       case api::TorsoCommand_Feedback::FEEDBACK_NOT_SET:
         break;

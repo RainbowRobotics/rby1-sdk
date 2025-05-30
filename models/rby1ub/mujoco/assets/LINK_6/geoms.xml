@@ -1,0 +1,14 @@
+<mujoco>
+  <geom mesh="LINK_6_0" material="254,254,255" class="visual" />
+  <geom mesh="LINK_6_1" material="191,191,191" class="visual" />
+  <geom mesh="LINK_6_2" material="70,70,70" class="visual" />
+  <geom mesh="LINK_6_3" material="178,0,0" class="visual" />
+  <geom mesh="LINK_6_4" material="10,10,10" class="visual" />
+  <geom mesh="LINK_6_5" material="254,254,255" class="visual" />
+  <geom mesh="LINK_6_0" class="collision" />
+  <geom mesh="LINK_6_1" class="collision" />
+  <geom mesh="LINK_6_2" class="collision" />
+  <geom mesh="LINK_6_3" class="collision" />
+  <geom mesh="LINK_6_4" class="collision" />
+  <geom mesh="LINK_6_5" class="collision" />
+</mujoco>

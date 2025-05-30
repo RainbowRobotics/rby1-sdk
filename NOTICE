@@ -43,3 +43,7 @@ This project includes the following third-party libraries:
 7. **nlohmann_json**  
    Licensed under the MIT License  
    https://github.com/nlohmann/json
+
+8. **skbuild-conan**  
+   Licensed under the MIT License  
+   https://github.com/d-krupke/skbuild-conan

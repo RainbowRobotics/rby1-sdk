@@ -1,0 +1,4 @@
+<mujoco>
+  <mesh file="PAN_TILT_3_0.obj" />
+  <mesh file="PAN_TILT_3_1.obj" />
+</mujoco>

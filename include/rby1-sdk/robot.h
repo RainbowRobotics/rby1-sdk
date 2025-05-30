@@ -45,6 +45,12 @@ struct PIDGain;
 
 struct Color;
 
+struct SerialDevice;
+
+class SerialStream;
+
+class SerialStreamImpl;
+
 }  // namespace rb
 
 namespace rb {
@@ -205,6 +211,11 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   std::optional<WifiStatus> GetWifiStatus() const;
 
+  std::vector<SerialDevice> GetSerialDeviceList() const;
+
+  std::unique_ptr<SerialStream> OpenSerialStream(const std::string& device_path, int buadrate, int bytesize,
+                                                 char parity, int stopbits) const;
+
  private:
   explicit Robot(std::string address);
 
@@ -295,6 +306,48 @@ struct Color {
   uint8_t r{0};
   uint8_t g{0};
   uint8_t b{0};
+};
+
+struct SerialDevice {
+  std::string path;
+  std::string description;
+};
+
+class SerialStream {
+ public:
+  ~SerialStream();
+
+  bool Connect(bool verbose) const;
+
+  void Disconnect() const;
+
+  void Wait() const;
+
+  bool WaitFor(int timeout_ms) const;
+
+  bool IsOpened() const;
+
+  bool IsCancelled() const;
+
+  bool IsDone() const;
+
+  void SetReadCallback(const std::function<void(const std::string&)>& cb);
+
+  bool Write(const std::string& data);
+
+  bool Write(const char* data);
+
+  bool Write(const char* data, int n);
+
+  bool WriteByte(char ch);
+
+ private:
+  explicit SerialStream(std::unique_ptr<SerialStreamImpl> impl);
+
+  std::unique_ptr<SerialStreamImpl> impl_;
+
+  template <typename T>
+  friend class RobotImpl;
 };
 
 }  // namespace rb

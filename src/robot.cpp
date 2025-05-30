@@ -20,6 +20,7 @@
 #include "rb/api/robot_command_service.grpc.pb.h"
 #include "rb/api/robot_info_service.grpc.pb.h"
 #include "rb/api/robot_state_service.grpc.pb.h"
+#include "rb/api/serial_service.grpc.pb.h"
 #include "rb/api/system_service.grpc.pb.h"
 
 #include "rby1-sdk/base/event_loop.h"
@@ -167,6 +168,8 @@ rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
 
   info.robot_version = msg.robot_version();
 
+  info.robot_model_name = msg.robot_model_name();
+
   info.sdk_commit_id = msg.sdk_commit_id();
 
   if (msg.has_battery_info()) {
@@ -197,6 +200,18 @@ rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
 
   for (const auto& idx : msg.head_joint_idx()) {
     info.head_joint_idx.push_back(idx);
+  }
+
+  for (const auto& idx : msg.torso_joint_idx()) {
+    info.torso_joint_idx.push_back(idx);
+  }
+
+  for (const auto& idx : msg.right_arm_joint_idx()) {
+    info.right_arm_joint_idx.push_back(idx);
+  }
+
+  for (const auto& idx : msg.left_arm_joint_idx()) {
+    info.left_arm_joint_idx.push_back(idx);
   }
 
   return info;
@@ -380,7 +395,8 @@ class RobotCommandStreamHandlerImpl
  private:
   std::shared_ptr<RobotImpl<T>> robot_;
   grpc::ClientContext context_;
-  rb::api::RobotCommandResponse res_;
+
+  api::RobotCommandResponse res_;
   grpc::Status status_;
   std::atomic<bool> done_;
   std::mutex mtx_;
@@ -392,6 +408,274 @@ class RobotCommandStreamHandlerImpl
   std::atomic<bool> write_done_, read_done_;
   std::mutex command_mtx_;
   std::condition_variable command_cv_;
+};
+
+class SerialStreamImpl : public grpc::ClientBidiReactor<api::OpenSerialStreamRequest, api::OpenSerialStreamResponse> {
+ public:
+  SerialStreamImpl(api::SerialService::Stub* stub, const std::string& device_path, int baudrate, int bytesize,
+                   char parity, int stopbits, int timeout_ms = 1000)
+      : device_path_(device_path),
+        baudrate_(baudrate),
+        bytesize_(bytesize),
+        parity_(parity),
+        stopbits_(stopbits),
+        timeout_ms_(timeout_ms) {
+    stub->async()->OpenSerialStream(&context_, this);
+    StartCall();
+    Read(&res_);
+  }
+
+  ~SerialStreamImpl() override {
+    Cancel();
+    Wait();
+  }
+
+  bool IsDone() const { return done_.load(); }
+
+  bool IsOpened() const { return is_opened_.load(); }
+
+  bool IsCancelled() const { return IsDone(); }
+
+  void Wait() {
+    std::unique_lock<std::mutex> lock(mtx_);
+    cv_.wait(lock, [this] { return done_.load(); });
+  }
+
+  bool WaitFor(int timeout_ms) {
+    std::unique_lock<std::mutex> lock(mtx_);
+    return cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms), [this] { return done_.load(); });
+  }
+
+  void SetReadCallback(const std::function<void(const std::string&)>& read_cb) {
+    std::unique_lock<std::mutex> lock(callback_mtx_);
+    read_cb_ = read_cb;
+  }
+
+  bool Connect(bool verbose) {
+    if (IsOpened()) {
+      if (verbose) {
+        std::cerr << "Already opened" << std::endl;
+      }
+      return false;
+    }
+
+    if (IsDone()) {
+      if (verbose) {
+        std::cerr << "Stream is already disconnected" << std::endl;
+      }
+      return false;
+    }
+
+    api::OpenSerialStreamRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    auto& connect = *req.mutable_connect();
+    connect.set_device_path(device_path_);
+    connect.set_baudrate(baudrate_);
+    connect.mutable_bytesize()->set_value(bytesize_);
+    connect.mutable_parity()->set_value(parity_);
+    connect.mutable_stopbits()->set_value(stopbits_);
+
+    std::unique_lock<std::mutex> lock(connect_mtx_);
+    connect_result_ = std::nullopt;
+
+    Write(&req);
+
+    if (!connect_cv_.wait_for(lock, std::chrono::milliseconds(timeout_ms_),
+                              [this] { return connect_result_.has_value(); })) {
+      Cancel();
+      if (verbose) {
+        std::cerr << "Timeout" << std::endl;
+      }
+      return false;
+    }
+    if (connect_result_->has_response_header()) {
+      auto& response_header = connect_result_->response_header();
+      if (response_header.has_error()) {
+        if (response_header.error().code() != api::CommonError::CODE_OK) {
+          std::stringstream ss;
+          ss << "Connect Call Error: " << response_header.error().code() << ", " << response_header.error().message();
+          if (verbose) {
+            std::cerr << ss.str() << std::endl;
+          }
+          return false;
+        }
+      }
+    }
+    if (!connect_result_->has_connect_result()) {
+      if (verbose) {
+        std::cerr << "Response has no connect result" << std::endl;
+      }
+      return false;
+    }
+    if (!connect_result_->connect_result().success()) {
+      if (verbose) {
+        std::cerr << "Connect result: Fail (" << connect_result_->connect_result().message() << ")" << std::endl;
+      }
+      return false;
+    }
+    is_opened_ = connect_result_->connect_result().success();
+    return is_opened_;
+  }
+
+  void Disconnect() {
+    Cancel();
+    Wait();
+  }
+
+  bool WriteData(const std::string& data) {
+    if (!IsOpened()) {
+      return false;
+    }
+
+    if (IsDone()) {
+      return false;
+    }
+
+    api::OpenSerialStreamRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    auto& write = *req.mutable_write();
+    write.set_data(data);
+
+    std::unique_lock<std::mutex> lock(write_mtx_);
+    write_result_ = std::nullopt;
+
+    Write(&req);
+
+    if (!write_cv_.wait_for(lock, std::chrono::seconds(1), [this] { return write_result_.has_value(); })) {
+      Cancel();
+      throw std::runtime_error("Timeout");
+    }
+    if (write_result_->has_response_header()) {
+      auto& response_header = write_result_->response_header();
+      if (response_header.has_error()) {
+        if (response_header.error().code() != api::CommonError::CODE_OK) {
+          std::stringstream ss;
+          ss << "gRPC Error: " << response_header.error().code() << ", " << response_header.error().message();
+          throw std::runtime_error(ss.str());
+        }
+      }
+    }
+    if (!write_result_->has_write_result()) {
+      std::cout << "********************** " << data << std::endl;
+      throw std::runtime_error("Response has no write result");
+    }
+    return write_result_->write_result().success();
+  }
+
+  bool WriteData(const char* data) { return WriteData(std::string(data)); }
+
+  bool WriteData(const char* data, int n) { return WriteData(std::string(data, n)); }
+
+  bool WriteByteData(char ch) { return WriteData(&ch, 1); }
+
+  void Write(api::OpenSerialStreamRequest* req) {
+    std::unique_lock<std::mutex> lock(mtx_);
+    cv_.wait(lock, [=] { return done_ || write_done_; });
+    if (done_) {
+      return;
+    }
+    write_done_ = false;
+    StartWrite(req);
+  }
+
+  void Read(api::OpenSerialStreamResponse* res) {
+    std::unique_lock<std::mutex> lock(mtx_);
+    cv_.wait(lock, [=] { return done_ || read_done_; });
+    if (done_) {
+      return;
+    }
+    read_done_ = false;
+    StartRead(res);
+  }
+
+  void Cancel() {
+    if (!IsDone()) {
+      context_.TryCancel();
+    }
+  }
+
+  void OnWriteDone(bool ok) override {
+    {
+      std::unique_lock<std::mutex> lock(mtx_);
+      write_done_ = true;
+    }
+    cv_.notify_all();
+  }
+
+  void OnReadDone(bool ok) override {
+    api::OpenSerialStreamResponse res;
+    {
+      std::unique_lock<std::mutex> lock(mtx_);
+      res = res_;
+      read_done_ = true;
+    }
+    cv_.notify_all();
+
+    if (ok) {
+      if (res.has_connect_result()) {
+        {
+          std::unique_lock<std::mutex> lock(connect_mtx_);
+          connect_result_ = res;
+        }
+        connect_cv_.notify_all();
+      } else if (res.has_write_result()) {
+        {
+          std::unique_lock<std::mutex> lock(write_mtx_);
+          write_result_ = res;
+        }
+        write_cv_.notify_all();
+      } else if (res.has_read_data()) {
+        std::unique_lock<std::mutex> lock(callback_mtx_);
+        if (read_cb_) {
+          read_cb_(res.read_data());
+        }
+      }
+
+      Read(&res_);
+
+    } else {
+      //
+    }
+  }
+
+  void OnDone(const grpc::Status& s) override {
+    {
+      std::unique_lock<std::mutex> lock(mtx_);
+      status_ = s;
+      done_ = true;
+    }
+    cv_.notify_all();
+  }
+
+ private:
+  grpc::ClientContext context_;
+  std::atomic<bool> is_opened_{};
+
+  std::string device_path_;
+  int baudrate_;
+  int bytesize_;
+  char parity_;
+  int stopbits_;
+  int timeout_ms_;
+
+  api::OpenSerialStreamResponse res_;
+  grpc::Status status_;
+
+  std::mutex mtx_;
+  std::condition_variable cv_;
+  bool write_done_{true}, read_done_{true};
+  std::atomic<bool> done_{false};
+
+  std::mutex callback_mtx_;
+  std::function<void(const std::string&)> read_cb_;
+
+  std::mutex connect_mtx_;
+  std::condition_variable connect_cv_;
+  std::optional<api::OpenSerialStreamResponse> connect_result_;
+
+  std::mutex write_mtx_;
+  std::condition_variable write_cv_;
+  std::optional<api::OpenSerialStreamResponse> write_result_;
 };
 
 template <typename T>
@@ -429,6 +713,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     parameter_service_ = api::ParameterService::NewStub(channel_);
     led_service_ = api::LEDService::NewStub(channel_);
     system_service_ = api::SystemService::NewStub(channel_);
+    serial_service_ = api::SerialService::NewStub(channel_);
 
     int retries = 0;
     while (retries < max_retries) {
@@ -1981,6 +2266,48 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return wifi_status;
   }
 
+  std::vector<SerialDevice> GetSerialDeviceList() const {
+    api::GetSerialDeviceListRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::GetSerialDeviceListResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = serial_service_->GetSerialDeviceList(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.response_header().has_error()) {
+      if (res.response_header().error().code() != api::CommonError::CODE_OK) {
+        std::cerr << "Error: " << res.response_header().error().message() << std::endl;
+        return {};
+      }
+    }
+
+    std::vector<SerialDevice> serial_devices;
+
+    for (const auto& d : res.devices()) {
+      SerialDevice device;
+      device.path = d.path();
+      device.description = d.description();
+      serial_devices.push_back(device);
+    }
+
+    return serial_devices;
+  }
+
+  std::unique_ptr<SerialStream> OpenSerialStream(const std::string& device_path, int buadrate, int bytesize,
+                                                 char parity, int stopbits) const {
+    return std::unique_ptr<SerialStream>(new SerialStream(
+        std::make_unique<SerialStreamImpl>(serial_service_.get(), device_path, buadrate, bytesize, parity, stopbits)));
+  }
+
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
     explicit StateReader(std::shared_ptr<RobotImpl<T>> robot, api::RobotStateService::Stub* stub,
@@ -2394,6 +2721,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   std::unique_ptr<api::ParameterService::Stub> parameter_service_;
   std::unique_ptr<api::LEDService::Stub> led_service_;
   std::unique_ptr<api::SystemService::Stub> system_service_;
+  std::unique_ptr<api::SerialService::Stub> serial_service_;
 
   std::unique_ptr<StateReader> state_reader_;
   std::unique_ptr<LogReader> log_reader_;
@@ -2781,6 +3109,17 @@ std::optional<WifiStatus> Robot<T>::GetWifiStatus() const {
 }
 
 template <typename T>
+std::vector<SerialDevice> Robot<T>::GetSerialDeviceList() const {
+  return impl_->GetSerialDeviceList();
+}
+
+template <typename T>
+std::unique_ptr<SerialStream> Robot<T>::OpenSerialStream(const std::string& device_path, int buadrate, int bytesize,
+                                                         char parity, int stopbits) const {
+  return impl_->OpenSerialStream(device_path, buadrate, bytesize, parity, stopbits);
+}
+
+template <typename T>
 RobotCommandHandler<T>::RobotCommandHandler(std::unique_ptr<RobotCommandHandlerImpl<T>> impl)
     : impl_(std::move(impl)) {}
 
@@ -2877,6 +3216,58 @@ RobotCommandFeedback RobotCommandStreamHandler<T>::RequestFeedback(int timeout_m
   return feedback;
 }
 
+SerialStream::SerialStream(std::unique_ptr<SerialStreamImpl> impl) : impl_(std::move(impl)) {}
+
+SerialStream::~SerialStream() = default;
+
+bool SerialStream::Connect(bool verbose) const {
+  return impl_->Connect(verbose);
+}
+
+void SerialStream::Disconnect() const {
+  impl_->Disconnect();
+}
+
+void SerialStream::Wait() const {
+  impl_->Wait();
+}
+
+bool SerialStream::WaitFor(int timeout_ms) const {
+  return impl_->WaitFor(timeout_ms);
+}
+
+bool SerialStream::IsOpened() const {
+  return impl_->IsOpened();
+}
+
+bool SerialStream::IsCancelled() const {
+  return impl_->IsCancelled();
+}
+
+bool SerialStream::IsDone() const {
+  return impl_->IsDone();
+}
+
+void SerialStream::SetReadCallback(const std::function<void(const std::string&)>& cb) {
+  impl_->SetReadCallback(cb);
+}
+
+bool SerialStream::Write(const std::string& data) {
+  return impl_->WriteData(data);
+}
+
+bool SerialStream::Write(const char* data) {
+  return impl_->WriteData(data);
+}
+
+bool SerialStream::Write(const char* data, int n) {
+  return impl_->WriteData(data, n);
+}
+
+bool SerialStream::WriteByte(char ch) {
+  return impl_->WriteByteData(ch);
+}
+
 }  // namespace rb
 
 template class rb::Robot<rb::y1_model::A>;
@@ -2896,3 +3287,9 @@ template class rb::RobotCommandHandler<rb::y1_model::M>;
 template class rb::RobotCommandStreamHandler<rb::y1_model::M>;
 template class rb::ControlInput<rb::y1_model::M>;
 template class rb::ControlState<rb::y1_model::M>;
+
+template class rb::Robot<rb::y1_model::UB>;
+template class rb::RobotCommandHandler<rb::y1_model::UB>;
+template class rb::RobotCommandStreamHandler<rb::y1_model::UB>;
+template class rb::ControlInput<rb::y1_model::UB>;
+template class rb::ControlState<rb::y1_model::UB>;

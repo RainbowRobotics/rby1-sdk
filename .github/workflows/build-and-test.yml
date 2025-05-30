@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, windows-2022, macos-14 ]
+        os: [ ubuntu-22.04, windows-2022, macos-14, ubuntu-22.04-arm ]
 
     steps:
       - uses: actions/checkout@v4
@@ -27,3 +27,5 @@ jobs:
 
       - name: Install
         run: pip install .
+        env:
+          CC: ${{ matrix.os == 'ubuntu-22.04-arm' && '/usr/bin/aarch64-linux-gnu-gcc' || '' }}

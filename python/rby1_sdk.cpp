@@ -49,6 +49,8 @@ py::object create_robot(const std::string& address, const py::object& model) {
     return py::cast(rb::Robot<y1_model::T5>::Create(address));
   } else if (is_equal(model_name, y1_model::M::kModelName.data())) {
     return py::cast(rb::Robot<y1_model::M>::Create(address));
+  } else if (is_equal(model_name, y1_model::UB::kModelName.data())) {
+    return py::cast(rb::Robot<y1_model::UB>::Create(address));
   }
 
   throw std::runtime_error("Unknown model name: " + std::string(model_name));
@@ -89,4 +91,7 @@ PYBIND11_MODULE(_bindings, m) {
   m.def(
       "create_robot_m",  //
       [](const std::string& address) { return Robot<y1_model::M>::Create(address); }, "address"_a);
+  m.def(
+      "create_robot_ub",  //
+      [](const std::string& address) { return Robot<y1_model::UB>::Create(address); }, "address"_a);
 }

@@ -33,8 +33,10 @@ message JointInfo {
 }
 
 message RobotInfo {
-  //
+  // [DEPRECATED] Will be removed in the future. Use `robot_model_name` instead.
   string robot_version = 1;
+
+  string robot_model_name = 12;
 
   string sdk_commit_id = 10;
 
@@ -53,6 +55,12 @@ message RobotInfo {
   repeated uint32 body_joint_idx = 7;
 
   repeated uint32 head_joint_idx = 8;
+
+  repeated uint32 torso_joint_idx = 13;
+
+  repeated uint32 right_arm_joint_idx = 14;
+
+  repeated uint32 left_arm_joint_idx = 15;
 }
 
 message GetRobotInfoRequest {

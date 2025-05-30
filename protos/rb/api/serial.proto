@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+import "google/protobuf/wrappers.proto";
+
+message SerialDeviceInfo {
+  string path = 1;
+  string description = 2;
+}
+
+message SerialOpenRequest {
+  string device_path = 1;
+  int32 baudrate = 2;
+  google.protobuf.Int32Value bytesize = 3; // default: 8
+  google.protobuf.Int32Value parity = 4; // default: 'N'
+  google.protobuf.Int32Value stopbits = 5; // default: 1
+}
+
+message SerialWriteRequest {
+  bytes data = 1;
+}
+
+message SerialConnectionStatus {
+  bool success = 1;
+  string message = 2;
+}
+
+message SerialWriteResult {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetSerialDeviceListRequest {
+  RequestHeader request_header = 1;
+}
+
+message GetSerialDeviceListResponse {
+  ResponseHeader response_header = 1;
+
+  repeated SerialDeviceInfo devices = 2;
+}
+
+message OpenSerialStreamRequest {
+  RequestHeader request_header = 1;
+
+  oneof payload {
+    SerialOpenRequest connect = 2;
+    SerialWriteRequest write = 3;
+  }
+}
+
+message OpenSerialStreamResponse {
+  ResponseHeader response_header = 1;
+
+  oneof payload {
+    SerialConnectionStatus connect_result = 2;
+    SerialWriteResult write_result = 3;
+    bytes read_data = 4;
+  }
+}

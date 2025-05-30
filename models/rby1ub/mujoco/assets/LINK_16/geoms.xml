@@ -1,0 +1,6 @@
+<mujoco>
+  <geom mesh="LINK_16_0" material="254,254,255" class="visual" />
+  <geom mesh="LINK_16_1" material="10,10,10" class="visual" />
+  <geom mesh="LINK_16_0" class="collision" />
+  <geom mesh="LINK_16_1" class="collision" />
+</mujoco>

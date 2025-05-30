@@ -1,5 +1,6 @@
 from rb.api import header_pb2 as _header_pb2
 from google.protobuf import wrappers_pb2 as _wrappers_pb2
+from google.protobuf import duration_pb2 as _duration_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
@@ -113,3 +114,19 @@ class CancelControlResponse(_message.Message):
     RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
     response_header: _header_pb2.ResponseHeader
     def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ...) -> None: ...
+
+class WaitForControlReadyRequest(_message.Message):
+    __slots__ = ("request_header", "timeout")
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    TIMEOUT_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    timeout: _duration_pb2.Duration
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ..., timeout: _Optional[_Union[_duration_pb2.Duration, _Mapping]] = ...) -> None: ...
+
+class WaitForControlReadyResponse(_message.Message):
+    __slots__ = ("response_header", "ready")
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    READY_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    ready: bool
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., ready: bool = ...) -> None: ...

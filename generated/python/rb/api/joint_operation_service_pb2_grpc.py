@@ -44,6 +44,11 @@ class JointOperationServiceStub(object):
                 request_serializer=rb_dot_api_dot_joint__operation__pb2.ServoOnRequest.SerializeToString,
                 response_deserializer=rb_dot_api_dot_joint__operation__pb2.ServoOnResponse.FromString,
                 _registered_method=True)
+        self.ServoOff = channel.unary_unary(
+                '/rb.api.JointOperationService/ServoOff',
+                request_serializer=rb_dot_api_dot_joint__operation__pb2.ServoOffRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_joint__operation__pb2.ServoOffResponse.FromString,
+                _registered_method=True)
         self.BrakeEngage = channel.unary_unary(
                 '/rb.api.JointOperationService/BrakeEngage',
                 request_serializer=rb_dot_api_dot_joint__operation__pb2.BrakeEngageRequest.SerializeToString,
@@ -75,6 +80,12 @@ class JointOperationServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def ServoOn(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ServoOff(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -117,6 +128,11 @@ def add_JointOperationServiceServicer_to_server(servicer, server):
                     servicer.ServoOn,
                     request_deserializer=rb_dot_api_dot_joint__operation__pb2.ServoOnRequest.FromString,
                     response_serializer=rb_dot_api_dot_joint__operation__pb2.ServoOnResponse.SerializeToString,
+            ),
+            'ServoOff': grpc.unary_unary_rpc_method_handler(
+                    servicer.ServoOff,
+                    request_deserializer=rb_dot_api_dot_joint__operation__pb2.ServoOffRequest.FromString,
+                    response_serializer=rb_dot_api_dot_joint__operation__pb2.ServoOffResponse.SerializeToString,
             ),
             'BrakeEngage': grpc.unary_unary_rpc_method_handler(
                     servicer.BrakeEngage,
@@ -171,6 +187,33 @@ class JointOperationService(object):
             '/rb.api.JointOperationService/ServoOn',
             rb_dot_api_dot_joint__operation__pb2.ServoOnRequest.SerializeToString,
             rb_dot_api_dot_joint__operation__pb2.ServoOnResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ServoOff(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.JointOperationService/ServoOff',
+            rb_dot_api_dot_joint__operation__pb2.ServoOffRequest.SerializeToString,
+            rb_dot_api_dot_joint__operation__pb2.ServoOffResponse.FromString,
             options,
             channel_credentials,
             insecure,

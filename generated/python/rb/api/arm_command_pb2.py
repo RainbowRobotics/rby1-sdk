@@ -16,7 +16,7 @@ from rb.api import command_header_pb2 as rb_dot_api_dot_command__header__pb2
 from rb.api import basic_command_pb2 as rb_dot_api_dot_basic__command__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18rb/api/arm_command.proto\x12\x06rb.api\x1a\x1brb/api/command_header.proto\x1a\x1arb/api/basic_command.proto\"\xae\x06\n\nArmCommand\x1a\xf4\x02\n\x07Request\x12\x35\n\x0e\x63ommand_header\x18\x01 \x01(\x0b\x32\x1d.rb.api.CommandHeader.Request\x12\x46\n\x16joint_position_command\x18\x02 \x01(\x0b\x32$.rb.api.JointPositionCommand.RequestH\x00\x12R\n\x1cgravity_compensation_command\x18\x03 \x01(\x0b\x32*.rb.api.GravityCompensationCommand.RequestH\x00\x12=\n\x11\x63\x61rtesian_command\x18\x04 \x01(\x0b\x32 .rb.api.CartesianCommand.RequestH\x00\x12L\n\x19impedance_control_command\x18\x05 \x01(\x0b\x32\'.rb.api.ImpedanceControlCommand.RequestH\x00\x42\t\n\x07\x63ommand\x1a\xa8\x03\n\x08\x46\x65\x65\x64\x62\x61\x63k\x12?\n\x17\x63ommand_header_feedback\x18\x01 \x01(\x0b\x32\x1e.rb.api.CommandHeader.Feedback\x12P\n\x1fjoint_position_command_feedback\x18\x02 \x01(\x0b\x32%.rb.api.JointPositionCommand.FeedbackH\x00\x12\\\n%gravity_compensation_command_feedback\x18\x03 \x01(\x0b\x32+.rb.api.GravityCompensationCommand.FeedbackH\x00\x12G\n\x1a\x63\x61rtesian_command_feedback\x18\x04 \x01(\x0b\x32!.rb.api.CartesianCommand.FeedbackH\x00\x12V\n\"impedance_control_command_feedback\x18\x05 \x01(\x0b\x32(.rb.api.ImpedanceControlCommand.FeedbackH\x00\x42\n\n\x08\x66\x65\x65\x64\x62\x61\x63kb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18rb/api/arm_command.proto\x12\x06rb.api\x1a\x1brb/api/command_header.proto\x1a\x1arb/api/basic_command.proto\"\xb6\t\n\nArmCommand\x1a\xae\x04\n\x07Request\x12\x35\n\x0e\x63ommand_header\x18\x01 \x01(\x0b\x32\x1d.rb.api.CommandHeader.Request\x12\x46\n\x16joint_position_command\x18\x02 \x01(\x0b\x32$.rb.api.JointPositionCommand.RequestH\x00\x12R\n\x1cgravity_compensation_command\x18\x03 \x01(\x0b\x32*.rb.api.GravityCompensationCommand.RequestH\x00\x12=\n\x11\x63\x61rtesian_command\x18\x04 \x01(\x0b\x32 .rb.api.CartesianCommand.RequestH\x00\x12L\n\x19impedance_control_command\x18\x05 \x01(\x0b\x32\'.rb.api.ImpedanceControlCommand.RequestH\x00\x12W\n\x1fjoint_impedance_control_command\x18\x06 \x01(\x0b\x32,.rb.api.JointImpedanceControlCommand.RequestH\x00\x12_\n#cartesian_impedance_control_command\x18\x07 \x01(\x0b\x32\x30.rb.api.CartesianImpedanceControlCommand.RequestH\x00\x42\t\n\x07\x63ommand\x1a\xf6\x04\n\x08\x46\x65\x65\x64\x62\x61\x63k\x12?\n\x17\x63ommand_header_feedback\x18\x01 \x01(\x0b\x32\x1e.rb.api.CommandHeader.Feedback\x12P\n\x1fjoint_position_command_feedback\x18\x02 \x01(\x0b\x32%.rb.api.JointPositionCommand.FeedbackH\x00\x12\\\n%gravity_compensation_command_feedback\x18\x03 \x01(\x0b\x32+.rb.api.GravityCompensationCommand.FeedbackH\x00\x12G\n\x1a\x63\x61rtesian_command_feedback\x18\x04 \x01(\x0b\x32!.rb.api.CartesianCommand.FeedbackH\x00\x12V\n\"impedance_control_command_feedback\x18\x05 \x01(\x0b\x32(.rb.api.ImpedanceControlCommand.FeedbackH\x00\x12\x61\n(joint_impedance_control_command_feedback\x18\x06 \x01(\x0b\x32-.rb.api.JointImpedanceControlCommand.FeedbackH\x00\x12i\n,cartesian_impedance_control_command_feedback\x18\x07 \x01(\x0b\x32\x31.rb.api.CartesianImpedanceControlCommand.FeedbackH\x00\x42\n\n\x08\x66\x65\x65\x64\x62\x61\x63kb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -24,9 +24,9 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'rb.api.arm_command_pb2', _g
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_ARMCOMMAND']._serialized_start=94
-  _globals['_ARMCOMMAND']._serialized_end=908
+  _globals['_ARMCOMMAND']._serialized_end=1300
   _globals['_ARMCOMMAND_REQUEST']._serialized_start=109
-  _globals['_ARMCOMMAND_REQUEST']._serialized_end=481
-  _globals['_ARMCOMMAND_FEEDBACK']._serialized_start=484
-  _globals['_ARMCOMMAND_FEEDBACK']._serialized_end=908
+  _globals['_ARMCOMMAND_REQUEST']._serialized_end=667
+  _globals['_ARMCOMMAND_FEEDBACK']._serialized_start=670
+  _globals['_ARMCOMMAND_FEEDBACK']._serialized_end=1300
 # @@protoc_insertion_point(module_scope)

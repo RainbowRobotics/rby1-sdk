@@ -4,6 +4,7 @@ Reference: https://github.com/tueda/test-poetry-scikit-build
 """
 
 import shutil
+import platform
 import os
 from distutils import log as distutils_log
 from pathlib import Path
@@ -19,7 +20,20 @@ __all__ = ("build",)
 
 def build(setup_kwargs: Dict[str, Any]) -> None:
     """Build Conan-based C++ project"""
-    skbuild_conan.setup(**setup_kwargs, script_args=["build_ext"], conan_env={"CC": os.environ.get("CC", ""), "CXX": os.environ.get("CXX", "")})
+
+    arch = platform.machine()
+    cc_env = os.environ.get("CC", "")
+    cxx_env = os.environ.get("CXX", "")
+
+    if arch in ("aarch64", "arm64") and not cc_env:
+        cc_env = "/usr/bin/aarch64-linux-gnu-gcc"
+        # cxx_env = "/usr/bin/aarch64-linux-gnu-g++"
+
+    skbuild_conan.setup(
+        **setup_kwargs,
+        script_args=["build_ext"],
+        conan_env={"CC": cc_env, "CXX": cxx_env},
+    )
 
     src_dir = Path(skbuild.constants.CMAKE_INSTALL_DIR()) / "python" / "rby1_sdk"
     dest_dir = Path("rby1_sdk")
@@ -61,12 +75,14 @@ def copy_files(src_dir: Path, dest_dir: Path, pattern: str) -> None:
 
 
 if __name__ == "__main__":
-    build({
-        "packages": find_packages("python"),
-        "package_dir": {"": "python"},
-        "python_requires": ">=3.10",
-        "install_requires": [],
-        "cmake_args": ["-DBUILD_PYTHON_BINDINGS=ON"],
-        # "conan_profile_settings": {"compiler.cppstd": 17},
-        "cmake_minimum_required_version": "3.28"
-    })
+    build(
+        {
+            "packages": find_packages("python"),
+            "package_dir": {"": "python"},
+            "python_requires": ">=3.10",
+            "install_requires": [],
+            "cmake_args": ["-DBUILD_PYTHON_BINDINGS=ON"],
+            # "conan_profile_settings": {"compiler.cppstd": 17},
+            "cmake_minimum_required_version": "3.28",
+        }
+    )

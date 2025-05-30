@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from rb.api import system_pb2 as rb_dot_api_dot_system__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1brb/api/system_service.proto\x12\x06rb.api\x1a\x13rb/api/system.proto2\xbd\x03\n\rSystemService\x12N\n\rGetSystemTime\x12\x1c.rb.api.GetSystemTimeRequest\x1a\x1d.rb.api.GetSystemTimeResponse\"\x00\x12N\n\rSetSystemTime\x12\x1c.rb.api.SetSystemTimeRequest\x1a\x1d.rb.api.SetSystemTimeResponse\"\x00\x12T\n\x0fSetBatteryLevel\x12\x1e.rb.api.SetBatteryLevelRequest\x1a\x1f.rb.api.SetBatteryLevelResponse\"\x00\x12W\n\x10SetBatteryConfig\x12\x1f.rb.api.SetBatteryConfigRequest\x1a .rb.api.SetBatteryConfigResponse\"\x00\x12]\n\x12ResetBatteryConfig\x12!.rb.api.ResetBatteryConfigRequest\x1a\".rb.api.ResetBatteryConfigResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1brb/api/system_service.proto\x12\x06rb.api\x1a\x13rb/api/system.proto2\xcd\x06\n\rSystemService\x12N\n\rGetSystemTime\x12\x1c.rb.api.GetSystemTimeRequest\x1a\x1d.rb.api.GetSystemTimeResponse\"\x00\x12N\n\rSetSystemTime\x12\x1c.rb.api.SetSystemTimeRequest\x1a\x1d.rb.api.SetSystemTimeResponse\"\x00\x12T\n\x0fSetBatteryLevel\x12\x1e.rb.api.SetBatteryLevelRequest\x1a\x1f.rb.api.SetBatteryLevelResponse\"\x00\x12W\n\x10SetBatteryConfig\x12\x1f.rb.api.SetBatteryConfigRequest\x1a .rb.api.SetBatteryConfigResponse\"\x00\x12]\n\x12ResetBatteryConfig\x12!.rb.api.ResetBatteryConfigRequest\x1a\".rb.api.ResetBatteryConfigResponse\"\x00\x12`\n\x13ResetNetworkSetting\x12\".rb.api.ResetNetworkSettingRequest\x1a#.rb.api.ResetNetworkSettingResponse\"\x00\x12?\n\x08ScanWifi\x12\x17.rb.api.ScanWifiRequest\x1a\x18.rb.api.ScanWifiResponse\"\x00\x12H\n\x0b\x43onnectWifi\x12\x1a.rb.api.ConnectWifiRequest\x1a\x1b.rb.api.ConnectWifiResponse\"\x00\x12Q\n\x0e\x44isconnectWifi\x12\x1d.rb.api.DisconnectWifiRequest\x1a\x1e.rb.api.DisconnectWifiResponse\"\x00\x12N\n\rGetWifiStatus\x12\x1c.rb.api.GetWifiStatusRequest\x1a\x1d.rb.api.GetWifiStatusResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,5 +23,5 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'rb.api.system_service_pb2',
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_SYSTEMSERVICE']._serialized_start=61
-  _globals['_SYSTEMSERVICE']._serialized_end=506
+  _globals['_SYSTEMSERVICE']._serialized_end=906
 # @@protoc_insertion_point(module_scope)

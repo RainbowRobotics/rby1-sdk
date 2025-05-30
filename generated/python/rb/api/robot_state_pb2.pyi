@@ -162,7 +162,7 @@ class Collision(_message.Message):
     def __init__(self, link1: _Optional[str] = ..., link2: _Optional[str] = ..., position1: _Optional[_Union[_geometry_pb2.Vec3, _Mapping]] = ..., position2: _Optional[_Union[_geometry_pb2.Vec3, _Mapping]] = ..., distance: _Optional[float] = ...) -> None: ...
 
 class RobotState(_message.Message):
-    __slots__ = ("timestamp", "system_stat", "battery_state", "power_states", "emo_states", "joint_states", "tool_flange_right", "tool_flange_left", "ft_sensor_right", "ft_sensor_left", "is_ready", "position", "velocity", "current", "torque", "target_position", "target_velocity", "target_feedback_gain", "target_feedforward_torque", "odometry", "center_of_mass", "collisions")
+    __slots__ = ("timestamp", "system_stat", "battery_state", "power_states", "emo_states", "joint_states", "tool_flange_right", "tool_flange_left", "ft_sensor_right", "ft_sensor_left", "is_ready", "position", "velocity", "current", "torque", "target_position", "target_velocity", "target_feedback_gain", "target_feedforward_torque", "odometry", "center_of_mass", "collisions", "temperature")
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     SYSTEM_STAT_FIELD_NUMBER: _ClassVar[int]
     BATTERY_STATE_FIELD_NUMBER: _ClassVar[int]
@@ -185,6 +185,7 @@ class RobotState(_message.Message):
     ODOMETRY_FIELD_NUMBER: _ClassVar[int]
     CENTER_OF_MASS_FIELD_NUMBER: _ClassVar[int]
     COLLISIONS_FIELD_NUMBER: _ClassVar[int]
+    TEMPERATURE_FIELD_NUMBER: _ClassVar[int]
     timestamp: _timestamp_pb2.Timestamp
     system_stat: SystemStat
     battery_state: BatteryState
@@ -207,7 +208,8 @@ class RobotState(_message.Message):
     odometry: _geometry_pb2.SE2Pose
     center_of_mass: _geometry_pb2.Vec3
     collisions: _containers.RepeatedCompositeFieldContainer[Collision]
-    def __init__(self, timestamp: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., system_stat: _Optional[_Union[SystemStat, _Mapping]] = ..., battery_state: _Optional[_Union[BatteryState, _Mapping]] = ..., power_states: _Optional[_Iterable[_Union[PowerState, _Mapping]]] = ..., emo_states: _Optional[_Iterable[_Union[EMOState, _Mapping]]] = ..., joint_states: _Optional[_Iterable[_Union[JointState, _Mapping]]] = ..., tool_flange_right: _Optional[_Union[ToolFlangeState, _Mapping]] = ..., tool_flange_left: _Optional[_Union[ToolFlangeState, _Mapping]] = ..., ft_sensor_right: _Optional[_Union[FTSensorData, _Mapping]] = ..., ft_sensor_left: _Optional[_Union[FTSensorData, _Mapping]] = ..., is_ready: _Optional[_Iterable[float]] = ..., position: _Optional[_Iterable[float]] = ..., velocity: _Optional[_Iterable[float]] = ..., current: _Optional[_Iterable[float]] = ..., torque: _Optional[_Iterable[float]] = ..., target_position: _Optional[_Iterable[float]] = ..., target_velocity: _Optional[_Iterable[float]] = ..., target_feedback_gain: _Optional[_Iterable[int]] = ..., target_feedforward_torque: _Optional[_Iterable[float]] = ..., odometry: _Optional[_Union[_geometry_pb2.SE2Pose, _Mapping]] = ..., center_of_mass: _Optional[_Union[_geometry_pb2.Vec3, _Mapping]] = ..., collisions: _Optional[_Iterable[_Union[Collision, _Mapping]]] = ...) -> None: ...
+    temperature: _containers.RepeatedScalarFieldContainer[int]
+    def __init__(self, timestamp: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., system_stat: _Optional[_Union[SystemStat, _Mapping]] = ..., battery_state: _Optional[_Union[BatteryState, _Mapping]] = ..., power_states: _Optional[_Iterable[_Union[PowerState, _Mapping]]] = ..., emo_states: _Optional[_Iterable[_Union[EMOState, _Mapping]]] = ..., joint_states: _Optional[_Iterable[_Union[JointState, _Mapping]]] = ..., tool_flange_right: _Optional[_Union[ToolFlangeState, _Mapping]] = ..., tool_flange_left: _Optional[_Union[ToolFlangeState, _Mapping]] = ..., ft_sensor_right: _Optional[_Union[FTSensorData, _Mapping]] = ..., ft_sensor_left: _Optional[_Union[FTSensorData, _Mapping]] = ..., is_ready: _Optional[_Iterable[float]] = ..., position: _Optional[_Iterable[float]] = ..., velocity: _Optional[_Iterable[float]] = ..., current: _Optional[_Iterable[float]] = ..., torque: _Optional[_Iterable[float]] = ..., target_position: _Optional[_Iterable[float]] = ..., target_velocity: _Optional[_Iterable[float]] = ..., target_feedback_gain: _Optional[_Iterable[int]] = ..., target_feedforward_torque: _Optional[_Iterable[float]] = ..., odometry: _Optional[_Union[_geometry_pb2.SE2Pose, _Mapping]] = ..., center_of_mass: _Optional[_Union[_geometry_pb2.Vec3, _Mapping]] = ..., collisions: _Optional[_Iterable[_Union[Collision, _Mapping]]] = ..., temperature: _Optional[_Iterable[int]] = ...) -> None: ...
 
 class GetRobotStateRequest(_message.Message):
     __slots__ = ("request_header",)

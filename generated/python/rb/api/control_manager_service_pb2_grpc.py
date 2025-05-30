@@ -59,6 +59,11 @@ class ControlManagerServiceStub(object):
                 request_serializer=rb_dot_api_dot_control__manager__pb2.SetTimeScaleRequest.SerializeToString,
                 response_deserializer=rb_dot_api_dot_control__manager__pb2.SetTimeScaleResponse.FromString,
                 _registered_method=True)
+        self.WaitForControlReady = channel.unary_unary(
+                '/rb.api.ControlManagerService/WaitForControlReady',
+                request_serializer=rb_dot_api_dot_control__manager__pb2.WaitForControlReadyRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_control__manager__pb2.WaitForControlReadyResponse.FromString,
+                _registered_method=True)
 
 
 class ControlManagerServiceServicer(object):
@@ -88,6 +93,12 @@ class ControlManagerServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def WaitForControlReady(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ControlManagerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -110,6 +121,11 @@ def add_ControlManagerServiceServicer_to_server(servicer, server):
                     servicer.SetTimeScale,
                     request_deserializer=rb_dot_api_dot_control__manager__pb2.SetTimeScaleRequest.FromString,
                     response_serializer=rb_dot_api_dot_control__manager__pb2.SetTimeScaleResponse.SerializeToString,
+            ),
+            'WaitForControlReady': grpc.unary_unary_rpc_method_handler(
+                    servicer.WaitForControlReady,
+                    request_deserializer=rb_dot_api_dot_control__manager__pb2.WaitForControlReadyRequest.FromString,
+                    response_serializer=rb_dot_api_dot_control__manager__pb2.WaitForControlReadyResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -220,6 +236,33 @@ class ControlManagerService(object):
             '/rb.api.ControlManagerService/SetTimeScale',
             rb_dot_api_dot_control__manager__pb2.SetTimeScaleRequest.SerializeToString,
             rb_dot_api_dot_control__manager__pb2.SetTimeScaleResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def WaitForControlReady(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.ControlManagerService/WaitForControlReady',
+            rb_dot_api_dot_control__manager__pb2.WaitForControlReadyRequest.SerializeToString,
+            rb_dot_api_dot_control__manager__pb2.WaitForControlReadyResponse.FromString,
             options,
             channel_credentials,
             insecure,

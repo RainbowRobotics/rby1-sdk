@@ -84,3 +84,99 @@ class ResetBatteryConfigResponse(_message.Message):
     RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
     response_header: _header_pb2.ResponseHeader
     def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ...) -> None: ...
+
+class ResetNetworkSettingRequest(_message.Message):
+    __slots__ = ("request_header",)
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ...) -> None: ...
+
+class ResetNetworkSettingResponse(_message.Message):
+    __slots__ = ("response_header",)
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ...) -> None: ...
+
+class ScanWifiRequest(_message.Message):
+    __slots__ = ("request_header",)
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ...) -> None: ...
+
+class WifiNetwork(_message.Message):
+    __slots__ = ("ssid", "signal_strength", "secured")
+    SSID_FIELD_NUMBER: _ClassVar[int]
+    SIGNAL_STRENGTH_FIELD_NUMBER: _ClassVar[int]
+    SECURED_FIELD_NUMBER: _ClassVar[int]
+    ssid: str
+    signal_strength: int
+    secured: bool
+    def __init__(self, ssid: _Optional[str] = ..., signal_strength: _Optional[int] = ..., secured: bool = ...) -> None: ...
+
+class ScanWifiResponse(_message.Message):
+    __slots__ = ("response_header", "networks")
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    NETWORKS_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    networks: _containers.RepeatedCompositeFieldContainer[WifiNetwork]
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., networks: _Optional[_Iterable[_Union[WifiNetwork, _Mapping]]] = ...) -> None: ...
+
+class ConnectWifiRequest(_message.Message):
+    __slots__ = ("request_header", "ssid", "password", "use_dhcp", "ip_address", "gateway", "dns")
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    SSID_FIELD_NUMBER: _ClassVar[int]
+    PASSWORD_FIELD_NUMBER: _ClassVar[int]
+    USE_DHCP_FIELD_NUMBER: _ClassVar[int]
+    IP_ADDRESS_FIELD_NUMBER: _ClassVar[int]
+    GATEWAY_FIELD_NUMBER: _ClassVar[int]
+    DNS_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    ssid: str
+    password: str
+    use_dhcp: bool
+    ip_address: str
+    gateway: str
+    dns: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ..., ssid: _Optional[str] = ..., password: _Optional[str] = ..., use_dhcp: bool = ..., ip_address: _Optional[str] = ..., gateway: _Optional[str] = ..., dns: _Optional[_Iterable[str]] = ...) -> None: ...
+
+class ConnectWifiResponse(_message.Message):
+    __slots__ = ("response_header", "success")
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    SUCCESS_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    success: bool
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., success: bool = ...) -> None: ...
+
+class DisconnectWifiRequest(_message.Message):
+    __slots__ = ("request_header",)
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ...) -> None: ...
+
+class DisconnectWifiResponse(_message.Message):
+    __slots__ = ("response_header",)
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ...) -> None: ...
+
+class GetWifiStatusRequest(_message.Message):
+    __slots__ = ("request_header",)
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ...) -> None: ...
+
+class GetWifiStatusResponse(_message.Message):
+    __slots__ = ("response_header", "ssid", "ip_address", "gateway", "dns", "connected")
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    SSID_FIELD_NUMBER: _ClassVar[int]
+    IP_ADDRESS_FIELD_NUMBER: _ClassVar[int]
+    GATEWAY_FIELD_NUMBER: _ClassVar[int]
+    DNS_FIELD_NUMBER: _ClassVar[int]
+    CONNECTED_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    ssid: str
+    ip_address: str
+    gateway: str
+    dns: _containers.RepeatedScalarFieldContainer[str]
+    connected: bool
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., ssid: _Optional[str] = ..., ip_address: _Optional[str] = ..., gateway: _Optional[str] = ..., dns: _Optional[_Iterable[str]] = ..., connected: bool = ...) -> None: ...

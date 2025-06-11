@@ -22,6 +22,7 @@
 #include "rb/api/robot_state_service.grpc.pb.h"
 #include "rb/api/serial_service.grpc.pb.h"
 #include "rb/api/system_service.grpc.pb.h"
+#include "rb/api/tool_flange_service.grpc.pb.h"
 
 #include "rby1-sdk/base/event_loop.h"
 #include "rby1-sdk/base/time_util.h"
@@ -43,7 +44,7 @@ void InitializeRequestHeader(rb::api::RequestHeader* req_header) {
 }
 
 struct timespec DurationToTimespec(const google::protobuf::Duration& duration) {
-  struct timespec t {};
+  struct timespec t{};
 
   t.tv_sec = duration.seconds();
   t.tv_nsec = duration.nanos();
@@ -714,6 +715,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     led_service_ = api::LEDService::NewStub(channel_);
     system_service_ = api::SystemService::NewStub(channel_);
     serial_service_ = api::SerialService::NewStub(channel_);
+    tool_flange_service_ = api::ToolFlangeService::NewStub(channel_);
 
     int retries = 0;
     while (retries < max_retries) {
@@ -1188,6 +1190,33 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
   }
 
+  bool SetPresetPosition(const std::string& joint_name) const {
+    api::SetPresetPositionRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(joint_name);
+
+    api::SetPresetPositionResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = joint_operation_service_->SetPresetPosition(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() == api::CommonError::CODE_OK) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   bool EnableControlManager(bool unlimited_mode_enabled) const {
     api::ControlManagerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
@@ -1268,7 +1297,6 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       }
       throw std::runtime_error(ss.str());
     }
-
     if (res.has_response_header()) {
       if (res.response_header().has_error()) {
         if (res.response_header().error().code() == api::CommonError::CODE_OK) {
@@ -1308,8 +1336,45 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       }
       throw std::runtime_error(ss.str());
     }
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() == api::CommonError::CODE_OK) {
+          return true;
+        }
+      }
+    }
 
-    return true;
+    return false;
+  }
+
+  bool SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const {
+    api::SetToolFlangeDigitalOutputRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(name);
+    req.set_channel(channel);
+    req.set_state(state);
+
+    api::SetToolFlangeDigitalOutputResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = tool_flange_service_->SetDigitalOutput(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() == api::CommonError::CODE_OK) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   void StartStateUpdate(const std::function<void(const RobotState<T>&, const ControlManagerState&)>& cb, double rate) {
@@ -1451,7 +1516,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     int recv_pkt_size_{0};
     std::array<unsigned char, kMaxPacketLength> recv_packet{};
 
-    struct sockaddr_storage client_addr {};
+    struct sockaddr_storage client_addr{};
 
     while (!handler->IsDone()) {
       {
@@ -1974,7 +2039,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       throw std::runtime_error(ss.str());
     }
 
-    struct timespec utc_time {};
+    struct timespec utc_time{};
 
     if (res.has_utc_time()) {
       utc_time.tv_sec = res.utc_time().seconds();
@@ -2722,6 +2787,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   std::unique_ptr<api::LEDService::Stub> led_service_;
   std::unique_ptr<api::SystemService::Stub> system_service_;
   std::unique_ptr<api::SerialService::Stub> serial_service_;
+  std::unique_ptr<api::ToolFlangeService::Stub> tool_flange_service_;
 
   std::unique_ptr<StateReader> state_reader_;
   std::unique_ptr<LogReader> log_reader_;
@@ -2879,6 +2945,11 @@ bool Robot<T>::HomeOffsetReset(const std::string& dev_name) const {
 }
 
 template <typename T>
+bool Robot<T>::SetPresetPosition(const std::string& joint_name) const {
+  return impl_->SetPresetPosition(joint_name);
+}
+
+template <typename T>
 bool Robot<T>::EnableControlManager(bool unlimited_mode_enabled) const {
   return impl_->EnableControlManager(unlimited_mode_enabled);
 }
@@ -2901,6 +2972,11 @@ bool Robot<T>::CancelControl() const {
 template <typename T>
 bool Robot<T>::SetToolFlangeOutputVoltage(const std::string& name, int voltage) const {
   return impl_->SetToolFlangeOutputVoltage(name, voltage);
+}
+
+template <typename T>
+bool Robot<T>::SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const {
+  return impl_->SetToolFlangeDigitalOutput(name, channel, state);
 }
 
 template <typename T>

@@ -216,12 +216,15 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("break_engage", &Robot<T>::BreakEngage, "dev_name"_a)
       .def("break_release", &Robot<T>::BreakRelease, "dev_name"_a)
       .def("home_offset_reset", &Robot<T>::HomeOffsetReset, "dev_name"_a)
+      .def("set_preset_position", &Robot<T>::SetPresetPosition, "joint_name"_a)
       .def("enable_control_manager", &Robot<T>::EnableControlManager, py::arg("unlimited_mode_enabled") = false,
            py::call_guard<py::gil_scoped_release>())
       .def("disable_control_manager", &Robot<T>::DisableControlManager, py::call_guard<py::gil_scoped_release>())
       .def("reset_fault_control_manager", &Robot<T>::ResetFaultControlManager, py::call_guard<py::gil_scoped_release>())
       .def("cancel_control", &Robot<T>::CancelControl, py::call_guard<py::gil_scoped_release>())
       .def("set_tool_flange_output_voltage", &Robot<T>::SetToolFlangeOutputVoltage,
+           py::call_guard<py::gil_scoped_release>())
+      .def("set_tool_flange_digital_output", &Robot<T>::SetToolFlangeDigitalOutput, "name"_a, "channel"_a, "state"_a,
            py::call_guard<py::gil_scoped_release>())
       .def(
           "start_state_update",

@@ -116,6 +116,8 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool HomeOffsetReset(const std::string& dev_name) const;
 
+  bool SetPresetPosition(const std::string& joint_name) const;
+
   bool EnableControlManager(bool unlimited_mode_enabled = false) const;
 
   bool DisableControlManager() const;
@@ -125,6 +127,8 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
   bool CancelControl() const;
 
   bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const;
+
+  bool SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const;
 
   void StartStateUpdate(const std::function<void(const RobotState<T>&)>& cb, double rate);
 

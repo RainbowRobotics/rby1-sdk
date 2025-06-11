@@ -1,10 +1,20 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+import re
+
+
+def extract_version_from_pyproject_toml(path="pyproject.toml"):
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+    match = re.search(r'^version[\t\r\n ]*=[\t\r\n ]*"([^"]+)"', content, re.MULTILINE)
+    if match:
+        return match.group(1)
+    raise RuntimeError("version not found")
 
 
 class rby1_sdkRecipe(ConanFile):
     name = "rby1-sdk"
-    version = "0.1"
+    version = extract_version_from_pyproject_toml()
 
     # Optional metadata
     license = "Rainbow Robotics"

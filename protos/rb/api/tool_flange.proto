@@ -9,9 +9,20 @@ message SetToolFlangeDigitalOutputRequest {
 
   string name = 2; // tool flange name; 'left' or 'right'
 
-  uint32 channel = 3;
+  message SingleChannel {
+    uint32 channel = 1;
+    uint32 duty = 2;
+  }
 
-  bool state = 4;
+  message DualChannel {
+    uint32 duty_0 = 1;
+    uint32 duty_1 = 2;
+  }
+
+  oneof command {
+    SingleChannel single = 3;
+    DualChannel dual = 4;
+  }
 }
 
 message SetToolFlangeDigitalOutputResponse {

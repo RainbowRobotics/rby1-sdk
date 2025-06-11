@@ -4,7 +4,6 @@ package rb.api;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
-import "google/protobuf/duration.proto";
 import "rb/api/header.proto";
 
 

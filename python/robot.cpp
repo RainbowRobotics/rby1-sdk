@@ -224,8 +224,10 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("cancel_control", &Robot<T>::CancelControl, py::call_guard<py::gil_scoped_release>())
       .def("set_tool_flange_output_voltage", &Robot<T>::SetToolFlangeOutputVoltage,
            py::call_guard<py::gil_scoped_release>())
-      .def("set_tool_flange_digital_output", &Robot<T>::SetToolFlangeDigitalOutput, "name"_a, "channel"_a, "state"_a,
+      .def("set_tool_flange_digital_output", &Robot<T>::SetToolFlangeDigitalOutput, "name"_a, "channel"_a, "duty"_a,
            py::call_guard<py::gil_scoped_release>())
+      .def("set_tool_flange_digital_output_dual", &Robot<T>::SetToolFlangeDigitalOutputDual, "name"_a, "duty_0"_a,
+           "duty_1"_a, py::call_guard<py::gil_scoped_release>())
       .def(
           "start_state_update",
           [](Robot<T>& self, py::function& cb, double rate) {

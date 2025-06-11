@@ -1347,12 +1347,44 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return false;
   }
 
-  bool SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const {
+  bool SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, unsigned int duty) const {
     api::SetToolFlangeDigitalOutputRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(name);
-    req.set_channel(channel);
-    req.set_state(state);
+    auto& single = *req.mutable_single();
+    single.set_channel(channel);
+    single.set_duty(duty);
+
+    api::SetToolFlangeDigitalOutputResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = tool_flange_service_->SetDigitalOutput(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() == api::CommonError::CODE_OK) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool SetToolFlangeDigitalOutputDual(const std::string& name, unsigned int duty_0, unsigned int duty_1) const {
+    api::SetToolFlangeDigitalOutputRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(name);
+    auto& dual = *req.mutable_dual();
+    dual.set_duty_0(duty_0);
+    dual.set_duty_1(duty_1);
 
     api::SetToolFlangeDigitalOutputResponse res;
     grpc::ClientContext context;
@@ -2975,8 +3007,13 @@ bool Robot<T>::SetToolFlangeOutputVoltage(const std::string& name, int voltage) 
 }
 
 template <typename T>
-bool Robot<T>::SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const {
-  return impl_->SetToolFlangeDigitalOutput(name, channel, state);
+bool Robot<T>::SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, unsigned int duty) const {
+  return impl_->SetToolFlangeDigitalOutput(name, channel, duty);
+}
+
+template <typename T>
+bool Robot<T>::SetToolFlangeDigitalOutputDual(const std::string& name, unsigned int duty_0, unsigned int duty_1) const {
+  return impl_->SetToolFlangeDigitalOutputDual(name, duty_0, duty_1);
 }
 
 template <typename T>

@@ -98,6 +98,11 @@ message ToolFlangeState {
 
   bool switch_A = 4;
   int32 output_voltage = 5;
+
+  bool digital_input_A = 6;
+  bool digital_input_B = 7;
+  bool digital_output_A = 8;
+  bool digital_output_B = 9;
 }
 
 message FTSensorData {

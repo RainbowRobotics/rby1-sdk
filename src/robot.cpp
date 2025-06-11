@@ -2587,6 +2587,10 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
       tf.switch_A = tf_proto.switch_a();
       tf.output_voltage = tf_proto.output_voltage();
+      tf.digital_input_A = tf_proto.digital_input_a();
+      tf.digital_input_B = tf_proto.digital_input_b();
+      tf.digital_output_A = tf_proto.digital_output_a();
+      tf.digital_output_B = tf_proto.digital_output_b();
     };
     if (msg.has_tool_flange_right()) {
       proto_to_tool_flange(rs.tool_flange_right, msg.tool_flange_right());

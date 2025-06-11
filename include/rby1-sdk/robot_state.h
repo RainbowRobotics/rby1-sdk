@@ -41,7 +41,7 @@ struct JointState {
   enum class RunState { kUnknown = 0, kControlOn = 1, kControlOff = 2 };
   enum class InitializationState { kUnknown = 0, kInitialized = 1, kUninitialized = 2 };
 
-  struct timespec time_since_last_update {};
+  struct timespec time_since_last_update{};
 
   bool is_ready{false};
   FETState fet_state{FETState::kUnknown};
@@ -62,11 +62,11 @@ struct JointState {
   uint32_t target_feedback_gain{};     // [0,10]
   double target_feedforward_torque{};  // (Nm)
 
-  int temperature{}; // ºC
+  int temperature{};  // ºC
 };
 
 struct ToolFlangeState {
-  struct timespec time_since_last_update {};
+  struct timespec time_since_last_update{};
 
   Eigen::Vector<double, 3> gyro;          // (rad/s)
   Eigen::Vector<double, 3> acceleration;  // (m/s^2)
@@ -74,10 +74,16 @@ struct ToolFlangeState {
   bool switch_A{};
 
   int output_voltage;
+
+  bool digital_input_A{};
+  bool digital_input_B{};
+
+  bool digital_output_A{};
+  bool digital_output_B{};
 };
 
 struct FTSensorData {
-  struct timespec time_since_last_update {};
+  struct timespec time_since_last_update{};
 
   Eigen::Vector<double, 3> force;
   Eigen::Vector<double, 3> torque;
@@ -85,7 +91,7 @@ struct FTSensorData {
 
 template <typename T>
 struct RobotState {
-  struct timespec timestamp {};  // Robot state update timestamp
+  struct timespec timestamp{};  // Robot state update timestamp
 
   SystemStat system_stat{};  // System Statistic
 
@@ -133,7 +139,7 @@ struct RobotState {
 };
 
 inline std::string to_string(PowerState::State s) {
-  switch(s) {
+  switch (s) {
     case PowerState::State::kUnknown:
       return "Unknown";
     case PowerState::State::kPowerOn:
@@ -145,7 +151,7 @@ inline std::string to_string(PowerState::State s) {
 }
 
 inline std::string to_string(EMOState::State s) {
-  switch(s) {
+  switch (s) {
     case EMOState::State::kReleased:
       return "Released";
     case EMOState::State::kPressed:
@@ -155,7 +161,7 @@ inline std::string to_string(EMOState::State s) {
 }
 
 inline std::string to_string(JointState::FETState s) {
-  switch(s) {
+  switch (s) {
     case JointState::FETState::kUnknown:
       return "Unknown";
     case JointState::FETState::kOn:
@@ -167,7 +173,7 @@ inline std::string to_string(JointState::FETState s) {
 }
 
 inline std::string to_string(JointState::RunState s) {
-  switch(s) {
+  switch (s) {
     case JointState::RunState::kUnknown:
       return "Unknown";
     case JointState::RunState::kControlOn:
@@ -179,7 +185,7 @@ inline std::string to_string(JointState::RunState s) {
 }
 
 inline std::string to_string(JointState::InitializationState s) {
-  switch(s) {
+  switch (s) {
     case JointState::InitializationState::kUnknown:
       return "Unknown";
     case JointState::InitializationState::kInitialized:

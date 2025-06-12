@@ -11,12 +11,12 @@ message SetToolFlangeDigitalOutputRequest {
 
   message SingleChannel {
     uint32 channel = 1;
-    uint32 duty = 2;
+    bool state = 2;
   }
 
   message DualChannel {
-    uint32 duty_0 = 1;
-    uint32 duty_1 = 2;
+    bool state_0 = 1;
+    bool state_1 = 2;
   }
 
   oneof command {

@@ -128,9 +128,9 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 
   bool SetToolFlangeOutputVoltage(const std::string& name, int voltage) const;
 
-  bool SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, unsigned int duty) const;
+  bool SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const;
 
-  bool SetToolFlangeDigitalOutputDual(const std::string& name, unsigned int duty_0, unsigned int duty_1) const;
+  bool SetToolFlangeDigitalOutputDual(const std::string& name, bool state_0, bool state_1) const;
 
   void StartStateUpdate(const std::function<void(const RobotState<T>&)>& cb, double rate);
 

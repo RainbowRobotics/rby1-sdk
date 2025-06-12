@@ -1347,13 +1347,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return false;
   }
 
-  bool SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, unsigned int duty) const {
+  bool SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const {
     api::SetToolFlangeDigitalOutputRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(name);
     auto& single = *req.mutable_single();
     single.set_channel(channel);
-    single.set_duty(duty);
+    single.set_state(state);
 
     api::SetToolFlangeDigitalOutputResponse res;
     grpc::ClientContext context;
@@ -1378,13 +1378,13 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return false;
   }
 
-  bool SetToolFlangeDigitalOutputDual(const std::string& name, unsigned int duty_0, unsigned int duty_1) const {
+  bool SetToolFlangeDigitalOutputDual(const std::string& name, bool state_0, bool state_1) const {
     api::SetToolFlangeDigitalOutputRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(name);
     auto& dual = *req.mutable_dual();
-    dual.set_duty_0(duty_0);
-    dual.set_duty_1(duty_1);
+    dual.set_state_0(state_0);
+    dual.set_state_1(state_1);
 
     api::SetToolFlangeDigitalOutputResponse res;
     grpc::ClientContext context;
@@ -3011,13 +3011,13 @@ bool Robot<T>::SetToolFlangeOutputVoltage(const std::string& name, int voltage) 
 }
 
 template <typename T>
-bool Robot<T>::SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, unsigned int duty) const {
-  return impl_->SetToolFlangeDigitalOutput(name, channel, duty);
+bool Robot<T>::SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const {
+  return impl_->SetToolFlangeDigitalOutput(name, channel, state);
 }
 
 template <typename T>
-bool Robot<T>::SetToolFlangeDigitalOutputDual(const std::string& name, unsigned int duty_0, unsigned int duty_1) const {
-  return impl_->SetToolFlangeDigitalOutputDual(name, duty_0, duty_1);
+bool Robot<T>::SetToolFlangeDigitalOutputDual(const std::string& name, bool state_0, bool state_1) const {
+  return impl_->SetToolFlangeDigitalOutputDual(name, state_0, state_1);
 }
 
 template <typename T>

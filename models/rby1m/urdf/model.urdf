@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="RB_Y1M">
+<robot name="RBY1_M">
     <mobile type="mecanum" xyz="0 0 0" rpy="0 0 0" joints="wheel_fr wheel_fl wheel_rr wheel_rl"
             params="1.0 1.0 0.1"/> <!-- wheel_base, wheel_radius -->
 

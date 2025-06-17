@@ -5,9 +5,11 @@
 #include <ostream>
 #include <string>
 
+#include "export.h"
+
 namespace rb {
 
-struct Log {
+struct RBY1_SDK_API Log {
   enum class Level {
     kTrace = 0,  //
     kDebug,      //
@@ -26,7 +28,7 @@ struct Log {
   std::string message;
 };
 
-inline std::string to_string(const Log::Level& level) {
+RBY1_SDK_API inline std::string to_string(const Log::Level& level) {
   switch (level) {
     case Log::Level::kTrace:
       return "Trace";
@@ -46,13 +48,13 @@ inline std::string to_string(const Log::Level& level) {
 
 }  // namespace rb
 
-inline std::ostream& operator<<(std::ostream& out, const rb::Log::Level& level) {
+RBY1_SDK_API inline std::ostream& operator<<(std::ostream& out, const rb::Log::Level& level) {
   out << rb::to_string(level);
 
   return out;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const rb::Log& log) {
+RBY1_SDK_API inline std::ostream& operator<<(std::ostream& out, const rb::Log& log) {
   out << "[" << log.timestamp.tv_sec << ".";
   out << std::setw(9) << std::setfill('0') << log.timestamp.tv_nsec << "] ";
 

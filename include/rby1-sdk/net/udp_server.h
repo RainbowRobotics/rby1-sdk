@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstring>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #if defined(_WIN32)
 #include <winsock2.h>
@@ -48,7 +48,7 @@ class UdpServer {
       throw std::runtime_error("Failed to set IPV6_V6ONLY");
     }
 
-    struct sockaddr_in6 server_addr {};
+    struct sockaddr_in6 server_addr{};
 
     std::memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin6_family = AF_INET6;
@@ -66,7 +66,7 @@ class UdpServer {
     }
 
     // Get the port number
-    struct sockaddr_in6 bound_addr {};
+    struct sockaddr_in6 bound_addr{};
 
     socklen_t bound_addr_len = sizeof(bound_addr);
     if (getsockname(fd_, (struct sockaddr*)&bound_addr, &bound_addr_len) == -1) {
@@ -116,7 +116,7 @@ class UdpServer {
 
     char buffer[kBufferSize];
 
-    struct sockaddr_storage client_addr {};
+    struct sockaddr_storage client_addr{};
 
     socklen_t addr_len = sizeof(client_addr);
 #if defined(_WIN32)

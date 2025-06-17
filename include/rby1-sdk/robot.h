@@ -8,6 +8,7 @@
 
 #include "control_manager_state.h"
 #include "dynamics/robot.h"
+#include "export.h"
 #include "log.h"
 #include "net/types.h"
 #include "robot_command_builder.h"
@@ -56,7 +57,7 @@ class SerialStreamImpl;
 namespace rb {
 
 template <typename T>
-class Robot : public std::enable_shared_from_this<Robot<T>> {
+class RBY1_SDK_API Robot : public std::enable_shared_from_this<Robot<T>> {
  public:
   using ModelType = T;
 
@@ -230,7 +231,7 @@ class Robot : public std::enable_shared_from_this<Robot<T>> {
 };
 
 template <typename T>
-class RobotCommandHandler {
+class RBY1_SDK_API RobotCommandHandler {
  public:
   ~RobotCommandHandler();
 
@@ -255,7 +256,7 @@ class RobotCommandHandler {
 };
 
 template <typename T>
-class RobotCommandStreamHandler {
+class RBY1_SDK_API RobotCommandStreamHandler {
  public:
   ~RobotCommandStreamHandler();
 
@@ -280,7 +281,7 @@ class RobotCommandStreamHandler {
 };
 
 template <typename T>
-struct ControlInput {
+struct RBY1_SDK_API ControlInput {
   Eigen::Vector<bool, T::kRobotDOF> mode{Eigen::Vector<bool, T::kRobotDOF>::Constant(false)};
   Eigen::Vector<double, T::kRobotDOF> target{Eigen::Vector<double, T::kRobotDOF>::Zero()};
   Eigen::Vector<unsigned int, T::kRobotDOF> feedback_gain{Eigen::Vector<unsigned int, T::kRobotDOF>::Zero()};
@@ -289,7 +290,7 @@ struct ControlInput {
 };
 
 template <typename T>
-struct ControlState {
+struct RBY1_SDK_API ControlState {
   double t{0.};
   Eigen::Vector<bool, T::kRobotDOF> is_ready{Eigen::Vector<bool, T::kRobotDOF>::Constant(false)};
   Eigen::Vector<double, T::kRobotDOF> position{Eigen::Vector<double, T::kRobotDOF>::Zero()};
@@ -298,13 +299,13 @@ struct ControlState {
   Eigen::Vector<double, T::kRobotDOF> torque{Eigen::Vector<double, T::kRobotDOF>::Zero()};
 };
 
-struct PIDGain {
+struct RBY1_SDK_API PIDGain {
   uint16_t p_gain;
   uint16_t i_gain;
   uint16_t d_gain;
 };
 
-struct Color {
+struct RBY1_SDK_API Color {
   Color() : r(0), g(0), b(0) {}
 
   Color(uint8_t _r, uint8_t _g, uint8_t _b) : r(_r), g(_g), b(_b) {}
@@ -314,12 +315,12 @@ struct Color {
   uint8_t b{0};
 };
 
-struct SerialDevice {
+struct RBY1_SDK_API SerialDevice {
   std::string path;
   std::string description;
 };
 
-class SerialStream {
+class RBY1_SDK_API SerialStream {
  public:
   ~SerialStream();
 

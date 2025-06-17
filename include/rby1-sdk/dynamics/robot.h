@@ -13,6 +13,7 @@
 #include "rby1-sdk/dynamics/joint.h"
 #include "rby1-sdk/dynamics/link.h"
 #include "rby1-sdk/dynamics/state.h"
+#include "rby1-sdk/export.h"
 #include "rby1-sdk/math/liegroup.h"
 
 namespace rb::dyn {
@@ -37,7 +38,7 @@ enum class MobileBaseType {
   kMecanum        //
 };
 
-struct MobileBase {
+struct RBY1_SDK_API MobileBase {
   MobileBaseType type{MobileBaseType::kNone};
 
   rb::math::SE3::MatrixType T;  // front = x-axis
@@ -45,7 +46,7 @@ struct MobileBase {
   std::vector<double> params;
 };
 
-struct MobileBaseDifferential : public MobileBase {
+struct RBY1_SDK_API MobileBaseDifferential : public MobileBase {
   unsigned int right_wheel_idx{};
   unsigned int left_wheel_idx{};
 
@@ -53,7 +54,7 @@ struct MobileBaseDifferential : public MobileBase {
   double wheel_radius{0.};
 };
 
-struct MobileBaseMecanum : public MobileBase {
+struct RBY1_SDK_API MobileBaseMecanum : public MobileBase {
   unsigned int fr_wheel_idx{};
   unsigned int fl_wheel_idx{};
   unsigned int rr_wheel_idx{};
@@ -68,14 +69,14 @@ struct MobileBaseMecanum : public MobileBase {
  * ROBOT
  **********************************************************/
 
-struct RobotConfiguration {
+struct RBY1_SDK_API RobotConfiguration {
   std::string name;
   std::shared_ptr<Link> base_link;
   std::shared_ptr<MobileBase> mobile_base;
 };
 
 template <int DOF>
-class Robot {
+class RBY1_SDK_API Robot {
  public:
   template <typename T, int N>
   using ContainerType = typename std::conditional_t<(N > 0), std::array<T, (unsigned int)N>, std::vector<T>>;
@@ -930,11 +931,11 @@ class Robot {
   std::shared_ptr<MobileBase> mobile_base_;
 };
 
-RobotConfiguration LoadRobotFromURDFData(const std::string& model, const std::string& base_link_name);
+RBY1_SDK_API RobotConfiguration LoadRobotFromURDFData(const std::string& model, const std::string& base_link_name);
 
-RobotConfiguration LoadRobotFromURDF(const std::string& path, const std::string& base_link_name);
+RBY1_SDK_API RobotConfiguration LoadRobotFromURDF(const std::string& path, const std::string& base_link_name);
 
-inline std::string to_string(GeomType type) {
+RBY1_SDK_API inline std::string to_string(GeomType type) {
   switch (type) {
     case GeomType::kCapsule:
       return "capsule";

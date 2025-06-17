@@ -1,13 +1,13 @@
 #pragma once
 
-#include <cstddef>
 #include <queue>
 
 #include "Eigen/Dense"
+#include "rby1-sdk/export.h"
 
 namespace rb {
 
-class VelocityFilterEstimator {
+class RBY1_SDK_API VelocityFilterEstimator {
  public:
   explicit VelocityFilterEstimator(double dt, int avg_count = 5)
       : avg_count_(avg_count), valid_(false), velocity_(0), dt_(dt), sum_velocity_(0) {}

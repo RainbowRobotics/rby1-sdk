@@ -2,13 +2,15 @@
 
 #include <Eigen/Core>
 
+#include "rby1-sdk/export.h"
+
 namespace rb::dyn {
 
 template <int DOF>
 class Robot;
 
 template <int DOF>
-class State {
+class RBY1_SDK_API State {
  public:
   template <int>
   friend class Robot;

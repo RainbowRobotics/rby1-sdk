@@ -3,6 +3,7 @@
 #include <Eigen/Core>
 #include <memory>
 
+#include "rby1-sdk/export.h"
 #include "rby1-sdk/math/liegroup.h"
 
 namespace rb::dyn {
@@ -12,7 +13,7 @@ class Robot;
 class Link;
 class Joint;
 
-class Joint : public std::enable_shared_from_this<Joint> {
+class RBY1_SDK_API Joint : public std::enable_shared_from_this<Joint> {
  public:
   template <int DOF>
   friend class Robot;
@@ -42,7 +43,7 @@ class Joint : public std::enable_shared_from_this<Joint> {
   void SetLimitQdot(double lower, double upper);
 
   void SetLimitQddot(double lower, double upper);
-  
+
   void SetLimitTorque(double value);
 
   double GetLimitQLower() const;

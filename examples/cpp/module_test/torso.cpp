@@ -1,4 +1,4 @@
-#include <iomanip>
+#include <chrono>
 #include <iostream>
 #include <thread>
 #include "rby1-sdk/model.h"
@@ -93,8 +93,8 @@ int main(int argc, char** argv) {
   double minimum_time = 3.;
   double moving_angle = 1.;
 
-  q_joint_target =
-      robot->GetState().position.block(2, 0, kDOF, 1) + Eigen::Vector<double, kDOF>::Constant(moving_angle * 3.141592 / 180.);
+  q_joint_target = robot->GetState().position.block(2, 0, kDOF, 1) +
+                   Eigen::Vector<double, kDOF>::Constant(moving_angle * 3.141592 / 180.);
 
   {
     // go to ready position
@@ -124,9 +124,8 @@ int main(int argc, char** argv) {
     }
   }
 
-  
-  q_joint_target =
-      robot->GetState().position.block(2, 0, kDOF, 1) + Eigen::Vector<double, kDOF>::Constant(-moving_angle * 3.141592 / 180.);
+  q_joint_target = robot->GetState().position.block(2, 0, kDOF, 1) +
+                   Eigen::Vector<double, kDOF>::Constant(-moving_angle * 3.141592 / 180.);
 
   {
     // go to ready position

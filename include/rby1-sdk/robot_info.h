@@ -1,18 +1,20 @@
 #pragma once
 
+#include "export.h"
+
 namespace rb {
 
-struct BatteryInfo {};
+struct RBY1_SDK_API BatteryInfo {};
 
-struct PowerInfo {
+struct RBY1_SDK_API PowerInfo {
   std::string name{};
 };
 
-struct EMOInfo {
+struct RBY1_SDK_API EMOInfo {
   std::string name{};
 };
 
-struct JointInfo {
+struct RBY1_SDK_API JointInfo {
   std::string name{};
 
   bool has_brake{};
@@ -22,7 +24,7 @@ struct JointInfo {
   std::string firmware_version{};
 };
 
-struct RobotInfo {
+struct RBY1_SDK_API RobotInfo {
   /**
    * @deprecated Use `robot_model_name` instead.
    */

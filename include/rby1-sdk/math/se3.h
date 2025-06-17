@@ -4,6 +4,7 @@
 #include <optional>
 
 #include "so3.h"
+#include "rby1-sdk/export.h"
 
 namespace rb::math {
 
@@ -11,7 +12,7 @@ class SE3;
 class se3;
 class se3v;
 
-class se3 {
+class RBY1_SDK_API se3 {
  public:
   using MatrixType = Eigen::Matrix4d;
 
@@ -19,7 +20,7 @@ class se3 {
   se3() = default;
 };
 
-class se3v {
+class RBY1_SDK_API se3v {
  public:
   using MatrixType = Eigen::Vector<double, 6>;
 
@@ -27,7 +28,7 @@ class se3v {
   se3v() = default;
 };
 
-class SE3 {
+class RBY1_SDK_API SE3 {
  public:
   using MatrixType = Eigen::Matrix4d;
 

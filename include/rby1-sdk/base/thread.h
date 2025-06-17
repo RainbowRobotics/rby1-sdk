@@ -6,6 +6,8 @@
 #include <thread>
 #include <utility>
 
+#include "rby1-sdk/export.h"
+
 #if defined(_WIN32)
 #include <Windows.h>
 #elif defined(__APPLE__)
@@ -25,7 +27,7 @@
 
 namespace rb {
 
-class Thread {
+class RBY1_SDK_API Thread {
  public:
   using Functor = std::function<void()>;
 
@@ -161,7 +163,7 @@ class Thread {
       }
       ::SetThreadPriority(GetCurrentThread(), win_priority);
 #else
-      struct sched_param param {};
+      struct sched_param param{};
 
       param.sched_priority = priority_;
 

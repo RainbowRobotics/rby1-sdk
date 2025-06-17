@@ -1,14 +1,15 @@
 #pragma once
 
-#include <Eigen/Core>
+#include "Eigen/Core"
 #include "constants.h"
+#include "rby1-sdk/export.h"
 
 namespace rb::math {
 
 class SE2;
 class se2v;
 
-class se2v {
+class RBY1_SDK_API se2v {
  public:
   using MatrixType = Eigen::Vector3d;
 
@@ -16,7 +17,7 @@ class se2v {
   se2v() = default;
 };
 
-class SE2 {
+class RBY1_SDK_API SE2 {
  public:
   using MatrixType = Eigen::Matrix3d;
 

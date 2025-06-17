@@ -4,6 +4,8 @@
 #include <ctime>
 #include <iostream>
 
+#include "rby1-sdk/export.h"
+
 namespace rb {
 
 constexpr int64_t kNanosecondsInSecond = 1000000000;
@@ -15,7 +17,7 @@ constexpr int64_t kNanosecondsInSecond = 1000000000;
  * @param end The end time as a timespec structure.
  * @return int64_t The duration between start and end in nanoseconds.
  */
-inline long GetDurationInNs(struct timespec start, struct timespec end) {
+RBY1_SDK_API inline long GetDurationInNs(struct timespec start, struct timespec end) {
   return (static_cast<int64_t>(end.tv_sec) * kNanosecondsInSecond + end.tv_nsec) -
          (static_cast<int64_t>(start.tv_sec) * kNanosecondsInSecond + start.tv_nsec);
 }
@@ -27,7 +29,7 @@ inline long GetDurationInNs(struct timespec start, struct timespec end) {
  * @param end The end time as a timespec structure.
  * @return timespec The duration between start and end as a timespec structure.
  */
-inline struct timespec GetDurationInTimespec(struct timespec start, struct timespec end) {
+RBY1_SDK_API inline struct timespec GetDurationInTimespec(struct timespec start, struct timespec end) {
   int64_t duration_ns = GetDurationInNs(start, end);
 
   struct timespec duration{};
@@ -45,7 +47,7 @@ inline struct timespec GetDurationInTimespec(struct timespec start, struct times
  * @note CLOCK_MONOTONIC is used to retrieve the time since the system boot, unaffected by system clock changes.
  *       In case of failure, an empty timespec structure is returned.
  */
-inline struct timespec GetCurrentTime() {
+RBY1_SDK_API inline struct timespec GetCurrentTime() {
   struct timespec current_time{};
 
 #ifdef __linux__
@@ -68,7 +70,7 @@ inline struct timespec GetCurrentTime() {
  * @param ts The timespec structure to convert.
  * @return int64_t The time in nanoseconds.
  */
-inline int64_t TimespecInNs(const struct timespec& ts) {
+RBY1_SDK_API inline int64_t TimespecInNs(const struct timespec& ts) {
   return static_cast<int64_t>(ts.tv_sec) * kNanosecondsInSecond + static_cast<int64_t>(ts.tv_nsec);
 }
 
@@ -78,7 +80,7 @@ inline int64_t TimespecInNs(const struct timespec& ts) {
  * @param tp The time_point to convert, with the system clock and nanosecond precision.
  * @return timespec A timespec structure representing the same time as the given time_point.
  */
-inline struct timespec TimepointToTimespec(
+RBY1_SDK_API inline struct timespec TimepointToTimespec(
     std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> tp) {
   using namespace std::chrono;
 
@@ -94,7 +96,7 @@ inline struct timespec TimepointToTimespec(
  * @param ts The timespec structure to convert.
  * @return double The time in seconds, including the fractional part from nanoseconds.
  */
-inline double TimespecToDouble(const struct timespec& ts) {
+RBY1_SDK_API inline double TimespecToDouble(const struct timespec& ts) {
   return static_cast<double>(TimespecInNs(ts)) / static_cast<double>(kNanosecondsInSecond);
 }
 
@@ -107,13 +109,13 @@ inline double TimespecToDouble(const struct timespec& ts) {
  * @note This function ensures that the tv_nsec value is within the range [0, kNanosecondsInSecond).
  *       If tv_nsec is larger than or equal to kNanosecondsInSecond, it carries over to the seconds field.
  */
-inline timespec NormalizeTimespec(timespec ts) {
+RBY1_SDK_API inline timespec NormalizeTimespec(timespec ts) {
   ts.tv_sec += ts.tv_nsec / kNanosecondsInSecond;
   ts.tv_nsec %= kNanosecondsInSecond;
   return ts;
 }
 
-class TimeWatch {
+class RBY1_SDK_API TimeWatch {
  public:
   TimeWatch() : ts_(GetCurrentTime()) {}
 

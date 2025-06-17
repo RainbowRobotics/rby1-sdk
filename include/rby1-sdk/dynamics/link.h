@@ -5,6 +5,7 @@
 
 #include "rby1-sdk/dynamics/inertial.h"
 #include "rby1-sdk/math/liegroup.h"
+#include "rby1-sdk/export.h"
 
 namespace rb::dyn {
 
@@ -19,7 +20,7 @@ class GeomCapsule;
 
 enum class GeomType { kCapsule = 0 };
 
-class Link : public std::enable_shared_from_this<Link> {
+class RBY1_SDK_API Link : public std::enable_shared_from_this<Link> {
  public:
   template <int DOF>
   friend class Robot;
@@ -55,7 +56,7 @@ class Link : public std::enable_shared_from_this<Link> {
   std::vector<std::shared_ptr<Collision>> collisions_;
 };
 
-class Collision : public std::enable_shared_from_this<Collision> {
+class RBY1_SDK_API Collision : public std::enable_shared_from_this<Collision> {
  public:
   explicit Collision(std::string name);
 
@@ -75,7 +76,7 @@ class Collision : public std::enable_shared_from_this<Collision> {
   std::vector<std::shared_ptr<Geom>> geoms_;
 };
 
-class Geom : public std::enable_shared_from_this<Geom> {
+class RBY1_SDK_API Geom : public std::enable_shared_from_this<Geom> {
  public:
   Geom(unsigned int coltype = 0, unsigned int colaffinity = 0) : coltype_(coltype), colaffinity_(colaffinity) {}
 
@@ -99,7 +100,7 @@ class Geom : public std::enable_shared_from_this<Geom> {
   unsigned int colaffinity_;
 };
 
-class GeomCapsule : public Geom {
+class RBY1_SDK_API GeomCapsule : public Geom {
  public:
   GeomCapsule(double length, double radius, unsigned int coltype = 0, unsigned int colaffinity = 0);
 
@@ -123,7 +124,7 @@ class GeomCapsule : public Geom {
   double radius_;
 };
 
-struct CollisionResult {
+struct RBY1_SDK_API CollisionResult {
   std::string link1;
   std::string link2;
   Eigen::Vector3d position1;

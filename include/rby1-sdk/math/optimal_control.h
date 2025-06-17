@@ -5,13 +5,14 @@
 #include <optional>
 
 #include "rby1-sdk/dynamics/robot.h"
+#include "rby1-sdk/export.h"
 #include "rby1-sdk/math/qp_solver.h"
 #include "rby1-sdk/math/se3.h"
 
 namespace rb {
 
 template <int DOF>
-class OptimalControl {
+class RBY1_SDK_API OptimalControl {
  public:
   enum class ExitCode : int { kNoError = 0, kInequalityConstraintViolation, kQPSolverError };
 

@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <thread>
@@ -16,7 +17,7 @@ int main(int argc, char** argv) {
   std::string address{argv[1]};
   std::string joint_name{argv[2]};
 
-  if (joint_name.find("torso") != std::string::npos || joint_name==".*") {
+  if (joint_name.find("torso") != std::string::npos || joint_name == ".*") {
     std::cerr << "Warning: Using '" << joint_name << "' may cause the robot to collapse." << std::endl;
     return 1;
   }
@@ -32,16 +33,16 @@ int main(int argc, char** argv) {
   std::this_thread::sleep_for(0.5s);
   std::cout << "Break Release!" << std::endl;
   if (!robot->BreakRelease(joint_name)) {
-      std::cerr << "Error: Failed to break release." << std::endl;
-      return 1;
+    std::cerr << "Error: Failed to break release." << std::endl;
+    return 1;
   }
   std::this_thread::sleep_for(0.5s);
   std::cout << "Break Engage!" << std::endl;
   robot->BreakEngage(joint_name);
   if (!robot->BreakEngage(joint_name)) {
-      std::cerr << "Error: Failed to break engage." << std::endl;
-      return 1;
+    std::cerr << "Error: Failed to break engage." << std::endl;
+    return 1;
   }
-  
+
   return 0;
 }

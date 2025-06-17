@@ -4,10 +4,12 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "rby1-sdk/export.h"
+
 namespace rb {
 
 template <int N>
-class TrapezoidalMotionGenerator {
+class RBY1_SDK_API TrapezoidalMotionGenerator {
  public:
   struct Input {
     Eigen::Vector<double, N> current_position;

@@ -1,11 +1,11 @@
-#include "rby1-sdk/upc/master_arm.h"
-
+#include <chrono>
+#include <csignal>
+#include <cstdlib>
 #include <iostream>
 
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
-#include <csignal>
-#include <cstdlib>
+#include "rby1-sdk/upc/master_arm.h"
 
 using namespace rb;
 using namespace std::chrono_literals;
@@ -13,8 +13,8 @@ using namespace std::chrono_literals;
 auto robot = Robot<y1_model::A>::Create("192.168.30.1:50051");
 auto master_arm = std::make_shared<upc::MasterArm>("/dev/rby1_master_arm");
 
-void signalHandler(int signum){
-  
+void signalHandler(int signum) {
+
   master_arm->StopControl();
   robot->PowerOff("12v");
   exit(signum);
@@ -58,9 +58,8 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  
   master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
-  master_arm->SetControlPeriod(0.01); // 100Hz
+  master_arm->SetControlPeriod(0.01);  // 100Hz
 
   auto active_ids = master_arm->Initialize();
   if (active_ids.size() != upc::MasterArm::kDeivceCount) {

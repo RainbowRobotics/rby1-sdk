@@ -5,6 +5,7 @@
 
 #include "Eigen/Core"
 #include "dynamics/inertial.h"
+#include "export.h"
 #include "math/liegroup.h"
 
 namespace rb {
@@ -32,7 +33,7 @@ class ComponentBasedCommandBuilderImpl;
 class WholeBodyCommandBuilderImpl;
 class RobotCommandBuilderImpl;
 
-class CommandHeaderBuilder {
+class RBY1_SDK_API CommandHeaderBuilder {
  public:
   CommandHeaderBuilder();
 
@@ -59,7 +60,7 @@ class CommandHeaderBuilder {
   friend class JogCommandBuilderImpl;
 };
 
-class JointPositionCommandBuilder {
+class RBY1_SDK_API JointPositionCommandBuilder {
  public:
   JointPositionCommandBuilder();
 
@@ -87,7 +88,7 @@ class JointPositionCommandBuilder {
   friend class HeadCommandBuilderImpl;
 };
 
-class JointImpedanceControlCommandBuilder {
+class RBY1_SDK_API JointImpedanceControlCommandBuilder {
  public:
   JointImpedanceControlCommandBuilder();
 
@@ -121,7 +122,7 @@ class JointImpedanceControlCommandBuilder {
   friend class HeadCommandBuilderImpl;
 };
 
-class OptimalControlCommandBuilder {
+class RBY1_SDK_API OptimalControlCommandBuilder {
  public:
   OptimalControlCommandBuilder();
 
@@ -168,7 +169,7 @@ class OptimalControlCommandBuilder {
   friend class BodyCommandBuilderImpl;
 };
 
-class ImpedanceControlCommandBuilder {
+class RBY1_SDK_API ImpedanceControlCommandBuilder {
  public:
   ImpedanceControlCommandBuilder();
 
@@ -198,7 +199,7 @@ class ImpedanceControlCommandBuilder {
   friend class TorsoCommandBuilderImpl;
 };
 
-class JointVelocityCommandBuilder {
+class RBY1_SDK_API JointVelocityCommandBuilder {
  public:
   JointVelocityCommandBuilder();
 
@@ -221,9 +222,9 @@ class JointVelocityCommandBuilder {
   friend class MobilityCommandBuilderImpl;
 };
 
-class JogCommandBuilder {
+class RBY1_SDK_API JogCommandBuilder {
  public:
-  class AbsolutePosition {
+  class RBY1_SDK_API AbsolutePosition {
    public:
     explicit AbsolutePosition(double value) : value_(value) {}
 
@@ -233,7 +234,7 @@ class JogCommandBuilder {
     double value_{};
   };
 
-  class RelativePosition {
+  class RBY1_SDK_API RelativePosition {
    public:
     explicit RelativePosition(double value) : value_(value) {}
 
@@ -243,7 +244,7 @@ class JogCommandBuilder {
     double value_{};
   };
 
-  class OneStep {
+  class RBY1_SDK_API OneStep {
    public:
     explicit OneStep(bool direction) : value_(direction) {}
 
@@ -280,7 +281,7 @@ class JogCommandBuilder {
   friend class RobotCommandBuilderImpl;
 };
 
-class SE2VelocityCommandBuilder {
+class RBY1_SDK_API SE2VelocityCommandBuilder {
  public:
   SE2VelocityCommandBuilder();
 
@@ -303,7 +304,7 @@ class SE2VelocityCommandBuilder {
   friend class MobilityCommandBuilderImpl;
 };
 
-class StopCommandBuilder {
+class RBY1_SDK_API StopCommandBuilder {
  public:
   StopCommandBuilder();
 
@@ -320,7 +321,7 @@ class StopCommandBuilder {
   friend class WholeBodyCommandBuilderImpl;
 };
 
-class RealTimeControlCommandBuilder {
+class RBY1_SDK_API RealTimeControlCommandBuilder {
  public:
   RealTimeControlCommandBuilder();
 
@@ -337,7 +338,7 @@ class RealTimeControlCommandBuilder {
   friend class WholeBodyCommandBuilderImpl;
 };
 
-class CartesianCommandBuilder {
+class RBY1_SDK_API CartesianCommandBuilder {
  public:
   CartesianCommandBuilder();
 
@@ -378,7 +379,7 @@ class CartesianCommandBuilder {
   friend class BodyCommandBuilderImpl;
 };
 
-class CartesianImpedanceControlCommandBuilder {
+class RBY1_SDK_API CartesianImpedanceControlCommandBuilder {
  public:
   CartesianImpedanceControlCommandBuilder();
 
@@ -432,7 +433,7 @@ class CartesianImpedanceControlCommandBuilder {
   friend class BodyCommandBuilderImpl;
 };
 
-class GravityCompensationCommandBuilder {
+class RBY1_SDK_API GravityCompensationCommandBuilder {
  public:
   GravityCompensationCommandBuilder();
 
@@ -453,7 +454,7 @@ class GravityCompensationCommandBuilder {
   friend class TorsoCommandBuilderImpl;
 };
 
-class ArmCommandBuilder {
+class RBY1_SDK_API ArmCommandBuilder {
  public:
   ArmCommandBuilder();
 
@@ -492,7 +493,7 @@ class ArmCommandBuilder {
   friend class BodyComponentBasedCommandBuilderImpl;
 };
 
-class TorsoCommandBuilder {
+class RBY1_SDK_API TorsoCommandBuilder {
  public:
   TorsoCommandBuilder();
 
@@ -535,7 +536,7 @@ class TorsoCommandBuilder {
   friend class BodyComponentBasedCommandBuilderImpl;
 };
 
-class BodyComponentBasedCommandBuilder {
+class RBY1_SDK_API BodyComponentBasedCommandBuilder {
  public:
   BodyComponentBasedCommandBuilder();
 
@@ -556,7 +557,7 @@ class BodyComponentBasedCommandBuilder {
   friend class BodyCommandBuilderImpl;
 };
 
-class BodyCommandBuilder {
+class RBY1_SDK_API BodyCommandBuilder {
  public:
   BodyCommandBuilder();
 
@@ -599,7 +600,7 @@ class BodyCommandBuilder {
   friend class ComponentBasedCommandBuilderImpl;
 };
 
-class MobilityCommandBuilder {
+class RBY1_SDK_API MobilityCommandBuilder {
  public:
   MobilityCommandBuilder();
 
@@ -622,7 +623,7 @@ class MobilityCommandBuilder {
   friend class ComponentBasedCommandBuilderImpl;
 };
 
-class HeadCommandBuilder {
+class RBY1_SDK_API HeadCommandBuilder {
  public:
   HeadCommandBuilder();
 
@@ -641,7 +642,7 @@ class HeadCommandBuilder {
   friend class ComponentBasedCommandBuilderImpl;
 };
 
-class ComponentBasedCommandBuilder {
+class RBY1_SDK_API ComponentBasedCommandBuilder {
  public:
   ComponentBasedCommandBuilder();
 
@@ -662,7 +663,7 @@ class ComponentBasedCommandBuilder {
   friend class RobotCommandBuilderImpl;
 };
 
-class WholeBodyCommandBuilder {
+class RBY1_SDK_API WholeBodyCommandBuilder {
  public:
   WholeBodyCommandBuilder();
 
@@ -685,7 +686,7 @@ class WholeBodyCommandBuilder {
   friend class RobotCommandBuilderImpl;
 };
 
-class RobotCommandBuilder {
+class RBY1_SDK_API RobotCommandBuilder {
  public:
   RobotCommandBuilder();
 

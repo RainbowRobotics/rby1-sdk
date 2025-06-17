@@ -4,13 +4,14 @@
 #include <string>
 #include <vector>
 
-#include <Eigen/Core>
+#include "Eigen/Core"
+#include "export.h"
 
 namespace rb {
 
 class RobotCommandFeedbackParserImpl;
 
-class Feedback {
+class RBY1_SDK_API Feedback {
  public:
   bool valid() const { return valid_; }
 
@@ -20,7 +21,7 @@ class Feedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class CommandHeaderFeedback : public Feedback {
+class RBY1_SDK_API CommandHeaderFeedback : public Feedback {
  public:
   bool finished() const { return finished_; }
 
@@ -30,7 +31,7 @@ class CommandHeaderFeedback : public Feedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class CommandFeedback : public Feedback {
+class RBY1_SDK_API CommandFeedback : public Feedback {
  public:
   const CommandHeaderFeedback& command_header() const { return command_header_; }
 
@@ -40,28 +41,28 @@ class CommandFeedback : public Feedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class StopCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API StopCommandFeedback : public CommandFeedback {
  public:
  protected:
  private:
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class RealtimeControlCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API RealtimeControlCommandFeedback : public CommandFeedback {
  public:
  protected:
  private:
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class SE2VelocityCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API SE2VelocityCommandFeedback : public CommandFeedback {
  public:
  protected:
  private:
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class JogCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API JogCommandFeedback : public CommandFeedback {
  public:
   const std::string& target_joint_name() const { return target_joint_name_; }
 
@@ -72,14 +73,14 @@ class JogCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class JointVelocityCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API JointVelocityCommandFeedback : public CommandFeedback {
  public:
  protected:
  private:
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class JointPositionCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API JointPositionCommandFeedback : public CommandFeedback {
  public:
   double time_based_progress() const { return time_based_progress_; }
 
@@ -93,9 +94,9 @@ class JointPositionCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class CartesianCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API CartesianCommandFeedback : public CommandFeedback {
  public:
-  struct TrackingError {
+  struct RBY1_SDK_API TrackingError {
     double position_error;
     double orientation_error;
   };
@@ -118,7 +119,7 @@ class CartesianCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class CartesianImpedanceControlCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API CartesianImpedanceControlCommandFeedback : public CommandFeedback {
  public:
   Eigen::VectorXd set_position() const { return set_position_; }
 
@@ -135,16 +136,16 @@ class CartesianImpedanceControlCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class GravityCompensationCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API GravityCompensationCommandFeedback : public CommandFeedback {
  public:
  protected:
  private:
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class ImpedanceControlCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API ImpedanceControlCommandFeedback : public CommandFeedback {
  public:
-  struct TrackingError {
+  struct RBY1_SDK_API TrackingError {
     double position_error;
     double rotation_error;
   };
@@ -158,7 +159,7 @@ class ImpedanceControlCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class OptimalControlCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API OptimalControlCommandFeedback : public CommandFeedback {
  public:
   double total_cost() const { return total_cost_; }
 
@@ -178,7 +179,7 @@ class OptimalControlCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class WholeBodyCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API WholeBodyCommandFeedback : public CommandFeedback {
  public:
   const StopCommandFeedback& stop_command() const { return stop_command_; }
 
@@ -192,7 +193,7 @@ class WholeBodyCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class ArmCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API ArmCommandFeedback : public CommandFeedback {
  public:
   const JointPositionCommandFeedback& joint_position_command() const { return joint_position_command_; }
 
@@ -219,7 +220,7 @@ class ArmCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class TorsoCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API TorsoCommandFeedback : public CommandFeedback {
  public:
   const JointPositionCommandFeedback& joint_position_command() const { return joint_position_command_; }
 
@@ -249,7 +250,7 @@ class TorsoCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class BodyComponentBasedCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API BodyComponentBasedCommandFeedback : public CommandFeedback {
  public:
   const ArmCommandFeedback& right_arm_command() const { return right_arm_command_; }  // NOLINT
 
@@ -266,7 +267,7 @@ class BodyComponentBasedCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class HeadCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API HeadCommandFeedback : public CommandFeedback {
  public:
   const JointPositionCommandFeedback& joint_position_command() const { return joint_position_command_; }  // NOLINT
 
@@ -277,7 +278,7 @@ class HeadCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class BodyCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API BodyCommandFeedback : public CommandFeedback {
  public:
   const JointPositionCommandFeedback& joint_position_command() const { return joint_position_command_; }  // NOLINT
 
@@ -309,7 +310,7 @@ class BodyCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class MobilityCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API MobilityCommandFeedback : public CommandFeedback {
  public:
   const JointVelocityCommandFeedback& joint_velocity_command() const { return joint_velocity_command_; }  // NOLINT
 
@@ -323,7 +324,7 @@ class MobilityCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class ComponentBasedCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API ComponentBasedCommandFeedback : public CommandFeedback {
  public:
   const HeadCommandFeedback& head_command() const { return head_command_; }  // NOLINT
 
@@ -340,7 +341,7 @@ class ComponentBasedCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class RobotCommandFeedback : public CommandFeedback {
+class RBY1_SDK_API RobotCommandFeedback : public CommandFeedback {
  public:
   enum class Status : int { kIdle = 0, kInitializing, kRunning, kFinished };
 
@@ -377,7 +378,7 @@ class RobotCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
-class RobotCommandFeedbackParser {
+class RBY1_SDK_API RobotCommandFeedbackParser {
  public:
   RobotCommandFeedbackParser();
 

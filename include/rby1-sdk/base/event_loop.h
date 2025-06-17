@@ -3,14 +3,14 @@
 #include <condition_variable>
 #include <functional>
 #include <future>
-#include <memory>
 #include <queue>
+
 #include "rby1-sdk/base/thread.h"
 #include "time_util.h"
 
 namespace rb {
 
-class EventLoop {
+class RBY1_SDK_API EventLoop {
  public:
   EventLoop() : EventLoop(std::make_unique<Thread>()) {}
 
@@ -49,7 +49,7 @@ class EventLoop {
     };
 
     const auto& cyclic_task = [=](struct timespec wakeup_time, const auto& self) -> void {
-      struct timespec current_ts {};
+      struct timespec current_ts{};
 
       clock_gettime(CLOCK_MONOTONIC, &current_ts);
 
@@ -75,7 +75,7 @@ class EventLoop {
       PushTask([=] { self(wakeup_time, self); });
     };
 
-    struct timespec ts {};
+    struct timespec ts{};
 
     clock_gettime(CLOCK_MONOTONIC, &ts);
     uint64_t c = (ts.tv_sec * kNanosecondsInSecond) + ts.tv_nsec;

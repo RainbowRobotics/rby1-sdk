@@ -76,7 +76,7 @@ struct RBY1_SDK_API RobotConfiguration {
 };
 
 template <int DOF>
-class RBY1_SDK_API Robot {
+class Robot {
  public:
   template <typename T, int N>
   using ContainerType = typename std::conditional_t<(N > 0), std::array<T, (unsigned int)N>, std::vector<T>>;

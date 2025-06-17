@@ -10,7 +10,7 @@ template <int DOF>
 class Robot;
 
 template <int DOF>
-class RBY1_SDK_API State {
+class State {
  public:
   template <int>
   friend class Robot;

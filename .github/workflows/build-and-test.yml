@@ -45,18 +45,6 @@ jobs:
           fetch-depth: 1
           submodules: recursive
 
-      - name: Configure Fast APT Mirror (Linux only)
-        if: contains(matrix.os, 'ubuntu')
-        uses: vegardit/fast-apt-mirror.sh@v1
-        with:
-          healthchecks: 20
-          speedtests: 10
-          parallel: 2
-          sample-size: 1024
-          sample-time: 3
-          country: "KR"
-          exclude-current: false
-
       - name: Install Dependencies (Linux)
         if: startsWith(matrix.os, 'ubuntu')
         run: |

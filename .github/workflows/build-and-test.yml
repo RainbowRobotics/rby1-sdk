@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-wheels:
+    name: Build Python Wheel (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -29,3 +30,57 @@ jobs:
         run: pip install .
         env:
           CC: ${{ matrix.os == 'ubuntu-22.04-arm' && '/usr/bin/aarch64-linux-gnu-gcc' || '' }}
+
+  build-cpp:
+    name: Build C++ SDK (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-2022, macos-14, ubuntu-22.04-arm]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Configure Fast APT Mirror (Linux only)
+        if: contains(matrix.os, 'ubuntu')
+        uses: vegardit/fast-apt-mirror.sh@v1
+        with:
+          healthchecks: 20
+          speedtests: 10
+          parallel: 2
+          sample-size: 1024
+          sample-time: 3
+          country: "KR"
+          exclude-current: false
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+          python3 -m pip install --upgrade pip conan
+
+      - name: Configure Conan
+        run: |
+          conan profile detect --force
+          conan install . -s build_type=Release -b missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True -of build
+
+      - name: CMake Build and Install
+        run: |
+          cmake --preset conan-release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+          cmake --build --target install --preset conan-release
+
+          cp README.md LICENSE NOTICE "${{ github.workspace }}/_output"
+
+          TAR_NAME=rby1_sdk-${{ matrix.os }}.tar.gz
+          tar -czvf "$TAR_NAME" -C _output .
+          echo "TAR_FILE=$TAR_NAME" >> $GITHUB_ENV
+
+      - name: Upload SDK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rby1_sdk-${{ matrix.os }}
+          path: ${{ env.TAR_FILE }}

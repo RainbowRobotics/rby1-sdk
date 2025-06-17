@@ -47,7 +47,7 @@ if(WIN32)
 endif()
 
 if (LIBRARY_TYPE STREQUAL "STATIC")
-    target_compile_definitions(rby1-sdk PRIVATE RBY1_SDK_STATIC)
+    target_compile_definitions(rby1-sdk PUBLIC RBY1_SDK_STATIC)
 endif()
 if (LIBRARY_TYPE STREQUAL "SHARED")
     target_compile_definitions(rby1-sdk PRIVATE RBY1_SDK_EXPORTS)

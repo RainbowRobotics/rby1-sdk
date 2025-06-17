@@ -9,7 +9,7 @@
 namespace rb {
 
 template <int N>
-class RBY1_SDK_API TrapezoidalMotionGenerator {
+class TrapezoidalMotionGenerator {
  public:
   struct Input {
     Eigen::Vector<double, N> current_position;

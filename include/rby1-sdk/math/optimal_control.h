@@ -12,7 +12,7 @@
 namespace rb {
 
 template <int DOF>
-class RBY1_SDK_API OptimalControl {
+class OptimalControl {
  public:
   enum class ExitCode : int { kNoError = 0, kInequalityConstraintViolation, kQPSolverError };
 

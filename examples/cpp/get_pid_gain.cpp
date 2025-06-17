@@ -1,7 +1,8 @@
+#include <chrono>
 #include <iomanip>
 #include <iostream>
-#include <thread>
 #include <optional>
+#include <thread>
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 
@@ -23,12 +24,12 @@ int main(int argc, char** argv) {
   }
 
   std::this_thread::sleep_for(1s);
-  if(!robot->IsPowerOn(".*")){
+  if (!robot->IsPowerOn(".*")) {
     robot->PowerOn(".*");
     std::this_thread::sleep_for(1s);
   }
 
-  std::cout<<std::endl<<" >>> Using Component Name"<<std::endl;
+  std::cout << std::endl << " >>> Using Component Name" << std::endl;
   auto gain_list = robot->GetTorsoPositionPIDGains();
   for (auto i = 0; i < gain_list.size(); i++) {
     std::cout << "[torso_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
@@ -53,26 +54,30 @@ int main(int argc, char** argv) {
               << ", d gain: " << gain_list[i].d_gain << std::endl;
   }
 
-  std::cout<<std::endl<<" >>> Using Joint Name"<<std::endl;
+  std::cout << std::endl << " >>> Using Joint Name" << std::endl;
   auto taregt_joint_name = "torso_0";
   auto gain = robot->GetPositionPIDGain(taregt_joint_name);
-  std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
-          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+  std::cout << "[" << taregt_joint_name << "] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+            << ", d gain: " << gain.d_gain << std::endl
+            << std::endl;
 
   taregt_joint_name = "right_arm_0";
   gain = robot->GetPositionPIDGain(taregt_joint_name);
-  std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
-          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+  std::cout << "[" << taregt_joint_name << "] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+            << ", d gain: " << gain.d_gain << std::endl
+            << std::endl;
 
   taregt_joint_name = "left_arm_0";
   gain = robot->GetPositionPIDGain(taregt_joint_name);
-  std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
-          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+  std::cout << "[" << taregt_joint_name << "] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+            << ", d gain: " << gain.d_gain << std::endl
+            << std::endl;
 
   taregt_joint_name = "head_0";
   gain = robot->GetPositionPIDGain(taregt_joint_name);
-  std::cout << "["<<taregt_joint_name<<"] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
-          << ", d gain: " << gain.d_gain << std::endl<<std::endl;
+  std::cout << "[" << taregt_joint_name << "] p gain: " << gain.p_gain << ", i gain: " << gain.i_gain
+            << ", d gain: " << gain.d_gain << std::endl
+            << std::endl;
 
   return 0;
 }

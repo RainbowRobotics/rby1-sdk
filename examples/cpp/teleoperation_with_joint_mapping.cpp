@@ -4,26 +4,23 @@
 #endif
 
 #include <Eigen/Core>
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <mutex>
 #include <thread>
-#include "dynamixel_sdk.h"  // Uses Dynamixel SDK library
+#include "dynamixel_sdk.h"
+
 #include "rby1-sdk/dynamics/robot.h"
 #include "rby1-sdk/dynamics/state.h"
-
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 #include "rby1-sdk/robot_command_builder.h"
-
 #include "rby1-sdk/upc/device.h"
-
-#include <unistd.h>
-#include <algorithm>
-#include <cstring>
 
 using namespace rb;
 using namespace std::chrono_literals;
@@ -767,16 +764,6 @@ void control_loop_for_gripper(dynamixel::PortHandler* portHandler, dynamixel::Pa
   }
 }
 
-std::string resolve_symlink(const std::string& symlink) {
-  char buf[1024];
-  ssize_t len = readlink(symlink.c_str(), buf, sizeof(buf) - 1);
-  if (len != -1) {
-    buf[len] = '\0';
-    return std::string(buf);
-  }
-  return "";
-}
-
 int main(int argc, char** argv) {
   try {
     // Latency timer setting
@@ -787,13 +774,13 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if (argc < 2) {  
+  if (argc < 2) {
     std::cerr << "Usage: " << argv[0] << " <server address> [servo]" << std::endl;
     return 1;
   }
 
   std::string address{argv[1]};
-  std::string servo = ".*"; // 기본값
+  std::string servo = ".*";  // 기본값
 
   if (argc >= 3) {
     servo = argv[2];

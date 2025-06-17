@@ -45,6 +45,10 @@ if(WIN32)
     target_link_libraries(rby1-sdk PUBLIC wsock32 ws2_32)
 endif()
 
+if (LIBRARY_TYPE STREQUAL "SHARED")
+    target_compile_definitions(rby1-sdk PRIVATE RBY1_SDK_EXPORTS)
+endif()
+
 target_include_directories(rby1-sdk PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>

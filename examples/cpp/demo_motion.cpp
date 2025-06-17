@@ -6,14 +6,15 @@
 #include "rby1-sdk/robot.h"
 #include "rby1-sdk/robot_command_builder.h"
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 using namespace rb;
 using namespace std::chrono_literals;
 
 #define D2R 0.017453
 #define R2D 57.296
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 const std::string kAll = ".*";
 

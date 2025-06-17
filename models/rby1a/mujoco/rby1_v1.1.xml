@@ -1,4 +1,4 @@
-<mujoco model="rby1a_v1.0">
+<mujoco model="rby1a_v1.1">
   <compiler angle="radian" autolimits="true" eulerseq="xyz" />
 
   <default>
@@ -37,15 +37,15 @@
     <include file="./assets/LINK_9/assets.xml" />
     <include file="./assets/LINK_10/assets.xml" />
     <include file="./assets/LINK_11/assets.xml" />
-    <include file="./assets/LINK_12/assets.xml" />
-    <include file="./assets/LINK_13/assets.xml" />
+    <include file="./assets/LINK_12_V1.1/assets.xml" />
+    <include file="./assets/LINK_13_V1.1/assets.xml" />
     <include file="./assets/LINK_14/assets.xml" />
     <include file="./assets/LINK_15/assets.xml" />
     <include file="./assets/LINK_16/assets.xml" />
     <include file="./assets/LINK_17/assets.xml" />
     <include file="./assets/LINK_18/assets.xml" />
-    <include file="./assets/LINK_19/assets.xml" />
-    <include file="./assets/LINK_20/assets.xml" />
+    <include file="./assets/LINK_19_V1.1/assets.xml" />
+    <include file="./assets/LINK_20_V1.1/assets.xml" />
     <include file="./assets/PAN_TILT_1/assets.xml" />
     <include file="./assets/PAN_TILT_2/assets.xml" />
     <include file="./assets/PAN_TILT_3/assets.xml" />
@@ -101,12 +101,12 @@
                   <include file="./assets/LINK_6/geoms.xml" />
                   <geom size="0.155 0.0675" pos="0 0 0.0075" class="in-model-collision" />
                   <include file="./assets/PAN_TILT_1/geoms.xml" />
-                  <body name="link_right_arm_0" pos="0 -0.22 0.0800735" quat="0.984808 -0.173648 0 0">
+                  <body name="link_right_arm_0" pos="0 -0.22 0.0800735">
                     <inertial pos="-0.00316662 0.0343718 -3e-07" quat="0.536676 0.553304 0.439546 0.461122" mass="1.26164" diaginertia="0.00433912 0.00432154 0.00223129" />
-                    <joint name="right_arm_0" pos="0 0 0" axis="0 1 0" limited="true" range="-2.35619 2.35619" />
+                    <joint name="right_arm_0" pos="0 0 0" axis="0 0.939693 -0.34202" limited="true" range="-2.35619 2.35619" />
                     <include file="./assets/LINK_7/geoms.xml" />
                     <geom size="0.075 0.035" pos="-0.015 0.018 -0.008" quat="0.707105 0 0.707108 0" class="in-model-collision" />
-                    <body name="link_right_arm_1" quat="0.984808 0.173648 0 0">
+                    <body name="link_right_arm_1">
                       <inertial pos="-0.00307855 -0.00124741 -0.0129432" quat="0.691024 -0.061096 -0.016345 0.72006" mass="2.27287" diaginertia="0.00447747 0.0038967 0.00286448" />
                       <joint name="right_arm_1" pos="0 0 0" axis="1 0 0" limited="true" range="-3.14159 0.05" />
                       <include file="./assets/LINK_8/geoms.xml" />
@@ -127,28 +127,24 @@
                             <include file="./assets/LINK_11/geoms.xml" />
                             <geom size="0.035 0.0475" pos="0 -0.038 0.0175" class="in-model-collision" />
                             <body name="link_right_arm_5">
-                              <inertial pos="0.00318034 -0.00532264 -0.0280966" quat="0.559407 0.0608226 -0.0803636 0.822743" mass="1.59194" diaginertia="0.00262685 0.00255036 0.00151658" />
+                              <inertial pos="0.00592642 -0.00537804 -0.02584713" mass="1.60506693" fullinertia="0.00247557 0.00268241 0.00166724 -0.00004984 -0.00009861 0.00021452" />
                               <joint name="right_arm_5" pos="0 0 0" axis="0 1 0" limited="true" range="-1.74533 2.00713" />
-                              <include file="./assets/LINK_12/geoms.xml" />
+                              <include file="./assets/LINK_12_V1.1/geoms.xml" />
                               <geom size="0.075 0.026" pos="0 0 -0.024" class="in-model-collision" />
                               <body name="link_right_arm_6">
-                                <inertial pos="0.00101419 0.000398553 -0.149904" quat="0.730015 -0.0098152 -0.00428736 0.683347" mass="1.16921" diaginertia="0.00296506 0.00265919 0.00114611" />
+                                <inertial pos="0.00024951 -0.00019562 -0.10711314" mass="0.42751673" fullinertia="0.00029613 0.00030651 0.00048946 -0.00000186 -0.00000157 0.00000221" />
                                 <joint name="right_arm_6" pos="0 0 0" axis="0 0 1" limited="true" range="-2.96706 2.96706" />
-                                <include file="./assets/LINK_13/geoms.xml" />
-                                <body name="FT_SENSOR_R" pos="0 0 -0.1087">
-                                  <inertial pos="0 0 0" mass="0" />
-                                  <include file="./assets/FT_SENSOR_R/geoms.xml" />
-                                </body>
-                                <body name="EE_BODY_R" pos="0 0 -0.1548">
-                                  <inertial pos="0 0 0" mass="0" />
+                                <include file="./assets/LINK_13_V1.1/geoms.xml" />
+                                <body name="EE_BODY_R" pos="0 0 -0.1261">
+                                  <inertial pos="0.00212703 0.00000615 -0.04287176" mass="0.46704998" fullinertia="0.00032067 0.00059559 0.00052732 0.00002383 -0.00000785 -0.00000007" />
                                   <include file="./assets/EE_BODY/geoms.xml" />
                                 </body>
-                                <body name="ee_finger_r1" pos="0.003 0 -0.2278">
+                                <body name="ee_finger_r1" pos="0.003 0 -0.2001">
                                   <inertial pos="0.00278346 -3.29e-06 -0.0257011" quat="0.999784 0 0.0208044 0" mass="0.03327" diaginertia="1.23275e-05 1.066e-05 2.22251e-06" />
                                   <joint name="gripper_finger_r1" pos="0 0 0" axis="-1 0 0" type="slide" limited="true" range="-0.05 0" />
                                   <include file="./assets/EE_FINGER/geoms.xml" />
                                 </body>
-                                <body name="ee_finger_r2" pos="-0.003 0 -0.2278" quat="4.48966e-11 0 0 1">
+                                <body name="ee_finger_r2" pos="-0.003 0 -0.2001" quat="4.48966e-11 0 0 1">
                                   <inertial pos="0.00278346 -3.29e-06 -0.0257011" quat="0.999784 0 0.0208044 0" mass="0.03327" diaginertia="1.23275e-05 1.066e-05 2.22251e-06" />
                                   <joint name="gripper_finger_r2" pos="0 0 0" axis="1 0 0" type="slide" limited="true" range="0 0.05" />
                                   <include file="./assets/EE_FINGER/geoms.xml" />
@@ -160,12 +156,12 @@
                       </body>
                     </body>
                   </body>
-                  <body name="link_left_arm_0" pos="0 0.22 0.0800735" quat="0.984808 0.173648 0 0">
+                  <body name="link_left_arm_0" pos="0 0.22 0.0800735">
                     <inertial pos="-0.00316662 -0.0343715 2.42e-06" quat="0.441442 0.459281 0.538276 0.551768" mass="1.26164" diaginertia="0.0043391 0.00432158 0.00223133" />
-                    <joint name="left_arm_0" pos="0 0 0" axis="0 1 0" limited="true" range="-2.35619 2.35619" />
+                    <joint name="left_arm_0" pos="0 0 0" axis="0 0.939693 0.34202" limited="true" range="-2.35619 2.35619" />
                     <include file="./assets/LINK_14/geoms.xml" />
                     <geom size="0.075 0.035" pos="-0.015 -0.018 -0.008" quat="0.707105 0 0.707108 0" class="in-model-collision" />
-                    <body name="link_left_arm_1" quat="0.984808 -0.173648 0 0">
+                    <body name="link_left_arm_1">
                       <inertial pos="-0.0018347 0.00040596 -0.0100873" quat="0.701113 -0.0246572 -0.049881 0.710875" mass="1.88139" diaginertia="0.00355382 0.00296561 0.0022966" />
                       <joint name="left_arm_1" pos="0 0 0" axis="1 0 0" limited="true" range="-0.05 3.14159" />
                       <include file="./assets/LINK_15/geoms.xml" />
@@ -186,28 +182,24 @@
                             <include file="./assets/LINK_18/geoms.xml" />
                             <geom size="0.035 0.0475" pos="0 0.038 0.0175" class="in-model-collision" />
                             <body name="link_left_arm_5">
-                              <inertial pos="0.00340082 0.00576824 -0.0250731" quat="0.874666 -0.0845974 0.0492323 0.474742" mass="1.44265" diaginertia="0.00238544 0.00231489 0.00134498" />
+                              <inertial pos="0.00592398 -0.01167056 -0.02584035" mass="1.60424243" fullinertia="0.00247523 0.00268221 0.00166703 -0.00004992 -0.00009867 0.00021464" />
                               <joint name="left_arm_5" pos="0 0 0" axis="0 1 0" limited="true" range="-1.74533 2.00713" />
-                              <include file="./assets/LINK_19/geoms.xml" />
+                              <include file="./assets/LINK_19_V1.1/geoms.xml" />
                               <geom size="0.075 0.026" pos="0 0 -0.024" class="in-model-collision" />
                               <body name="link_left_arm_6">
-                                <inertial pos="-0.00092669 0.000508285 -0.149904" quat="0.72966 0.00249295 0.012223 0.683697" mass="1.16921" diaginertia="0.00296541 0.00265922 0.00114589" />
+                                <inertial pos="-0.00024951 0.00019562 -0.10711314" mass="0.42751673" fullinertia="0.00029613 0.00030651 0.00048946 -0.00000186 0.00000157 -0.00000221" />
                                 <joint name="left_arm_6" pos="0 0 0" axis="0 0 1" limited="true" range="-2.96706 2.96706" />
-                                <include file="./assets/LINK_20/geoms.xml" />
-                                <body name="FT_SENSOR_L" pos="0 0 -0.1087">
-                                  <inertial pos="0 0 0" mass="0"/>
-                                  <include file="./assets/FT_SENSOR_L/geoms.xml" />
-                                </body>
-                                <body name="EE_BODY_L" pos="0 0 -0.1548">
-                                  <inertial pos="0 0 0" mass="0" />
+                                <include file="./assets/LINK_20_V1.1/geoms.xml" />
+                                <body name="EE_BODY_L" pos="0 0 -0.1261">
+                                  <inertial pos="0.00212703 0.00000615 -0.04287176" mass="0.46704998" fullinertia="0.00032067 0.00059559 0.00052732 0.00002383 -0.00000785 -0.00000007" />
                                   <include file="./assets/EE_BODY/geoms.xml" />
                                 </body>
-                                <body name="ee_finger_l1" pos="-0.003 0 -0.2278" quat="4.48966e-11 0 0 1">
+                                <body name="ee_finger_l1" pos="-0.003 0 -0.2001" >
                                   <inertial pos="0.00278346 -3.29e-06 -0.0257011" quat="0.999784 0 0.0208044 0" mass="0.03327" diaginertia="1.23275e-05 1.066e-05 2.22251e-06" />
                                   <joint name="gripper_finger_l1" pos="0 0 0" axis="-1 0 0" type="slide" limited="true" range="-0.05 0" />
                                   <include file="./assets/EE_FINGER/geoms.xml" />
                                 </body>
-                                <body name="ee_finger_l2" pos="0.003 0 -0.2278" quat="-1 0 0 8.97932e-11">
+                                <body name="ee_finger_l2" pos="0.003 0 -0.2001" >
                                   <inertial pos="0.00278346 -3.29e-06 -0.0257011" quat="0.999784 0 0.0208044 0" mass="0.03327" diaginertia="1.23275e-05 1.066e-05 2.22251e-06" />
                                   <joint name="gripper_finger_l2" pos="0 0 0" axis="1 0 0" type="slide" limited="true" range="0 0.05" />
                                   <include file="./assets/EE_FINGER/geoms.xml" />

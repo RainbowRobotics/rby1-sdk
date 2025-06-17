@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="RBY1_A_v1.0"> <!-- This file is the same as 'model-v1.0.urdf' -->
+<robot name="RBY1_A_v1.1">
     <mobile type="differential" xyz="0.228 0 0" rpy="0 0 0" joints="right_wheel left_wheel"
             params="0.53 0.1"/> <!-- wheel_base, wheel_radius -->
 
@@ -292,15 +292,15 @@
 
     <link name="link_right_arm_5">
         <inertial>
-            <mass value="1.59194395"/>
-            <origin rpy="0 0 0" xyz="0.00318034 -0.00532264 -0.02809655"/>
-            <inertia ixx="0.00256054" ixy="-0.00002344" ixz="-0.00001563" iyy="0.00257233"
-                     iyz="0.00021608" izz="0.00156092"/>
+            <mass value="1.60506693"/>
+            <origin rpy="0 0 0" xyz="0.00592642 -0.00537804 -0.02584713"/>
+            <inertia ixx="0.00247557" ixy="-0.00004984" ixz="-0.00009861" iyy="0.00268241"
+                     iyz="0.00021452" izz="0.00166724"/>
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_12.dae"/>
+                <mesh filename="./meshes/LINK_12_v1.1.dae"/>
             </geometry>
         </visual>
 
@@ -315,15 +315,15 @@
 
     <link name="link_right_arm_6">
         <inertial>
-            <mass value="0.21137279"/>
-            <origin rpy="0 0 0" xyz="0.00066810 -0.00031708 -0.09636043"/>
-            <inertia ixx="0.00013511" ixy="-0.00000242" ixz="-0.00000102" iyy="0.00014453"
-                     iyz="0.00000094" izz="0.00025431"/>
+            <mass value="0.42751673"/>
+            <origin rpy="0 0 0" xyz="0.00024951 -0.00019562 -0.10711314"/>
+            <inertia ixx="0.00029613" ixy="-0.00000186" ixz="-0.00000157" iyy="0.00030651"
+                     iyz="0.00000221" izz="0.00048946"/>
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_13.dae"/>
+                <mesh filename="./meshes/LINK_13_v1.1.dae"/>
             </geometry>
         </visual>
     </link>
@@ -440,15 +440,15 @@
 
     <link name="link_left_arm_5">
         <inertial>
-            <mass value="1.44264795"/>
-            <origin rpy="0 0 0" xyz="0.00340082 0.00576824 -0.02507309"/>
-            <inertia ixx="0.00233577" ixy="0.00003048" ixz="-0.00001191" iyy="0.00232580"
-                     iyz="-0.00019491" izz="0.00138375"/>
+            <mass value="1.60424243"/>
+            <origin rpy="0 0 0" xyz="0.00592398 -0.01167056 -0.02584035"/>
+            <inertia ixx="0.00247523" ixy="-0.00004992" ixz="-0.00009867" iyy="0.00268221"
+                     iyz="0.00021464" izz="0.00166703"/>
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_19.dae"/>
+                <mesh filename="./meshes/LINK_19_v1.1.dae"/>
             </geometry>
         </visual>
 
@@ -462,45 +462,15 @@
 
     <link name="link_left_arm_6">
         <inertial>
-            <mass value="0.21137279"/>
-            <origin rpy="0 0 0" xyz="-0.00066810 0.00031708 -0.09636043"/>
-            <inertia ixx="0.00013511" ixy="-0.00000242" ixz="0.00000102" iyy="0.00014453"
-                     iyz="-0.00000094" izz="0.00025431"/>
+            <mass value="0.42751673"/>
+            <origin rpy="0 0 0" xyz="-0.00024951 0.00019562 -0.10711314"/>
+            <inertia ixx="0.00029613" ixy="-0.00000186" ixz="0.00000157" iyy="0.00030651"
+                     iyz="-0.00000221" izz="0.00048946"/>
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_20.dae"/>
-            </geometry>
-        </visual>
-    </link>
-
-    <link name="FT_sensor_R">
-        <inertial>
-            <mass value="0.49078507"/>
-            <origin rpy="0 0 0" xyz="0.00010423 0.00108019 -0.01880676"/>
-            <inertia ixx="0.00028587" ixy="-0.00000146" ixz="-0.00000026" iyy="0.00030459"
-                     iyz="-0.00000772" izz="0.00036377"/>
-        </inertial>
-
-        <visual>
-            <geometry>
-                <mesh filename="./meshes/FT_SENSOR_R.dae"/>
-            </geometry>
-        </visual>
-    </link>
-
-    <link name="FT_sensor_L">
-        <inertial>
-            <mass value="0.49078507"/>
-            <origin rpy="0 0 0" xyz="-0.00010423 -0.00108019 -0.01880676"/>
-            <inertia ixx="0.00028587" ixy="-0.00000146" ixz="0.00000026" iyy="0.00030459" iyz="0.00000772"
-                     izz="0.00036377"/>
-        </inertial>
-
-        <visual>
-            <geometry>
-                <mesh filename="./meshes/FT_SENSOR_L.dae"/>
+                <mesh filename="./meshes/LINK_20_v1.1.dae"/>
             </geometry>
         </visual>
     </link>
@@ -751,8 +721,8 @@
     <joint name="right_arm_0" type="revolute">
         <parent link="link_torso_5"/>
         <child link="link_right_arm_0"/>
-        <origin rpy="-0.349065850  0.0 0.0" xyz="0.0 -0.220 0.080073451539 "/>
-        <axis xyz="0 1 0"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 -0.220 0.080073451539 "/>
+        <axis xyz="0.0 0.93969262 -0.34202014"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -180deg, 180deg -->
         <limit effort="70.0"
@@ -766,7 +736,7 @@
     <joint name="right_arm_1" type="revolute">
         <parent link="link_right_arm_0"/>
         <child link="link_right_arm_1"/>
-        <origin rpy="0.349065850 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <axis xyz="1 0 0"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -180deg, 1deg -->
@@ -856,8 +826,8 @@
     <joint name="left_arm_0" type="revolute">
         <parent link="link_torso_5"/>
         <child link="link_left_arm_0"/>
-        <origin rpy="0.349065850  0.0 0.0" xyz="0.0 0.220 0.080073452 "/>
-        <axis xyz="0 1 0"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.220 0.080073452 "/>
+        <axis xyz="0.0 0.93969262 0.34202014"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -180deg, 180deg -->
         <limit effort="70.0"
@@ -871,7 +841,7 @@
     <joint name="left_arm_1" type="revolute">
         <parent link="link_left_arm_0"/>
         <child link="link_left_arm_1"/>
-        <origin rpy="-0.349065850 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <axis xyz="1 0 0"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -1deg, 180deg -->
@@ -960,22 +930,15 @@
 
     <joint name="tool_right" type="fixed">
         <parent link="link_right_arm_6"/>
-        <child link="FT_sensor_R"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.1087"/>
-        <axis xyz="0 0 1"/>
-    </joint>
-
-    <joint name="FT_Sensor_END_right" type="fixed">
-        <parent link="FT_sensor_R"/>
         <child link="ee_right"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0461"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.1261"/>
         <axis xyz="0 0 1"/>
     </joint>
 
     <joint name="gripper_finger_r1" type="prismatic" in_model_type="fixed">
         <parent link="ee_right"/>
         <child link="ee_finger_r1"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.003 0.0 -0.073"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.003 0.0 -0.075"/>
         <axis xyz="-1 0 0"/>
         <limit effort="1000" velocity="0.05" lower="-0.05" upper="0"/>
     </joint>
@@ -983,29 +946,22 @@
     <joint name="gripper_finger_r2" type="prismatic" in_model_type="fixed">
         <parent link="ee_right"/>
         <child link="ee_finger_r2"/>
-        <origin rpy="0.0 0.0 3.1415926535" xyz="-0.003 0.0 -0.073"/>
+        <origin rpy="0.0 0.0 3.1415926535" xyz="-0.003 0.0 -0.075"/>
         <axis xyz="1 0 0"/>
         <limit effort="1000" velocity="0.05" lower="0" upper="0.05"/>
     </joint>
 
     <joint name="tool_left" type="fixed">
         <parent link="link_left_arm_6"/>
-        <child link="FT_sensor_L"/>
-        <origin rpy="0.0 0.0 0" xyz="0.0 0.0 -0.1087"/>
-        <axis xyz="0 0 1"/>
-    </joint>
-
-    <joint name="FT_Sensor_END_left" type="fixed">
-        <parent link="FT_sensor_L"/>
         <child link="ee_left"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.0461"/>
+        <origin rpy="0.0 0.0 0" xyz="0.0 0.0 -0.1261"/>
         <axis xyz="0 0 1"/>
     </joint>
 
     <joint name="gripper_finger_l1" type="prismatic" in_model_type="fixed">
         <parent link="ee_left"/>
         <child link="ee_finger_l1"/>
-        <origin rpy="0.0 0.0 0.0" xyz="0.003 0.0 -0.073"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.003 0.0 -0.075"/>
         <axis xyz="-1 0 0"/>
         <limit effort="1000" velocity="0.05" lower="-0.05" upper="0"/>
     </joint>
@@ -1013,7 +969,7 @@
     <joint name="gripper_finger_l2" type="prismatic" in_model_type="fixed">
         <parent link="ee_left"/>
         <child link="ee_finger_l2"/>
-        <origin rpy="0.0 0.0 3.1415926535" xyz="-0.003 0.0 -0.073"/>
+        <origin rpy="0.0 0.0 3.1415926535" xyz="-0.003 0.0 -0.075"/>
         <axis xyz="1 0 0"/>
         <limit effort="1000" velocity="0.05" lower="0" upper="0.05"/>
     </joint>

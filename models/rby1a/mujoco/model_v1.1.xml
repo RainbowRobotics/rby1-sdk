@@ -16,7 +16,7 @@
         </default>
     </default>
 
-    <include file="./rby1.xml"/>
+    <include file="./rby1_v1.1.xml"/>
 
     <actuator>
         <motor name="left_wheel_act" joint="left_wheel"/>

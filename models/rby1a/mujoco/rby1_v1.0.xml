@@ -101,12 +101,12 @@
                   <include file="./assets/LINK_6/geoms.xml" />
                   <geom size="0.155 0.0675" pos="0 0 0.0075" class="in-model-collision" />
                   <include file="./assets/PAN_TILT_1/geoms.xml" />
-                  <body name="link_right_arm_0" pos="0 -0.22 0.0800735" quat="0.984808 -0.173648 0 0">
+                  <body name="link_right_arm_0" pos="0 -0.22 0.0800735">
                     <inertial pos="-0.00316662 0.0343718 -3e-07" quat="0.536676 0.553304 0.439546 0.461122" mass="1.26164" diaginertia="0.00433912 0.00432154 0.00223129" />
-                    <joint name="right_arm_0" pos="0 0 0" axis="0 1 0" limited="true" range="-2.35619 2.35619" />
+                    <joint name="right_arm_0" pos="0 0 0" axis="0 0.939693 -0.34202" limited="true" range="-2.35619 2.35619" />
                     <include file="./assets/LINK_7/geoms.xml" />
                     <geom size="0.075 0.035" pos="-0.015 0.018 -0.008" quat="0.707105 0 0.707108 0" class="in-model-collision" />
-                    <body name="link_right_arm_1" quat="0.984808 0.173648 0 0">
+                    <body name="link_right_arm_1">
                       <inertial pos="-0.00307855 -0.00124741 -0.0129432" quat="0.691024 -0.061096 -0.016345 0.72006" mass="2.27287" diaginertia="0.00447747 0.0038967 0.00286448" />
                       <joint name="right_arm_1" pos="0 0 0" axis="1 0 0" limited="true" range="-3.14159 0.05" />
                       <include file="./assets/LINK_8/geoms.xml" />
@@ -160,12 +160,12 @@
                       </body>
                     </body>
                   </body>
-                  <body name="link_left_arm_0" pos="0 0.22 0.0800735" quat="0.984808 0.173648 0 0">
+                  <body name="link_left_arm_0" pos="0 0.22 0.0800735">
                     <inertial pos="-0.00316662 -0.0343715 2.42e-06" quat="0.441442 0.459281 0.538276 0.551768" mass="1.26164" diaginertia="0.0043391 0.00432158 0.00223133" />
-                    <joint name="left_arm_0" pos="0 0 0" axis="0 1 0" limited="true" range="-2.35619 2.35619" />
+                    <joint name="left_arm_0" pos="0 0 0" axis="0 0.939693 0.34202" limited="true" range="-2.35619 2.35619" />
                     <include file="./assets/LINK_14/geoms.xml" />
                     <geom size="0.075 0.035" pos="-0.015 -0.018 -0.008" quat="0.707105 0 0.707108 0" class="in-model-collision" />
-                    <body name="link_left_arm_1" quat="0.984808 -0.173648 0 0">
+                    <body name="link_left_arm_1">
                       <inertial pos="-0.0018347 0.00040596 -0.0100873" quat="0.701113 -0.0246572 -0.049881 0.710875" mass="1.88139" diaginertia="0.00355382 0.00296561 0.0022966" />
                       <joint name="left_arm_1" pos="0 0 0" axis="1 0 0" limited="true" range="-0.05 3.14159" />
                       <include file="./assets/LINK_15/geoms.xml" />

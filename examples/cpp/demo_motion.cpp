@@ -1,11 +1,13 @@
 #include <chrono>
-#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <thread>
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 #include "rby1-sdk/robot_command_builder.h"
+
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 using namespace rb;
 using namespace std::chrono_literals;

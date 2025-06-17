@@ -28,7 +28,7 @@ class RBY1_SDK_API QPSolverException : public std::exception {
 
 class QPSolverImpl;
 
-class QPSolver {
+class RBY1_SDK_API QPSolver {
  public:
   QPSolver();
 

@@ -81,9 +81,15 @@ jobs:
           conan profile detect --force
           conan install . -s build_type=Release -b missing -of build
 
-      - name: Configure CMake
+      - name: Configure CMake (Linux or macOS)
+        if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}
         run: |
-          cmake --preset conan-release -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+          cmake --preset conan-release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+
+      - name: Configure CMake (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
 
       - name: Build and Install
         run: |

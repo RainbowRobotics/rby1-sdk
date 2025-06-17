@@ -68,7 +68,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install cmake
-          python3 -m pip install --upgrade pip conan
+          python3 -m pip install --upgrade pip conan --break-system-packages
 
       - name: Install Dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -83,10 +83,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake --preset conan-release \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output \
-            -DBUILD_EXAMPLES=ON
+          cmake --preset conan-release -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
 
       - name: Build and Install
         run: |

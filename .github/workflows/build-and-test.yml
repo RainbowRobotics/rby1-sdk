@@ -63,21 +63,46 @@ jobs:
           sudo apt-get install -y build-essential
           python3 -m pip install --upgrade pip conan
 
+      - name: Install Dependencies (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+          python3 -m pip install --upgrade pip conan
+
+      - name: Install Dependencies (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install cmake
+          python3 -m pip install --upgrade pip conan
+
+      - name: Install Dependencies (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' --yes
+          python -m pip install --upgrade pip conan
+
       - name: Configure Conan
         run: |
           conan profile detect --force
-          conan install . -s build_type=Release -b missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True -of build
+          conan install . -s build_type=Release -b missing -of build
 
-      - name: CMake Build and Install
+      - name: Configure CMake
         run: |
-          cmake --preset conan-release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+          cmake --preset conan-release \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output \
+            -DBUILD_EXAMPLES=ON
+
+      - name: Build and Install
+        run: |
           cmake --build --target install --preset conan-release
+          cp README.md LICENSE NOTICE _output || true
 
-          cp README.md LICENSE NOTICE "${{ github.workspace }}/_output"
-
-          TAR_NAME=rby1_sdk-${{ matrix.os }}.tar.gz
-          tar -czvf "$TAR_NAME" -C _output .
-          echo "TAR_FILE=$TAR_NAME" >> $GITHUB_ENV
+      - name: Archive SDK
+        run: |
+          tar -czvf rby1_sdk-${{ matrix.os }}.tar.gz -C _output .
+          echo "TAR_FILE=rby1_sdk-${{ matrix.os }}.tar.gz" >> $GITHUB_ENV
 
       - name: Upload SDK Artifact
         uses: actions/upload-artifact@v4

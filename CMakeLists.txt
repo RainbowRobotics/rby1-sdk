@@ -68,11 +68,13 @@ protobuf_generate(
 
 ############################################################
 
-
+if (MSVC)
+    add_compile_options(/bigobj)
+endif ()
 
 configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in
-    ${CMAKE_CURRENT_BINARY_DIR}/version.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/version.h
 )
 
 add_subdirectory(third-party)
@@ -82,7 +84,7 @@ find_package(Threads REQUIRED)
 
 if (BUILD_EXAMPLES)
     add_subdirectory(examples/cpp)
-#     target_link_libraries(example_master_arm PRIVATE Threads::Threads)
+    #     target_link_libraries(example_master_arm PRIVATE Threads::Threads)
     target_link_libraries(example_teleoperation_with_joint_mapping PRIVATE Threads::Threads)
 endif ()
 

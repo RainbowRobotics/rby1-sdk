@@ -27,7 +27,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install
-        run: pip install .
+        run: pip install . -v
         env:
           CC: ${{ matrix.os == 'ubuntu-22.04-arm' && '/usr/bin/aarch64-linux-gnu-gcc' || '' }}
 
@@ -77,7 +77,7 @@ jobs:
 
       - name: Install Dependencies (Release)
         run: |
-          conan install . -s build_type=Release -b missing -of build
+          conan install . -s compiler.cppstd=17 -s build_type=Release -b missing -of build
 
       - name: Configure CMake (Linux or macOS - Release)
         if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}
@@ -98,7 +98,7 @@ jobs:
 
       - name: Install Dependencies (Debug)
         run: |
-          conan install . -s build_type=Debug -b missing -of build
+          conan install . -s compiler.cppstd=17 -s build_type=Debug -b missing -of build
 
       - name: Configure CMake (Linux or macOS - Debug)
         if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}

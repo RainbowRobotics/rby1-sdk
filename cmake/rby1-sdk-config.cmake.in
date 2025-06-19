@@ -14,4 +14,4 @@ if (NOT TARGET rby1-sdk::rby1-sdk)
     include("${RBY1-SDK_CMAKE_DIR}/rby1-sdk-targets.cmake")
 endif ()
 
-set(RBPODO_LIBRARIES rby1-sdk::rby1-sdk)
+set(RBY1_SDK_LIBRARIES rby1-sdk::rby1-sdk)

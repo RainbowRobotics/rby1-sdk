@@ -34,7 +34,7 @@ class rby1_sdkRecipe(ConanFile):
     exports_sources = ["CMakeLists.txt", "src/", "protos/", "include/", "generated/", "examples/"]
 
     def requirements(self):
-        self.requires("grpc/1.54.3")
+        self.requires("grpc/1.72.0")
         self.requires("eigen/3.4.0")
         self.requires("tinyxml2/10.0.0", visible=False)
         self.requires("nlohmann_json/3.11.3")

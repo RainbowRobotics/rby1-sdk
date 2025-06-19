@@ -45,6 +45,11 @@ jobs:
           fetch-depth: 1
           submodules: recursive
 
+      - name: Make Output Directory
+        run: |
+          mkdir -p _output
+        shell: bash
+
       - name: Install Dependencies (Linux)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
@@ -67,27 +72,52 @@ jobs:
       - name: Configure Conan
         run: |
           conan profile detect --force
+
+      # RELEASE MODE
+
+      - name: Install Dependencies (Release)
+        run: |
           conan install . -s build_type=Release -b missing -of build
 
-      - name: Configure CMake (Linux or macOS)
+      - name: Configure CMake (Linux or macOS - Release)
         if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}
         run: |
           cmake --preset conan-release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
 
-      - name: Configure CMake (Windows)
+      - name: Configure CMake (Windows - Release)
         if: startsWith(matrix.os, 'windows')
         run: |
           cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
 
-      - name: Build and Install
+      - name: Build and Install (Release)
         run: |
-          mkdir -p _output
           cmake --build --target install --preset conan-release
-          cp README.md LICENSE NOTICE _output || true
+        shell: bash
+
+      # Debug MODE
+
+      - name: Install Dependencies (Debug)
+        run: |
+          conan install . -s build_type=Debug -b missing -of build
+
+      - name: Configure CMake (Linux or macOS - Debug)
+        if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}
+        run: |
+          cmake --preset conan-debug -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+
+      - name: Configure CMake (Windows - Debug)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+
+      - name: Build and Install (Debug)
+        run: |
+          cmake --build --target install --preset conan-debug
         shell: bash
 
       - name: Archive SDK
         run: |
+          cp README.md LICENSE NOTICE _output || true
           tar -czvf rby1_sdk-${{ matrix.os }}.tar.gz -C _output .
           echo "TAR_FILE=rby1_sdk-${{ matrix.os }}.tar.gz" >> $GITHUB_ENV
         shell: bash

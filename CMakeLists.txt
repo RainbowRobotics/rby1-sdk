@@ -44,7 +44,7 @@ find_package(nlohmann_json REQUIRED)
 # PROTO
 ############################################################
 
-set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/_protobuf)
+set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/_protobuf/${CMAKE_BUILD_TYPE})
 set(PROTO_IMPORT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/protos)
 file(MAKE_DIRECTORY ${PROTO_BINARY_DIR})
 file(GLOB_RECURSE PROTO_FILES ${PROTO_IMPORT_DIR}/*.proto)
@@ -67,6 +67,8 @@ protobuf_generate(
         PROTOC_OUT_DIR ${PROTO_BINARY_DIR})
 
 ############################################################
+
+
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in
@@ -104,9 +106,10 @@ if ((NOT BUILD_PYTHON_BINDINGS)
 
     install(TARGETS rby1-sdk
             EXPORT rby1-sdk-targets
-            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+            CONFIGURATIONS Debug Release
+            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/$<CONFIG>
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/$<CONFIG>
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/$<CONFIG>)
 
     set_target_properties(rby1-sdk PROPERTIES EXPORT_NAME rby1-sdk)
 
@@ -117,12 +120,9 @@ if ((NOT BUILD_PYTHON_BINDINGS)
     endif ()
 
     install(EXPORT rby1-sdk-targets
-            FILE
-            rby1-sdk-targets.cmake
-            NAMESPACE
-            rby1-sdk::
-            DESTINATION
-            ${INSTALL_CONFIGDIR})
+            FILE rby1-sdk-targets.cmake
+            NAMESPACE rby1-sdk::
+            DESTINATION ${INSTALL_CONFIGDIR})
 
     include(CMakePackageConfigHelpers)
     configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/rby1-sdk-config.cmake.in

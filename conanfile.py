@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
 import re
 
 
@@ -32,6 +33,14 @@ class rby1_sdkRecipe(ConanFile):
 
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = ["CMakeLists.txt", "src/", "protos/", "include/", "generated/", "examples/"]
+
+    @property
+    def _cxxstd_required(self):
+        return 17
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._cxxstd_required)
 
     def requirements(self):
         self.requires("grpc/1.72.0")

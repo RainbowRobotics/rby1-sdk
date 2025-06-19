@@ -85,7 +85,7 @@ if __name__ == "__main__":
             "python_requires": ">=3.10",
             "install_requires": [],
             "cmake_args": ["-DBUILD_PYTHON_BINDINGS=ON"],
-            # "conan_profile_settings": {"compiler.cppstd": 17},
+            "conan_profile_settings": {"compiler.cppstd": 17},
             "cmake_minimum_required_version": "3.28",
         }
     )

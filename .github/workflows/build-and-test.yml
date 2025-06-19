@@ -82,12 +82,12 @@ jobs:
       - name: Configure CMake (Linux or macOS - Release)
         if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}
         run: |
-          cmake --preset conan-release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+          cmake --preset conan-release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON -DINSTALL_MODELS=OFF
 
       - name: Configure CMake (Windows - Release)
         if: startsWith(matrix.os, 'windows')
         run: |
-          cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+          cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON -DINSTALL_MODELS=OFF
 
       - name: Build and Install (Release)
         run: |
@@ -103,12 +103,12 @@ jobs:
       - name: Configure CMake (Linux or macOS - Debug)
         if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}
         run: |
-          cmake --preset conan-debug -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+          cmake --preset conan-debug -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON -DINSTALL_MODELS=OFF
 
       - name: Configure CMake (Windows - Debug)
         if: startsWith(matrix.os, 'windows')
         run: |
-          cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON
+          cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON -DINSTALL_MODELS=OFF
 
       - name: Build and Install (Debug)
         run: |

@@ -37,7 +37,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022, macos-14, ubuntu-22.04-arm]
+        include:
+          - os: ubuntu-22.04
+            tag: linux-x86_64-gcc11
+          - os: ubuntu-22.04-arm
+            tag: linux-armv8-gcc11
+          - os: windows-2022
+            tag: windows-x86_64-msvc194
+          - os: macos-14
+            tag: macos-armv8-appleclang15
 
     steps:
       - uses: actions/checkout@v4
@@ -116,14 +124,16 @@ jobs:
         shell: bash
 
       - name: Archive SDK
+        id: archive
         run: |
           cp README.md LICENSE NOTICE _output || true
-          tar -czvf rby1_sdk-${{ matrix.os }}.tar.gz -C _output .
-          echo "TAR_FILE=rby1_sdk-${{ matrix.os }}.tar.gz" >> $GITHUB_ENV
+          tar_file=rby1_sdk-${{ matrix.tag }}.tar.gz
+          tar -czvf "$tar_file" -C _output .
+          echo "TAR_FILE=$tar_file" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Upload SDK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rby1_sdk-${{ matrix.os }}
-          path: ${{ env.TAR_FILE }}
+          name: rby1_sdk-${{ matrix.tag }}
+          path: ${{ steps.archive.outputs.TAR_FILE }}

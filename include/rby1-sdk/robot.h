@@ -1,6 +1,6 @@
 #pragma once
 
-#include "version.h"
+#include "rby1-sdk/version.h"
 
 #include <condition_variable>
 #include <functional>

@@ -25,14 +25,13 @@ struct RBY1_SDK_API JointInfo {
 };
 
 struct RBY1_SDK_API RobotInfo {
-  /**
-   * @deprecated Use `robot_model_name` instead.
-   */
-  std::string robot_version{};
+  std::string version{};
+
+  std::string sdk_version{};
 
   std::string robot_model_name{};
 
-  std::string sdk_commit_id{};
+  std::string robot_model_version{};
 
   BatteryInfo battery_info;
 
@@ -55,6 +54,16 @@ struct RBY1_SDK_API RobotInfo {
   std::vector<unsigned int> right_arm_joint_idx{};
 
   std::vector<unsigned int> left_arm_joint_idx{};
+
+  /**
+   * @deprecated Use `robot_model_name` instead.
+   */
+  std::string robot_version{};
+
+  /**
+   * @deprecated Use `sdk_version` instead.
+   */
+  std::string sdk_commit_id{};
 };
 
 }  // namespace rb

@@ -67,8 +67,11 @@ void bind_joint_info(py::module_& m) {
 void bind_robot_info(py::module_& m) {
   py::class_<RobotInfo>(m, "RobotInfo")
       .def(py::init<>())
+      .def_readonly("version", &RobotInfo::version)
+      .def_readonly("sdk_version", &RobotInfo::sdk_version)
       .def_readonly("robot_version", &RobotInfo::robot_version)
       .def_readonly("robot_model_name", &RobotInfo::robot_model_name)
+      .def_readonly("robot_model_version", &RobotInfo::robot_model_version)
       .def_readonly("sdk_commit_id", &RobotInfo::sdk_commit_id)
       .def_readonly("battery_info", &RobotInfo::battery_info)
       .def_readonly("power_infos", &RobotInfo::power_infos)
@@ -93,16 +96,17 @@ void bind_robot_info(py::module_& m) {
           out << "]";
         };
         std::stringstream ss;
-        ss << std::fixed << std::setprecision(kDoublePrecision)       //
-           << "RobotInfo("                                            //
-           << "robot_version='" << self.robot_version << "'"          //
-           << ", robot_model_name='" << self.robot_model_name << "'"  //
-           << ", sdk_commit_id='" << self.sdk_commit_id << "'"        //
-           << ", battery_info={}"                                     //
-           << ", num_power_infos=" << self.power_infos.size()         //
-           << ", num_emo_infos=" << self.emo_infos.size()             //
-           << ", degree_of_freedom=" << self.degree_of_freedom        //
-           << ", num_joint_infos=" << self.joint_infos.size()         //
+        ss << std::fixed << std::setprecision(kDoublePrecision)             //
+           << "RobotInfo("                                                  //
+           << "version='" << self.version << "'"                            //
+           << ", sdk_version='" << self.sdk_version << "'"                  //
+           << ", robot_model_name='" << self.robot_model_name << "'"        //
+           << ", robot_model_version='" << self.robot_model_version << "'"  //
+           << ", battery_info={}"                                           //
+           << ", num_power_infos=" << self.power_infos.size()               //
+           << ", num_emo_infos=" << self.emo_infos.size()                   //
+           << ", degree_of_freedom=" << self.degree_of_freedom              //
+           << ", num_joint_infos=" << self.joint_infos.size()               //
            << ", mobility_joint_idx=";
         print(ss, self.mobility_joint_idx);
         ss << ", body_joint_idx=";
@@ -115,7 +119,10 @@ void bind_robot_info(py::module_& m) {
         print(ss, self.right_arm_joint_idx);
         ss << ", left_arm_joint_idx=";
         print(ss, self.left_arm_joint_idx);
-        ss << ")";
+        ss << ")"                                               //
+           << ", robot_version='" << self.robot_version << "'"  //
+           << ", sdk_commit_id='" << self.sdk_commit_id << "'"  //
+            ;
         return ss.str();
       });
 }

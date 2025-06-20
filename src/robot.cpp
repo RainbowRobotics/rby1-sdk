@@ -167,9 +167,15 @@ rb::JointInfo ProtoToJointInfo(const api::JointInfo& msg) {
 rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
   rb::RobotInfo info;
 
+  info.version = msg.version();
+
+  info.sdk_version = msg.sdk_version();
+
   info.robot_version = msg.robot_version();
 
   info.robot_model_name = msg.robot_model_name();
+
+  info.robot_model_version = msg.robot_model_version();
 
   info.sdk_commit_id = msg.sdk_commit_id();
 

@@ -751,8 +751,8 @@
     <joint name="right_arm_0" type="revolute">
         <parent link="link_torso_5"/>
         <child link="link_right_arm_0"/>
-        <origin rpy="-0.349065850  0.0 0.0" xyz="0.0 -0.220 0.080073451539 "/>
-        <axis xyz="0 1 0"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 -0.220 0.080073451539 "/>
+        <axis xyz="0.0 0.93969262 -0.34202014"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -180deg, 180deg -->
         <limit effort="70.0"
@@ -766,7 +766,7 @@
     <joint name="right_arm_1" type="revolute">
         <parent link="link_right_arm_0"/>
         <child link="link_right_arm_1"/>
-        <origin rpy="0.349065850 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <axis xyz="1 0 0"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -180deg, 1deg -->
@@ -856,8 +856,8 @@
     <joint name="left_arm_0" type="revolute">
         <parent link="link_torso_5"/>
         <child link="link_left_arm_0"/>
-        <origin rpy="0.349065850  0.0 0.0" xyz="0.0 0.220 0.080073452 "/>
-        <axis xyz="0 1 0"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.220 0.080073452 "/>
+        <axis xyz="0.0 0.93969262 0.34202014"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -180deg, 180deg -->
         <limit effort="70.0"
@@ -871,7 +871,7 @@
     <joint name="left_arm_1" type="revolute">
         <parent link="link_left_arm_0"/>
         <child link="link_left_arm_1"/>
-        <origin rpy="-0.349065850 0.0 0.0" xyz="0.0 0.0 0.0"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
         <axis xyz="1 0 0"/>
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -1deg, 180deg -->

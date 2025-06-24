@@ -10,4 +10,6 @@ service LogService {
   rpc GetLogStream(GetLogStreamRequest) returns (stream GetLogStreamResponse) {}
 
   rpc SetLogLevel(SetLogLevelRequest) returns (SetLogLevelResponse) {}
+
+  rpc GetFaultLogList(GetFaultLogListRequest) returns (GetFaultLogListResponse) {}
 }

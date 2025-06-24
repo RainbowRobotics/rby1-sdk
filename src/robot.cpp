@@ -11,6 +11,7 @@
 #include "rb/api/robot_state.pb.h"
 
 #include "rb/api/control_manager_service.grpc.pb.h"
+#include "rb/api/file_service.grpc.pb.h"
 #include "rb/api/joint_operation_service.grpc.pb.h"
 #include "rb/api/led_service.grpc.pb.h"
 #include "rb/api/log_service.grpc.pb.h"
@@ -722,6 +723,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     system_service_ = api::SystemService::NewStub(channel_);
     serial_service_ = api::SerialService::NewStub(channel_);
     tool_flange_service_ = api::ToolFlangeService::NewStub(channel_);
+    file_service_ = api::FileService::NewStub(channel_);
 
     int retries = 0;
     while (retries < max_retries) {
@@ -1491,6 +1493,39 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     }
 
     return logs;
+  }
+
+  std::vector<std::string> GetFaultLogList() const {
+    api::GetFaultLogListRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::GetFaultLogListResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = log_service_->GetFaultLogList(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() != api::CommonError::CODE_OK) {
+          throw std::runtime_error("GetFaultLogList failed: " + res.response_header().error().message());
+        }
+      }
+    }
+
+    std::vector<std::string> fault_log_list;
+    for (const auto& log : res.fault_log_list()) {
+      fault_log_list.push_back(log);
+    }
+
+    return fault_log_list;
   }
 
   ControlManagerState GetControlManagerState() const {
@@ -2411,6 +2446,49 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
         std::make_unique<SerialStreamImpl>(serial_service_.get(), device_path, buadrate, bytesize, parity, stopbits)));
   }
 
+  bool DownloadFile(const std::string& path, std::ostream& output) const {
+    return DownloadFileToCallback(path, [&output](const char* data, size_t size) { output.write(data, size); });
+  }
+
+  bool DownloadFileToCallback(const std::string& path, std::function<void(const char*, size_t)> on_chunk) const {
+    api::DownloadFileRequest req;
+    req.set_file_path(path);
+
+    grpc::ClientContext context;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    std::unique_ptr<grpc::ClientReader<api::DownloadFileResponse>> reader(file_service_->DownloadFile(&context, req));
+
+    api::DownloadFileResponse chunk;
+    while (reader->Read(&chunk)) {
+      if (chunk.has_response_header()) {
+        if (chunk.response_header().has_error()) {
+          if (chunk.response_header().error().code() != api::CommonError::CODE_OK) {
+            std::cerr << "Error: " << chunk.response_header().error().message() << std::endl;
+            return false;
+          }
+        }
+      }
+
+      if (on_chunk) {
+        on_chunk(chunk.file_content().data(), chunk.file_content().size());
+      }
+    }
+
+    grpc::Status status = reader->Finish();
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    return true;
+  }
+
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
     explicit StateReader(std::shared_ptr<RobotImpl<T>> robot, api::RobotStateService::Stub* stub,
@@ -2830,6 +2908,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   std::unique_ptr<api::SystemService::Stub> system_service_;
   std::unique_ptr<api::SerialService::Stub> serial_service_;
   std::unique_ptr<api::ToolFlangeService::Stub> tool_flange_service_;
+  std::unique_ptr<api::FileService::Stub> file_service_;
 
   std::unique_ptr<StateReader> state_reader_;
   std::unique_ptr<LogReader> log_reader_;
@@ -3063,6 +3142,11 @@ std::vector<Log> Robot<T>::GetLastLog(unsigned int count) const {
 }
 
 template <typename T>
+std::vector<std::string> Robot<T>::GetFaultLogList() const {
+  return impl_->GetFaultLogList();
+}
+
+template <typename T>
 ControlManagerState Robot<T>::GetControlManagerState() const {
   return impl_->GetControlManagerState();
 }
@@ -3240,6 +3324,17 @@ template <typename T>
 std::unique_ptr<SerialStream> Robot<T>::OpenSerialStream(const std::string& device_path, int buadrate, int bytesize,
                                                          char parity, int stopbits) const {
   return impl_->OpenSerialStream(device_path, buadrate, bytesize, parity, stopbits);
+}
+
+template <typename T>
+bool Robot<T>::DownloadFile(const std::string& path, std::ostream& output) const {
+  return impl_->DownloadFile(path, output);
+}
+
+template <typename T>
+bool Robot<T>::DownloadFileToCallback(const std::string& path,
+                                      std::function<void(const char*, size_t)> on_chunk) const {
+  return impl_->DownloadFileToCallback(path, on_chunk);
 }
 
 template <typename T>

@@ -250,6 +250,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("stop_log_stream", &Robot<T>::StopLogStream)
       .def("get_state", &Robot<T>::GetState, py::call_guard<py::gil_scoped_release>())
       .def("get_last_log", &Robot<T>::GetLastLog, "count"_a)
+      .def("get_fault_log_list", &Robot<T>::GetFaultLogList)
       .def("get_control_manager_state", &Robot<T>::GetControlManagerState)
       .def("send_command", &Robot<T>::SendCommand, "builder"_a, "priority"_a = 1)
       .def("create_command_stream", &Robot<T>::CreateCommandStream, "priority"_a = 1)
@@ -385,6 +386,11 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("get_serial_device_list", &Robot<T>::GetSerialDeviceList, py::call_guard<py::gil_scoped_release>())
       .def("open_serial_stream", &Robot<T>::OpenSerialStream, "device_path"_a, "baudrate"_a, "bytesize"_a = 8,
            "parity"_a = 'N', "stopbits"_a = 1)
+      .def("download_file",
+           [](Robot<T>& self, const std::string& path, py::object py_file_like) {
+             return self.DownloadFileToCallback(
+                 path, [&](const char* data, size_t size) { py_file_like.attr("write")(py::bytes(data, size)); });
+           })
 
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)

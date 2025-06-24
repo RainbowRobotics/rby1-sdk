@@ -147,6 +147,8 @@ class RBY1_SDK_API Robot : public std::enable_shared_from_this<Robot<T>> {
 
   std::vector<Log> GetLastLog(unsigned int count) const;
 
+  std::vector<std::string> GetFaultLogList() const;
+
   ControlManagerState GetControlManagerState() const;
 
   std::unique_ptr<RobotCommandHandler<T>> SendCommand(const RobotCommandBuilder& builder, int priority = 1);
@@ -222,6 +224,10 @@ class RBY1_SDK_API Robot : public std::enable_shared_from_this<Robot<T>> {
 
   std::unique_ptr<SerialStream> OpenSerialStream(const std::string& device_path, int buadrate, int bytesize,
                                                  char parity, int stopbits) const;
+
+  bool DownloadFile(const std::string& path, std::ostream& output) const;
+
+  bool DownloadFileToCallback(const std::string& path, std::function<void(const char*, size_t)> on_chunk) const;
 
  private:
   explicit Robot(std::string address);

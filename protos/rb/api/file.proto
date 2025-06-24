@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+
+message DownloadFileRequest {
+  RequestHeader request_header = 1;
+
+  string file_path = 2;
+}
+
+message DownloadFileResponse {
+  ResponseHeader response_header = 1;
+
+  bytes file_content = 2;
+}

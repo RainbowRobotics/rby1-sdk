@@ -112,7 +112,6 @@ class Gripper:
             if np.array_equal(prev_q, q):
                 counter += 1
             prev_q = q
-            # A small value (e.g., 5) was too short and failed to detect limits properly, so a reasonably larger value was chosen.
             if counter >= 30:
                 direction += 1
                 counter = 0
@@ -239,8 +238,9 @@ def main(address, model, power, servo, control_mode):
     robot_max_qdot = dyn_model.get_limit_qdot_upper(dyn_state)
     robot_max_qddot = dyn_model.get_limit_qddot_upper(dyn_state)
 
-    robot_max_qdot[model.right_arm_idx[-1]] *= 10
-    robot_max_qdot[model.left_arm_idx[-1]] *= 10
+    if control_mode == "impedance":
+        robot_max_qdot[model.right_arm_idx[-1]] *= 10
+        robot_max_qdot[model.left_arm_idx[-1]] *= 10
 
     if not model.model_name in supported_model:
         logging.error(
@@ -324,8 +324,10 @@ def main(address, model, power, servo, control_mode):
         )
     )
 
+    log_count = 0
+
     def master_arm_control_loop(state: rby.upc.MasterArm.State):
-        nonlocal position_mode, right_q, left_q, right_minimum_time, left_minimum_time
+        nonlocal position_mode, right_q, left_q, right_minimum_time, left_minimum_time, log_count
 
         if right_q is None:
             right_q = state.q_joint[0:7]
@@ -334,9 +336,12 @@ def main(address, model, power, servo, control_mode):
 
         ma_input = rby.upc.MasterArm.ControlInput()
 
-        print(f"--- {datetime.datetime.now().time()} ---")
-        print(f"Button: {state.button_right.button}, {state.button_left.button}")
-        print(f"Trigger: {state.button_right.trigger}, {state.button_left.trigger}")
+        log_count += 1
+        if log_count % round(1 / Settings.master_arm_loop_period) == 0:
+            print(f"--- {datetime.datetime.now().time()} ---")
+            print(f"Button: {state.button_right.button}, {state.button_left.button}")
+            print(f"Trigger: {state.button_right.trigger}, {state.button_left.trigger}")
+            log_count = 0
         gripper.set_target(
             np.array(
                 [state.button_right.trigger / 1000, state.button_left.trigger / 1000]

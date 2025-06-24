@@ -1,3 +1,4 @@
+#include <functional>
 #include <regex>
 #include <utility>
 
@@ -700,7 +701,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
   std::string GetAddress() { return address_; }
 
-  bool Connect(int max_retries = 5, int timeout_ms = 1000) {
+  bool Connect(int max_retries = 5, int timeout_ms = 1000, std::function<bool()> signal_check = nullptr) {
     if (connected_) {
       return true;
     }
@@ -735,6 +736,9 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       if (channel_->WaitForConnected(system_clock::now() + milliseconds(timeout_ms))) {
         connected_ = true;
         return true;
+      }
+      if (signal_check && !signal_check()) {
+        return false;
       }
       retries++;
     }
@@ -2940,8 +2944,8 @@ std::string Robot<T>::GetAddress() {
 }
 
 template <typename T>
-bool Robot<T>::Connect(int max_retries, int timeout_ms) {
-  return impl_->Connect(max_retries, timeout_ms);
+bool Robot<T>::Connect(int max_retries, int timeout_ms, std::function<bool()> signal_check) {
+  return impl_->Connect(max_retries, timeout_ms, signal_check);
 }
 
 template <typename T>

@@ -67,7 +67,16 @@ class RBY1_SDK_API Robot : public std::enable_shared_from_this<Robot<T>> {
 
   std::string GetAddress();
 
-  bool Connect(int max_retries = 5, int timeout_ms = 1000);
+  /**
+   * Connects to the robot.
+   *
+   * @param max_retries Maximum number of retries to connect.
+   * @param timeout_ms Timeout in milliseconds for each connection attempt.
+   * @param signal_check Optional function to check for a signal (e.g., Ctrl+C).
+   *                     If provided, the connection will be aborted if this function returns false.
+   * @return True if the connection was successful, false otherwise.
+   */
+  bool Connect(int max_retries = 5, int timeout_ms = 1000, std::function<bool()> signal_check = nullptr);
 
   void Disconnect();
 

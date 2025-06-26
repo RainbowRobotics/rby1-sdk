@@ -103,15 +103,20 @@ endif ()
 if ((NOT BUILD_PYTHON_BINDINGS)
         AND (${PROJECT_NAME} STREQUAL ${CMAKE_PROJECT_NAME})
 )
+    set_target_properties(rby1-sdk PROPERTIES
+            OUTPUT_NAME_DEBUG "rby1-sdk_debug"
+            OUTPUT_NAME_RELEASE "rby1-sdk"
+    )
+
     include(GNUInstallDirs)
     set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/rby1-sdk)
 
     install(TARGETS rby1-sdk
             EXPORT rby1-sdk-targets
             CONFIGURATIONS Debug Release
-            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/$<CONFIG>
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/$<CONFIG>
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/$<CONFIG>)
+            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     set_target_properties(rby1-sdk PROPERTIES EXPORT_NAME rby1-sdk)
 

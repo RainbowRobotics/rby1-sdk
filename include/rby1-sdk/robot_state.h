@@ -52,16 +52,16 @@ struct RBY1_SDK_API JointState {
   uint32_t motor_type{};  // 0: simulator, 1: rbmotor, 2: dynamixel
   uint64_t motor_state{};
 
-  bool power_on{};
-  double position{};  // (rad)
-  double velocity{};  // (rad/s)
-  double current{};   // (amp)
-  double torque{};    // (Nm)
+  bool power_on{false};
+  double position{0.};  // (rad)
+  double velocity{0.};  // (rad/s)
+  double current{0.};   // (amp)
+  double torque{0.};    // (Nm)
 
-  double target_position{};            // (rad)
-  double target_velocity{};            // (rad/s)
-  uint32_t target_feedback_gain{};     // [0,10]
-  double target_feedforward_torque{};  // (Nm)
+  double target_position{0.};            // (rad)
+  double target_velocity{0.};            // (rad/s)
+  uint32_t target_feedback_gain{10};     // [0,10]
+  double target_feedforward_torque{0.};  // (Nm)
 
   int temperature{};  // ºC
 };

@@ -12,6 +12,7 @@ namespace rb {
 
 class CommandHeaderBuilderImpl;
 class JointPositionCommandBuilderImpl;
+class JointGroupPositionCommandBuilderImpl;
 class JointImpedanceControlCommandBuilderImpl;
 class OptimalControlCommandBuilderImpl;
 class GravityCompensationCommandBuilderImpl;
@@ -49,6 +50,7 @@ class RBY1_SDK_API CommandHeaderBuilder {
 
   friend class GravityCompensationCommandBuilderImpl;
   friend class JointPositionCommandBuilderImpl;
+  friend class JointGroupPositionCommandBuilderImpl;
   friend class JointImpedanceControlCommandBuilderImpl;
   friend class CartesianCommandBuilderImpl;
   friend class CartesianImpedanceControlCommandBuilderImpl;
@@ -86,6 +88,33 @@ class RBY1_SDK_API JointPositionCommandBuilder {
   friend class TorsoCommandBuilderImpl;
   friend class BodyCommandBuilderImpl;
   friend class HeadCommandBuilderImpl;
+};
+
+class RBY1_SDK_API JointGroupPositionCommandBuilder {
+ public:
+  JointGroupPositionCommandBuilder();
+
+  ~JointGroupPositionCommandBuilder();
+
+  JointGroupPositionCommandBuilder& SetCommandHeader(const CommandHeaderBuilder& builder);
+
+  JointGroupPositionCommandBuilder& SetJointNames(const std::vector<std::string>& joint_names);
+
+  JointGroupPositionCommandBuilder& SetMinimumTime(double minimum_time);
+
+  JointGroupPositionCommandBuilder& SetPosition(const Eigen::VectorXd& position);
+
+  JointGroupPositionCommandBuilder& SetVelocityLimit(const Eigen::VectorXd& velocity_limit);
+
+  JointGroupPositionCommandBuilder& SetAccelerationLimit(const Eigen::VectorXd& acceleration_limit);
+
+ private:
+  [[nodiscard]] void* Build() const;
+
+ private:
+  std::unique_ptr<JointGroupPositionCommandBuilderImpl> impl_;
+
+  friend class TorsoCommandBuilderImpl;
 };
 
 class RBY1_SDK_API JointImpedanceControlCommandBuilder {
@@ -511,6 +540,8 @@ class RBY1_SDK_API TorsoCommandBuilder {
 
   TorsoCommandBuilder(const CartesianImpedanceControlCommandBuilder& builder);
 
+  TorsoCommandBuilder(const JointGroupPositionCommandBuilder& builder);
+
   ~TorsoCommandBuilder();
 
   TorsoCommandBuilder& SetCommand(const JointPositionCommandBuilder& builder);
@@ -526,6 +557,8 @@ class RBY1_SDK_API TorsoCommandBuilder {
   TorsoCommandBuilder& SetCommand(const JointImpedanceControlCommandBuilder& builder);
 
   TorsoCommandBuilder& SetCommand(const CartesianImpedanceControlCommandBuilder& builder);
+
+  TorsoCommandBuilder& SetCommand(const JointGroupPositionCommandBuilder& builder);
 
  private:
   [[nodiscard]] void* Build() const;

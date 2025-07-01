@@ -99,6 +99,32 @@ message JointPositionCommand {
   }
 }
 
+message JointGroupPositionCommand {
+  message Request {
+    CommandHeader.Request command_header = 1;
+
+    repeated string joint_names = 2;
+
+    google.protobuf.Duration minimum_time = 3;
+
+    repeated double position = 4;
+
+    repeated double velocity_limit = 5;
+
+    repeated double acceleration_limit = 6;
+  }
+
+  message Feedback {
+    CommandHeader.Feedback command_header_feedback = 1;
+
+    repeated int32 joint_indices = 2;
+
+    double time_based_progress = 3; // [0, 1]
+
+    double position_based_progress = 4; // (-inf, 1]
+  }
+}
+
 message JointImpedanceControlCommand {
   message Request {
     CommandHeader.Request command_header = 1;

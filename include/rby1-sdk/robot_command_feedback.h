@@ -94,6 +94,23 @@ class RBY1_SDK_API JointPositionCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
+class RBY1_SDK_API JointGroupPositionCommandFeedback : public CommandFeedback {
+ public:
+  const std::vector<unsigned int>& joint_indices() const { return joint_indices_; }
+
+  double time_based_progress() const { return time_based_progress_; }
+
+  double position_based_progress() const { return position_based_progress_; }
+
+ protected:
+  std::vector<unsigned int> joint_indices_;
+  double time_based_progress_;
+  double position_based_progress_;
+
+ private:
+  friend class RobotCommandFeedbackParserImpl;
+};
+
 class RBY1_SDK_API CartesianCommandFeedback : public CommandFeedback {
  public:
   struct RBY1_SDK_API TrackingError {
@@ -159,6 +176,20 @@ class RBY1_SDK_API ImpedanceControlCommandFeedback : public CommandFeedback {
   friend class RobotCommandFeedbackParserImpl;
 };
 
+class RBY1_SDK_API JointImpedanceControlCommandFeedback : public CommandFeedback {
+ public:
+  const std::vector<double>& set_position() const { return set_position_; }
+
+  const std::vector<double>& error() const { return error_; }
+
+ protected:
+  std::vector<double> set_position_;
+  std::vector<double> error_;
+
+ private:
+  friend class RobotCommandFeedbackParserImpl;
+};
+
 class RBY1_SDK_API OptimalControlCommandFeedback : public CommandFeedback {
  public:
   double total_cost() const { return total_cost_; }
@@ -209,12 +240,17 @@ class RBY1_SDK_API ArmCommandFeedback : public CommandFeedback {
     return cartesian_impedance_control_command_;
   }
 
+  const JointImpedanceControlCommandFeedback& joint_impedance_control_command() const {
+    return joint_impedance_control_command_;
+  }
+
  protected:
   JointPositionCommandFeedback joint_position_command_;
   GravityCompensationCommandFeedback gravity_compensation_command_;
   CartesianCommandFeedback cartesian_command_;
   ImpedanceControlCommandFeedback impedance_control_command_;
   CartesianImpedanceControlCommandFeedback cartesian_impedance_control_command_;
+  JointImpedanceControlCommandFeedback joint_impedance_control_command_;
 
  private:
   friend class RobotCommandFeedbackParserImpl;
@@ -238,6 +274,14 @@ class RBY1_SDK_API TorsoCommandFeedback : public CommandFeedback {
     return cartesian_impedance_control_command_;
   }
 
+  const JointImpedanceControlCommandFeedback& joint_impedance_control_command() const {
+    return joint_impedance_control_command_;
+  }
+
+  const JointGroupPositionCommandFeedback& joint_group_position_command() const {
+    return joint_group_position_command_;
+  }
+
  protected:
   JointPositionCommandFeedback joint_position_command_;
   GravityCompensationCommandFeedback gravity_compensation_command_;
@@ -245,6 +289,8 @@ class RBY1_SDK_API TorsoCommandFeedback : public CommandFeedback {
   ImpedanceControlCommandFeedback impedance_control_command_;
   OptimalControlCommandFeedback optimal_control_command_;
   CartesianImpedanceControlCommandFeedback cartesian_impedance_control_command_;
+  JointImpedanceControlCommandFeedback joint_impedance_control_command_;
+  JointGroupPositionCommandFeedback joint_group_position_command_;
 
  private:
   friend class RobotCommandFeedbackParserImpl;
@@ -298,6 +344,10 @@ class RBY1_SDK_API BodyCommandFeedback : public CommandFeedback {
     return cartesian_impedance_control_command_;
   }
 
+  const JointImpedanceControlCommandFeedback& joint_impedance_control_command() const {
+    return joint_impedance_control_command_;
+  }
+
  protected:
   JointPositionCommandFeedback joint_position_command_;
   OptimalControlCommandFeedback optimal_control_command_;
@@ -305,6 +355,7 @@ class RBY1_SDK_API BodyCommandFeedback : public CommandFeedback {
   CartesianCommandFeedback cartesian_command_;
   BodyComponentBasedCommandFeedback body_component_based_command_;
   CartesianImpedanceControlCommandFeedback cartesian_impedance_control_command_;
+  JointImpedanceControlCommandFeedback joint_impedance_control_command_;
 
  private:
   friend class RobotCommandFeedbackParserImpl;

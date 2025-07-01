@@ -89,6 +89,59 @@ class JointPositionCommandBuilderImpl {
   std::unique_ptr<api::JointPositionCommand::Request> req_;
 };
 
+class JointGroupPositionCommandBuilderImpl {
+ public:
+  JointGroupPositionCommandBuilderImpl() : req_(std::make_unique<api::JointGroupPositionCommand::Request>()) {}
+
+  void SetCommandHeader(const CommandHeaderBuilder& builder) {
+    req_->set_allocated_command_header(static_cast<api::CommandHeader::Request*>(builder.Build()));
+  }
+
+  void SetJointNames(const std::vector<std::string>& joint_names) {
+    req_->clear_joint_names();
+    for (const auto& name : joint_names) {
+      req_->add_joint_names(name);
+    }
+  }
+
+  void SetMinimumTime(double minimum_time) {
+    auto seconds = (int64_t)(std::floor(minimum_time));
+    auto nanos = (int32_t)((minimum_time - (double)seconds) * 1.e9);
+    auto& t = *req_->mutable_minimum_time();
+    t.set_seconds(seconds);
+    t.set_nanos(nanos);
+  }
+
+  template <typename Derived, typename = std::enable_if_t<Derived::IsVectorAtCompileTime, void>>
+  void SetPosition(const Eigen::MatrixBase<Derived>& v) {
+    req_->clear_position();
+    for (int i = 0; i < v.size(); i++) {
+      req_->add_position(v(i));
+    }
+  }
+
+  template <typename Derived, typename = std::enable_if_t<Derived::IsVectorAtCompileTime, void>>
+  void SetVelocityLimit(const Eigen::MatrixBase<Derived>& v) {
+    req_->clear_velocity_limit();
+    for (int i = 0; i < v.size(); i++) {
+      req_->add_velocity_limit(v(i));
+    }
+  }
+
+  template <typename Derived, typename = std::enable_if_t<Derived::IsVectorAtCompileTime, void>>
+  void SetAccelerationLimit(const Eigen::MatrixBase<Derived>& v) {
+    req_->clear_acceleration_limit();
+    for (int i = 0; i < v.size(); i++) {
+      req_->add_acceleration_limit(v(i));
+    }
+  }
+
+  api::JointGroupPositionCommand::Request* Build() { return req_.release(); }
+
+ private:
+  std::unique_ptr<api::JointGroupPositionCommand::Request> req_;
+};
+
 class JointImpedanceControlCommandBuilderImpl {
  public:
   JointImpedanceControlCommandBuilderImpl() : req_(std::make_unique<api::JointImpedanceControlCommand::Request>()) {}
@@ -541,9 +594,7 @@ class CartesianImpedanceControlCommandBuilderImpl {
     joint_limit.set_upper(upper);
   }
 
-  void SetResetReference(bool reset_reference) {
-    req_->mutable_reset_reference()->set_value(reset_reference);
-  }
+  void SetResetReference(bool reset_reference) { req_->mutable_reset_reference()->set_value(reset_reference); }
 
   api::CartesianImpedanceControlCommand::Request* Build() { return req_.release(); }
 
@@ -643,6 +694,11 @@ class TorsoCommandBuilderImpl {
   void SetCommand(const CartesianImpedanceControlCommandBuilder& builder) {
     req_->set_allocated_cartesian_impedance_control_command(
         static_cast<api::CartesianImpedanceControlCommand::Request*>(builder.Build()));
+  }
+
+  void SetCommand(const JointGroupPositionCommandBuilder& builder) {
+    req_->set_allocated_joint_group_position_command(
+        static_cast<api::JointGroupPositionCommand::Request*>(builder.Build()));
   }
 
   api::TorsoCommand::Request* Build() { return req_.release(); }
@@ -875,6 +931,50 @@ JointPositionCommandBuilder& JointPositionCommandBuilder::SetAccelerationLimit(
 }
 
 void* JointPositionCommandBuilder::Build() const {
+  return static_cast<void*>(impl_->Build());
+}
+
+JointGroupPositionCommandBuilder::JointGroupPositionCommandBuilder() {
+  impl_ = std::make_unique<JointGroupPositionCommandBuilderImpl>();
+}
+
+JointGroupPositionCommandBuilder::~JointGroupPositionCommandBuilder() = default;
+
+JointGroupPositionCommandBuilder& JointGroupPositionCommandBuilder::SetCommandHeader(
+    const CommandHeaderBuilder& builder) {
+  impl_->SetCommandHeader(builder);
+  return *this;
+}
+
+JointGroupPositionCommandBuilder& JointGroupPositionCommandBuilder::SetJointNames(
+    const std::vector<std::string>& joint_names) {
+  impl_->SetJointNames(joint_names);
+  return *this;
+}
+
+JointGroupPositionCommandBuilder& JointGroupPositionCommandBuilder::SetMinimumTime(double minimum_time) {
+  impl_->SetMinimumTime(minimum_time);
+  return *this;
+}
+
+JointGroupPositionCommandBuilder& JointGroupPositionCommandBuilder::SetPosition(const Eigen::VectorXd& position) {
+  impl_->SetPosition(position);
+  return *this;
+}
+
+JointGroupPositionCommandBuilder& JointGroupPositionCommandBuilder::SetVelocityLimit(
+    const Eigen::VectorXd& velocity_limit) {
+  impl_->SetVelocityLimit(velocity_limit);
+  return *this;
+}
+
+JointGroupPositionCommandBuilder& JointGroupPositionCommandBuilder::SetAccelerationLimit(
+    const Eigen::VectorXd& acceleration_limit) {
+  impl_->SetAccelerationLimit(acceleration_limit);
+  return *this;
+}
+
+void* JointGroupPositionCommandBuilder::Build() const {
   return static_cast<void*>(impl_->Build());
 }
 
@@ -1435,6 +1535,10 @@ TorsoCommandBuilder::TorsoCommandBuilder(const CartesianImpedanceControlCommandB
   SetCommand(builder);
 }
 
+TorsoCommandBuilder::TorsoCommandBuilder(const JointGroupPositionCommandBuilder& builder) : TorsoCommandBuilder() {
+  SetCommand(builder);
+}
+
 TorsoCommandBuilder::~TorsoCommandBuilder() = default;
 
 TorsoCommandBuilder& TorsoCommandBuilder::SetCommand(const JointPositionCommandBuilder& builder) {
@@ -1468,6 +1572,11 @@ TorsoCommandBuilder& TorsoCommandBuilder::SetCommand(const JointImpedanceControl
 }
 
 TorsoCommandBuilder& TorsoCommandBuilder::SetCommand(const CartesianImpedanceControlCommandBuilder& builder) {
+  impl_->SetCommand(builder);
+  return *this;
+}
+
+TorsoCommandBuilder& TorsoCommandBuilder::SetCommand(const JointGroupPositionCommandBuilder& builder) {
   impl_->SetCommand(builder);
   return *this;
 }

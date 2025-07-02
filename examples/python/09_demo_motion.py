@@ -741,8 +741,8 @@ def example_optimal_control_2(robot, model_name):
         .add_cartesian_target("base", target_link, T_torso, WEIGHT, WEIGHT)
         .add_cartesian_target("base", "ee_right", T_right, WEIGHT, WEIGHT)
         .add_cartesian_target("base", "ee_left", T_left, WEIGHT, WEIGHT)
-        .add_joint_position_target("right_arm_2", 0.0, WEIGHT / 2)
-        .add_joint_position_target("left_arm_2", -0.0, WEIGHT / 2)
+        .add_joint_position_target("right_arm_2", 0.05, WEIGHT / 2)
+        .add_joint_position_target("left_arm_2", -0.05, WEIGHT / 2)
         .set_velocity_limit_scaling(1)
         .set_stop_cost(STOP_COST)
         .set_min_delta_cost(MIN_DELTA_COST)
@@ -912,8 +912,8 @@ def example_mixed_command_1(robot, model_name):
     right_arm_command = (
         JointPositionCommandBuilder()
         .set_position(np.array([0, -np.pi / 4, 0, -np.pi / 2, 0, 0, 0]))
-        .set_velocity_limit(np.array([np.pi]) * 7)
-        .set_acceleration_limit(np.array([1.0]) * 7)
+        .set_velocity_limit(np.array([np.pi] * 7))
+        .set_acceleration_limit(np.array([1.0] * 7))
         .set_minimum_time(MINIMUM_TIME)
     )
 
@@ -1014,8 +1014,8 @@ def example_mixed_command_2(robot, model_name):
     right_arm_command = (
         JointPositionCommandBuilder()
         .set_position(np.array([0, -np.pi / 4, 0, -np.pi / 2, 0, 0, 0]))
-        .set_velocity_limit(np.array([np.pi]) * 7)
-        .set_acceleration_limit(np.array([1.0]) * 7)
+        .set_velocity_limit(np.array([np.pi] * 7))
+        .set_acceleration_limit(np.array([1.0] * 7))
         .set_minimum_time(MINIMUM_TIME)
     )
 

@@ -145,7 +145,7 @@ void pybind11_robot_command_feedback(py::module_& m) {
       .value("Ok", RobotCommandFeedback::FinishCode::kOk)
       .value("Canceled", RobotCommandFeedback::FinishCode::kCanceled)
       .value("Preempted", RobotCommandFeedback::FinishCode::kPreempted)
-      .value("InitializedFailed", RobotCommandFeedback::FinishCode::kInitializedFailed)
+      .value("InitializationFailed", RobotCommandFeedback::FinishCode::kInitializationFailed)
       .value("ControlManagerIdle", RobotCommandFeedback::FinishCode::kControlManagerIdle)
       .value("ControlManagerFault", RobotCommandFeedback::FinishCode::kControlManagerFault)
       .value("UnexpectedState", RobotCommandFeedback::FinishCode::kUnexpectedState);

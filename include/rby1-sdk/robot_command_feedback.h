@@ -401,7 +401,7 @@ class RBY1_SDK_API RobotCommandFeedback : public CommandFeedback {
     kOk,
     kCanceled,
     kPreempted,
-    kInitializedFailed,
+    kInitializationFailed,
     kControlManagerIdle,
     kControlManagerFault,
     kUnexpectedState

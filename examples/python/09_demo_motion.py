@@ -7,7 +7,7 @@ import re
 from rby1_sdk import *
 
 D2R = np.pi / 180  # Degree to Radian conversion factor
-MINIMUM_TIME = 2.5
+MINIMUM_TIME = 2
 LINEAR_VELOCITY_LIMIT = 1.5
 ANGULAR_VELOCITY_LIMIT = np.pi * 1.5
 ACCELERATION_LIMIT = 1.0
@@ -1140,8 +1140,8 @@ def main(address, model_name, power, servo):
 
     # robot.factory_reset_all_parameters()
     robot.set_parameter("default.acceleration_limit_scaling", "1.0")
-    robot.set_parameter("joint_position_command.cutoff_frequency", "10")
-    robot.set_parameter("cartesian_command.cutoff_frequency", "15")
+    robot.set_parameter("joint_position_command.cutoff_frequency", "5")
+    robot.set_parameter("cartesian_command.cutoff_frequency", "5")
     robot.set_parameter("default.linear_acceleration_limit", "20")
     robot.set_parameter("default.angular_acceleration_limit", "10")
     robot.set_parameter("manipulability_threshold", "1e4")

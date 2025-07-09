@@ -100,7 +100,10 @@
                   <joint name="torso_5" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 1.5708" />
                   <include file="./assets/LINK_6/geoms.xml" />
                   <geom size="0.155 0.0675" pos="0 0 0.0075" class="in-model-collision" />
-                  <include file="./assets/PAN_TILT_1/geoms.xml" />
+                  <body name="link_head_0" pos="0.022 0.0 0.120073451525">
+                    <inertial pos="0 0 0" mass="0" />
+                    <include file="./assets/PAN_TILT_1/geoms.xml" />
+                  </body>
                   <body name="link_right_arm_0" pos="0 -0.22 0.0800735">
                     <inertial pos="-0.00316662 0.0343718 -3e-07" quat="0.536676 0.553304 0.439546 0.461122" mass="1.26164" diaginertia="0.00433912 0.00432154 0.00223129" />
                     <joint name="right_arm_0" pos="0 0 0" axis="0 0.939693 -0.34202" limited="true" range="-2.35619 2.35619" />

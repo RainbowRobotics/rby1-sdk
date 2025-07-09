@@ -1,0 +1,24 @@
+<mujoco model="NECK_2">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="69,69,69" specular="1.0" shininess="1.0" rgba="0.270588 0.270588 0.270588 1.000000"/>
+    <material name="254,254,255" specular="0.9973853333333333" shininess="1.0" rgba="0.996078 0.996078 1.000000 1.000000"/>
+    <mesh file="NECK_2_0.obj"/>
+    <mesh file="NECK_2_1.obj"/>
+  </asset>
+  <worldbody>
+    <body name="NECK_2">
+      <geom mesh="NECK_2_0" material="254,254,255" class="visual"/>
+      <geom mesh="NECK_2_1" material="69,69,69" class="visual"/>
+      <geom mesh="NECK_2_0" class="collision"/>
+      <geom mesh="NECK_2_1" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -46,9 +46,9 @@
     <include file="./assets/LINK_18/assets.xml" />
     <include file="./assets/LINK_19_V1.1/assets.xml" />
     <include file="./assets/LINK_20_V1.1/assets.xml" />
-    <include file="./assets/PAN_TILT_1/assets.xml" />
-    <include file="./assets/PAN_TILT_2/assets.xml" />
-    <include file="./assets/PAN_TILT_3/assets.xml" />
+    <include file="./assets/NECK_0/assets.xml" />
+    <include file="./assets/NECK_1/assets.xml" />
+    <include file="./assets/NECK_2/assets.xml" />
   </asset>
 
   <worldbody>
@@ -96,11 +96,14 @@
                 <include file="./assets/LINK_5/geoms.xml" />
                 <geom size="0.105 0.1" pos="-0.07 0 0.0385" quat="0.707105 0 0.707108 0" class="in-model-collision" />
                 <body name="link_torso_5" pos="0 0 0.309427">
-                  <inertial pos="-0.0132199 0.000254676 -0.0318761" quat="0.998675 -0.00438307 -0.0510462 0.00477378" mass="12.6659" diaginertia="0.21618 0.167212 0.132309" />
+                  <inertial pos="-0.03419752 0.00073431 -0.02659420" mass="14.73283950" fullinertia="0.23934353 0.23140544 0.18873182 0.00158316 0.02926509 0.00018390" />
                   <joint name="torso_5" pos="0 0 0" axis="0 0 1" limited="true" range="-1.5708 1.5708" />
                   <include file="./assets/LINK_6/geoms.xml" />
                   <geom size="0.155 0.0675" pos="0 0 0.0075" class="in-model-collision" />
-                  <include file="./assets/PAN_TILT_1/geoms.xml" />
+                  <body name="link_head_0" pos="0.022 0.0 0.120073451525">
+                    <inertial pos="0.00024733 0.00033306 -0.01029730" mass="0.65731648" fullinertia="0.00046241 0.00043223 0.00027509 0.00000182 0.00001119 0.00000061" />
+                    <include file="./assets/NECK_0/geoms.xml" />
+                  </body>
                   <body name="link_right_arm_0" pos="0 -0.22 0.0800735">
                     <inertial pos="-0.00316662 0.0343718 -3e-07" quat="0.536676 0.553304 0.439546 0.461122" mass="1.26164" diaginertia="0.00433912 0.00432154 0.00223129" />
                     <joint name="right_arm_0" pos="0 0 0" axis="0 0.939693 -0.34202" limited="true" range="-2.35619 2.35619" />
@@ -211,14 +214,14 @@
                       </body>
                     </body>
                   </body>
-                  <body name="link_head_1" pos="0.022 0 0.140073">
-                    <inertial pos="-0.0115068 -0.0011427 -0.00031579" quat="0.354317 0.578329 0.650884 0.341093" mass="0.0745058" diaginertia="2.45449e-05 2.18237e-05 1.72614e-05" />
-                    <joint name="head_0" pos="0 0 0" axis="0 0 1" limited="true" range="-0.523 0.523" />
-                    <include file="./assets/PAN_TILT_2/geoms.xml" />
+                  <body name="link_head_1" pos="0.022 0 0.200073">
+                    <inertial pos="-0.00041643 0.00593524 -0.00289916" mass="0.70476502" fullinertia="0.00066212 0.00036078 0.00059265 -0.00000515 0.00000093 -0.00001312" />
+                    <joint name="head_0" pos="0 0 0" axis="0 0 1" limited="true" range="-1.57 1.57" />
+                    <include file="./assets/NECK_1/geoms.xml" />
                     <body name="link_head_2">
-                      <inertial pos="-0.00081966 0.00099024 0.022837" quat="0.797736 0.60274 0.0137914 -0.0114992" mass="0.0358537" diaginertia="2.04697e-05 1.31161e-05 1.02242e-05" />
-                      <joint name="head_1" pos="0 0 0" axis="0 1 0" limited="true" range="-0.35 1.57" />
-                      <include file="./assets/PAN_TILT_3/geoms.xml" />
+                      <inertial pos="0.05315320 0.00547509 0.05913909" mass="0.95262738" fullinertia="0.00114243 0.00107559 0.00151415 0.00027678 -0.00035426 0.00023641" />
+                      <joint name="head_1" pos="0 0 0" axis="0 1 0" limited="true" range="-1.57 1.57" />
+                      <include file="./assets/NECK_2/geoms.xml" />
                     </body>
                   </body>
                 </body>

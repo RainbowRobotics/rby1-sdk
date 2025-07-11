@@ -37,7 +37,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="./meshes/MECANUM_WHEEL.dae"/>
+                <mesh filename="./meshes/MECANUM_WHEEL_M.dae"/>
             </geometry>
         </visual>
     </link>
@@ -64,7 +64,7 @@
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/MECANUM_WHEEL_M.dae"/>
+                <mesh filename="./meshes/MECANUM_WHEEL.dae"/>
             </geometry>
         </visual>
     </link> 

@@ -1,3 +1,9 @@
+## v0.8.1 (2025-07-15)
+
+### 🐛 Fixes
+
+- add python wrapping class for JointImpedanceControlCommandFeedback, JointGroupPositionCommandFeedback
+
 ## v0.8.0 (2025-07-15)
 
 ### ✨ Features

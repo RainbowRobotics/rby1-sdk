@@ -1,3 +1,34 @@
+## v0.8.0 (2025-07-15)
+
+### ✨ Features
+
+- add a v1.2 model
+- add joint group position command
+- add fault log listing and file download support
+- add RBY1_SDK_API export macro for cross-platform symbol visibility
+- add model A v1.1
+- add digital i/o in proto
+- set tool flange both digital outputs at the same time
+- add preset position function for pvl sensor
+
+### 🐛 Fixes
+
+- rename enum kInitializedFailed to kInitializationFailed
+- rename debug shared object
+- add rpc/sdk version into robot info
+- correct shoulder 0 link frame orientation in rby1a urdf model
+- remove models from sdk c++ archive
+- add /bigobj for MSVC to prevent section limit compilation error
+- define M_PI
+- add RBY1_SDK_API to QPSolver
+- add chrono header
+- remove RBY1_SDK_API in template classes
+- **cmake**: make RBY1_SDK_STATIC a PUBLIC definition for static builds
+- **cmake**: use RBY1_SDK_STATIC
+- **cmake**: apply RBY1_SDK_EXPORTS only for shared library builds
+- remove auto select apt mirror
+- change duty to state for tf io
+
 ## v0.7.0 (2025-05-30)
 
 ### ♻️ Refactor

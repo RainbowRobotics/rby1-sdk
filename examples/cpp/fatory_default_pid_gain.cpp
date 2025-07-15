@@ -1,6 +1,5 @@
-#include <iomanip>
+#include <chrono>
 #include <iostream>
-#include <optional>
 #include <thread>
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
@@ -28,7 +27,7 @@ int main(int argc, char** argv) {
     std::this_thread::sleep_for(1s);
   }
 
-  std::cout<<">>> Before"<<std::endl;
+  std::cout << ">>> Before" << std::endl;
   auto gain_list = robot->GetTorsoPositionPIDGains();
   for (auto i = 0; i < gain_list.size(); i++) {
     std::cout << "[torso_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain
@@ -86,7 +85,7 @@ int main(int argc, char** argv) {
   // Ensure PID Gain update compleation
   std::this_thread::sleep_for(50ms);
 
-  std::cout<<">>> After"<<std::endl;
+  std::cout << ">>> After" << std::endl;
   gain_list = robot->GetTorsoPositionPIDGains();
   for (auto i = 0; i < gain_list.size(); i++) {
     std::cout << "[torso_" << i << "] p gain: " << gain_list[i].p_gain << ", i gain: " << gain_list[i].i_gain

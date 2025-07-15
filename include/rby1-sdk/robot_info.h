@@ -1,18 +1,20 @@
 #pragma once
 
+#include "export.h"
+
 namespace rb {
 
-struct BatteryInfo {};
+struct RBY1_SDK_API BatteryInfo {};
 
-struct PowerInfo {
+struct RBY1_SDK_API PowerInfo {
   std::string name{};
 };
 
-struct EMOInfo {
+struct RBY1_SDK_API EMOInfo {
   std::string name{};
 };
 
-struct JointInfo {
+struct RBY1_SDK_API JointInfo {
   std::string name{};
 
   bool has_brake{};
@@ -22,15 +24,14 @@ struct JointInfo {
   std::string firmware_version{};
 };
 
-struct RobotInfo {
-  /**
-   * @deprecated Use `robot_model_name` instead.
-   */
-  std::string robot_version{};
+struct RBY1_SDK_API RobotInfo {
+  std::string version{};
+
+  std::string sdk_version{};
 
   std::string robot_model_name{};
 
-  std::string sdk_commit_id{};
+  std::string robot_model_version{};
 
   BatteryInfo battery_info;
 
@@ -53,6 +54,16 @@ struct RobotInfo {
   std::vector<unsigned int> right_arm_joint_idx{};
 
   std::vector<unsigned int> left_arm_joint_idx{};
+
+  /**
+   * @deprecated Use `robot_model_name` instead.
+   */
+  std::string robot_version{};
+
+  /**
+   * @deprecated Use `sdk_version` instead.
+   */
+  std::string sdk_commit_id{};
 };
 
 }  // namespace rb

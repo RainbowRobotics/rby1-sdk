@@ -199,12 +199,61 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
 
   py::class_<Robot<T>, std::shared_ptr<Robot<T>>>(m, robot_name.c_str())
       .def_static("model", []() { return PyModel<T>(); })
-      .def_static("create", &Robot<T>::Create)
-      .def("connect", &Robot<T>::Connect, "max_retries"_a = 5, "timeout_ms"_a = 1000,
-           py::call_guard<py::gil_scoped_release>())
-      .def("disconnect", &Robot<T>::Disconnect, py::call_guard<py::gil_scoped_release>())
-      .def("is_connected", &Robot<T>::IsConnected)
-      .def("get_robot_info", &Robot<T>::GetRobotInfo)
+      .def_static("create", &Robot<T>::Create, "address"_a)
+      .def(
+          "connect",
+          [](Robot<T>& self, int max_retries, int timeout_ms) {
+            return self.Connect(max_retries, timeout_ms, []() {
+              py::gil_scoped_acquire gil;
+              if (PyErr_CheckSignals() != 0) {
+                throw py::error_already_set();
+              }
+              return true;
+            });
+          },
+          "max_retries"_a = 5, "timeout_ms"_a = 1000, py::call_guard<py::gil_scoped_release>(),
+          R"(
+connect(max_retries=5, timeout_ms=1000)
+
+Attempts to establish a connection with the robot.
+
+Parameters
+----------
+max_retries : int, optional
+    Maximum number of retries to connect. Default is 5.
+timeout_ms : int, optional
+    Timeout in milliseconds for each connection attempt. Default is 1000.
+
+Returns
+-------
+bool
+    True if the connection was successful, false otherwise.
+        )")
+      .def("disconnect", &Robot<T>::Disconnect, py::call_guard<py::gil_scoped_release>(), R"(
+disconnect()
+
+Disconnects from the robot.
+        )")
+      .def("is_connected", &Robot<T>::IsConnected, R"(
+is_connected()
+
+Checks whether the robot is currently connected.
+
+Returns
+-------
+bool
+    True if the robot is connected to the robot, False otherwise.
+      )")
+      .def("get_robot_info", &Robot<T>::GetRobotInfo, R"(
+get_robot_info()
+
+Retrieves static information about the robot, such as model name, SDK version, and joint configuration.
+
+Returns
+-------
+RobotInfo
+    Structured metadata including joint details, device names, and robot model information.
+      )")
       .def("get_time_scale", &Robot<T>::GetTimeScale)
       .def("set_time_scale", &Robot<T>::SetTimeScale, "time_scale"_a)
       .def("power_on", &Robot<T>::PowerOn, "dev_name"_a, py::call_guard<py::gil_scoped_release>())
@@ -216,6 +265,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("break_engage", &Robot<T>::BreakEngage, "dev_name"_a)
       .def("break_release", &Robot<T>::BreakRelease, "dev_name"_a)
       .def("home_offset_reset", &Robot<T>::HomeOffsetReset, "dev_name"_a)
+      .def("set_preset_position", &Robot<T>::SetPresetPosition, "joint_name"_a)
       .def("enable_control_manager", &Robot<T>::EnableControlManager, py::arg("unlimited_mode_enabled") = false,
            py::call_guard<py::gil_scoped_release>())
       .def("disable_control_manager", &Robot<T>::DisableControlManager, py::call_guard<py::gil_scoped_release>())
@@ -223,6 +273,10 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("cancel_control", &Robot<T>::CancelControl, py::call_guard<py::gil_scoped_release>())
       .def("set_tool_flange_output_voltage", &Robot<T>::SetToolFlangeOutputVoltage,
            py::call_guard<py::gil_scoped_release>())
+      .def("set_tool_flange_digital_output", &Robot<T>::SetToolFlangeDigitalOutput, "name"_a, "channel"_a, "duty"_a,
+           py::call_guard<py::gil_scoped_release>())
+      .def("set_tool_flange_digital_output_dual", &Robot<T>::SetToolFlangeDigitalOutputDual, "name"_a, "duty_0"_a,
+           "duty_1"_a, py::call_guard<py::gil_scoped_release>())
       .def(
           "start_state_update",
           [](Robot<T>& self, py::function& cb, double rate) {
@@ -245,6 +299,7 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("stop_log_stream", &Robot<T>::StopLogStream)
       .def("get_state", &Robot<T>::GetState, py::call_guard<py::gil_scoped_release>())
       .def("get_last_log", &Robot<T>::GetLastLog, "count"_a)
+      .def("get_fault_log_list", &Robot<T>::GetFaultLogList)
       .def("get_control_manager_state", &Robot<T>::GetControlManagerState)
       .def("send_command", &Robot<T>::SendCommand, "builder"_a, "priority"_a = 1)
       .def("create_command_stream", &Robot<T>::CreateCommandStream, "priority"_a = 1)
@@ -380,6 +435,35 @@ void bind_robot(py::module_& m, const std::string& robot_name) {
       .def("get_serial_device_list", &Robot<T>::GetSerialDeviceList, py::call_guard<py::gil_scoped_release>())
       .def("open_serial_stream", &Robot<T>::OpenSerialStream, "device_path"_a, "baudrate"_a, "bytesize"_a = 8,
            "parity"_a = 'N', "stopbits"_a = 1)
+      .def(
+          "download_file",
+          [](Robot<T>& self, const std::string& path, py::object py_file_like) {
+            return self.DownloadFileToCallback(
+                path, [&](const char* data, size_t size) { py_file_like.attr("write")(py::bytes(data, size)); });
+          },
+          "path"_a, "file_like"_a, R"(
+download_file(path, file_like)
+
+Downloads a file from the robot and writes it into a file-like object.
+
+Parameters
+----------
+path : str
+    Relative path to the file on the robot's file system.
+    The base directory is defined by the `RBY1_HOME` environment variable (default: `/root/.rby1`).
+file_like : file-like object
+    Any object with a `.write(bytes)` method (e.g., `io.BytesIO`, a real file).
+
+Returns
+-------
+bool
+    True if the file was downloaded successfully.
+
+Raises
+------
+RuntimeError
+    If the gRPC call fails (e.g., network issue, file not found, internal error).
+           )")
 
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a)
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a)

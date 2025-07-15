@@ -5,6 +5,7 @@
 #include <optional>
 
 #include "rby1-sdk/dynamics/robot.h"
+#include "rby1-sdk/export.h"
 #include "rby1-sdk/math/qp_solver.h"
 #include "rby1-sdk/math/se3.h"
 

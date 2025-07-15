@@ -22,4 +22,8 @@
   <material name="70,70,70" specular="1.0" shininess="0.2" rgba="0.274510 0.274510 0.274510 1.000000" />
   <material name="79,79,79" specular="1.0" shininess="0.2" rgba="0.309804 0.309804 0.309804 1.000000" />
   <material name="80,80,80" specular="0.0" shininess="0.5" rgba="0.313725 0.313725 0.313725 1.000000" />
+  <material name="219,216,216" specular="1.0" shininess="0.2" rgba="0.858824 0.847059 0.847059 1.000000"/>
+  <material name="160,160,160" specular="1.0" shininess="0.2" rgba="0.627451 0.627451 0.627451 1.000000"/>
+  <material name="246,246,243" specular="1.0" shininess="0.2" rgba="0.964706 0.964706 0.952941 1.000000"/>
+  <material name="255,255,255" specular="1.0" shininess="0.2" rgba="1.000000 1.000000 1.000000 1.000000"/>
 </mujoco>

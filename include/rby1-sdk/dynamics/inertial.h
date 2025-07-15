@@ -2,13 +2,14 @@
 
 #include <Eigen/Core>
 
+#include "rby1-sdk/export.h"
 #include "rby1-sdk/math/se3.h"
 
 namespace rb::dyn {
 
 class Inertial;
 
-class Inertial {
+class RBY1_SDK_API Inertial {
  public:
   using MatrixType = Eigen::Matrix<double, 6, 6>;
 

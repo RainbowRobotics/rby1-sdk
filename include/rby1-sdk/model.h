@@ -4,6 +4,7 @@
 #include <string>
 
 #include "dynamics/robot.h"
+#include "export.h"
 
 namespace rb::y1_model {
 
@@ -13,7 +14,7 @@ namespace rb::y1_model {
  *
  * This class represents the model description of Robot A, which serves as the base model.
  */
-class A {
+class RBY1_SDK_API A {
  public:
   /** @brief The model name. */
   static constexpr std::string_view kModelName = "A";
@@ -85,7 +86,7 @@ class A {
  * The T5 model includes torso with 5 degrees of freedom,
  * achieved by removing the torso_0 joint from the base model.
  */
-class T5 {
+class RBY1_SDK_API T5 {
  public:
   static constexpr std::string_view kModelName = "T5";
 
@@ -118,7 +119,7 @@ class T5 {
  * This class represents the model description of Robot M, which is derived from the base model A.
  * The M model includes mecanum wheel mobile base instead differential type mobile base.
  */
-class M {
+class RBY1_SDK_API M {
  public:
   static constexpr std::string_view kModelName = "M";
 
@@ -148,7 +149,7 @@ class M {
  * Standard Upper Body
  * @brief Represents the model description of Robot UB
  */
-class UB {
+class RBY1_SDK_API UB {
  public:
   static constexpr std::string_view kModelName = "UB";
 

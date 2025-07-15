@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="RB_Y1M">
+<robot name="RBY1_M">
     <mobile type="mecanum" xyz="0 0 0" rpy="0 0 0" joints="wheel_fr wheel_fl wheel_rr wheel_rl"
             params="1.0 1.0 0.1"/> <!-- wheel_base, wheel_radius -->
 
@@ -37,7 +37,7 @@
         </inertial>
         <visual>
             <geometry>
-                <mesh filename="./meshes/MECANUM_WHEEL.dae"/>
+                <mesh filename="./meshes/MECANUM_WHEEL_M.dae"/>
             </geometry>
         </visual>
     </link>
@@ -64,7 +64,7 @@
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/MECANUM_WHEEL_M.dae"/>
+                <mesh filename="./meshes/MECANUM_WHEEL.dae"/>
             </geometry>
         </visual>
     </link> 

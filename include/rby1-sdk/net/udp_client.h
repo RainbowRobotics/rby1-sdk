@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstring>
+#include <string>
 #include <stdexcept>
 #include <utility>
 #if defined(_WIN32)

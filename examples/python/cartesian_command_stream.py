@@ -15,6 +15,8 @@ def main(address, model, power, servo):
 
     robot = initialize_robot(address, model, power, servo)
 
+    robot.set_parameter("cartesian_command.cutoff_frequency", "5")
+
     model = robot.model()
     torso_dof = len(model.torso_idx)
     right_arm_dof = len(model.right_arm_idx)
@@ -57,7 +59,8 @@ def main(address, model, power, servo):
                     .set_command_header(
                         rby.CommandHeaderBuilder().set_control_hold_time(1e6)
                     )
-                    .add_target("base", "ee_right", T, 0.02, 100.0, 1.0)
+                    .add_joint_position_target("right_arm_2", 0.5, 1, 100)
+                    .add_target("base", "ee_right", T, 0.3, 100.0, 0.8)
                 )
             )
         )
@@ -65,16 +68,29 @@ def main(address, model, power, servo):
 
     stream = robot.create_command_stream()
     for pos_diff in [
-        [0, -0.05],
-        [0, 0.05],
-        [-0.1, 0.05],
-        [-0.1, -0.05],
-        [0, -0.05],
-        [0, 0.05],
+        [0, 0, -0.08],
+        [0, 0, 0.08],
+        [0.1, -0.16, 0.08],
+        [0.1, -0.16, -0.08],
+        [0, 0, -0.08],
+        [0, 0, 0.08],
+        [0, -0.2, 0.1],
+        [0, -0.2, -0.1],
+        [-0.05, 0.1, -0.08],
+        [-0.05, 0.1, 0.08],
+        [0, -0.2, 0.1],
+        [0, -0.2, -0.1],
+        [0, 0, -0.08],
+        [0, 0, 0.08],
+        [0, -0.16, 0.08],
+        [0, -0.16, -0.08],
+        [0, 0, -0.08],
+        [0, 0, 0.08],
     ]:
         target = T_ref.copy()
-        target[1, 3] += pos_diff[0]
-        target[2, 3] += pos_diff[1]
+        target[0, 3] += pos_diff[0]
+        target[1, 3] += pos_diff[1]
+        target[2, 3] += pos_diff[2]
         rc = build_cartesian_command(target)
         stream.send_command(rc)
 
@@ -93,7 +109,7 @@ def main(address, model, power, servo):
                     f"position error: {feedback.se3_pose_tracking_errors[0].position_error}, manipulability: {feedback.manipulability}"
                 )
             log_count += 1
-            if feedback.se3_pose_tracking_errors[0].position_error < 1e-3:
+            if feedback.se3_pose_tracking_errors[0].position_error < 1e-2:
                 break
 
 

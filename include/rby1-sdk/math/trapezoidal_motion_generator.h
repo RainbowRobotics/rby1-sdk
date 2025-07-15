@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "rby1-sdk/export.h"
+
 namespace rb {
 
 template <int N>

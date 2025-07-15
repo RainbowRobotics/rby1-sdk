@@ -3,6 +3,7 @@ if (BUILD_PYTHON_BINDINGS OR BUILD_LIB_STATIC)
 else ()
     set(LIBRARY_TYPE SHARED)
 endif ()
+message(STATUS "Building library as ${LIBRARY_TYPE} (${CMAKE_SYSTEM_NAME})")
 
 add_library(rby1-sdk ${LIBRARY_TYPE}
         robot.cpp
@@ -45,8 +46,15 @@ if(WIN32)
     target_link_libraries(rby1-sdk PUBLIC wsock32 ws2_32)
 endif()
 
+if (LIBRARY_TYPE STREQUAL "STATIC")
+    target_compile_definitions(rby1-sdk PUBLIC RBY1_SDK_STATIC)
+endif()
+if (LIBRARY_TYPE STREQUAL "SHARED")
+    target_compile_definitions(rby1-sdk PRIVATE RBY1_SDK_EXPORTS)
+endif()
+
 target_include_directories(rby1-sdk PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../private/>
         $<BUILD_INTERFACE:${PROTO_BINARY_DIR}>)

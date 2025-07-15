@@ -1,4 +1,4 @@
-#include <iomanip>
+#include <chrono>
 #include <iostream>
 #include <thread>
 #include "rby1-sdk/model.h"
@@ -41,16 +41,15 @@ int main(int argc, char** argv) {
   robot->StartStateUpdate(
       [](const auto& state) {
         std::cout << "right ft sensor" << std::endl;
-        std::cout << "time stamp : " << (state.timestamp.tv_nsec - state.tool_flange_right.time_since_last_update.tv_nsec)
-                  << std::endl;
+        std::cout << "time stamp : "
+                  << (state.timestamp.tv_nsec - state.tool_flange_right.time_since_last_update.tv_nsec) << std::endl;
         std::cout << "gyro : " << state.tool_flange_right.gyro.transpose() << std::endl;
         std::cout << "acceleration : " << state.tool_flange_right.acceleration.transpose() << std::endl;
         std::cout << "switch_A : " << state.tool_flange_right.switch_A << std::endl;
 
-
         std::cout << "left ft sensor" << std::endl;
-        std::cout << "time stamp : " << (state.timestamp.tv_nsec - state.tool_flange_left.time_since_last_update.tv_nsec)
-                  << std::endl;
+        std::cout << "time stamp : "
+                  << (state.timestamp.tv_nsec - state.tool_flange_left.time_since_last_update.tv_nsec) << std::endl;
         std::cout << "gyro : " << state.tool_flange_left.gyro.transpose() << std::endl;
         std::cout << "acceleration : " << state.tool_flange_left.acceleration.transpose() << std::endl;
         std::cout << "switch_A : " << state.tool_flange_left.switch_A << std::endl;

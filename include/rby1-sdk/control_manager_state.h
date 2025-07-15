@@ -1,8 +1,10 @@
 #pragma once
 
+#include "export.h"
+
 namespace rb {
 
-struct ControlManagerState {
+struct RBY1_SDK_API ControlManagerState {
   enum class State {
     kUnknown = 0,
     kIdle,
@@ -20,7 +22,7 @@ struct ControlManagerState {
   bool unlimited_mode_enabled{false};
 };
 
-inline std::string to_string(ControlManagerState::State s) {
+RBY1_SDK_API inline std::string to_string(ControlManagerState::State s) {
   switch (s) {
     case ControlManagerState::State::kUnknown:
       return "Unknown";
@@ -36,7 +38,7 @@ inline std::string to_string(ControlManagerState::State s) {
   return "";
 }
 
-inline std::string to_string(ControlManagerState::ControlState s) {
+RBY1_SDK_API inline std::string to_string(ControlManagerState::ControlState s) {
   switch (s) {
     case ControlManagerState::ControlState::kUnknown:
       return "Unknown";

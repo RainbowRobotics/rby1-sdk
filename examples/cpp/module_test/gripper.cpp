@@ -4,23 +4,19 @@
 #endif
 
 #include <Eigen/Core>
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <mutex>
 #include <thread>
-#include "dynamixel_sdk.h"  // Uses Dynamixel SDK library
+#include "dynamixel_sdk.h"
 
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
-
 #include "rby1-sdk/upc/device.h"
-
-#include <unistd.h>
-#include <algorithm>
-#include <cstring>
 
 using namespace rb;
 using namespace std::chrono_literals;
@@ -179,14 +175,12 @@ void control_loop_for_gripper(dynamixel::PortHandler* portHandler, dynamixel::Pa
         is_init = false;
       }
 
-      std::cout <<" id: " << id<< std::endl;
-      std::cout <<" q_min_max_vector[id](0): " << q_min_max_vector[id](0)* 180 / 3.141592<< std::endl;
-      std::cout <<" q_min_max_vector[id](1): " << q_min_max_vector[id](1)* 180 / 3.141592<< std::endl;
-      std::cout <<" is_init: " << is_init<< std::endl;
-      
+      std::cout << " id: " << id << std::endl;
+      std::cout << " q_min_max_vector[id](0): " << q_min_max_vector[id](0) * 180 / 3.141592 << std::endl;
+      std::cout << " q_min_max_vector[id](1): " << q_min_max_vector[id](1) * 180 / 3.141592 << std::endl;
+      std::cout << " is_init: " << is_init << std::endl;
     }
 
-    
     if (is_init) {
       for (auto const& id : activeIDs) {
         if (q_min_max_vector[id](MIN_INDEX) > q_min_max_vector[id](MAX_INDEX)) {
@@ -197,9 +191,9 @@ void control_loop_for_gripper(dynamixel::PortHandler* portHandler, dynamixel::Pa
 
         SendCurrent(portHandler, packetHandler, id, 0);
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(3000));\
+      std::this_thread::sleep_for(std::chrono::milliseconds(3000));
       isInitFinish = true;
-      
+
       break;
     }
 
@@ -209,16 +203,6 @@ void control_loop_for_gripper(dynamixel::PortHandler* portHandler, dynamixel::Pa
   }
 
   std::cout << "OK\n";
-}
-
-std::string resolve_symlink(const std::string& symlink) {
-  char buf[1024];
-  ssize_t len = readlink(symlink.c_str(), buf, sizeof(buf) - 1);
-  if (len != -1) {
-    buf[len] = '\0';
-    return std::string(buf);
-  }
-  return "";
 }
 
 int main(int argc, char** argv) {
@@ -319,7 +303,7 @@ int main(int argc, char** argv) {
 
   while (1) {
     std::this_thread::sleep_for(5ms);
-    if(isInitFinish)
+    if (isInitFinish)
       break;
   }
 

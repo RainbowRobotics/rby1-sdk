@@ -6,13 +6,13 @@
 #include "rby1-sdk/base/event_loop.h"
 #include "rby1-sdk/base/thread.h"
 #include "rby1-sdk/upc/device.h"
-
+#include "rby1-sdk/export.h"
 #include "rby1-sdk/dynamics/robot.h"
 #include "rby1-sdk/dynamics/state.h"
 
 namespace rb::upc {
 
-class MasterArm {
+class RBY1_SDK_API MasterArm {
  public:
   static constexpr int kDOF = 14;
   static constexpr int kDeivceCount = kDOF + 2;

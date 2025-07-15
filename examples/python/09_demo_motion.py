@@ -7,7 +7,7 @@ import re
 from rby1_sdk import *
 
 D2R = np.pi / 180  # Degree to Radian conversion factor
-MINIMUM_TIME = 2.5
+MINIMUM_TIME = 2
 LINEAR_VELOCITY_LIMIT = 1.5
 ANGULAR_VELOCITY_LIMIT = np.pi * 1.5
 ACCELERATION_LIMIT = 1.0
@@ -459,6 +459,7 @@ def example_impedance_control_command_1(robot, model_name):
         .set_link_name("ee_right")
         .set_translation_weight([1000, 1000, 1000])
         .set_rotation_weight([50, 50, 50])
+        .set_damping_ratio(0.85)
         .set_transformation(T_right)
     )
 
@@ -469,6 +470,7 @@ def example_impedance_control_command_1(robot, model_name):
         .set_link_name("ee_left")
         .set_translation_weight([1000, 1000, 1000])
         .set_rotation_weight([50, 50, 50])
+        .set_damping_ratio(0.85)
         .set_transformation(T_left)
     )
 
@@ -558,6 +560,7 @@ def example_relative_command_1(robot, model_name):
         .set_link_name("ee_left")
         .set_translation_weight([1000, 1000, 1000])
         .set_rotation_weight([50, 50, 50])
+        .set_damping_ratio(0.85)
         .set_transformation(T_diff)
     )
 
@@ -738,8 +741,8 @@ def example_optimal_control_2(robot, model_name):
         .add_cartesian_target("base", target_link, T_torso, WEIGHT, WEIGHT)
         .add_cartesian_target("base", "ee_right", T_right, WEIGHT, WEIGHT)
         .add_cartesian_target("base", "ee_left", T_left, WEIGHT, WEIGHT)
-        .add_joint_position_target("right_arm_2", 0.0, WEIGHT / 2)
-        .add_joint_position_target("left_arm_2", -0.0, WEIGHT / 2)
+        .add_joint_position_target("right_arm_2", 0.05, WEIGHT / 2)
+        .add_joint_position_target("left_arm_2", -0.05, WEIGHT / 2)
         .set_velocity_limit_scaling(1)
         .set_stop_cost(STOP_COST)
         .set_min_delta_cost(MIN_DELTA_COST)
@@ -797,7 +800,7 @@ def example_optimal_control_3(robot, model_name):
     )
     T_left[:3, 3] = [0.5, 0.3, 1.2]
 
-    COM = np.array([-0.0, 0.0, 0.5])
+    COM = np.array([-0.0, 0.0, 0.47])
     
     if model_name=="a":
         target_link = "link_torso_5"
@@ -909,8 +912,8 @@ def example_mixed_command_1(robot, model_name):
     right_arm_command = (
         JointPositionCommandBuilder()
         .set_position(np.array([0, -np.pi / 4, 0, -np.pi / 2, 0, 0, 0]))
-        .set_velocity_limit(np.array([np.pi]) * 7)
-        .set_acceleration_limit(np.array([1.0]) * 7)
+        .set_velocity_limit(np.array([np.pi] * 7))
+        .set_acceleration_limit(np.array([1.0] * 7))
         .set_minimum_time(MINIMUM_TIME)
     )
 
@@ -1011,8 +1014,8 @@ def example_mixed_command_2(robot, model_name):
     right_arm_command = (
         JointPositionCommandBuilder()
         .set_position(np.array([0, -np.pi / 4, 0, -np.pi / 2, 0, 0, 0]))
-        .set_velocity_limit(np.array([np.pi]) * 7)
-        .set_acceleration_limit(np.array([1.0]) * 7)
+        .set_velocity_limit(np.array([np.pi] * 7))
+        .set_acceleration_limit(np.array([1.0] * 7))
         .set_minimum_time(MINIMUM_TIME)
     )
 
@@ -1138,7 +1141,7 @@ def main(address, model_name, power, servo):
     # robot.factory_reset_all_parameters()
     robot.set_parameter("default.acceleration_limit_scaling", "1.0")
     robot.set_parameter("joint_position_command.cutoff_frequency", "5")
-    robot.set_parameter("cartesian_command.cutoff_frequency", "15")
+    robot.set_parameter("cartesian_command.cutoff_frequency", "5")
     robot.set_parameter("default.linear_acceleration_limit", "20")
     robot.set_parameter("default.angular_acceleration_limit", "10")
     robot.set_parameter("manipulability_threshold", "1e4")

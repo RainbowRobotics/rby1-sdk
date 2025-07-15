@@ -139,8 +139,117 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*
 
+  build-cpp:
+    needs: [ bump-version ]
+    name: Build C++ SDK (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            tag: linux-x86_64-gcc11
+          - os: ubuntu-22.04-arm
+            tag: linux-armv8-gcc11
+          - os: windows-2022
+            tag: windows-x86_64-msvc194
+          - os: macos-14
+            tag: macos-armv8-appleclang15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.bump-version.outputs.new_sha }}
+          fetch-depth: 0
+          submodules: true
+
+      - name: Make Output Directory
+        run: |
+          mkdir -p _output
+        shell: bash
+
+      - name: Install Dependencies (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+          python3 -m pip install --upgrade pip conan
+
+      - name: Install Dependencies (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install cmake
+          python3 -m pip install --upgrade pip conan --break-system-packages
+
+      - name: Install Dependencies (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' --yes
+          python -m pip install --upgrade pip conan
+
+      - name: Configure Conan
+        run: |
+          conan profile detect --force
+
+      # RELEASE MODE
+
+      - name: Install Dependencies (Release)
+        run: |
+          conan install . -s compiler.cppstd=17 -s build_type=Release -b missing -of build
+
+      - name: Configure CMake (Linux or macOS - Release)
+        if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}
+        run: |
+          cmake --preset conan-release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON -DINSTALL_MODELS=OFF
+
+      - name: Configure CMake (Windows - Release)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON -DINSTALL_MODELS=OFF
+
+      - name: Build and Install (Release)
+        run: |
+          cmake --build --target install --preset conan-release
+        shell: bash
+
+      # Debug MODE
+
+      - name: Install Dependencies (Debug)
+        run: |
+          conan install . -s compiler.cppstd=17 -s build_type=Debug -b missing -of build
+
+      - name: Configure CMake (Linux or macOS - Debug)
+        if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}
+        run: |
+          cmake --preset conan-debug -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON -DINSTALL_MODELS=OFF
+
+      - name: Configure CMake (Windows - Debug)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/_output -DBUILD_EXAMPLES=ON -DINSTALL_MODELS=OFF
+
+      - name: Build and Install (Debug)
+        run: |
+          cmake --build --target install --preset conan-debug
+        shell: bash
+
+      - name: Archive SDK
+        id: archive
+        run: |
+          cp README.md LICENSE NOTICE _output || true
+          tar_file=rby1_sdk-${{ needs.bump-version.outputs.version }}-${{ matrix.tag }}.tar.gz
+          tar -czvf "$tar_file" -C _output .
+          echo "TAR_FILE=$tar_file" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Upload SDK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rby1_sdk-${{ needs.bump-version.outputs.version }}-${{ matrix.tag }}
+          path: ${{ steps.archive.outputs.TAR_FILE }}
+
   release:
-    needs: [ bump-version, build-wheels ]
+    needs: [ bump-version, build-wheels, build-cpp ]
 
     runs-on: ubuntu-latest
     name: "Release with python packages"
@@ -171,11 +280,20 @@ jobs:
           path: ./wheelhouse
           merge-multiple: true
 
+      - name: Download cpp libraries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: rby1_sdk-*
+          path: ./cpp
+          merge-multiple: true
+
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           body_path: "body.md"
-          files: ./wheelhouse/*
+          files: |
+            ./wheelhouse/*
+            ./cpp/*
           tag_name: v${{ needs.bump-version.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

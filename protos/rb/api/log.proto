@@ -59,3 +59,13 @@ message SetLogLevelRequest {
 message SetLogLevelResponse {
   ResponseHeader response_header = 1;
 }
+
+message GetFaultLogListRequest {
+  RequestHeader request_header = 1;
+}
+
+message GetFaultLogListResponse {
+  ResponseHeader response_header = 1;
+
+  repeated string fault_log_list = 2; 
+}

@@ -1,6 +1,6 @@
+#include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11/eigen.h>
 
 #include "rby1-sdk/robot_command_feedback.h"
 
@@ -84,7 +84,9 @@ void pybind11_robot_command_feedback(py::module_& m) {
       .def_property_readonly("gravity_compensation_command", &ArmCommandFeedback::gravity_compensation_command)
       .def_property_readonly("cartesian_command", &ArmCommandFeedback::cartesian_command)
       .def_property_readonly("impedance_control_command", &ArmCommandFeedback::impedance_control_command)
-      .def_property_readonly("cartesian_impedance_control_command", &ArmCommandFeedback::cartesian_impedance_control_command);
+      .def_property_readonly("cartesian_impedance_control_command",
+                             &ArmCommandFeedback::cartesian_impedance_control_command)
+      .def_property_readonly("joint_impedance_control_command", &ArmCommandFeedback::joint_impedance_control_command);
 
   py::class_<TorsoCommandFeedback, CommandFeedback>(m, "TorsoCommandFeedback")
       .def(py::init<>())
@@ -92,7 +94,11 @@ void pybind11_robot_command_feedback(py::module_& m) {
       .def_property_readonly("gravity_compensation_command", &TorsoCommandFeedback::gravity_compensation_command)
       .def_property_readonly("cartesian_command", &TorsoCommandFeedback::cartesian_command)
       .def_property_readonly("impedance_control_command", &TorsoCommandFeedback::impedance_control_command)
-      .def_property_readonly("optimal_control_command", &TorsoCommandFeedback::optimal_control_command);
+      .def_property_readonly("optimal_control_command", &TorsoCommandFeedback::optimal_control_command)
+      .def_property_readonly("cartesian_impedance_control_command",
+                             &TorsoCommandFeedback::cartesian_impedance_control_command)
+      .def_property_readonly("joint_impedance_control_command", &TorsoCommandFeedback::joint_impedance_control_command)
+      .def_property_readonly("joint_group_position_command", &TorsoCommandFeedback::joint_group_position_command);
 
   py::class_<BodyComponentBasedCommandFeedback, CommandFeedback>(m, "BodyComponentBasedCommandFeedback")
       .def(py::init<>())
@@ -110,7 +116,10 @@ void pybind11_robot_command_feedback(py::module_& m) {
       .def_property_readonly("optimal_control_command", &BodyCommandFeedback::optimal_control_command)
       .def_property_readonly("gravity_compensation_command", &BodyCommandFeedback::gravity_compensation_command)
       .def_property_readonly("cartesian_command", &BodyCommandFeedback::cartesian_command)
-      .def_property_readonly("body_component_based_command", &BodyCommandFeedback::body_component_based_command);
+      .def_property_readonly("body_component_based_command", &BodyCommandFeedback::body_component_based_command)
+      .def_property_readonly("cartesian_impedance_control_command",
+                             &BodyCommandFeedback::cartesian_impedance_control_command)
+      .def_property_readonly("joint_impedance_control_command", &BodyCommandFeedback::joint_impedance_control_command);
 
   py::class_<MobilityCommandFeedback, CommandFeedback>(m, "MobilityCommandFeedback")
       .def(py::init<>())
@@ -136,7 +145,7 @@ void pybind11_robot_command_feedback(py::module_& m) {
       .value("Ok", RobotCommandFeedback::FinishCode::kOk)
       .value("Canceled", RobotCommandFeedback::FinishCode::kCanceled)
       .value("Preempted", RobotCommandFeedback::FinishCode::kPreempted)
-      .value("InitializedFailed", RobotCommandFeedback::FinishCode::kInitializedFailed)
+      .value("InitializationFailed", RobotCommandFeedback::FinishCode::kInitializationFailed)
       .value("ControlManagerIdle", RobotCommandFeedback::FinishCode::kControlManagerIdle)
       .value("ControlManagerFault", RobotCommandFeedback::FinishCode::kControlManagerFault)
       .value("UnexpectedState", RobotCommandFeedback::FinishCode::kUnexpectedState);

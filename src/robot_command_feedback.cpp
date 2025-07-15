@@ -66,6 +66,38 @@ class RobotCommandFeedbackParserImpl {
     self.position_based_progress_ = feedback->position_based_progress();
   }
 
+  void ParseJointGroupPositionCommandFeedback(JointGroupPositionCommandFeedback& self,
+                                              api::JointGroupPositionCommand::Feedback* feedback) {
+    self.valid_ = true;
+
+    if (feedback->has_command_header_feedback()) {
+      ParseCommandHeaderFeedback(self.command_header_, feedback->mutable_command_header_feedback());
+    }
+    self.joint_indices_.clear();
+    for (const auto& e : feedback->joint_indices()) {
+      self.joint_indices_.push_back(e);
+    }
+    self.time_based_progress_ = feedback->time_based_progress();
+    self.position_based_progress_ = feedback->position_based_progress();
+  }
+
+  void ParseJointImpedanceControlCommandFeedback(JointImpedanceControlCommandFeedback& self,
+                                                 api::JointImpedanceControlCommand::Feedback* feedback) {
+    self.valid_ = true;
+
+    if (feedback->has_command_header_feedback()) {
+      ParseCommandHeaderFeedback(self.command_header_, feedback->mutable_command_header_feedback());
+    }
+    self.set_position_.clear();
+    for (const auto& e : feedback->set_position()) {
+      self.set_position_.push_back(e);
+    }
+    self.error_.clear();
+    for (const auto& e : feedback->error()) {
+      self.error_.push_back(e);
+    }
+  }
+
   void ParseCartesianCommandFeedback(CartesianCommandFeedback& self, api::CartesianCommand::Feedback* feedback) {
     self.valid_ = true;
 
@@ -203,6 +235,10 @@ class RobotCommandFeedbackParserImpl {
         ParseCartesianImpedanceControlCommandFeedback(self.cartesian_impedance_control_command_,
                                                       feedback->mutable_cartesian_impedance_control_command_feedback());
         break;
+      case api::BodyCommand_Feedback::kJointImpedanceControlCommandFeedback:
+        ParseJointImpedanceControlCommandFeedback(self.joint_impedance_control_command_,
+                                                  feedback->mutable_joint_impedance_control_command_feedback());
+        break;
       case api::BodyCommand_Feedback::FEEDBACK_NOT_SET:
         break;
     }
@@ -254,6 +290,11 @@ class RobotCommandFeedbackParserImpl {
       case api::ArmCommand_Feedback::kCartesianImpedanceControlCommandFeedback:
         ParseCartesianImpedanceControlCommandFeedback(self.cartesian_impedance_control_command_,
                                                       feedback->mutable_cartesian_impedance_control_command_feedback());
+        break;
+      case api::ArmCommand_Feedback::kJointImpedanceControlCommandFeedback:
+        ParseJointImpedanceControlCommandFeedback(self.joint_impedance_control_command_,
+                                                  feedback->mutable_joint_impedance_control_command_feedback());
+        break;
       case api::ArmCommand_Feedback::FEEDBACK_NOT_SET:
         break;
     }
@@ -289,6 +330,14 @@ class RobotCommandFeedbackParserImpl {
       case api::TorsoCommand_Feedback::kCartesianImpedanceControlCommandFeedback:
         ParseCartesianImpedanceControlCommandFeedback(self.cartesian_impedance_control_command_,
                                                       feedback->mutable_cartesian_impedance_control_command_feedback());
+        break;
+      case api::TorsoCommand_Feedback::kJointImpedanceControlCommandFeedback:
+        ParseJointImpedanceControlCommandFeedback(self.joint_impedance_control_command_,
+                                                  feedback->mutable_joint_impedance_control_command_feedback());
+        break;
+      case api::TorsoCommand_Feedback::kJointGroupPositionCommandFeedback:
+        ParseJointGroupPositionCommandFeedback(self.joint_group_position_command_,
+                                               feedback->mutable_joint_group_position_command_feedback());
         break;
       case api::TorsoCommand_Feedback::FEEDBACK_NOT_SET:
         break;

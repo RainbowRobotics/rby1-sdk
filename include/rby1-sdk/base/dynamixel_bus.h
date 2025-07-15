@@ -5,11 +5,13 @@
 #include <string>
 #include <vector>
 
+#include "rby1-sdk/export.h"
+
 namespace rb {
 
 class DynamixelBusImpl;
 
-class DynamixelBus {
+class RBY1_SDK_API DynamixelBus {
  public:
   static constexpr float kProtocolVersion = 2.0;
 

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/file.proto";
+
+service FileService {
+    rpc DownloadFile(DownloadFileRequest) returns (stream DownloadFileResponse) {}
+}

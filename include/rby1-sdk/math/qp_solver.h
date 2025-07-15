@@ -5,10 +5,11 @@
 #include <optional>
 
 #include "Eigen/Core"
+#include "rby1-sdk/export.h"
 
 namespace rb::math {
 
-class QPSolverException : public std::exception {
+class RBY1_SDK_API QPSolverException : public std::exception {
  public:
   static constexpr unsigned int kStatusOffset = 100;
 
@@ -27,7 +28,7 @@ class QPSolverException : public std::exception {
 
 class QPSolverImpl;
 
-class QPSolver {
+class RBY1_SDK_API QPSolver {
  public:
   QPSolver();
 

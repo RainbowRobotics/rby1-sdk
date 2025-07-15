@@ -23,6 +23,8 @@ message TorsoCommand {
       JointImpedanceControlCommand.Request joint_impedance_control_command = 7;
 
       CartesianImpedanceControlCommand.Request cartesian_impedance_control_command = 8;
+
+      JointGroupPositionCommand.Request joint_group_position_command = 9;
     }
   }
 
@@ -43,6 +45,8 @@ message TorsoCommand {
       JointImpedanceControlCommand.Feedback joint_impedance_control_command_feedback = 7;
 
       CartesianImpedanceControlCommand.Feedback cartesian_impedance_control_command_feedback = 8;
+
+      JointGroupPositionCommand.Feedback joint_group_position_command_feedback = 9;
     }
   }
 }

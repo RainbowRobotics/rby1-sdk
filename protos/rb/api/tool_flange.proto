@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package rb.api;
+
+import "rb/api/header.proto";
+
+message SetToolFlangeDigitalOutputRequest {
+  RequestHeader request_header = 1;
+
+  string name = 2; // tool flange name; 'left' or 'right'
+
+  message SingleChannel {
+    uint32 channel = 1;
+    bool state = 2;
+  }
+
+  message DualChannel {
+    bool state_0 = 1;
+    bool state_1 = 2;
+  }
+
+  oneof command {
+    SingleChannel single = 3;
+    DualChannel dual = 4;
+  }
+}
+
+message SetToolFlangeDigitalOutputResponse {
+  ResponseHeader response_header = 1;
+}

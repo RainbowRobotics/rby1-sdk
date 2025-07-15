@@ -1,3 +1,4 @@
+#include <functional>
 #include <regex>
 #include <utility>
 
@@ -11,6 +12,7 @@
 #include "rb/api/robot_state.pb.h"
 
 #include "rb/api/control_manager_service.grpc.pb.h"
+#include "rb/api/file_service.grpc.pb.h"
 #include "rb/api/joint_operation_service.grpc.pb.h"
 #include "rb/api/led_service.grpc.pb.h"
 #include "rb/api/log_service.grpc.pb.h"
@@ -22,6 +24,7 @@
 #include "rb/api/robot_state_service.grpc.pb.h"
 #include "rb/api/serial_service.grpc.pb.h"
 #include "rb/api/system_service.grpc.pb.h"
+#include "rb/api/tool_flange_service.grpc.pb.h"
 
 #include "rby1-sdk/base/event_loop.h"
 #include "rby1-sdk/base/time_util.h"
@@ -43,7 +46,7 @@ void InitializeRequestHeader(rb::api::RequestHeader* req_header) {
 }
 
 struct timespec DurationToTimespec(const google::protobuf::Duration& duration) {
-  struct timespec t {};
+  struct timespec t{};
 
   t.tv_sec = duration.seconds();
   t.tv_nsec = duration.nanos();
@@ -166,9 +169,15 @@ rb::JointInfo ProtoToJointInfo(const api::JointInfo& msg) {
 rb::RobotInfo ProtoToRobotInfo(const api::RobotInfo& msg) {
   rb::RobotInfo info;
 
+  info.version = msg.version();
+
+  info.sdk_version = msg.sdk_version();
+
   info.robot_version = msg.robot_version();
 
   info.robot_model_name = msg.robot_model_name();
+
+  info.robot_model_version = msg.robot_model_version();
 
   info.sdk_commit_id = msg.sdk_commit_id();
 
@@ -692,7 +701,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
   std::string GetAddress() { return address_; }
 
-  bool Connect(int max_retries = 5, int timeout_ms = 1000) {
+  bool Connect(int max_retries = 5, int timeout_ms = 1000, std::function<bool()> signal_check = nullptr) {
     if (connected_) {
       return true;
     }
@@ -714,6 +723,8 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     led_service_ = api::LEDService::NewStub(channel_);
     system_service_ = api::SystemService::NewStub(channel_);
     serial_service_ = api::SerialService::NewStub(channel_);
+    tool_flange_service_ = api::ToolFlangeService::NewStub(channel_);
+    file_service_ = api::FileService::NewStub(channel_);
 
     int retries = 0;
     while (retries < max_retries) {
@@ -725,6 +736,9 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       if (channel_->WaitForConnected(system_clock::now() + milliseconds(timeout_ms))) {
         connected_ = true;
         return true;
+      }
+      if (signal_check && !signal_check()) {
+        return false;
       }
       retries++;
     }
@@ -1188,6 +1202,33 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
   }
 
+  bool SetPresetPosition(const std::string& joint_name) const {
+    api::SetPresetPositionRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(joint_name);
+
+    api::SetPresetPositionResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = joint_operation_service_->SetPresetPosition(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() == api::CommonError::CODE_OK) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   bool EnableControlManager(bool unlimited_mode_enabled) const {
     api::ControlManagerCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
@@ -1268,7 +1309,6 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       }
       throw std::runtime_error(ss.str());
     }
-
     if (res.has_response_header()) {
       if (res.response_header().has_error()) {
         if (res.response_header().error().code() == api::CommonError::CODE_OK) {
@@ -1308,8 +1348,77 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       }
       throw std::runtime_error(ss.str());
     }
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() == api::CommonError::CODE_OK) {
+          return true;
+        }
+      }
+    }
 
-    return true;
+    return false;
+  }
+
+  bool SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const {
+    api::SetToolFlangeDigitalOutputRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(name);
+    auto& single = *req.mutable_single();
+    single.set_channel(channel);
+    single.set_state(state);
+
+    api::SetToolFlangeDigitalOutputResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = tool_flange_service_->SetDigitalOutput(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() == api::CommonError::CODE_OK) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool SetToolFlangeDigitalOutputDual(const std::string& name, bool state_0, bool state_1) const {
+    api::SetToolFlangeDigitalOutputRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+    req.set_name(name);
+    auto& dual = *req.mutable_dual();
+    dual.set_state_0(state_0);
+    dual.set_state_1(state_1);
+
+    api::SetToolFlangeDigitalOutputResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = tool_flange_service_->SetDigitalOutput(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() == api::CommonError::CODE_OK) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   void StartStateUpdate(const std::function<void(const RobotState<T>&, const ControlManagerState&)>& cb, double rate) {
@@ -1390,6 +1499,39 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return logs;
   }
 
+  std::vector<std::string> GetFaultLogList() const {
+    api::GetFaultLogListRequest req;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    api::GetFaultLogListResponse res;
+    grpc::ClientContext context;
+    grpc::Status status = log_service_->GetFaultLogList(&context, req, &res);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    if (res.has_response_header()) {
+      if (res.response_header().has_error()) {
+        if (res.response_header().error().code() != api::CommonError::CODE_OK) {
+          throw std::runtime_error("GetFaultLogList failed: " + res.response_header().error().message());
+        }
+      }
+    }
+
+    std::vector<std::string> fault_log_list;
+    for (const auto& log : res.fault_log_list()) {
+      fault_log_list.push_back(log);
+    }
+
+    return fault_log_list;
+  }
+
   ControlManagerState GetControlManagerState() const {
     api::GetControlManagerStateRequest req;
     InitializeRequestHeader(req.mutable_request_header());
@@ -1451,7 +1593,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     int recv_pkt_size_{0};
     std::array<unsigned char, kMaxPacketLength> recv_packet{};
 
-    struct sockaddr_storage client_addr {};
+    struct sockaddr_storage client_addr{};
 
     while (!handler->IsDone()) {
       {
@@ -1974,7 +2116,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
       throw std::runtime_error(ss.str());
     }
 
-    struct timespec utc_time {};
+    struct timespec utc_time{};
 
     if (res.has_utc_time()) {
       utc_time.tv_sec = res.utc_time().seconds();
@@ -2308,6 +2450,49 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
         std::make_unique<SerialStreamImpl>(serial_service_.get(), device_path, buadrate, bytesize, parity, stopbits)));
   }
 
+  bool DownloadFile(const std::string& path, std::ostream& output) const {
+    return DownloadFileToCallback(path, [&output](const char* data, size_t size) { output.write(data, size); });
+  }
+
+  bool DownloadFileToCallback(const std::string& path, std::function<void(const char*, size_t)> on_chunk) const {
+    api::DownloadFileRequest req;
+    req.set_file_path(path);
+
+    grpc::ClientContext context;
+    InitializeRequestHeader(req.mutable_request_header());
+
+    std::unique_ptr<grpc::ClientReader<api::DownloadFileResponse>> reader(file_service_->DownloadFile(&context, req));
+
+    api::DownloadFileResponse chunk;
+    while (reader->Read(&chunk)) {
+      if (chunk.has_response_header()) {
+        if (chunk.response_header().has_error()) {
+          if (chunk.response_header().error().code() != api::CommonError::CODE_OK) {
+            std::cerr << "Error: " << chunk.response_header().error().message() << std::endl;
+            return false;
+          }
+        }
+      }
+
+      if (on_chunk) {
+        on_chunk(chunk.file_content().data(), chunk.file_content().size());
+      }
+    }
+
+    grpc::Status status = reader->Finish();
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << "gRPC call failed. Code: " << static_cast<int>(status.error_code()) << "("
+         << gRPCStatusToString(status.error_code()) << ")";
+      if (!status.error_message().empty()) {
+        ss << ", Message: " << status.error_message();
+      }
+      throw std::runtime_error(ss.str());
+    }
+
+    return true;
+  }
+
   class StateReader : public grpc::ClientReadReactor<api::GetRobotStateStreamResponse> {
    public:
     explicit StateReader(std::shared_ptr<RobotImpl<T>> robot, api::RobotStateService::Stub* stub,
@@ -2490,6 +2675,10 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
 
       tf.switch_A = tf_proto.switch_a();
       tf.output_voltage = tf_proto.output_voltage();
+      tf.digital_input_A = tf_proto.digital_input_a();
+      tf.digital_input_B = tf_proto.digital_input_b();
+      tf.digital_output_A = tf_proto.digital_output_a();
+      tf.digital_output_B = tf_proto.digital_output_b();
     };
     if (msg.has_tool_flange_right()) {
       proto_to_tool_flange(rs.tool_flange_right, msg.tool_flange_right());
@@ -2722,6 +2911,8 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
   std::unique_ptr<api::LEDService::Stub> led_service_;
   std::unique_ptr<api::SystemService::Stub> system_service_;
   std::unique_ptr<api::SerialService::Stub> serial_service_;
+  std::unique_ptr<api::ToolFlangeService::Stub> tool_flange_service_;
+  std::unique_ptr<api::FileService::Stub> file_service_;
 
   std::unique_ptr<StateReader> state_reader_;
   std::unique_ptr<LogReader> log_reader_;
@@ -2753,8 +2944,8 @@ std::string Robot<T>::GetAddress() {
 }
 
 template <typename T>
-bool Robot<T>::Connect(int max_retries, int timeout_ms) {
-  return impl_->Connect(max_retries, timeout_ms);
+bool Robot<T>::Connect(int max_retries, int timeout_ms, std::function<bool()> signal_check) {
+  return impl_->Connect(max_retries, timeout_ms, signal_check);
 }
 
 template <typename T>
@@ -2879,6 +3070,11 @@ bool Robot<T>::HomeOffsetReset(const std::string& dev_name) const {
 }
 
 template <typename T>
+bool Robot<T>::SetPresetPosition(const std::string& joint_name) const {
+  return impl_->SetPresetPosition(joint_name);
+}
+
+template <typename T>
 bool Robot<T>::EnableControlManager(bool unlimited_mode_enabled) const {
   return impl_->EnableControlManager(unlimited_mode_enabled);
 }
@@ -2901,6 +3097,16 @@ bool Robot<T>::CancelControl() const {
 template <typename T>
 bool Robot<T>::SetToolFlangeOutputVoltage(const std::string& name, int voltage) const {
   return impl_->SetToolFlangeOutputVoltage(name, voltage);
+}
+
+template <typename T>
+bool Robot<T>::SetToolFlangeDigitalOutput(const std::string& name, unsigned int channel, bool state) const {
+  return impl_->SetToolFlangeDigitalOutput(name, channel, state);
+}
+
+template <typename T>
+bool Robot<T>::SetToolFlangeDigitalOutputDual(const std::string& name, bool state_0, bool state_1) const {
+  return impl_->SetToolFlangeDigitalOutputDual(name, state_0, state_1);
 }
 
 template <typename T>
@@ -2937,6 +3143,11 @@ RobotState<T> Robot<T>::GetState() const {
 template <typename T>
 std::vector<Log> Robot<T>::GetLastLog(unsigned int count) const {
   return impl_->GetLastLog(count);
+}
+
+template <typename T>
+std::vector<std::string> Robot<T>::GetFaultLogList() const {
+  return impl_->GetFaultLogList();
 }
 
 template <typename T>
@@ -3117,6 +3328,17 @@ template <typename T>
 std::unique_ptr<SerialStream> Robot<T>::OpenSerialStream(const std::string& device_path, int buadrate, int bytesize,
                                                          char parity, int stopbits) const {
   return impl_->OpenSerialStream(device_path, buadrate, bytesize, parity, stopbits);
+}
+
+template <typename T>
+bool Robot<T>::DownloadFile(const std::string& path, std::ostream& output) const {
+  return impl_->DownloadFile(path, output);
+}
+
+template <typename T>
+bool Robot<T>::DownloadFileToCallback(const std::string& path,
+                                      std::function<void(const char*, size_t)> on_chunk) const {
+  return impl_->DownloadFileToCallback(path, on_chunk);
 }
 
 template <typename T>

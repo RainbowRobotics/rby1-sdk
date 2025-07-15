@@ -6,42 +6,43 @@
 #include <vector>
 
 #include "dynamics/link.h"
+#include "export.h"
 #include "math/liegroup.h"
 
 namespace rb {
 
-struct SystemStat {
+struct RBY1_SDK_API SystemStat {
   double cpu_usage{0.};       // (percent)
   double memory_usage{0.};    // (percent)
   double uptime{0.};          // (sec)
   double program_uptime{0.};  // (sec)
 };
 
-struct BatteryState {
+struct RBY1_SDK_API BatteryState {
   double voltage{0.};        // (V)
   double current{0.};        // (Amp)
   double level_percent{0.};  // (%)
 };
 
-struct PowerState {
+struct RBY1_SDK_API PowerState {
   enum class State { kUnknown = 0, kPowerOn = 1, kPowerOff = 2 };
 
   State state{State::kUnknown};
   double voltage{0.};
 };
 
-struct EMOState {
+struct RBY1_SDK_API EMOState {
   enum class State { kReleased = 0, kPressed = 1 };
 
   State state{State::kReleased};
 };
 
-struct JointState {
+struct RBY1_SDK_API JointState {
   enum class FETState { kUnknown = 0, kOn = 1, kOff = 2 };
   enum class RunState { kUnknown = 0, kControlOn = 1, kControlOff = 2 };
   enum class InitializationState { kUnknown = 0, kInitialized = 1, kUninitialized = 2 };
 
-  struct timespec time_since_last_update {};
+  struct timespec time_since_last_update{};
 
   bool is_ready{false};
   FETState fet_state{FETState::kUnknown};
@@ -51,22 +52,22 @@ struct JointState {
   uint32_t motor_type{};  // 0: simulator, 1: rbmotor, 2: dynamixel
   uint64_t motor_state{};
 
-  bool power_on{};
-  double position{};  // (rad)
-  double velocity{};  // (rad/s)
-  double current{};   // (amp)
-  double torque{};    // (Nm)
+  bool power_on{false};
+  double position{0.};  // (rad)
+  double velocity{0.};  // (rad/s)
+  double current{0.};   // (amp)
+  double torque{0.};    // (Nm)
 
-  double target_position{};            // (rad)
-  double target_velocity{};            // (rad/s)
-  uint32_t target_feedback_gain{};     // [0,10]
-  double target_feedforward_torque{};  // (Nm)
+  double target_position{0.};            // (rad)
+  double target_velocity{0.};            // (rad/s)
+  uint32_t target_feedback_gain{10};     // [0,10]
+  double target_feedforward_torque{0.};  // (Nm)
 
-  int temperature{}; // ºC
+  int temperature{};  // ºC
 };
 
-struct ToolFlangeState {
-  struct timespec time_since_last_update {};
+struct RBY1_SDK_API ToolFlangeState {
+  struct timespec time_since_last_update{};
 
   Eigen::Vector<double, 3> gyro;          // (rad/s)
   Eigen::Vector<double, 3> acceleration;  // (m/s^2)
@@ -74,18 +75,24 @@ struct ToolFlangeState {
   bool switch_A{};
 
   int output_voltage;
+
+  bool digital_input_A{};
+  bool digital_input_B{};
+
+  bool digital_output_A{};
+  bool digital_output_B{};
 };
 
-struct FTSensorData {
-  struct timespec time_since_last_update {};
+struct RBY1_SDK_API FTSensorData {
+  struct timespec time_since_last_update{};
 
   Eigen::Vector<double, 3> force;
   Eigen::Vector<double, 3> torque;
 };
 
 template <typename T>
-struct RobotState {
-  struct timespec timestamp {};  // Robot state update timestamp
+struct RBY1_SDK_API RobotState {
+  struct timespec timestamp{};  // Robot state update timestamp
 
   SystemStat system_stat{};  // System Statistic
 
@@ -132,8 +139,8 @@ struct RobotState {
   Eigen::Vector<int, T::kRobotDOF> temperature{Eigen::Vector<int, T::kRobotDOF>::Zero()};
 };
 
-inline std::string to_string(PowerState::State s) {
-  switch(s) {
+RBY1_SDK_API inline std::string to_string(PowerState::State s) {
+  switch (s) {
     case PowerState::State::kUnknown:
       return "Unknown";
     case PowerState::State::kPowerOn:
@@ -144,8 +151,8 @@ inline std::string to_string(PowerState::State s) {
   return "";
 }
 
-inline std::string to_string(EMOState::State s) {
-  switch(s) {
+RBY1_SDK_API inline std::string to_string(EMOState::State s) {
+  switch (s) {
     case EMOState::State::kReleased:
       return "Released";
     case EMOState::State::kPressed:
@@ -154,8 +161,8 @@ inline std::string to_string(EMOState::State s) {
   return "";
 }
 
-inline std::string to_string(JointState::FETState s) {
-  switch(s) {
+RBY1_SDK_API inline std::string to_string(JointState::FETState s) {
+  switch (s) {
     case JointState::FETState::kUnknown:
       return "Unknown";
     case JointState::FETState::kOn:
@@ -166,8 +173,8 @@ inline std::string to_string(JointState::FETState s) {
   return "";
 }
 
-inline std::string to_string(JointState::RunState s) {
-  switch(s) {
+RBY1_SDK_API inline std::string to_string(JointState::RunState s) {
+  switch (s) {
     case JointState::RunState::kUnknown:
       return "Unknown";
     case JointState::RunState::kControlOn:
@@ -178,8 +185,8 @@ inline std::string to_string(JointState::RunState s) {
   return "";
 }
 
-inline std::string to_string(JointState::InitializationState s) {
-  switch(s) {
+RBY1_SDK_API inline std::string to_string(JointState::InitializationState s) {
+  switch (s) {
     case JointState::InitializationState::kUnknown:
       return "Unknown";
     case JointState::InitializationState::kInitialized:

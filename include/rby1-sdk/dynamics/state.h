@@ -2,6 +2,8 @@
 
 #include <Eigen/Core>
 
+#include "rby1-sdk/export.h"
+
 namespace rb::dyn {
 
 template <int DOF>

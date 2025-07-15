@@ -25,3 +25,6 @@ wheelhouse
 
 .DS_Store
 .ipynb_checkpoints
+_output
+
+fault.csv

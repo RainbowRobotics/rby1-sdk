@@ -3,21 +3,19 @@
 #undef __ARM_NEON__
 #endif
 
+#include <algorithm>
+#include <chrono>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <thread>
-#include "dynamixel_sdk.h"  // Uses Dynamixel SDK library
+#include "dynamixel_sdk.h"
 
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 #include "rby1-sdk/robot_command_builder.h"
-
 #include "rby1-sdk/upc/device.h"
 
-#include <unistd.h>
-
-#include <algorithm>
-#include <cstring>
 using namespace rb;
 using namespace std::chrono_literals;
 
@@ -501,7 +499,7 @@ Eigen::Matrix<double, 14, 1> calc_torque_for_limit_avoid(Eigen::Matrix<double, 1
 }
 
 void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
-  
+
   Eigen::Vector<double, 6> q_joint_waist;
   Eigen::Vector<double, 7> q_joint_right_arm;
   Eigen::Vector<double, 7> q_joint_left_arm;
@@ -513,24 +511,23 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
   // double minimum_time = 2.;
   double minimum_time = 1.5;
 
-  
-    //go to init pos
-    auto rv = robot
-                  ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
-                      BodyComponentBasedCommandBuilder()
-                          .SetTorsoCommand(JointPositionCommandBuilder().SetMinimumTime(3).SetPosition(
-                              Eigen::Vector<double, 6>{0, 30, -60, 30, 0, 0} * D2R))
-                          .SetRightArmCommand(JointPositionCommandBuilder().SetMinimumTime(3).SetPosition(
-                              Eigen::Vector<double, 7>{45, -15, 0, -135, 0, 45, 0} * D2R))
-                          .SetLeftArmCommand(JointPositionCommandBuilder().SetMinimumTime(3).SetPosition(
-                              Eigen::Vector<double, 7>{45, 15, 0, -135, 0, 45, 0} * D2R)))))
-                  ->Get();
+  //go to init pos
+  auto rv = robot
+                ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
+                    BodyComponentBasedCommandBuilder()
+                        .SetTorsoCommand(JointPositionCommandBuilder().SetMinimumTime(3).SetPosition(
+                            Eigen::Vector<double, 6>{0, 30, -60, 30, 0, 0} * D2R))
+                        .SetRightArmCommand(JointPositionCommandBuilder().SetMinimumTime(3).SetPosition(
+                            Eigen::Vector<double, 7>{45, -15, 0, -135, 0, 45, 0} * D2R))
+                        .SetLeftArmCommand(JointPositionCommandBuilder().SetMinimumTime(3).SetPosition(
+                            Eigen::Vector<double, 7>{45, 15, 0, -135, 0, 45, 0} * D2R)))))
+                ->Get();
 
-    if (rv.finish_code() != RobotCommandFeedback::FinishCode::kOk) {
-      std::cerr << "Error: Failed to conduct demo motion." << std::endl;
-    }
+  if (rv.finish_code() != RobotCommandFeedback::FinishCode::kOk) {
+    std::cerr << "Error: Failed to conduct demo motion." << std::endl;
+  }
 
-    is_first_init = true;
+  is_first_init = true;
 
   if (0) {
     std::cout << "joint position command example 1\n";
@@ -1083,7 +1080,7 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
                   ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
                       JointPositionCommandBuilder()
                           .SetPosition(Eigen::Vector<double, 20>::Constant(0.0))
-                          .SetMinimumTime(minimum_time*2.0))))
+                          .SetMinimumTime(minimum_time * 2.0))))
                   ->Get();
 
     if (rv.finish_code() != RobotCommandFeedback::FinishCode::kOk) {
@@ -1094,8 +1091,8 @@ void control_loop_for_robot(std::shared_ptr<rb::Robot<y1_model::A>> robot) {
     std::this_thread::sleep_for(1s);
   }
 
-  if(1){
-    std::cout<< "power off"<<std::endl;
+  if (1) {
+    std::cout << "power off" << std::endl;
     robot->DisableControlManager();
     std::this_thread::sleep_for(1s);
     robot->PowerOff("12v");
@@ -1266,16 +1263,6 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
-}
-
-std::string resolve_symlink(const std::string& symlink) {
-  char buf[1024];
-  ssize_t len = readlink(symlink.c_str(), buf, sizeof(buf) - 1);
-  if (len != -1) {
-    buf[len] = '\0';
-    return std::string(buf);
-  }
-  return "";
 }
 
 int main(int argc, char** argv) {

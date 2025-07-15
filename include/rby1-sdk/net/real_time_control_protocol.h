@@ -5,6 +5,8 @@
 #include <cstring>
 #include <vector>
 
+#include "rby1-sdk/export.h"
+
 namespace rb {
 
 static unsigned char const kCRC8Table[] = {
@@ -23,7 +25,7 @@ static unsigned char const kCRC8Table[] = {
     0x05, 0x34, 0x67, 0x56, 0x78, 0x49, 0x1a, 0x2b, 0xbc, 0x8d, 0xde, 0xef, 0x82, 0xb3, 0xe0, 0xd1, 0x46, 0x77, 0x24,
     0x15, 0x3b, 0x0a, 0x59, 0x68, 0xff, 0xce, 0x9d, 0xac};
 
-inline unsigned char CalculateCRC8(unsigned char* data, size_t len) {
+RBY1_SDK_API inline unsigned char CalculateCRC8(unsigned char* data, size_t len) {
   unsigned char crc = 0xff;
   if (data == nullptr)
     return 0xff;
@@ -43,24 +45,24 @@ static constexpr bool kPositionControlMode = false;
 static constexpr bool kVelocityControlMode = true;
 
 // mode - if 0, position, if 1, velocity
-int BuildRobotCommandRTPacket(unsigned char* packet, size_t N, const bool* mode, const double* target,
+RBY1_SDK_API int BuildRobotCommandRTPacket(unsigned char* packet, size_t N, const bool* mode, const double* target,
                               const unsigned int* feedback_gain, const double* feedforward_torque, bool finished);
 
-int BuildRobotStateRTPacket(unsigned char* packet, size_t N, double t, const bool* is_ready, const double* position,
+RBY1_SDK_API int BuildRobotStateRTPacket(unsigned char* packet, size_t N, double t, const bool* is_ready, const double* position,
                             const double* velocity, const double* current, const double* torque);
 
-std::pair<bool, int> ValidateRTProtocol(const unsigned char* packet, int packet_size);
+RBY1_SDK_API std::pair<bool, int> ValidateRTProtocol(const unsigned char* packet, int packet_size);
 
 // N
-size_t GetDoFRobotStateRTProtocol(const unsigned char* packet);
+RBY1_SDK_API size_t GetDoFRobotStateRTProtocol(const unsigned char* packet);
 
 // N
-size_t GetDoFRobotCommandRTProtocol(const unsigned char* packet);
+RBY1_SDK_API size_t GetDoFRobotCommandRTProtocol(const unsigned char* packet);
 
-void ParseRobotStateRTProtocol(const unsigned char* packet, size_t* N, double* t, bool* is_ready, double* position,
+RBY1_SDK_API void ParseRobotStateRTProtocol(const unsigned char* packet, size_t* N, double* t, bool* is_ready, double* position,
                                double* velocity, double* current, double* torque);
 
-void ParseRobotCommandRTProtocol(const unsigned char* packet, size_t* N, bool* mode, double* target,
+RBY1_SDK_API void ParseRobotCommandRTProtocol(const unsigned char* packet, size_t* N, bool* mode, double* target,
                                  unsigned int* feedback_gain, double* feedforward_torque, bool* finished);
 
 }  // namespace rb

@@ -33,12 +33,13 @@ message JointInfo {
 }
 
 message RobotInfo {
-  // [DEPRECATED] Will be removed in the future. Use `robot_model_name` instead.
-  string robot_version = 1;
+  string version = 17;
+
+  string sdk_version = 18;
 
   string robot_model_name = 12;
 
-  string sdk_commit_id = 10;
+  string robot_model_version = 16;
 
   BatteryInfo battery_info = 2;
 
@@ -61,6 +62,12 @@ message RobotInfo {
   repeated uint32 right_arm_joint_idx = 14;
 
   repeated uint32 left_arm_joint_idx = 15;
+
+  // [DEPRECATED] Will be removed in the future. Use `robot_model_name` instead.
+  string robot_version = 1;
+
+  // [DEPRECATED]
+  string sdk_commit_id = 10;
 }
 
 message GetRobotInfoRequest {

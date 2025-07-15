@@ -3,15 +3,17 @@
 #include <string>
 #include <vector>
 
+#include "rby1-sdk/export.h"
+
 namespace rb {
 
-struct WifiNetwork {
+struct RBY1_SDK_API WifiNetwork {
   std::string ssid;
   int signal_strength;
   bool secured;
 };
 
-struct WifiStatus {
+struct RBY1_SDK_API WifiStatus {
   std::string ssid;
   std::string ip_address;
   std::string gateway;

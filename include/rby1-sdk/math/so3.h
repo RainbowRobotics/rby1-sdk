@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "constants.h"
+#include "rby1-sdk/export.h"
 
 namespace rb::math {
 
@@ -15,7 +16,7 @@ class SO3;
 class so3;
 class so3v;
 
-class so3 {
+class RBY1_SDK_API so3 {
  public:
   using MatrixType = Eigen::Matrix3d;
 
@@ -23,7 +24,7 @@ class so3 {
   so3() = default;
 };
 
-class so3v {
+class RBY1_SDK_API so3v {
  public:
   using MatrixType = Eigen::Vector3d;
 
@@ -31,7 +32,7 @@ class so3v {
   so3v() = default;
 };
 
-class SO3 {
+class RBY1_SDK_API SO3 {
  public:
   using MatrixType = Eigen::Matrix3d;
 

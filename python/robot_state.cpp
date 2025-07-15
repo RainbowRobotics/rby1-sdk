@@ -96,6 +96,10 @@ void bind_tool_flange(py::module_& m) {
       .def_readonly("acceleration", &ToolFlangeState::acceleration)
       .def_readonly("switch_A", &ToolFlangeState::switch_A)
       .def_readonly("output_voltage", &ToolFlangeState::output_voltage)
+      .def_readonly("digital_input_A", &ToolFlangeState::digital_input_A)
+      .def_readonly("digital_input_B", &ToolFlangeState::digital_input_B)
+      .def_readonly("digital_output_A", &ToolFlangeState::digital_output_A)
+      .def_readonly("digital_output_B", &ToolFlangeState::digital_output_B)
       .def("__repr__", [](const ToolFlangeState& self) {
         py::object np = py::module_::import("numpy");
         std::stringstream ss;
@@ -107,6 +111,10 @@ void bind_tool_flange(py::module_& m) {
            << ", acceleration=" << np.attr("array2string")(self.acceleration).cast<std::string>()  //
            << ", switch_A=" << (self.switch_A ? "True" : "False")                                  //
            << ", output_voltage=" << self.output_voltage                                           //
+           << ", digital_input_A=" << (self.digital_input_A ? "True" : "False")                    //
+           << ", digital_input_B=" << (self.digital_input_B ? "True" : "False")                    //
+           << ", digital_output_A=" << (self.digital_output_A ? "True" : "False")                  //
+           << ", digital_output_B=" << (self.digital_output_B ? "True" : "False")                  //
            << ")";
         return ss.str();
       });

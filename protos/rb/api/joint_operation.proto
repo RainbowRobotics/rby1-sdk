@@ -4,7 +4,6 @@ package rb.api;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
-
 import "rb/api/header.proto";
 
 
@@ -175,4 +174,14 @@ message GetPositionPIDGainRequest {
 message GetPositionPIDGainResponse {
   ResponseHeader response_header = 1;
   repeated PositionPIDGain position_gain = 2;
+}
+
+message SetPresetPositionRequest {
+  RequestHeader request_header = 1;
+
+  string name = 2;
+}
+
+message SetPresetPositionResponse {
+  ResponseHeader response_header = 1;
 }

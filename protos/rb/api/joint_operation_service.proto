@@ -12,4 +12,5 @@ service JointOperationService {
   rpc HomeOffsetReset(HomeOffsetResetRequest) returns (HomeOffsetResetResponse) {}
   rpc GetPositionPIDGain(GetPositionPIDGainRequest) returns (GetPositionPIDGainResponse) {}
   rpc SetPositionPIDGain(SetPositionPIDGainRequest) returns (SetPositionPIDGainResponse) {}
+  rpc SetPresetPosition(SetPresetPositionRequest) returns (SetPresetPositionResponse) {}
 }

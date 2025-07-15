@@ -1,10 +1,21 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
+import re
+
+
+def extract_version_from_pyproject_toml(path="pyproject.toml"):
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+    match = re.search(r'^version[\t\r\n ]*=[\t\r\n ]*"([^"]+)"', content, re.MULTILINE)
+    if match:
+        return match.group(1)
+    raise RuntimeError("version not found")
 
 
 class rby1_sdkRecipe(ConanFile):
     name = "rby1-sdk"
-    version = "0.1"
+    version = extract_version_from_pyproject_toml()
 
     # Optional metadata
     license = "Rainbow Robotics"
@@ -23,8 +34,16 @@ class rby1_sdkRecipe(ConanFile):
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = ["CMakeLists.txt", "src/", "protos/", "include/", "generated/", "examples/"]
 
+    @property
+    def _cxxstd_required(self):
+        return 17
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._cxxstd_required)
+
     def requirements(self):
-        self.requires("grpc/1.54.3")
+        self.requires("grpc/1.72.0")
         self.requires("eigen/3.4.0")
         self.requires("tinyxml2/10.0.0", visible=False)
         self.requires("nlohmann_json/3.11.3")

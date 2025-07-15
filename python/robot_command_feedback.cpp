@@ -35,6 +35,12 @@ void pybind11_robot_command_feedback(py::module_& m) {
       .def_property_readonly("time_based_progress", &JointPositionCommandFeedback::time_based_progress)
       .def_property_readonly("position_based_progress", &JointPositionCommandFeedback::position_based_progress);
 
+  py::class_<JointGroupPositionCommandFeedback, CommandFeedback>(m, "JointGroupPositionCommandFeedback")
+      .def(py::init<>())
+      .def_property_readonly("joint_indices", &JointGroupPositionCommandFeedback::joint_indices)
+      .def_property_readonly("time_based_progress", &JointGroupPositionCommandFeedback::time_based_progress)
+      .def_property_readonly("position_based_progress", &JointGroupPositionCommandFeedback::position_based_progress);
+
   py::class_<CartesianCommandFeedback, CommandFeedback> ccf(m, "CartesianCommandFeedback");
 
   py::class_<CartesianCommandFeedback::TrackingError>(ccf, "TrackingError")
@@ -66,6 +72,11 @@ void pybind11_robot_command_feedback(py::module_& m) {
       .def_readonly("rotation_error", &ImpedanceControlCommandFeedback::TrackingError::rotation_error);
 
   iccf.def(py::init<>()).def_property_readonly("tracking_error", &ImpedanceControlCommandFeedback::tracking_error);
+
+  py::class_<JointImpedanceControlCommandFeedback, CommandFeedback>(m, "JointImpedanceControlCommandFeedback")
+      .def(py::init<>())
+      .def_property_readonly("set_position", &JointImpedanceControlCommandFeedback::set_position)
+      .def_property_readonly("error", &JointImpedanceControlCommandFeedback::error);
 
   py::class_<OptimalControlCommandFeedback, CommandFeedback>(m, "OptimalControlCommandFeedback")
       .def(py::init<>())

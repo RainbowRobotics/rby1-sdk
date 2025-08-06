@@ -155,7 +155,7 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
             if (ret.first < kDOF) {
               state_.q_joint(ret.first) = ret.second.position;
               state_.qvel_joint(ret.first) = ret.second.velocity;
-              state_.torque_joint(ret.first) = ret.second.current * torque_constant_[ret.first] / kTorqueScaling;
+              state_.torque_joint(ret.first) = ret.second.current * torque_constant_[ret.first];
             }
           }
           state_updated_ = true;
@@ -191,7 +191,7 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
                 if (state.operating_mode(i) == DynamixelBus::kCurrentControlMode) {
                   id_torque.emplace_back(i, input.target_torque(i));
                 } else if (state.operating_mode(i) == DynamixelBus::kCurrentBasedPositionControlMode) {
-                  id_torque.emplace_back(i, kMaximumTorque);
+                  id_torque.emplace_back(i, input.target_torque(i));
                   id_position.emplace_back(i, input.target_position(i));
                 }
               }

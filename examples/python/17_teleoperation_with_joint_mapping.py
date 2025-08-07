@@ -308,7 +308,7 @@ def main(address, model, power, servo, control_mode):
     ma_max_q = np.deg2rad(
         [360, -10, 90, -60, 90, 80, 360, 360, 30, 0, -60, 90, 80, 360]
     )
-    ma_torque_limit = np.array([4.0] * 14)
+    ma_torque_limit = np.array([3.5, 3.5, 3.5, 1.5, 1.5, 1.5, 1.5] * 2)
     ma_viscous_gain = np.array([0.02, 0.02, 0.02, 0.02, 0.01, 0.01, 0.002] * 2)
     right_q = None
     left_q = None
@@ -368,7 +368,7 @@ def main(address, model, power, servo, control_mode):
             ma_input.target_operating_mode[0:7].fill(
                 rby.DynamixelBus.CurrentBasedPositionControlMode
             )
-            ma_input.target_torque[0:7].fill(5)
+            ma_input.target_torque[0:7] = ma_torque_limit[0:7]
             ma_input.target_position[0:7] = right_q
 
         if state.button_left.button == 1:
@@ -381,7 +381,7 @@ def main(address, model, power, servo, control_mode):
             ma_input.target_operating_mode[7:14].fill(
                 rby.DynamixelBus.CurrentBasedPositionControlMode
             )
-            ma_input.target_torque[7:14].fill(5)
+            ma_input.target_torque[7:14] = ma_torque_limit[7:14]
             ma_input.target_position[7:14] = left_q
 
         # Check whether target configure is in collision

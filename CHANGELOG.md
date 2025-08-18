@@ -1,3 +1,16 @@
+## v0.8.2 (2025-08-18)
+
+### ♻️ Refactor
+
+- **example**: adjust torque limit in current-based position control
+
+### 🐛 Fixes
+
+- remove exit when master arm initialization is failed
+- use traget torque in current based position control mode
+- skip pip upgrade to avoid Homebrew uninstall error on macOS
+- model a v1.2 collisions for last links / model m mobile base kinematics param
+
 ## v0.8.1 (2025-07-15)
 
 ### 🐛 Fixes

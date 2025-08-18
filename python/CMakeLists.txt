@@ -26,6 +26,7 @@ endif ()
 
 pybind11_add_module(_bindings
         rby1_sdk.cpp
+        math.cpp
         common.cpp
         net.cpp
         model.cpp

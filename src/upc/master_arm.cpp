@@ -68,7 +68,6 @@ std::vector<int> MasterArm::Initialize(bool verbose) {
     if (verbose) {
       std::cerr << "active ids: " << ids.transpose() << std::endl;
     }
-    exit(1);
   }
 
   torque_constant_ = {1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043,

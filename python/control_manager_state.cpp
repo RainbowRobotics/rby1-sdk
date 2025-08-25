@@ -10,27 +10,133 @@ namespace py = pybind11;
 using namespace rb;
 
 void bind_control_manager_state(py::module_& m) {
-  py::class_<ControlManagerState> cms(m, "ControlManagerState");
+  py::class_<ControlManagerState> cms(m, "ControlManagerState", R"doc(
+Control manager state information.
 
-  py::enum_<ControlManagerState::State>(cms, "State")
-      .value("Unknown", ControlManagerState::State::kUnknown)
-      .value("Idle", ControlManagerState::State::kIdle)
-      .value("Enabled", ControlManagerState::State::kEnabled)
-      .value("MinorFault", ControlManagerState::State::kMinorFault)
-      .value("MajorFault", ControlManagerState::State::kMajorFault);
+This class represents the current state of the robot's control manager,
+including operational status, time scaling, and joint enablement.
 
-  py::enum_<ControlManagerState::ControlState>(cms, "ControlState")
-      .value("Unknown", ControlManagerState::ControlState::kUnknown)
-      .value("Idle", ControlManagerState::ControlState::kIdle)
-      .value("Executing", ControlManagerState::ControlState::kExecuting)
-      .value("Switching", ControlManagerState::ControlState::kSwitching);
+Attributes
+----------
+state : State
+    Current operational state of the control manager.
+time_scale : float
+    Time scaling factor for motion execution (0.0 to 1.0).
+control_state : ControlState
+    Current control execution state.
+enabled_joint_idx : list[int]
+    Indices of currently enabled joints.
+unlimited_mode_enabled : bool
+    Whether unlimited mode is currently enabled.
+)doc");
 
-  cms.def(py::init<>())
-      .def_readonly("state", &ControlManagerState::state)
-      .def_readonly("time_scale", &ControlManagerState::time_scale)
-      .def_readonly("control_state", &ControlManagerState::control_state)
-      .def_readonly("enabled_joint_idx", &ControlManagerState::enabled_joint_idx)
-      .def_readonly("unlimited_mode_enabled", &ControlManagerState::unlimited_mode_enabled)
+  py::enum_<ControlManagerState::State>(cms, "State", R"doc(
+Control manager operational state enumeration.
+
+Defines the possible operational states of the control manager,
+from normal operation to various fault conditions.
+
+Members
+-------
+Unknown : int
+    State is unknown or undefined.
+Idle : int
+    Control manager is idle and ready for commands.
+Enabled : int
+    Control manager is enabled and actively controlling.
+MinorFault : int
+    Minor fault condition detected.
+MajorFault : int
+    Major fault condition detected.
+)doc")
+      .value("Unknown", ControlManagerState::State::kUnknown, R"doc(
+State is unknown or undefined.
+)doc")
+      .value("Idle", ControlManagerState::State::kIdle, R"doc(
+Control manager is idle and ready for commands.
+)doc")
+      .value("Enabled", ControlManagerState::State::kEnabled, R"doc(
+Control manager is enabled and actively controlling.
+)doc")
+      .value("MinorFault", ControlManagerState::State::kMinorFault, R"doc(
+Minor fault condition detected.
+)doc")
+      .value("MajorFault", ControlManagerState::State::kMajorFault, R"doc(
+Major fault condition detected.
+)doc");
+
+  py::enum_<ControlManagerState::ControlState>(cms, "ControlState", R"doc(
+Control execution state enumeration.
+
+Defines the current state of control execution within the control manager.
+
+Members
+-------
+Unknown : int
+    Control state is unknown or undefined.
+Idle : int
+    No control commands are being executed.
+Executing : int
+    Control commands are actively being executed.
+Switching : int
+    Control is switching between different modes or commands.
+)doc")
+      .value("Unknown", ControlManagerState::ControlState::kUnknown, R"doc(
+Control state is unknown or undefined.
+)doc")
+      .value("Idle", ControlManagerState::ControlState::kIdle, R"doc(
+No control commands are being executed.
+)doc")
+      .value("Executing", ControlManagerState::ControlState::kExecuting, R"doc(
+Control commands are actively being executed.
+)doc")
+      .value("Switching", ControlManagerState::ControlState::kSwitching, R"doc(
+Control is switching between different modes or commands.
+)doc");
+
+  cms.def(py::init<>(), R"doc(
+Construct a ControlManagerState instance with default values.
+)doc")
+      .def_readonly("state", &ControlManagerState::state, R"doc(
+Current operational state of the control manager.
+
+Type
+----
+State
+    Enumeration value indicating the operational state.
+)doc")
+      .def_readonly("time_scale", &ControlManagerState::time_scale, R"doc(
+Time scaling factor for motion execution.
+
+Type
+----
+float
+    Time scaling factor from 0.0 (stopped) to 1.0 (normal speed).
+)doc")
+      .def_readonly("control_state", &ControlManagerState::control_state, R"doc(
+Current control execution state.
+
+Type
+----
+ControlState
+    Enumeration value indicating the control execution state.
+)doc")
+      .def_readonly("enabled_joint_idx", &ControlManagerState::enabled_joint_idx, R"doc(
+Indices of currently enabled joints.
+
+Type
+----
+list[int]
+    List of joint indices that are currently enabled for control.
+)doc")
+      .def_readonly("unlimited_mode_enabled", &ControlManagerState::unlimited_mode_enabled, R"doc(
+Whether unlimited mode is currently enabled.
+
+Type
+----
+bool
+    ``True`` if unlimited mode is enabled, ``False`` otherwise.
+)doc")
       .def("__repr__", [](const ControlManagerState& self) {
         py::object np = py::module_::import("numpy");
         std::stringstream ss;

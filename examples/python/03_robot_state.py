@@ -18,7 +18,8 @@ def main(address, model, power):
             exit(1)
 
     robot_state = robot.get_state()
-    print(robot_state)
+    with rby1_sdk.printoptions(linewidth=10**9, multiline_repr=True):
+        print(repr(robot_state))
 
 
 if __name__ == "__main__":

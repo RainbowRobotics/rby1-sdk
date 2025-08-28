@@ -48,7 +48,7 @@ class State {
     Set<Derived::RowsAtCompileTime>(tau, new_tau.eval());
   }
 
-  Eigen::Vector<double, DOF> GetTau() { return tau(utr_joint_map); }
+  const Eigen::Vector<double, DOF> GetTau() const { return tau(utr_joint_map); }
 
   const math::se3v::MatrixType& GetV0() const { return V0; }
 

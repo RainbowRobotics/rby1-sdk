@@ -4,9 +4,11 @@
 #include <pybind11/stl.h>
 #include <Eigen/Core>
 #include <iomanip>
+#include <optional>
 #include <utility>
 
 #include "common.h"
+#include "print_helper.h"
 #include "rby1-sdk/dynamics/robot.h"
 #include "rby1-sdk/dynamics/state.h"
 #include "rby1-sdk/model.h"
@@ -94,18 +96,30 @@ Type
 float
     Minimum distance between the objects in meters.
 )doc")
-      .def("__repr__", [](const dyn::CollisionResult& self) {
-        py::object np = py::module_::import("numpy");
-        std::stringstream ss;
-        ss << std::fixed << std::setprecision(kDoublePrecision)                              //
-           << "CollisionResult("                                                             //
-           << "link1='" << self.link1 << "'"                                                 //
-           << ", link2='" << self.link2 << "'"                                               //
-           << ", position1=" << np.attr("array2string")(self.position1).cast<std::string>()  //
-           << ", position2=" << np.attr("array2string")(self.position2).cast<std::string>()  //
-           << ", distance=" << self.distance                                                 //
-           << ")";
-        return ss.str();
+      .def("__repr__",
+           [](const dyn::CollisionResult& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::ostringstream out;
+             out << "CollisionResult(" << FIRST << "link1=" << inline_obj(py::cast(self.link1)) << SEP
+                 << "link2=" << inline_obj(py::cast(self.link2)) << SEP
+                 << "position1=" << np_array_to_string(py::cast(self.position1), Style::Repr) << SEP
+                 << "position2=" << np_array_to_string(py::cast(self.position2), Style::Repr) << SEP
+                 << "distance=" << format_number(self.distance, Style::Repr) << LAST << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::CollisionResult& self) {
+        using namespace rb::print;
+        std::ostringstream out;
+        out << "CollisionResult("
+            << "l1=" << inline_obj_one_line(py::cast(self.link1)) << ", "
+            << "l2=" << inline_obj_one_line(py::cast(self.link2)) << ", "
+            << "d=" << format_number(self.distance, Style::Str) << ")";
+        return out.str();
       });
 }
 
@@ -183,11 +197,11 @@ Compute the minimum Euclidean distance between this geometry and another geometr
 
 Parameters
 ----------
-T : numpy.ndarray of shape (4, 4), dtype=float64
+T : numpy.ndarray, shape (4, 4)
     Homogeneous transformation of this geometry in the world (SE(3)).
 other_geom : Geom
     The other geometry.
-other_T : numpy.ndarray of shape (4, 4), dtype=float64
+other_T : numpy.ndarray, shape (4, 4)
     Homogeneous transformation of the other geometry in the world (SE(3)).
 
 Returns
@@ -233,7 +247,30 @@ Returns
 -------
 bool
     True if collision should be checked, False otherwise.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::Geom& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::ostringstream out;
+             out << "Geom(" << FIRST                                        //
+                 << "type=" << inline_obj(py::cast(self.GetType())) << SEP  //
+                 << "coltype=" << self.GetColtype() << SEP                  //
+                 << "colaffinity=" << self.GetColaffinity() << LAST         //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::Geom& self) {
+        using namespace rb::print;
+        std::ostringstream out;
+        out << "Geom(type=" << inline_obj_one_line(py::cast(self.GetType())) << ", coltype=" << self.GetColtype()
+            << ", colaffinity=" << self.GetColaffinity() << ")";
+        return out.str();
+      });
 
   py::class_<dyn::GeomCapsule, dyn::Geom, std::shared_ptr<dyn::GeomCapsule>>(m, "GeomCapsule", R"doc(
 Capsule geometry.
@@ -310,7 +347,30 @@ Returns
 -------
 float
     Radius in meters.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::GeomCapsule& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::ostringstream out;
+             out << "GeomCapsule(" << FIRST
+                 << "start_point=" << np_array_to_string(py::cast(self.GetStartPoint()), Style::Repr) << SEP
+                 << "end_point=" << np_array_to_string(py::cast(self.GetEndPoint()), Style::Repr) << SEP
+                 << "radius=" << format_number(self.GetRadius(), Style::Repr) << LAST << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::GeomCapsule& self) {
+        using namespace rb::print;
+        std::ostringstream out;
+        out << "GeomCapsule(r=" << format_number(self.GetRadius(), Style::Str) << ", "
+            << "p0=" << np_array_to_string(py::cast(self.GetStartPoint()), Style::Str) << ", "
+            << "p1=" << np_array_to_string(py::cast(self.GetEndPoint()), Style::Str) << ")";
+        return out.str();
+      });
 }
 
 void bind_collision(py::module_& m) {
@@ -377,7 +437,29 @@ Returns
 -------
 list
     List of geometric objects.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::Collision& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             const auto geoms = self.GetGeoms();
+             std::ostringstream out;
+             out << "Collision(" << FIRST                                                            //
+                 << "origin=" << np_array_to_string(py::cast(self.GetOrigin()), Style::Repr) << SEP  //
+                 << "geoms=" << geoms.size() << LAST                                                 //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::Collision& self) {
+        using namespace rb::print;
+        std::ostringstream out;
+        out << "Collision(geoms=" << self.GetGeoms().size() << ")";
+        return out.str();
+      });
 }
 
 void bind_link_joint(py::module_& m) {
@@ -506,7 +588,53 @@ Returns
 -------
 list
     List of collisions.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::Link& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::string parent_joint = "None";
+             if (auto w = self.GetParentJoint(); !w.expired()) {
+               if (auto pj = w.lock()) {
+                 parent_joint = pj->GetName();
+               }
+             }
+             const auto child_list = self.GetChildJointList();
+             std::vector<std::string> child_names;
+             child_names.reserve(child_list.size());
+             for (const auto& w : child_list) {
+               child_names.emplace_back(w->GetName());
+             }
+
+             const auto col_list = self.GetCollisions();
+             std::vector<std::string> collision_names;
+             collision_names.reserve(col_list.size());
+             for (const auto& g : col_list) {
+               if (!g) {
+                 continue;
+               }
+               collision_names.emplace_back(g->GetName());
+             }
+
+             std::ostringstream out;
+             out << "Link(" << FIRST                                                //
+                 << "name=" << inline_obj(py::cast(self.GetName())) << SEP          //
+                 << "parent_joint=" << inline_obj(py::cast(parent_joint)) << SEP    //
+                 << "children=" << inline_obj(py::cast(child_names)) << SEP         //
+                 << "collisions=" << inline_obj(py::cast(collision_names)) << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::Link& self) {
+        std::ostringstream out;
+        out << "Link(" << self.GetName() << ", children=" << self.GetChildJointList().size()
+            << ", collisions=" << self.GetCollisions().size() << ")";
+        return out.str();
+      });
 
   joint
       .def_static("make", &dyn::Joint::Make, "name"_a, "S"_a, R"doc(
@@ -820,7 +948,39 @@ Returns
 -------
 bool
     True if fixed, False otherwise.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::Joint& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::string parent = "None";
+             if (auto w = self.GetParentLink(); !w.expired()) {
+               if (auto p = w.lock())
+                 parent = p->GetName();
+             }
+             std::string child = "None";
+             if (auto c = self.GetChildLink()) {
+               child = c->GetName();
+             }
+
+             std::ostringstream out;
+             out << "Joint(" << FIRST                                       //
+                 << "name=" << inline_obj(py::cast(self.GetName())) << SEP  //
+                 << "fixed=" << (self.IsFixed() ? "True" : "False") << SEP  //
+                 << "parent=" << inline_obj(py::cast(parent)) << SEP        //
+                 << "child=" << inline_obj(py::cast(child)) << LAST         //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::Joint& self) {
+        std::ostringstream out;
+        out << "Joint(" << self.GetName() << (self.IsFixed() ? ", fixed" : "") << ")";
+        return out.str();
+      });
 }
 
 void bind_mobile_base(py::module_& m) {
@@ -895,7 +1055,31 @@ Type
 ----
 dict
     Dictionary of parameters.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::MobileBase& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::ostringstream out;
+             out << "MobileBase(" << FIRST                                            //
+                 << "type=" << inline_obj(py::cast(self.type)) << SEP                 //
+                 << "T=" << np_array_to_string(py::cast(self.T), Style::Repr) << SEP  //
+                 << "joints=" << self.joints.size() << SEP                            //
+                 << "params=" << inline_obj(py::cast(self.params)) << LAST            //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::MobileBase& self) {
+        using namespace rb::print;
+        std::ostringstream out;
+        out << "MobileBase(type=" << inline_obj_one_line(py::cast(self.type)) << ", joints=" << self.joints.size()
+            << ")";
+        return out.str();
+      });
 
   py::class_<dyn::MobileBaseDifferential, dyn::MobileBase, std::shared_ptr<dyn::MobileBaseDifferential>>(
       m, "MobileBaseDifferential", R"doc(
@@ -945,7 +1129,33 @@ Type
 ----
 float
     Radius of the wheels.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::MobileBaseDifferential& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::ostringstream out;
+             out << "MobileBaseDifferential(" << FIRST << "type=" << inline_obj(py::cast(self.type)) << SEP  //
+                 << "wheel_base=" << format_number(self.wheel_base, Style::Repr) << SEP                      //
+                 << "wheel_radius=" << format_number(self.wheel_radius, Style::Repr) << SEP                  //
+                 << "right_wheel_idx=" << self.right_wheel_idx << SEP                                        //
+                 << "left_wheel_idx=" << self.left_wheel_idx << LAST                                         //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::MobileBaseDifferential& self) {
+        using namespace rb::print;
+        std::ostringstream out;
+        out << "MobileBaseDifferential("
+            << "base=" << format_number(self.wheel_base, Style::Str) << "m, "
+            << "radius=" << format_number(self.wheel_radius, Style::Str) << "m"
+            << ")";
+        return out.str();
+      });
 }
 
 void bind_robot_configuration(py::module_& m) {
@@ -1010,7 +1220,40 @@ Type
 ----
 MobileBase
     Mobile base object.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::RobotConfiguration& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::string base_name = "None";
+             if (self.base_link)
+               base_name = self.base_link->GetName();
+
+             std::string mb_type = "None";
+             if (self.mobile_base) {
+               mb_type = inline_obj(py::cast(self.mobile_base->type));
+             }
+
+             std::ostringstream out;
+             out << "RobotConfiguration(" << FIRST                          //
+                 << "name=" << inline_obj(py::cast(self.name)) << SEP       //
+                 << "base_link=" << inline_obj(py::cast(base_name)) << SEP  //
+                 << "mobile_base=" << mb_type << LAST                       //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::RobotConfiguration& self) {
+        using namespace rb::print;
+        std::string base_name = self.base_link ? self.base_link->GetName() : "None";
+        std::string mb_type = self.mobile_base ? inline_obj_one_line(py::cast(self.mobile_base->type)) : "None";
+        std::ostringstream out;
+        out << "RobotConfiguration(" << self.name << ", base=" << base_name << ", mobile=" << mb_type << ")";
+        return out.str();
+      });
 }
 
 template <int DOF>
@@ -1044,7 +1287,7 @@ Parameters
 robot_configuration : RobotConfiguration
     Configuration of the robot.
 )doc")
-      .def("get_base", &dyn::Robot<DOF>::GetBase, R"doc(
+      .def("get_base", py::overload_cast<>(&dyn::Robot<DOF>::GetBase), R"doc(
 get_base()
 
 Get the base link of the robot.
@@ -1891,7 +2134,36 @@ Returns
 -------
 int
     The total number of joints.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::Robot<DOF>& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             auto base = self.GetBase();
+             std::string base_name = base ? base->GetName() : "None";
+             const auto links = self.GetLinkNames();
+             const auto joints = self.GetJointNames();
+
+             std::ostringstream out;
+             out << "Robot(" << FIRST << "dof=" << self.GetDOF() << SEP  //
+                 << "links=" << links.size() << SEP                      //
+                 << "joints=" << joints.size() << SEP                    //
+                 << "base=" << inline_obj(py::cast(base_name))           //
+                 << LAST << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::Robot<DOF>& self) {
+        auto base = self.GetBase();
+        std::string base_name = base ? base->GetName() : "None";
+        std::ostringstream out;
+        out << "Robot(dof=" << self.GetDOF() << ", joints=" << self.GetNumberOfJoints() << ", base=" << base_name
+            << ")";
+        return out.str();
+      });
 }
 
 template <int DOF>
@@ -2145,7 +2417,66 @@ Returns
 -------
 list[str]
     List of link names.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const dyn::State<DOF>& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::ostringstream out;
+             out << "State(" << FIRST  //
+                 << "base_link_idx=" << self.GetBaseLinkIdx() << SEP;
+
+             {
+               std::string k = "q=";
+               std::string v = np_array_to_string(py::cast(self.GetQ()), Style::Repr);
+               out << k << indent_continuation(v, (int)(ml ? 2 + k.size() : 0));
+               out << SEP;
+             }
+             {
+               std::string k = "qdot=";
+               std::string v = np_array_to_string(py::cast(self.GetQdot()), Style::Repr);
+               out << k << indent_continuation(v, (int)(ml ? 2 + k.size() : 0));
+               out << SEP;
+             }
+             {
+               std::string k = "qddot=";
+               std::string v = np_array_to_string(py::cast(self.GetQddot()), Style::Repr);
+               out << k << indent_continuation(v, (int)(ml ? 2 + k.size() : 0));
+               out << SEP;
+             }
+             {
+               std::string k = "tau=";
+               std::string v = np_array_to_string(py::cast(self.GetTau()), Style::Repr);
+               out << k << indent_continuation(v, (int)(ml ? 2 + k.size() : 0));
+               out << SEP;
+             }
+             {
+               std::string k = "V0=";
+               std::string v = np_array_to_string(py::cast(self.GetV0()), Style::Repr);
+               out << k << indent_continuation(v, (int)(ml ? 2 + k.size() : 0));
+               out << SEP;
+             }
+             {
+               std::string k = "Vdot0=";
+               std::string v = np_array_to_string(py::cast(self.GetVdot0()), Style::Repr);
+               out << k << indent_continuation(v, (int)(ml ? 2 + k.size() : 0));
+             }
+
+             out << LAST << ")";
+             return out.str();
+           })
+      .def("__str__", [](const dyn::State<DOF>& self) {
+        using namespace rb::print;
+        std::ostringstream out;
+        out << "State(base=" << self.GetBaseLinkIdx() << ", q=" << np_array_to_string(py::cast(self.GetQ()), Style::Str)
+            << ", qdot=" << np_array_to_string(py::cast(self.GetQdot()), Style::Str)
+            << ", tau=" << np_array_to_string(py::cast(self.GetTau()), Style::Str) << ")";
+        return out.str();
+      });
 }
 
 void pybind11_dynamics(py::module_& m) {

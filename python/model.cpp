@@ -1,5 +1,7 @@
 #include "model.h"
 
+#include "print_helper.h"
+
 template <typename T>
 void bind_model(py::module_& m, const std::string& model_name) {
   py::class_<PyModel<T>>(m, model_name.c_str(), R"doc(
@@ -108,7 +110,8 @@ Returns
 list[int]
     Indices of torso joints.
 )doc")
-      .def_property_readonly("velocity_estimation_required_idx", &PyModel<T>::get_velocity_estimation_required_idx, R"doc(
+      .def_property_readonly("velocity_estimation_required_idx", &PyModel<T>::get_velocity_estimation_required_idx,
+                             R"doc(
 Get indices of joints requiring velocity estimation.
 
 Returns
@@ -123,7 +126,50 @@ Returns
 -------
 float
     Control period in seconds (typically 0.002).
-)doc");
+)doc")
+      .def("__repr__",
+           [model_name](const PyModel<T>& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             const auto& names = self.get_robot_joint_names();
+             const auto& mob = self.get_mobility_idx();
+             const auto& body = self.get_body_idx();
+             const auto& head = self.get_head_idx();
+             const auto& rarm = self.get_right_arm_idx();
+             const auto& larm = self.get_left_arm_idx();
+             const auto& torso = self.get_torso_idx();
+             const auto& velreq = self.get_velocity_estimation_required_idx();
+
+             std::ostringstream out;
+             out << model_name << "(" << FIRST                                                          //
+                 << "model_name=" << inline_obj(py::cast(self.get_model_name())) << SEP                 //
+                 << "robot_dof=" << self.get_robot_dof() << SEP                                         //
+                 << "robot_joint_names=" << inline_obj(py::cast(names)) << SEP                          //
+                 << "mobility_idx=" << inline_obj(py::cast(mob)) << SEP                                 //
+                 << "body_idx=" << inline_obj(py::cast(body)) << SEP                                    //
+                 << "head_idx=" << inline_obj(py::cast(head)) << SEP                                    //
+                 << "right_arm_idx=" << inline_obj(py::cast(rarm)) << SEP                               //
+                 << "left_arm_idx=" << inline_obj(py::cast(larm)) << SEP                                //
+                 << "torso_idx=" << inline_obj(py::cast(torso)) << SEP                                  //
+                 << "velocity_estimation_required_idx=" << inline_obj(py::cast(velreq)) << SEP          //
+                 << "control_period=" << format_number(self.get_control_period(), Style::Repr) << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [model_name](const PyModel<T>& self) {
+        using namespace rb::print;
+        std::ostringstream out;
+        out << model_name << "(" << self.get_model_name() << ", dof=" << self.get_robot_dof()
+            << ", joints=" << self.get_robot_joint_names().size() << ", body=" << self.get_body_idx().size()
+            << ", head=" << self.get_head_idx().size() << ", R=" << self.get_right_arm_idx().size()
+            << ", L=" << self.get_left_arm_idx().size() << ", torso=" << self.get_torso_idx().size()
+            << ", dt=" << format_number(self.get_control_period(), Style::Str) << "s)";
+        return out.str();
+      });
 }
 
 void pybind11_model(py::module_& m) {

@@ -129,6 +129,10 @@ void Joint::SetLimitQddotUpper(double val) {
   limit_qddot_upper_ = val;
 }
 
+weak_ptr<const Link> Joint::GetParentLink() const {
+  return parent_link_;
+}
+
 weak_ptr<Link> Joint::GetParentLink() {
   return parent_link_;
 }

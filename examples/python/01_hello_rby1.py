@@ -14,7 +14,16 @@ def main(address, model):
         exit(1)
     robot_info = robot.get_robot_info()
     print(f"Hello, RB-Y1! (Robot model name: {m.model_name})")
-    print(robot_info)
+
+    print("\n== Robot info (__str__ format):")
+    print(str(robot_info))
+
+    print("\n== Robot info (repr, single-line format):")
+    with rby1_sdk.printoptions(multiline_repr=False):
+        print(repr(robot_info))
+
+    print("\n=== Robot info (repr, multi-line format):")
+    print(repr(robot_info))
 
 
 if __name__ == "__main__":

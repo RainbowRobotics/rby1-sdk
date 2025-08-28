@@ -3,6 +3,8 @@ import rby1_sdk.dynamics as rby_dyn
 
 import numpy as np
 
+np.set_printoptions(precision=2, suppress=True)
+
 # 1. Connect to the robot and get its model information.
 robot = rby.create_robot("localhost:50051", "a")
 robot.connect()
@@ -22,6 +24,8 @@ dyn_state.set_gravity(np.array([0, 0, 0, 0, 0, -9.81]))
 dyn_state.set_q(q)
 dyn_state.set_qdot(np.zeros(model.robot_dof))
 dyn_state.set_qddot(np.zeros(model.robot_dof))
+
+print(f"{dyn_state = }")
 
 # 5. Perform Inverse Dynamics calculation.
 #    To compute inverse dynamics, forward kinematics-related calculations must be performed first.

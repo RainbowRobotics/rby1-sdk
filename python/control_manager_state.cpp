@@ -4,10 +4,16 @@
 #include <sstream>
 
 #include "common.h"
+#include "print_helper.h"
 #include "rby1-sdk/control_manager_state.h"
 
 namespace py = pybind11;
 using namespace rb;
+using rb::print::indent_continuation;
+using rb::print::inline_obj;
+using rb::print::np_array_to_string;
+using rb::print::np_shape_dtype;
+using rb::print::Style;
 
 void bind_control_manager_state(py::module_& m) {
   py::class_<ControlManagerState> cms(m, "ControlManagerState", R"doc(
@@ -137,26 +143,33 @@ Type
 bool
     ``True`` if unlimited mode is enabled, ``False`` otherwise.
 )doc")
-      .def("__repr__", [](const ControlManagerState& self) {
-        py::object np = py::module_::import("numpy");
-        std::stringstream ss;
-        ss << std::fixed << std::setprecision(kDoublePrecision)    //
-           << "ControlManagerState("                               //
-           << "state=" << to_string(self.state)                    //
-           << ", time_scale=" << self.time_scale                   //
-           << ", control_state=" << to_string(self.control_state)  //
-           << ", enabled_joint_idx=";
-        ss << "[";
-        for (int i = 0; i < (int)self.enabled_joint_idx.size(); i++) {
-          if (i != 0) {
-            ss << ", ";
-          }
-          ss << self.enabled_joint_idx[i];
-        }
-        ss << "]";
-        ss << ", unlimited_mode_enabled=" << (self.unlimited_mode_enabled ? "True" : "False")  //
-           << ")";
-        return ss.str();
+      .def("__repr__",
+           [](const ControlManagerState& self) {
+             using namespace rb::print;
+
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             std::ostringstream out;
+             out << "ControlManagerState(" << FIRST                                                        //
+                 << "state=" << to_string(self.state) << SEP                                               //
+                 << "time_scale=" << format_number(self.time_scale, Style::Repr) << SEP                    //
+                 << "control_state=" << to_string(self.control_state) << SEP                               //
+                 << "enabled_joint_idx=" << inline_obj(py::cast(self.enabled_joint_idx)) << SEP            //
+                 << "unlimited_mode_enabled=" << (self.unlimited_mode_enabled ? "True" : "False") << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const ControlManagerState& self) {
+        std::ostringstream out;
+        out << "ControlManagerState("
+            << "state=" << to_string(self.state) << ", "
+            << "ctrl=" << to_string(self.control_state) << ", "
+            << "time_scale=" << format_number(self.time_scale, Style::Str) << ", "
+            << "enabled=" << self.enabled_joint_idx.size() << (self.unlimited_mode_enabled ? ", unlimited" : "") << ")";
+        return out.str();
       });
 }
 

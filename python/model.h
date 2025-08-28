@@ -12,7 +12,7 @@ class PyModelBase {
  public:
   virtual ~PyModelBase() = default;
 
-  virtual std::string_view get_model_name() = 0;
+  virtual std::string_view get_model_name() const = 0;
 };
 
 template <typename T>
@@ -20,25 +20,25 @@ class PyModel : public PyModelBase {
  public:
   ~PyModel() override = default;
 
-  std::string_view get_model_name() override { return T::kModelName; }
+  std::string_view get_model_name() const override { return T::kModelName; }
 
-  auto get_robot_dof() { return T::kRobotDOF; }
+  const auto& get_robot_dof() const { return T::kRobotDOF; }
 
-  auto get_robot_joint_names() { return T::kRobotJointNames; }
+  const auto& get_robot_joint_names() const { return T::kRobotJointNames; }
 
-  auto get_mobility_idx() { return T::kMobilityIdx; }
+  const auto& get_mobility_idx() const { return T::kMobilityIdx; }
 
-  auto get_body_idx() { return T::kBodyIdx; }
+  const auto& get_body_idx() const { return T::kBodyIdx; }
 
-  auto get_head_idx() { return T::kHeadIdx; }
+  const auto& get_head_idx() const { return T::kHeadIdx; }
 
-  auto get_right_arm_idx() { return T::kRightArmIdx; }
+  const auto& get_right_arm_idx() const { return T::kRightArmIdx; }
 
-  auto get_left_arm_idx() { return T::kLeftArmIdx; }
+  const auto& get_left_arm_idx() const { return T::kLeftArmIdx; }
 
-  auto get_torso_idx() { return T::kTorsoIdx; }
+  const auto& get_torso_idx() const { return T::kTorsoIdx; }
 
-  auto get_velocity_estimation_required_idx() { return T::kVelocityEstimationRequiredIdx; }
+  const auto& get_velocity_estimation_required_idx() const { return T::kVelocityEstimationRequiredIdx; }
 
-  auto get_control_period() { return T::kControlPeriod; }
+  const auto& get_control_period() const { return T::kControlPeriod; }
 };

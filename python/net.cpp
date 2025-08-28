@@ -2,10 +2,16 @@
 #include <pybind11/stl.h>
 #include <sstream>
 
+#include "print_helper.h"
 #include "rby1-sdk/net/types.h"
 
 namespace py = pybind11;
 using namespace rb;
+using rb::print::indent_continuation;
+using rb::print::inline_obj;
+using rb::print::np_array_to_string;
+using rb::print::np_shape_dtype;
+using rb::print::Style;
 
 void bind_net_types(py::module_& m) {
   py::class_<WifiNetwork>(m, "WifiNetwork", R"doc(
@@ -52,11 +58,26 @@ Type
 bool
     True if the network requires a password, False otherwise.
 )doc")
-      .def("__repr__", [](const WifiNetwork& self) {
-        std::stringstream ss;
-        ss << "WifiNetwork(ssid='" << self.ssid << "', signal_strength=" << self.signal_strength
-           << ", secured=" << (self.secured ? "True" : "False") << ")";
-        return ss.str();
+      .def("__repr__",
+           [](const WifiNetwork& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "WifiNetwork(" << FIRST                                  //
+                 << "ssid=" << inline_obj(py::cast(self.ssid)) << SEP        //
+                 << "signal_strength=" << self.signal_strength << SEP        //
+                 << "secured=" << (self.secured ? "True" : "False") << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const WifiNetwork& self) {
+        std::ostringstream out;
+        out << "WifiNetwork(ssid=" << self.ssid << ", signal=" << self.signal_strength << "dBm"
+            << ", secured=" << (self.secured ? "True" : "False") << ")";
+        return out.str();
       });
 
   py::class_<WifiStatus>(m, "WifiStatus", R"doc(
@@ -121,23 +142,28 @@ Type
 bool
     True if connected to WiFi, False otherwise.
 )doc")
-      .def("__repr__", [](const WifiStatus& self) {
-        const auto& vector_to_string = [](const std::vector<std::string>& vec) {
-          std::stringstream ss;
-          ss << "[";
-          for (size_t i = 0; i < vec.size(); ++i) {
-            if (i > 0)
-              ss << ", ";
-            ss << "'" << vec[i] << "'";
-          }
-          ss << "]";
-          return ss.str();
-        };
-
-        std::stringstream ss;
-        ss << "WifiStatus(ssid='" << self.ssid << "', ip_address='" << self.ip_address << "', gateway='" << self.gateway
-           << "', dns='" << vector_to_string(self.dns) << "', connected=" << (self.connected ? "True" : "False") << ")";
-        return ss.str();
+      .def("__repr__",
+           [](const WifiStatus& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "WifiStatus(" << FIRST                                         //
+                 << "ssid=" << inline_obj(py::cast(self.ssid)) << SEP              //
+                 << "ip_address=" << inline_obj(py::cast(self.ip_address)) << SEP  //
+                 << "gateway=" << inline_obj(py::cast(self.gateway)) << SEP        //
+                 << "dns=" << inline_obj(py::cast(self.dns)) << SEP                //
+                 << "connected=" << (self.connected ? "True" : "False") << LAST    //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const WifiStatus& self) {
+        std::ostringstream out;
+        out << "WifiStatus(ssid=" << self.ssid << ", ip=" << self.ip_address << ", gw=" << self.gateway
+            << ", connected=" << (self.connected ? "True" : "False") << ")";
+        return out.str();
       });
 }
 

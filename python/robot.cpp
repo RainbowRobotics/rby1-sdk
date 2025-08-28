@@ -7,10 +7,16 @@
 #include "rby1-sdk/robot.h"
 
 #include "model.h"
+#include "print_helper.h"
 
 namespace py = pybind11;
 using namespace rb;
 using namespace py::literals;
+using rb::print::indent_continuation;
+using rb::print::inline_obj;
+using rb::print::np_array_to_string;
+using rb::print::np_shape_dtype;
+using rb::print::Style;
 
 void bind_pid_gain(pybind11::module_& m) {
   py::class_<PIDGain>(m, "PIDGain", R"doc(
@@ -66,11 +72,25 @@ Type
 int
     Derivative gain for PID control.
 )doc")
-      .def("__repr__", [](const PIDGain& self) {
-        std::stringstream ss;
-        ss << "PIDGain("                  //
-           << "p_gain=" << self.p_gain    //
-           << ", i_gain=" << self.i_gain  //
+      .def("__repr__",
+           [](const PIDGain& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "PIDGain(" << FIRST               //
+                 << "p_gain=" << self.p_gain << SEP   //
+                 << "i_gain=" << self.i_gain << SEP   //
+                 << "d_gain=" << self.d_gain << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const PIDGain& self) {
+        std::ostringstream ss;
+        ss << "PIDGain(p_gain=" << self.p_gain  //
+           << ", i_gain=" << self.i_gain        //
            << ", d_gain=" << self.d_gain << ")";
         return ss.str();
       });
@@ -129,7 +149,28 @@ Type
 ----
 int
     Blue component value (0-255).
-)doc");
+)doc")
+      .def("__repr__",
+           [](const Color& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "Color(" << FIRST                         //
+                 << "r=" << static_cast<int>(self.r) << SEP   //
+                 << "g=" << static_cast<int>(self.g) << SEP   //
+                 << "b=" << static_cast<int>(self.b) << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const Color& self) {
+        std::ostringstream ss;
+        ss << "Color(r=" << static_cast<int>(self.r) << ", g=" << static_cast<int>(self.g)
+           << ", b=" << static_cast<int>(self.b) << ")";
+        return ss.str();
+      });
 }
 
 void bind_serial(py::module_& m) {
@@ -164,10 +205,24 @@ Type
 str
     Human-readable device description.
 )doc")
-      .def("__repr__", [](const SerialDevice& self) {
-        std::stringstream ss;
-        ss << "SerialDevice(path='" << self.path << "', description='" << self.description << "')";
-        return ss.str();
+      .def("__repr__",
+           [](const SerialDevice& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "SerialDevice(" << FIRST                                          //
+                 << "path=" << inline_obj(py::cast(self.path)) << SEP                 //
+                 << "description=" << inline_obj(py::cast(self.description)) << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const SerialDevice& self) {
+        std::ostringstream out;
+        out << "SerialDevice(" << self.path << " - " << self.description << ")";
+        return out.str();
       });
 
   py::class_<SerialStream>(m, "SerialStream", R"doc(
@@ -350,7 +405,28 @@ Parameters
 ----------
 ch : int
     Byte value to write (0-255).
-)doc");
+)doc")
+      .def("__repr__",
+           [](const SerialStream& self) {
+             const bool ml = rb::print::use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "SerialStream(" << FIRST                                           //
+                 << "is_opened=" << (self.IsOpened() ? "True" : "False") << SEP        //
+                 << "is_cancelled=" << (self.IsCancelled() ? "True" : "False") << SEP  //
+                 << "is_done=" << (self.IsDone() ? "True" : "False") << LAST           //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const SerialStream& self) {
+        std::ostringstream out;
+        out << "SerialStream(opened=" << (self.IsOpened() ? "True" : "False")
+            << ", cancelled=" << (self.IsCancelled() ? "True" : "False")
+            << ", done=" << (self.IsDone() ? "True" : "False") << ")";
+        return out.str();
+      });
 }
 
 template <typename T>
@@ -447,7 +523,23 @@ RobotCommandFeedback
 get_status()
 
 Get gRPC status
-)doc");
+)doc")
+      .def("__repr__",
+           [](const RobotCommandHandler<T>& self) {
+             const bool ml = rb::print::use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "RobotCommandHandler(" << FIRST                           //
+                 << "is_done=" << (self.IsDone() ? "True" : "False") << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const RobotCommandHandler<T>& self) {
+        std::ostringstream out;
+        out << "RobotCommandHandler(done=" << (self.IsDone() ? "True" : "False") << ")";
+        return out.str();
+      });
 }
 
 template <typename T>
@@ -529,7 +621,23 @@ RobotCommandFeedback
 cancel()
 
 Cancel the current command execution.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const RobotCommandStreamHandler<T>& self) {
+             const bool ml = rb::print::use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "RobotCommandStreamHandler(" << FIRST                     //
+                 << "is_done=" << (self.IsDone() ? "True" : "False") << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const RobotCommandStreamHandler<T>& self) {
+        std::ostringstream out;
+        out << "RobotCommandStreamHandler(done=" << (self.IsDone() ? "True" : "False") << ")";
+        return out.str();
+      });
 }
 
 template <typename T>
@@ -546,7 +654,7 @@ t : float
 is_ready : numpy.ndarray
     Whether the joint is ready for control.
 position : numpy.ndarray
-    Current joint positions in radians.
+    Current joint positions in rad.
 velocity : numpy.ndarray
     Current joint velocities in rad/s.
 current : numpy.ndarray
@@ -579,7 +687,7 @@ Joint positions.
 Type
 ----
 numpy.ndarray
-    Current joint positions in radians.
+    Current joint positions in rad.
 )doc")
       .def_readonly("velocity", &ControlState<T>::velocity, R"doc(
 Joint velocities.
@@ -595,7 +703,7 @@ Joint currents.
 Type
 ----
 numpy.ndarray
-    Current joint currents in Amp.
+    Current joint currents in A.
 )doc")
       .def_readonly("torque", &ControlState<T>::torque, R"doc(
 Joint torques.
@@ -604,7 +712,66 @@ Type
 ----
 numpy.ndarray
     Current joint torques in Nm.
-)doc");
+)doc")
+      .def("__repr__",
+           [handler_name](const ControlState<T>& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n" : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             Eigen::Index ready = 0;
+             for (Eigen::Index i = 0; i < self.is_ready.size(); ++i) {
+               if (self.is_ready[i]) {
+                 ++ready;
+               }
+             }
+             const Eigen::Index total = self.is_ready.size();
+
+             std::ostringstream out;
+             out << handler_name << "(" << FIRST << (ml ? "  t=" : "t=") << format_number(self.t, Style::Repr) << SEP
+                 << (ml ? "  ready=" : "ready=") << ready << "/" << total << SEP;
+
+             {
+               std::string k = ml ? "  position=" : "position=";
+               std::string v = np_array_to_string(py::cast(self.position), Style::Repr);
+               out << k << indent_continuation(v, (int)k.size()) << SEP;
+             }
+             {
+               std::string k = ml ? "  velocity=" : "velocity=";
+               std::string v = np_array_to_string(py::cast(self.velocity), Style::Repr);
+               out << k << indent_continuation(v, (int)k.size()) << SEP;
+             }
+             {
+               std::string k = ml ? "  current=" : "current=";
+               std::string v = np_array_to_string(py::cast(self.current), Style::Repr);
+               out << k << indent_continuation(v, (int)k.size()) << SEP;
+             }
+             {
+               std::string k = ml ? "  torque=" : "torque=";
+               std::string v = np_array_to_string(py::cast(self.torque), Style::Repr);
+               out << k << indent_continuation(v, (int)k.size());
+             }
+
+             out << LAST << ")";
+             return out.str();
+           })
+      .def("__str__", [handler_name](const ControlState<T>& self) {
+        using namespace rb::print;
+        Eigen::Index ready = 0;
+        for (Eigen::Index i = 0; i < self.is_ready.size(); ++i)
+          if (self.is_ready[i])
+            ++ready;
+        const Eigen::Index total = self.is_ready.size();
+
+        std::ostringstream ss;
+        ss << handler_name << "(t=" << format_number(self.t, Style::Str) << ", ready=" << ready << "/" << total
+           << ", q=" << np_array_to_string(py::cast(self.position), Style::Str)
+           << ", dq=" << np_array_to_string(py::cast(self.velocity), Style::Str)
+           << ", tau=" << np_array_to_string(py::cast(self.torque), Style::Str) << ")";
+        return ss.str();
+      });
 }
 
 template <typename T>
@@ -619,7 +786,7 @@ Attributes
 mode : numpy.ndarray
     Control mode for each joint (boolean array).
 target : numpy.ndarray
-    Target positions for each joint in radians.
+    Target positions for each joint in rad.
 feedback_gain : numpy.ndarray
     Feedback gains for each joint.
 feedforward_torque : numpy.ndarray
@@ -650,7 +817,7 @@ Target positions for each joint.
 Type
 ----
 numpy.ndarray
-    Target positions in radians for each joint.
+    Target positions in rad for each joint.
 )doc")
       .def_property(
           "feedback_gain",
@@ -683,7 +850,32 @@ Type
 ----
 bool
     Whether to finish the current control operation.
-)doc");
+)doc")
+      .def("__repr__",
+           [handler_name](const ControlInput<T>& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << handler_name << "(" << FIRST                                                       //
+                 << "mode=" << np_shape_dtype(py::cast(self.mode)) << SEP                              //
+                 << "target=" << np_shape_dtype(py::cast(self.target)) << SEP                          //
+                 << "feedback_gain=" << np_shape_dtype(py::cast(self.feedback_gain)) << SEP            //
+                 << "feedforward_torque=" << np_shape_dtype(py::cast(self.feedforward_torque)) << SEP  //
+                 << "finish=" << (self.finish ? "True" : "False") << LAST                              //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [handler_name](const ControlInput<T>& self) {
+        using namespace rb::print;
+        std::ostringstream ss;
+        ss << handler_name << "(mode=" << np_shape_dtype(py::cast(self.mode))
+           << ", target=" << np_shape_dtype(py::cast(self.target)) << ", finish=" << (self.finish ? "True" : "False")
+           << ")";
+        return ss.str();
+      });
 }
 
 template <typename T>
@@ -1394,7 +1586,7 @@ Reset odometry to specified values.
 Parameters
 ----------
 angle : float
-    New angle in radians.
+    New angle in rad.
 position : numpy.ndarray
     New position in meters.
 
@@ -1406,7 +1598,7 @@ Examples
 >>> # Reset to specific position and orientation
 >>> robot.reset_odometry(angle=np.pi/2, position=np.array([1.0, 2.0]))
 >>> # Useful for mobile base navigation
->>> # Position is [x, y] in meters, angle is yaw in radians
+>>> # Position is [x, y] in meters, angle is yaw in rad
 )doc")
       .def("get_parameter_list", &Robot<T>::GetParameterList, R"doc(
 get_parameter_list()
@@ -2154,7 +2346,32 @@ Examples
 >>> for device in devices:
 ...     pid = robot.get_position_pid_gain(device)
 ...     print(f"{device}: P={pid.p_gain}, I={pid.i_gain}, D={pid.d_gain}")
-)doc");
+)doc")
+      .def("__repr__",
+           [robot_name](const Robot<T>& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             PyModel<T> model;
+             std::ostringstream out;
+             out << robot_name << "(" << FIRST                                                      //
+                 << "connected=" << (self.IsConnected() ? "True" : "False") << SEP                  //
+                 << "time_scale=" << format_number(self.GetTimeScale(), Style::Repr) << SEP         //
+                 << "model_name=" << inline_obj_one_line(py::cast(model.get_model_name())) << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [robot_name](const Robot<T>& self) {
+        PyModel<T> model;
+        std::ostringstream out;
+        out << robot_name << "(connected=" << (self.IsConnected() ? "True" : "False")
+            << ", time_scale=" << rb::print::format_number(self.GetTimeScale(), rb::print::Style::Str)
+            << ", model=" << model.get_model_name() << ")";
+        return out.str();
+      });
 }
 
 void pybind11_robot(py::module_& m) {

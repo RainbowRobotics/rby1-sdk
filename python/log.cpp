@@ -3,10 +3,16 @@
 #include <sstream>
 
 #include "common.h"
+#include "print_helper.h"
 #include "rby1-sdk/log.h"
 
 namespace py = pybind11;
 using namespace rb;
+using rb::print::indent_continuation;
+using rb::print::inline_obj;
+using rb::print::np_array_to_string;
+using rb::print::np_shape_dtype;
+using rb::print::Style;
 
 void bind_log(py::module_& m) {
   auto log = py::class_<Log>(m, "Log", R"doc(
@@ -104,17 +110,32 @@ Type
 str
     Human-readable log message describing the event or condition.
 )doc")
-      .def("__repr__", [](const Log& self) {
-        auto timestamp = timespec_to_time_point(self.timestamp);
-        auto robot_system_timestamp = timespec_to_time_point(self.robot_system_timestamp);
-        std::stringstream ss;
-        ss << "Log("                                                                                               //
-           << "timestamp=" << static_cast<std::string>(py::repr(py::cast(timestamp)))                              //
-           << ", robot_system_timestamp=" << static_cast<std::string>(py::repr(py::cast(robot_system_timestamp)))  //
-           << ", level=" << to_string(self.level)                                                                  //
-           << ", message='" << self.message << "'"                                                                 //
-           << ")";
-        return ss.str();
+      .def("__repr__",
+           [](const Log& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+
+             auto ts_client = timespec_to_time_point(self.timestamp);
+             auto ts_robot = timespec_to_time_point(self.robot_system_timestamp);
+
+             std::ostringstream out;
+             out << "Log(" << FIRST                                                     //
+                 << "timestamp=" << inline_obj(py::cast(ts_client)) << SEP              //
+                 << "robot_system_timestamp=" << inline_obj(py::cast(ts_robot)) << SEP  //
+                 << "level=" << to_string(self.level) << SEP                            //
+                 << "message=" << inline_obj(py::cast(self.message)) << LAST            //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const Log& self) {
+        auto ts_client = timespec_to_time_point(self.timestamp);
+        std::ostringstream out;
+        out << "[" << to_string(self.level) << "] " << py::str(py::cast(ts_client)).cast<std::string>() << " - "
+            << self.message;
+        return out.str();
       });
 }
 

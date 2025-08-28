@@ -3,7 +3,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <Eigen/Core>
+#include <iomanip>
 
+#include "common.h"
+#include "print_helper.h"
 #include "rby1-sdk/base/dynamixel_bus.h"
 
 namespace py = pybind11;
@@ -90,7 +93,26 @@ Type
 ----
 int
 Trigger value ranging from 0 to 255.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const DynamixelBus::ButtonState& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "ButtonState(" << FIRST             //
+                 << "button=" << self.button << SEP     //
+                 << "trigger=" << self.trigger << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const DynamixelBus::ButtonState& self) {
+        std::ostringstream out;
+        out << "btn=" << self.button << ", trg=" << self.trigger;
+        return out.str();
+      });
 
   py::class_<DynamixelBus::MotorState>(bus_m, "MotorState", R"doc(
 Motor state information.
@@ -163,7 +185,35 @@ Type
 ----
 int
     Current temperature in degrees Celsius.
-)doc");
+)doc")
+      .def("__repr__",
+           [](const DynamixelBus::MotorState& self) {
+             using namespace rb::print;
+             const bool ml = use_multiline_repr();
+             const char* FIRST = ml ? "\n  " : "";
+             const char* SEP = ml ? ",\n  " : ", ";
+             const char* LAST = ml ? "\n" : "";
+             std::ostringstream out;
+             out << "MotorState(" << FIRST                                                  //
+                 << "torque_enable=" << (self.torque_enable ? "True" : "False") << SEP      //
+                 << "position=" << format_number(self.position, Style::Repr) << SEP         //
+                 << "velocity=" << format_number(self.velocity, Style::Repr) << SEP         //
+                 << "current=" << format_number(self.current, Style::Repr) << SEP           //
+                 << "torque=" << format_number(self.torque, Style::Repr) << SEP             //
+                 << "temperature=" << format_number(self.temperature, Style::Repr) << LAST  //
+                 << ")";
+             return out.str();
+           })
+      .def("__str__", [](const DynamixelBus::MotorState& self) {
+        using namespace rb::print;
+        std::ostringstream out;
+        out << "MotorState(q=" << format_number(self.position, Style::Str)
+            << ", dq=" << format_number(self.velocity, Style::Str) << ", I=" << format_number(self.current, Style::Str)
+            << ", tau=" << format_number(self.torque, Style::Str)
+            << ", T=" << format_number(self.temperature, Style::Str) << "C"
+            << ", enabled=" << (self.torque_enable ? "True" : "False") << ")";
+        return out.str();
+      });
 
   py::class_<DynamixelBus::PIDGain>(bus_m, "PIDGain", R"doc(
 PID gain parameters for position control.

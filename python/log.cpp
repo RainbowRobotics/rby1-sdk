@@ -114,21 +114,39 @@ str
            [](const Log& self) {
              using namespace rb::print;
              const bool ml = use_multiline_repr();
-             const char* FIRST = ml ? "\n  " : "";
-             const char* SEP = ml ? ",\n  " : ", ";
-             const char* LAST = ml ? "\n" : "";
 
              auto ts_client = timespec_to_time_point(self.timestamp);
              auto ts_robot = timespec_to_time_point(self.robot_system_timestamp);
 
-             std::ostringstream out;
-             out << "Log(" << FIRST                                                     //
-                 << "timestamp=" << inline_obj(py::cast(ts_client)) << SEP              //
-                 << "robot_system_timestamp=" << inline_obj(py::cast(ts_robot)) << SEP  //
-                 << "level=" << to_string(self.level) << SEP                            //
-                 << "message=" << inline_obj(py::cast(self.message)) << LAST            //
-                 << ")";
-             return out.str();
+             ReprStream ss;
+
+             const auto& print_array = [&](const std::string& name, const auto& array) {
+               std::string k = name + "=";
+               std::string v = np_array_to_string(py::cast(array), Style::Repr);
+               ss << k << indent_continuation(v, (int)k.size());
+             };
+
+             ss << "Log(";
+             ss << prefix(ml ? "  " : "");
+
+             ss << (ml ? "\n" : "");
+
+             ss << "timestamp=" << inline_obj(py::cast(ts_client)) << ",";
+             ss << (ml ? "\n" : " ");
+
+             ss << "robot_system_timestamp=" << inline_obj(py::cast(ts_robot)) << ",";
+             ss << (ml ? "\n" : " ");
+
+             ss << "level=" << to_string(self.level) << ",";
+             ss << (ml ? "\n" : " ");
+
+             ss << "message=" << inline_obj(py::cast(self.message));
+             ss << (ml ? "\n" : "");
+
+             ss << prefix("");
+             ss << ")";
+
+             return ss.str();
            })
       .def("__str__", [](const Log& self) {
         auto ts_client = timespec_to_time_point(self.timestamp);

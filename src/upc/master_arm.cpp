@@ -83,6 +83,10 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
     return;
   }
   is_running_ = true;
+
+  ev_.Unpause();
+  ctrl_ev_.Unpause();
+
   control_ = control;
 
   auto rc = dyn::LoadRobotFromURDF(model_path_, "Base");
@@ -99,17 +103,22 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
   const int kRightLinkId = 7;
   const int kLeftLinkId = 14;
 
-  std::vector<int> motor_ids;
+  std::vector<int> motor_ids;  // Motor IDs for active motors
   for (int id : active_ids_) {
     if (id < 0x80) {
       motor_ids.push_back(id);
-      if (!handler_->SendOperatingMode(id, DynamixelBus::kCurrentControlMode)) {
-        std::cerr << "Failed to write current control mode value: "
-                  << handler_->ReadOperatingMode(id, true).value_or(-1) << std::endl;
-      }
-      handler_->SendTorqueEnable(id, DynamixelBus::kTorqueEnable);
     }
   }
+
+  handler_->GroupSyncWriteTorqueEnable(motor_ids, DynamixelBus::kTorqueDisable);
+  {
+    std::vector<std::pair<int, int>> motor_id_modes;
+    for (int id : motor_ids) {
+      motor_id_modes.emplace_back(id, DynamixelBus::kCurrentControlMode);
+    }
+    handler_->GroupSyncWriteOperatingMode(motor_id_modes);
+  }
+  handler_->GroupSyncWriteTorqueEnable(motor_ids, DynamixelBus::kTorqueEnable);
 
   operating_mode_init_ = false;
 

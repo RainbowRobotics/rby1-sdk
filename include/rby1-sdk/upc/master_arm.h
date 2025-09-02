@@ -1,14 +1,17 @@
 #pragma once
 
+#include <array>
 #include <functional>
+
+#include "Eigen/Core"
 
 #include "rby1-sdk/base/dynamixel_bus.h"
 #include "rby1-sdk/base/event_loop.h"
 #include "rby1-sdk/base/thread.h"
-#include "rby1-sdk/upc/device.h"
-#include "rby1-sdk/export.h"
 #include "rby1-sdk/dynamics/robot.h"
 #include "rby1-sdk/dynamics/state.h"
+#include "rby1-sdk/export.h"
+#include "rby1-sdk/upc/device.h"
 
 namespace rb::upc {
 
@@ -29,6 +32,7 @@ class RBY1_SDK_API MasterArm {
     Eigen::Vector<double, kDOF> gravity_term;
 
     Eigen::Vector<int, kDOF> operating_mode;
+    Eigen::Vector<double, kDOF> target_position; // Last target position
 
     DynamixelBus::ButtonState button_right;
     DynamixelBus::ButtonState button_left;
@@ -51,16 +55,24 @@ class RBY1_SDK_API MasterArm {
 
   void SetModelPath(const std::string& model_path);
 
+  void SetTorqueConstant(const std::array<double, kDOF>& torque_constant);
+
   std::vector<int> Initialize(bool verbose = false);
 
-  void StartControl(const std::function<ControlInput(const State& state)>& control = nullptr);
+  bool StartControl(const std::function<ControlInput(const State& state)>& control = nullptr);
 
-  void StopControl();
+  bool StopControl(bool torque_disable = false);
+
+  bool EnableTorque();
+
+  bool DisableTorque();
 
  private:
+  bool initialized_{false};
+
   EventLoop ev_;
   double control_period_;  // (sec)
-  std::vector<double> torque_constant_;
+  std::array<double, kDOF> torque_constant_;
 
   EventLoop ctrl_ev_;
   std::atomic<bool> ctrl_running_{false};

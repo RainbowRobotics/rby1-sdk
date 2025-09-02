@@ -2,6 +2,7 @@
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
 #include <Eigen/Core>
 
 #include "print_helper.h"
@@ -126,6 +127,14 @@ Type
 numpy.ndarray
     Shape (14,), dtype=int32. Operating mode for each joint.
 )doc")
+      .def_readonly("target_position", &MasterArm::State::target_position, R"doc(
+Last joint target positions.
+
+Type
+----
+numpy.ndarray
+    Shape (14,), dtype=float64. Joint target positions in radians.
+)doc")
       .def_readonly("button_right", &MasterArm::State::button_right, R"doc(
 Right tool button and trigger state.
 
@@ -196,6 +205,10 @@ numpy.ndarray
              ss << ",";
              ss << (ml ? "\n" : " ");
 
+             print_array("target_position", self.target_position);
+             ss << ",";
+             ss << (ml ? "\n" : " ");
+
              ss << "button_right=" << inline_obj_one_line(py::cast(self.button_right)) << ",";
              ss << (ml ? "\n" : " ");
 
@@ -211,7 +224,7 @@ numpy.ndarray
 
              ss << prefix("");
              ss << ")";
-             
+
              return ss.str();
            })
       .def("__str__", [](const MasterArm::State& self) {
@@ -363,6 +376,18 @@ Parameters
 model_path : str
     Path to the URDF model file.
 )doc")
+      .def("set_torque_constant", &MasterArm::SetTorqueConstant, "torque_constant"_a, R"doc(
+Set torque constant.
+
+Parameters
+----------
+torque_constant : numpy.ndarray (14, )
+
+Parameters
+----------
+model_path : str
+    Path to the URDF model file.
+)doc")
       .def("initialize", &MasterArm::Initialize, "verbose"_a = false, py::call_guard<py::gil_scoped_release>(), R"doc(
 Initialize the master arm and detect active devices.
 
@@ -384,9 +409,34 @@ Parameters
 control : callable, optional
     Control callback function that takes State and returns ControlInput.
     If None, no control is applied.
+
+Returns
+-------
+bool
 )doc")
-      .def("stop_control", &MasterArm::StopControl, py::call_guard<py::gil_scoped_release>(), R"doc(
+      .def("stop_control", &MasterArm::StopControl, "torque_disable"_a = false,
+           py::call_guard<py::gil_scoped_release>(), R"doc(
+stop_control(torque_disable)
+
 Stop the control loop.
+
+Parameters
+----------
+torque_disable : bool, optional
+
+Returns
+-------
+bool
+)doc")
+      .def("enable_torque", &MasterArm::EnableTorque, py::call_guard<py::gil_scoped_release>(), R"doc(
+enable_torque()
+
+Enable torque of motors
+)doc")
+      .def("disable_torque", &MasterArm::DisableTorque, py::call_guard<py::gil_scoped_release>(), R"doc(
+disable_torque()
+
+Disable torque of motors
 )doc")
       .def("__repr__",
            [](const MasterArm::ControlInput& self) {

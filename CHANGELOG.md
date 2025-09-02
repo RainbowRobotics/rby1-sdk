@@ -1,3 +1,11 @@
+## v0.8.3 (2025-09-02)
+
+### 🐛 Fixes
+
+- tap conflict on github action
+- add target position in master arm state
+- reinitialize variable when restarting master arm
+
 ## v0.8.2 (2025-08-18)
 
 ### ♻️ Refactor

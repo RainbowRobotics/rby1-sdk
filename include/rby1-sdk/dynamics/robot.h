@@ -139,6 +139,8 @@ class Robot {
 
   explicit Robot(const RobotConfiguration& robot_configuration) { Build(robot_configuration); }
 
+  std::shared_ptr<const Link> GetBase() const { return links_[0].links[0].link; }
+
   std::shared_ptr<Link> GetBase() { return links_[0].links[0].link; }
 
   std::vector<std::string> GetLinkNames() const {

@@ -72,6 +72,8 @@ class RBY1_SDK_API Joint : public std::enable_shared_from_this<Joint> {
 
   void SetLimitQddotUpper(double val);
 
+  std::weak_ptr<const Link> GetParentLink() const;
+
   std::weak_ptr<Link> GetParentLink();
 
   std::shared_ptr<Link> GetChildLink();

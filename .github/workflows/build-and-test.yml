@@ -68,8 +68,12 @@ jobs:
       - name: Install Dependencies (macOS)
         if: startsWith(matrix.os, 'macos')
         run: |
+          if brew list cmake &>/dev/null; then
+            brew uninstall --force cmake
+          fi
+          
           brew install cmake
-          python3 -m pip install --upgrade conan --break-system-packages
+          python3 -m pip install --upgrade pip conan --break-system-packages
 
       - name: Install Dependencies (Windows)
         if: startsWith(matrix.os, 'windows')

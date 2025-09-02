@@ -168,7 +168,7 @@ RBY1_SDK_API inline std::string to_string(JointState::FETState s) {
     case JointState::FETState::kOn:
       return "On";
     case JointState::FETState::kOff:
-      return "Unknown";
+      return "Off";
   }
   return "";
 }

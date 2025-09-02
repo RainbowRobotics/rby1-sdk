@@ -6,10 +6,28 @@
 namespace rb::upc {
 
 MasterArm::MasterArm(const std::string& dev_name)
-    : handler_(std::make_shared<DynamixelBus>(dev_name)), control_period_(0.1) {}
+    : handler_(std::make_shared<DynamixelBus>(dev_name)), control_period_(0.1) {
+  torque_constant_ = {1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043,
+                      1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043};  // Default torque constant
+}
 
 MasterArm::~MasterArm() {
   this->StopControl();
+
+  // Set torque to zero
+  if (initialized_) {
+    std::vector<std::pair<int, double>> id_torque;
+    for (const auto& id : active_ids_) {
+      if (id < 0x80) {
+        id_torque.emplace_back(id, 0);
+      }
+    }
+    if (!id_torque.empty()) {
+      handler_->GroupSyncWriteSendTorque(id_torque);
+    }
+  }
+
+  this->DisableTorque();
 }
 
 void MasterArm::SetControlPeriod(double control_period) {
@@ -18,6 +36,10 @@ void MasterArm::SetControlPeriod(double control_period) {
 
 void MasterArm::SetModelPath(const std::string& model_path) {
   model_path_ = model_path;
+}
+
+void MasterArm::SetTorqueConstant(const std::array<double, MasterArm::kDOF>& torque_constant) {
+  torque_constant_ = torque_constant;
 }
 
 std::vector<int> MasterArm::Initialize(bool verbose) {
@@ -34,9 +56,11 @@ std::vector<int> MasterArm::Initialize(bool verbose) {
     return {};
   }
 
+  initialized_ = true;
+
   std::vector<int> active_ids;
 
-  for (int id = 0; id < 14; ++id) {
+  for (int id = 0; id < kDOF; ++id) {
     if (handler_->Ping(id)) {
       if (verbose) {
         std::cout << "Dynamixel ID " << id << " is active." << std::endl;
@@ -70,19 +94,25 @@ std::vector<int> MasterArm::Initialize(bool verbose) {
     }
   }
 
-  torque_constant_ = {1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043,
-                      1.6591, 1.6591, 1.6591, 1.3043, 1.3043, 1.3043, 1.3043};
-  handler_->SetTorqueConstant(torque_constant_);
+  handler_->SetTorqueConstant(std::vector<double>(torque_constant_.begin(), torque_constant_.end()));
 
   active_ids_ = active_ids;
   return active_ids;
 }
 
-void MasterArm::StartControl(const std::function<ControlInput(const State& state)>& control) {
+bool MasterArm::StartControl(const std::function<ControlInput(const State& state)>& control) {
+  if (!initialized_) {
+    return false;
+  }
+
   if (is_running_.load()) {
-    return;
+    return false;
   }
   is_running_ = true;
+
+  ev_.Unpause();
+  ctrl_ev_.Unpause();
+
   control_ = control;
 
   auto rc = dyn::LoadRobotFromURDF(model_path_, "Base");
@@ -99,19 +129,24 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
   const int kRightLinkId = 7;
   const int kLeftLinkId = 14;
 
-  std::vector<int> motor_ids;
+  std::vector<int> motor_ids;  // Motor IDs for active motors
   for (int id : active_ids_) {
     if (id < 0x80) {
       motor_ids.push_back(id);
-      if (!handler_->SendOperatingMode(id, DynamixelBus::kCurrentControlMode)) {
-        std::cerr << "Failed to write current control mode value: "
-                  << handler_->ReadOperatingMode(id, true).value_or(-1) << std::endl;
-      }
-      handler_->SendTorqueEnable(id, DynamixelBus::kTorqueEnable);
     }
   }
 
-  operating_mode_init_ = false;
+  if (!operating_mode_init_) {
+    handler_->GroupSyncWriteTorqueEnable(motor_ids, DynamixelBus::kTorqueDisable);
+    {
+      std::vector<std::pair<int, int>> motor_id_modes;
+      for (int id : motor_ids) {
+        motor_id_modes.emplace_back(id, DynamixelBus::kCurrentControlMode);
+      }
+      handler_->GroupSyncWriteOperatingMode(motor_id_modes);
+    }
+    handler_->GroupSyncWriteTorqueEnable(motor_ids, DynamixelBus::kTorqueEnable);
+  }
 
   state_.q_joint.setZero();
   state_.operating_mode.setConstant(-1);
@@ -158,6 +193,15 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
             }
           }
           state_updated_ = true;
+        } else {
+          return;
+        }
+
+        const auto& temp_gp_vector = handler_->GroupFastSyncRead(motor_ids, DynamixelBus::kAddrGoalPosition, 4);
+        if (temp_gp_vector.has_value()) {
+          for (auto const& ret : temp_gp_vector.value()) {
+            state_.target_position[ret.first] = (double)ret.second / 4096. * 2. * 3.141592;
+          }
         } else {
           return;
         }
@@ -221,10 +265,20 @@ void MasterArm::StartControl(const std::function<ControlInput(const State& state
         }
       },
       std::chrono::nanoseconds((long)(control_period_ * 1e9)));
+
+  return true;
 }
 
-void MasterArm::StopControl() {
-  {  // Remove all tasks in current event loop
+bool MasterArm::StopControl(bool torque_disable) {
+  if (!initialized_) {
+    return false;
+  }
+
+  if (!is_running_.load()) {
+    return false;
+  }
+
+  {
     ev_.Pause();
 
     ctrl_ev_.Pause();
@@ -238,14 +292,54 @@ void MasterArm::StopControl() {
   dyn_state_ = nullptr;
   dyn_robot_ = nullptr;
 
+  if (torque_disable) {
+    for (int id : active_ids_) {
+      if (id < 0x80) {
+        handler_->SendTorqueEnable(id, DynamixelBus::kTorqueDisable);
+      }
+    }
+  }
+
+  is_running_ = false;
+  control_ = nullptr;
+
+  return true;
+}
+
+bool MasterArm::EnableTorque() {
+  if (!initialized_) {
+    return false;
+  }
+
+  if (is_running_.load()) {
+    return false;
+  }
+
+  for (int id : active_ids_) {
+    if (id < 0x80) {
+      handler_->SendTorqueEnable(id, DynamixelBus::kTorqueEnable);
+    }
+  }
+
+  return true;
+}
+
+bool MasterArm::DisableTorque() {
+  if (!initialized_) {
+    return false;
+  }
+
+  if (is_running_.load()) {
+    return false;
+  }
+
   for (int id : active_ids_) {
     if (id < 0x80) {
       handler_->SendTorqueEnable(id, DynamixelBus::kTorqueDisable);
     }
   }
 
-  is_running_ = false;
-  control_ = nullptr;
+  return true;
 }
 
 }  // namespace rb::upc

@@ -7,4 +7,11 @@ robot.connect()
 
 robot.sync_time()
 logs = robot.get_last_log(5)
-print(logs[0])
+
+for log in logs:
+    print(f"{log}")
+    
+print("---")
+
+with rby1_sdk.printoptions(array_mode="full", multiline_repr=True):
+    print(logs)

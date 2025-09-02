@@ -27,30 +27,34 @@ class State {
     Set<Derived::RowsAtCompileTime>(q, new_q.eval());
   }
 
-  Eigen::Vector<double, DOF> GetQ() { return q(utr_joint_map); }
+  Eigen::Vector<double, DOF> GetQ() const { return q(utr_joint_map); }
 
   template <typename Derived>
   void SetQdot(const Eigen::MatrixBase<Derived>& new_qdot) {
     Set<Derived::RowsAtCompileTime>(qdot, new_qdot.eval());
   }
 
-  Eigen::Vector<double, DOF> GetQdot() { return qdot(utr_joint_map); }
+  Eigen::Vector<double, DOF> GetQdot() const { return qdot(utr_joint_map); }
 
   template <typename Derived>
   void SetQddot(const Eigen::MatrixBase<Derived>& new_qddot) {
     Set<Derived::RowsAtCompileTime>(qddot, new_qddot.eval());
   }
 
-  Eigen::Vector<double, DOF> GetQddot() { return qddot(utr_joint_map); }
+  Eigen::Vector<double, DOF> GetQddot() const { return qddot(utr_joint_map); }
 
   template <typename Derived>
   void SetTau(const Eigen::MatrixBase<Derived>& new_tau) {
     Set<Derived::RowsAtCompileTime>(tau, new_tau.eval());
   }
 
-  Eigen::Vector<double, DOF> GetTau() { return tau(utr_joint_map); }
+  const Eigen::Vector<double, DOF> GetTau() const { return tau(utr_joint_map); }
+
+  const math::se3v::MatrixType& GetV0() const { return V0; }
 
   void SetV0(const math::se3v::MatrixType& new_V0) { V0 = new_V0; }
+
+  const math::se3v::MatrixType& GetVdot0() const { return Vdot0; }
 
   // Vdot of root link in root frame
   void SetVdot0(const math::se3v::MatrixType& new_Vdot0) { Vdot0 = new_Vdot0; }

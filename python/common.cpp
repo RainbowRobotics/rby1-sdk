@@ -23,12 +23,47 @@ std::chrono::nanoseconds timespec_to_nanoseconds(const timespec& ts) {
 }
 
 void pybind11_timespec(py::module_& m) {
-  py::class_<timespec>(m, "timespec")
-      .def(py::init<>())
+  py::class_<timespec>(m, "timespec", R"doc(
+POSIX timespec structure for high-resolution time representation.
+
+This class represents time with nanosecond precision, commonly used
+in system calls and high-resolution timing operations.
+
+Attributes
+----------
+tv_sec : int
+    Seconds since the Epoch (January 1, 1970, 00:00:00 UTC).
+tv_nsec : int
+    Nanoseconds component (0-999,999,999).
+)doc")
+      .def(py::init<>(), R"doc(
+Construct a timespec with zero values.
+)doc")
       .def_property(
           "tv_sec", [](struct timespec& ts) { return ts.tv_sec; },
-          [](struct timespec& ts, int sec) { ts.tv_sec = sec; })
+          [](struct timespec& ts, int sec) { ts.tv_sec = sec; }, R"doc(
+Seconds since the Epoch.
+
+Type
+----
+int
+
+Notes
+-----
+This represents the integral number of seconds since the Unix epoch.
+)doc")
       .def_property(
           "tv_nsec", [](struct timespec& ts) { return ts.tv_nsec; },
-          [](struct timespec& ts, int nsec) { ts.tv_nsec = nsec; });
+          [](struct timespec& ts, int nsec) { ts.tv_nsec = nsec; }, R"doc(
+Nanoseconds component.
+
+Type
+----
+int
+
+Notes
+-----
+Must be in the range [0, 999,999,999]. Values outside this range
+will cause undefined behavior.
+)doc");
 }

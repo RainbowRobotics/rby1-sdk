@@ -40,6 +40,7 @@ pybind11_add_module(_bindings
         dynamics.cpp
         dynamixel_bus.cpp
         upc.cpp
+        print_helper.cpp
 )
 target_link_libraries(_bindings PRIVATE rby1-sdk Eigen3::Eigen)
 

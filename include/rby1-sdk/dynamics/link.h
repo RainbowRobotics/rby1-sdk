@@ -4,8 +4,8 @@
 #include <memory>
 
 #include "rby1-sdk/dynamics/inertial.h"
-#include "rby1-sdk/math/liegroup.h"
 #include "rby1-sdk/export.h"
+#include "rby1-sdk/math/liegroup.h"
 
 namespace rb::dyn {
 
@@ -30,6 +30,8 @@ class RBY1_SDK_API Link : public std::enable_shared_from_this<Link> {
   static std::shared_ptr<Link> Make(std::string name, Inertial::MatrixType I = Inertial::I(1.));
 
   std::string GetName() const;
+
+  std::weak_ptr<const Joint> GetParentJoint() const;
 
   std::weak_ptr<Joint> GetParentJoint();
 
@@ -59,6 +61,8 @@ class RBY1_SDK_API Link : public std::enable_shared_from_this<Link> {
 class RBY1_SDK_API Collision : public std::enable_shared_from_this<Collision> {
  public:
   explicit Collision(std::string name);
+
+  std::string GetName() const;
 
   void SetOrigin(const math::SE3::MatrixType& T);
 

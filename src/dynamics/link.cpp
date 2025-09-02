@@ -86,6 +86,10 @@ namespace rb::dyn {
 
 Collision::Collision(std::string name) : name_(std::move(name)) {}
 
+std::string Collision::GetName() const {
+  return name_;
+}
+
 void Collision::SetOrigin(const math::SE3::MatrixType& T) {
   T_ = T;
 }
@@ -114,6 +118,10 @@ Link::Link(string name, Inertial::MatrixType I) : name_(std::move(name)), I_(std
 
 std::string Link::GetName() const {
   return name_;
+}
+
+weak_ptr<const Joint> Link::GetParentJoint() const {
+  return parent_joint_;
 }
 
 weak_ptr<Joint> Link::GetParentJoint() {

@@ -9,17 +9,206 @@ using namespace rb;
 using namespace py::literals;
 
 void pybind11_robot_command_builder(py::module_& m) {
-  py::class_<CommandHeaderBuilder>(m, "CommandHeaderBuilder")
-      .def(py::init<>())
-      .def("set_control_hold_time", &CommandHeaderBuilder::SetControlHoldTime, "control_hold_time"_a);
+  py::class_<CommandHeaderBuilder>(m, "CommandHeaderBuilder", R"doc(
+Command header builder.
 
-  py::class_<JointPositionCommandBuilder>(m, "JointPositionCommandBuilder")
-      .def(py::init<>())
-      .def("set_command_header", &JointPositionCommandBuilder::SetCommandHeader, "command_header_builder"_a)
-      .def("set_minimum_time", &JointPositionCommandBuilder::SetMinimumTime, "minimum_time"_a)
-      .def("set_position", &JointPositionCommandBuilder::SetPosition, "position"_a)
-      .def("set_velocity_limit", &JointPositionCommandBuilder::SetVelocityLimit, "velocity_limit"_a)
-      .def("set_acceleration_limit", &JointPositionCommandBuilder::SetAccelerationLimit, "acceleration_limit"_a);
+Builds command headers with control hold time settings.
+
+Attributes
+----------
+control_hold_time : float
+    Control hold time in seconds.
+)doc")
+      .def(py::init<>(), R"doc(
+      Construct a CommandHeaderBuilder instance.
+)doc")
+      .def("set_control_hold_time", &CommandHeaderBuilder::SetControlHoldTime, "control_hold_time"_a, R"doc(
+set_control_hold_time(control_hold_time)
+
+Set the control hold time.
+
+Parameters
+----------
+control_hold_time : float
+    Control hold time in seconds.
+
+Returns
+-------
+CommandHeaderBuilder
+    Self reference for method chaining.
+
+Examples
+--------
+>>> from rby1_sdk import CommandHeaderBuilder
+>>> # Create command header with control hold time
+>>> header = CommandHeaderBuilder().set_control_hold_time(5.0)
+>>> # Use in command builders
+>>> command = JointPositionCommandBuilder().set_command_header(header)
+>>> # Control hold time keeps the command active for 5 seconds
+)doc");
+
+  py::class_<JointPositionCommandBuilder>(m, "JointPositionCommandBuilder", R"doc(
+Joint position command builder.
+
+Builds joint position commands with position, velocity, and acceleration limits.
+
+Attributes
+----------
+command_header : CommandHeaderBuilder
+    Command header configuration.
+minimum_time : float
+    Minimum execution time in seconds.
+position : numpy.ndarray
+    Target joint positions in radians.
+velocity_limit : numpy.ndarray
+    Joint velocity limits in rad/s.
+acceleration_limit : numpy.ndarray
+    Joint acceleration limits in rad/s².
+
+Examples
+--------
+>>> def movej(robot, torso=None, right_arm=None, left_arm=None, minimum_time=0):
+...     rc = rby.BodyComponentBasedCommandBuilder()
+...     if torso is not None:
+...         rc.set_torso_command(
+...             rby.JointPositionCommandBuilder()
+...             .set_minimum_time(minimum_time)
+...             .set_position(torso)
+...         )
+...     if right_arm is not None:
+...         rc.set_right_arm_command(
+...             rby.JointPositionCommandBuilder()
+...             .set_minimum_time(minimum_time)
+...             .set_position(right_arm)
+...         )
+...     if left_arm is not None:
+...         rc.set_left_arm_command(
+...             rby.JointPositionCommandBuilder()
+...             .set_minimum_time(minimum_time)
+...             .set_position(left_arm)
+...         )
+...     handler = robot.send_command(
+...         rby.RobotCommandBuilder().set_command(
+...             rby.ComponentBasedCommandBuilder().set_body_command(rc)
+...         ),
+...         1,
+...     )
+...     rv = handler.get()
+...     if rv.finish_code != rby.RobotCommandFeedback.FinishCode.Ok:
+...         logging.error("Failed to conduct movej.")
+...         return False
+...     return True
+>>> movej(
+...     robot,
+...     torso=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
+...     right_arm=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
+...     left_arm=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
+...     minimum_time=5.0
+... )
+)doc")
+      .def(py::init<>(), R"doc(
+      Construct a JointPositionCommandBuilder instance.
+)doc")
+      .def("set_command_header", &JointPositionCommandBuilder::SetCommandHeader, "command_header_builder"_a, R"doc(
+set_command_header(command_header_builder)
+
+Set the command header.
+
+Parameters
+----------
+command_header_builder : CommandHeaderBuilder
+    Command header configuration.
+
+Returns
+-------
+JointPositionCommandBuilder
+    Self reference for method chaining.
+)doc")
+      .def("set_minimum_time", &JointPositionCommandBuilder::SetMinimumTime, "minimum_time"_a, R"doc(
+set_minimum_time(minimum_time)
+
+Set the minimum execution time.
+
+Parameters
+----------
+minimum_time : float
+    Minimum time in seconds. This parameter provides an additional degree
+    of freedom to control the arrival time to a target. Instead of relying
+    solely on velocity/acceleration limits, you can set high limits and
+    control the arrival time using minimum_time. For streaming commands,
+    this helps ensure continuous motion by preventing the robot from
+    stopping if it arrives too early before the next command.
+
+Returns
+-------
+JointPositionCommandBuilder
+    Self reference for method chaining.
+)doc")
+      .def("set_position", &JointPositionCommandBuilder::SetPosition, "position"_a, R"doc(
+set_position(position)
+
+Set the target joint positions.
+The size of the array must match the number of joints in the corresponding component.
+
+Parameters
+----------
+position : numpy.ndarray
+    Target positions in radians.
+
+Returns
+-------
+JointPositionCommandBuilder
+    Self reference for method chaining.
+
+Examples
+--------
+>>> right_arm_command = (
+...     JointPositionCommandBuilder()
+...     .set_position(np.array([0, 0, 0, 0, 0, 0, 0]))
+...     .set_velocity_limit(np.array([np.pi] * 7))
+...     .set_acceleration_limit(np.array([1.0] * 7))
+...     .set_minimum_time(3.0)
+... )
+>>> robot.send_command(
+...      RobotCommandBuilder().set_command(
+...           ComponentBasedCommandBuilder().set_body_command(
+...                BodyComponentBasedCommandBuilder()
+...                .set_right_arm_command(right_arm_command)
+...           )
+...      ),
+...      10,
+... )
+)doc")
+      .def("set_velocity_limit", &JointPositionCommandBuilder::SetVelocityLimit, "velocity_limit"_a, R"doc(
+set_velocity_limit(velocity_limit)
+
+Set the joint velocity limits.
+
+Parameters
+----------
+velocity_limit : numpy.ndarray
+    Velocity limits in rad/s.
+
+Returns
+-------
+JointPositionCommandBuilder
+    Self reference for method chaining.
+)doc")
+      .def("set_acceleration_limit", &JointPositionCommandBuilder::SetAccelerationLimit, "acceleration_limit"_a, R"doc(
+set_acceleration_limit(acceleration_limit)
+
+Set the joint acceleration limits.
+
+Parameters
+----------
+acceleration_limit : numpy.ndarray
+    Acceleration limits in rad/s².
+
+Returns
+-------
+JointPositionCommandBuilder
+    Self reference for method chaining.
+)doc");
 
   py::class_<JointGroupPositionCommandBuilder>(m, "JointGroupPositionCommandBuilder")
       .def(py::init<>())
@@ -93,7 +282,7 @@ void pybind11_robot_command_builder(py::module_& m) {
   jcb.def(py::init<>())
       .def("set_command_header", &JogCommandBuilder::SetCommandHeader, "command_header_builder"_a)
       .def("set_joint_name", &JogCommandBuilder::SetJointName, "joint_name"_a)
-      .def("set_velocity_limit", &JogCommandBuilder::SetVelocityLimit, "velocity_limite"_a)
+      .def("set_velocity_limit", &JogCommandBuilder::SetVelocityLimit, "velocity_limit"_a)
       .def("set_acceleration_limit", &JogCommandBuilder::SetAccelerationLimit, "acceleration_limit"_a)
       .def("set_command", py::overload_cast<JogCommandBuilder::AbsolutePosition>(&JogCommandBuilder::SetCommand),
            "absolute_position"_a)

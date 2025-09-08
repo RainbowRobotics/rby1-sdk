@@ -6,23 +6,27 @@ from ._bindings import __version__
 
 # from ._robot_command import *
 
-from typing import overload
+from typing import overload, Literal, Union
 
 
 @overload
-def create_robot(address: str, model_name: str) -> Robot_A: ...
+def create_robot(address: str, model_name: Literal["a"]) -> _bindings.Robot_A: ...
 @overload
-def create_robot(address: str, model_name: str) -> Robot_M: ...
+def create_robot(address: str, model_name: Literal["m"]) -> _bindings.Robot_M: ...
 @overload
-def create_robot(address: str, model_name: str) -> Robot_T5: ...
+def create_robot(address: str, model_name: Literal["t5"]) -> _bindings.Robot_T5: ...
 @overload
-def create_robot(address: str, model_name: str) -> Robot_UB: ...
+def create_robot(address: str, model_name: Literal["ub"]) -> _bindings.Robot_UB: ...
+@overload
+def create_robot(
+    address: str, model_name: str
+) -> Union[
+    _bindings.Robot_A, _bindings.Robot_M, _bindings.Robot_T5, _bindings.Robot_UB
+]: ...
 
 
 def create_robot(address: str, model_name: str):
     """
-    create_robot(address, model_name)
-    
     Create a robot instance for a specific RB-Y1 model.
 
     This function is a thin wrapper around the internal
@@ -35,10 +39,10 @@ def create_robot(address: str, model_name: str):
         Network address of the robot, e.g. "192.168.1.100:50051".
     model_name : str
         Robot model identifier (case-insensitive). Supported values are:
-        - "a"   → Robot_A
-        - "m"   → Robot_M
-        - "t5"  → Robot_T5
-        - "ub"  → Robot_UB
+
+            - "a"   → Robot_A
+            - "m"   → Robot_M
+            - "ub"  → Robot_UB
 
     Returns
     -------

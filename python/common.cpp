@@ -41,29 +41,8 @@ Construct a timespec with zero values.
 )doc")
       .def_property(
           "tv_sec", [](struct timespec& ts) { return ts.tv_sec; },
-          [](struct timespec& ts, int sec) { ts.tv_sec = sec; }, R"doc(
-Seconds since the Epoch.
-
-Type
-----
-int
-
-Notes
------
-This represents the integral number of seconds since the Unix epoch.
-)doc")
+          [](struct timespec& ts, int sec) { ts.tv_sec = sec; })
       .def_property(
           "tv_nsec", [](struct timespec& ts) { return ts.tv_nsec; },
-          [](struct timespec& ts, int nsec) { ts.tv_nsec = nsec; }, R"doc(
-Nanoseconds component.
-
-Type
-----
-int
-
-Notes
------
-Must be in the range [0, 999,999,999]. Values outside this range
-will cause undefined behavior.
-)doc");
+          [](struct timespec& ts, int nsec) { ts.tv_nsec = nsec; });
 }

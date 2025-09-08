@@ -41,120 +41,52 @@ Input parameters for trapezoidal motion generation.
 
 Attributes
 ----------
-current_position : numpy.ndarray
-    Current joint positions, shape (N,), dtype=float64.
-current_velocity : numpy.ndarray
-    Current joint velocities, shape (N,), dtype=float64.
-target_position : numpy.ndarray
-    Target joint positions, shape (N,), dtype=float64.
-velocity_limit : numpy.ndarray
-    Maximum allowed velocities for each joint, shape (N,), dtype=float64.
-acceleration_limit : numpy.ndarray
-    Maximum allowed accelerations for each joint, shape (N,), dtype=float64.
+current_position : numpy.ndarray, shape (N,), dtype=float64
+    Current joint positions.
+current_velocity : numpy.ndarray, shape (N,), dtype=float64
+    Current joint velocities.
+target_position : numpy.ndarray, shape (N,), dtype=float64
+    Target joint positions.
+velocity_limit : numpy.ndarray, shape (N,), dtype=float64
+    Maximum allowed velocities for each joint.
+acceleration_limit : numpy.ndarray, shape (N,), dtype=float64
+    Maximum allowed accelerations for each joint.
 minimum_time : float
-    Minimum time constraint for the motion. This parameter provides an additional degree
-    of freedom to control the arrival time to a target. Instead of relying
-    solely on velocity/acceleration limits, you can set high limits and
-    control the arrival time using minimum_time. For streaming commands,
+    Minimum time constraint for the motion in seconds. This parameter provides 
+    an additional degree of freedom to control the arrival time to a target. 
+    Instead of relying solely on velocity/acceleration limits, you can set high 
+    limits and control the arrival time using minimum_time. For streaming commands,
     this helps ensure continuous motion by preventing the robot from
     stopping if it arrives too early before the next command.
 )doc")
       .def(py::init<>(), R"doc(
 Construct an Input instance with default values.
 )doc")
-      .def_readwrite("current_position", &rb::TrapezoidalMotionGenerator<N>::Input::current_position, R"doc(
-Current joint positions.
-
-Type
-----
-numpy.ndarray
-    Shape (N,), dtype=float64.
-)doc")
-      .def_readwrite("current_velocity", &rb::TrapezoidalMotionGenerator<N>::Input::current_velocity, R"doc(
-Current joint velocities.
-
-Type
-----
-numpy.ndarray
-    Shape (N,), dtype=float64.
-)doc")
-      .def_readwrite("target_position", &rb::TrapezoidalMotionGenerator<N>::Input::target_position, R"doc(
-Target joint positions.
-
-Type
-----
-numpy.ndarray
-    Shape (N,), dtype=float64.
-)doc")
-      .def_readwrite("velocity_limit", &rb::TrapezoidalMotionGenerator<N>::Input::velocity_limit, R"doc(
-Maximum allowed velocities for each joint.
-
-Type
-----
-numpy.ndarray
-    Shape (N,), dtype=float64.
-)doc")
-      .def_readwrite("acceleration_limit", &rb::TrapezoidalMotionGenerator<N>::Input::acceleration_limit, R"doc(
-Maximum allowed accelerations for each joint.
-
-Type
-----
-numpy.ndarray
-    Shape (N,), dtype=float64.
-)doc")
-      .def_readwrite("minimum_time", &rb::TrapezoidalMotionGenerator<N>::Input::minimum_time, R"doc(
-Minimum time constraint for the motion. This parameter provides an additional degree
-of freedom to control the arrival time to a target. Instead of relying
-solely on velocity/acceleration limits, you can set high limits and
-control the arrival time using minimum_time. For streaming commands,
-this helps ensure continuous motion by preventing the robot from
-stopping if it arrives too early before the next command.
-
-Type
-----
-float
-    Time in seconds.
-)doc");
+      .def_readwrite("current_position", &rb::TrapezoidalMotionGenerator<N>::Input::current_position)
+      .def_readwrite("current_velocity", &rb::TrapezoidalMotionGenerator<N>::Input::current_velocity)
+      .def_readwrite("target_position", &rb::TrapezoidalMotionGenerator<N>::Input::target_position)
+      .def_readwrite("velocity_limit", &rb::TrapezoidalMotionGenerator<N>::Input::velocity_limit)
+      .def_readwrite("acceleration_limit", &rb::TrapezoidalMotionGenerator<N>::Input::acceleration_limit)
+      .def_readwrite("minimum_time", &rb::TrapezoidalMotionGenerator<N>::Input::minimum_time);
 
   py::class_<typename rb::TrapezoidalMotionGenerator<N>::Output>(gen, "Output", R"doc(
 Output trajectory data from motion generation.
 
 Attributes
 ----------
-position : numpy.ndarray
-    Joint positions at the specified time, shape (N,), dtype=float64.
-velocity : numpy.ndarray
-    Joint velocities at the specified time, shape (N,), dtype=float64.
-acceleration : numpy.ndarray
-    Joint accelerations at the specified time, shape (N,), dtype=float64.
+position : numpy.ndarray, shape (N,), dtype=float64
+    Joint positions at the specified time.
+velocity : numpy.ndarray, shape (N,), dtype=float64
+    Joint velocities at the specified time.
+acceleration : numpy.ndarray, shape (N,), dtype=float64
+    Joint accelerations at the specified time.
 )doc")
       .def(py::init<>(), R"doc(
 Construct an Output instance with default values.
 )doc")
-      .def_readwrite("position", &rb::TrapezoidalMotionGenerator<N>::Output::position, R"doc(
-Joint positions at the specified time.
-
-Type
-----
-numpy.ndarray
-    Shape (N,), dtype=float64.
-)doc")
-      .def_readwrite("velocity", &rb::TrapezoidalMotionGenerator<N>::Output::velocity, R"doc(
-Joint velocities at the specified time.
-
-Type
-----
-numpy.ndarray
-    Shape (N,), dtype=float64.
-)doc")
-      .def_readwrite("acceleration", &rb::TrapezoidalMotionGenerator<N>::Output::acceleration, R"doc(
-Joint accelerations at the specified time.
-
-Type
-----
-numpy.ndarray
-    Shape (N,), dtype=float64.
-)doc");
+      .def_readwrite("position", &rb::TrapezoidalMotionGenerator<N>::Output::position)
+      .def_readwrite("velocity", &rb::TrapezoidalMotionGenerator<N>::Output::velocity)
+      .def_readwrite("acceleration", &rb::TrapezoidalMotionGenerator<N>::Output::acceleration);
 
   py::class_<typename rb::TrapezoidalMotionGenerator<N>::Coeff>(gen, "Coeff", R"doc(
 Spline coefficients for trajectory segments.
@@ -162,9 +94,9 @@ Spline coefficients for trajectory segments.
 Attributes
 ----------
 start_t : float
-    Start time of the segment.
+    Start time of the segment (in seconds).
 end_t : float
-    End time of the segment.
+    End time of the segment (in seconds).
 init_p : float
     Initial position for the segment.
 init_v : float
@@ -175,46 +107,11 @@ a : float
       .def(py::init<>(), R"doc(
 Construct a Coeff instance with default values.
 )doc")
-      .def_readwrite("start_t", &rb::TrapezoidalMotionGenerator<N>::Coeff::start_t, R"doc(
-Start time of the segment.
-
-Type
-----
-float
-    Time in seconds.
-)doc")
-      .def_readwrite("end_t", &rb::TrapezoidalMotionGenerator<N>::Coeff::end_t, R"doc(
-End time of the segment.
-
-Type
-----
-float
-    Time in seconds.
-)doc")
-      .def_readwrite("init_p", &rb::TrapezoidalMotionGenerator<N>::Coeff::init_p, R"doc(
-Initial position for the segment.
-
-Type
-----
-float
-    Position in radians or meters.
-)doc")
-      .def_readwrite("init_v", &rb::TrapezoidalMotionGenerator<N>::Coeff::init_v, R"doc(
-Initial velocity for the segment.
-
-Type
-----
-float
-    Velocity in rad/s or m/s.
-)doc")
-      .def_readwrite("a", &rb::TrapezoidalMotionGenerator<N>::Coeff::a, R"doc(
-Constant acceleration for the segment.
-
-Type
-----
-float
-    Acceleration in rad/s² or m/s².
-)doc");
+      .def_readwrite("start_t", &rb::TrapezoidalMotionGenerator<N>::Coeff::start_t)
+      .def_readwrite("end_t", &rb::TrapezoidalMotionGenerator<N>::Coeff::end_t)
+      .def_readwrite("init_p", &rb::TrapezoidalMotionGenerator<N>::Coeff::init_p)
+      .def_readwrite("init_v", &rb::TrapezoidalMotionGenerator<N>::Coeff::init_v)
+      .def_readwrite("a", &rb::TrapezoidalMotionGenerator<N>::Coeff::a);
 
   gen.def(py::init<unsigned int>(), "max_iter"_a = 30, R"doc(
 Construct a TrapezoidalMotionGenerator.
@@ -225,8 +122,6 @@ max_iter : int, optional
     Maximum number of iterations for optimization. Default is 30.
 )doc")
       .def("update", &rb::TrapezoidalMotionGenerator<N>::Update, "input"_a, R"doc(
-update(input)
-
 Update the motion generator with new input parameters.
 
 Parameters
@@ -240,8 +135,6 @@ ValueError
     If input argument sizes are inconsistent.
 )doc")
       .def("get_total_time", &rb::TrapezoidalMotionGenerator<N>::GetTotalTime, R"doc(
-get_total_time()
-
 Get the total time for the generated trajectory.
 
 Returns
@@ -268,8 +161,6 @@ RuntimeError
     If the motion generator is not initialized.
 )doc")
       .def("at_time", &rb::TrapezoidalMotionGenerator<N>::at_time, "t"_a, R"doc(
-at_time(t)
-
 Get trajectory output at the specified time.
 
 Parameters

@@ -27,29 +27,29 @@ ProtocolVersion : float
 DefaultBaudrate : int
     Default communication baudrate (2000000).
 AddrTorqueEnable : int
-    Memory address for torque enable/disable.
+    Memory address for torque enable/disable (64).
 AddrPresentCurrent : int
-    Memory address for current reading.
+    Memory address for current reading (126).
 AddrPresentVelocity : int
-    Memory address for velocity reading.
+    Memory address for velocity reading (128).
 AddrPresentPosition : int
-    Memory address for position reading.
+    Memory address for position reading (132).
 AddrGoalCurrent : int
-    Memory address for current goal setting.
+    Memory address for current goal setting (102).
 AddrGoalPosition : int
-    Memory address for position goal setting.
+    Memory address for position goal setting (104).
 AddrOperatingMode : int
-    Memory address for operating mode setting.
+    Memory address for operating mode setting (11).
 AddrPresentButtonState : int
-    Memory address for button state reading.
+    Memory address for button state reading (12).
 AddrGoalVibrationLevel : int
-    Memory address for vibration level setting.
+    Memory address for vibration level setting (13).
 AddrPositionPGain : int
-    Memory address for position P gain.
+    Memory address for position P gain (80).
 AddrPositionIGain : int
-    Memory address for position I gain.
+    Memory address for position I gain (81).
 AddrPositionDGain : int
-    Memory address for position D gain.
+    Memory address for position D gain (82).
 TorqueEnable : int
     Value to enable torque (1).
 TorqueDisable : int
@@ -59,7 +59,7 @@ CurrentControlMode : int
 CurrentBasedPositionControlMode : int
     Operating mode for current-based position control (5).
 AddrCurrentTemperature : int
-    Memory address for temperature reading.
+    Memory address for temperature reading (146).
 )doc");
 
   py::class_<DynamixelBus::ButtonState>(bus_m, "ButtonState", R"doc(
@@ -71,29 +71,15 @@ on gripper or tool devices.
 Attributes
 ----------
 button : int
-    Button state (0 or 1).
+    Button state: 0 (released) or 1 (pressed).
 trigger : int
-    Trigger value (0-255).
+    Trigger value ranging from 0 to 255.
 )doc")
       .def(py::init<>(), R"doc(
 Construct a ButtonState instance with default values.
 )doc")
-      .def_readonly("button", &DynamixelBus::ButtonState::button, R"doc(
-Button state.
-
-Type
-----
-int
-    Button state: 0 (released) or 1 (pressed).
-)doc")
-      .def_readonly("trigger", &DynamixelBus::ButtonState::trigger, R"doc(
-Trigger value.
-
-Type
-----
-int
-Trigger value ranging from 0 to 255.
-)doc")
+      .def_readonly("button", &DynamixelBus::ButtonState::button)
+      .def_readonly("trigger", &DynamixelBus::ButtonState::trigger)
       .def("__repr__",
            [](const DynamixelBus::ButtonState& self) {
              using namespace rb::print;
@@ -125,67 +111,25 @@ Attributes
 torque_enable : bool
     Whether torque is currently enabled.
 position : float
-    Current position in radians.
+    Current position [rad].
 velocity : float
-    Current velocity in rad/s.
+    Current velocity [rad/s].
 current : float
-    Current current in amperes.
+    Current current [A].
 torque : float
-    Current torque in Nm.
+    Current torque [Nm].
 temperature : int
     Current temperature in degrees Celsius.
 )doc")
       .def(py::init<>(), R"doc(
 Construct a MotorState instance with default values.
 )doc")
-      .def_readonly("torque_enable", &DynamixelBus::MotorState::torque_enable, R"doc(
-Whether torque is currently enabled.
-
-Type
-----
-bool
-    True if torque is enabled, False otherwise.
-)doc")
-      .def_readonly("position", &DynamixelBus::MotorState::position, R"doc(
-Current position.
-
-Type
-----
-float
-    Current position in radians.
-)doc")
-      .def_readonly("velocity", &DynamixelBus::MotorState::velocity, R"doc(
-Current velocity.
-
-Type
-----
-float
-    Current velocity in rad/s.
-)doc")
-      .def_readonly("current", &DynamixelBus::MotorState::current, R"doc(
-Current current.
-
-Type
-----
-float
-    Current current in amperes.
-)doc")
-      .def_readonly("torque", &DynamixelBus::MotorState::torque, R"doc(
-Current torque.
-
-Type
-----
-float
-    Current torque in Nm.
-)doc")
-      .def_readonly("temperature", &DynamixelBus::MotorState::temperature, R"doc(
-Current temperature.
-
-Type
-----
-int
-    Current temperature in degrees Celsius.
-)doc")
+      .def_readonly("torque_enable", &DynamixelBus::MotorState::torque_enable)
+      .def_readonly("position", &DynamixelBus::MotorState::position)
+      .def_readonly("velocity", &DynamixelBus::MotorState::velocity)
+      .def_readonly("current", &DynamixelBus::MotorState::current)
+      .def_readonly("torque", &DynamixelBus::MotorState::torque)
+      .def_readonly("temperature", &DynamixelBus::MotorState::temperature)
       .def("__repr__",
            [](const DynamixelBus::MotorState& self) {
              using namespace rb::print;
@@ -233,184 +177,30 @@ d_gain : int
       .def(py::init<>(), R"doc(
 Construct a PIDGain instance with default values.
 )doc")
-      .def_readwrite("p_gain", &DynamixelBus::PIDGain::p_gain, R"doc(
-Proportional gain.
-
-Type
-----
-int
-    Proportional gain value (0-65535).
-)doc")
-      .def_readwrite("i_gain", &DynamixelBus::PIDGain::i_gain, R"doc(
-Integral gain.
-
-Type
-----
-int
-    Integral gain value (0-65535).
-)doc")
-      .def_readwrite("d_gain", &DynamixelBus::PIDGain::d_gain, R"doc(
-Derivative gain.
-
-Type
-----
-int
-    Derivative gain value (0-65535).
-)doc");
+      .def_readwrite("p_gain", &DynamixelBus::PIDGain::p_gain)
+      .def_readwrite("i_gain", &DynamixelBus::PIDGain::i_gain)
+      .def_readwrite("d_gain", &DynamixelBus::PIDGain::d_gain);
 
   bus_m  //
-      .def_readonly_static("ProtocolVersion", &DynamixelBus::kProtocolVersion, R"doc(
-Dynamixel protocol version.
-
-Type
-----
-float
-    Protocol version (2.0).
-)doc")
-      .def_readonly_static("DefaultBaudrate", &DynamixelBus::kDefaultBaudrate, R"doc(
-Default communication baudrate.
-
-Type
-----
-int
-    Default baudrate (2000000).
-)doc")
-      .def_readonly_static("AddrTorqueEnable", &DynamixelBus::kAddrTorqueEnable, R"doc(
-Memory address for torque enable/disable.
-
-Type
-----
-int
-    Memory address (64).
-)doc")
-      .def_readonly_static("AddrPresentCurrent", &DynamixelBus::kAddrPresentCurrent, R"doc(
-Memory address for current reading.
-
-Type
-----
-int
-    Memory address (126).
-)doc")
-      .def_readonly_static("AddrPresentVelocity", &DynamixelBus::kAddrPresentVelocity, R"doc(
-Memory address for velocity reading.
-
-Type
-----
-int
-    Memory address (128).
-)doc")
-      .def_readonly_static("AddrPresentPosition", &DynamixelBus::kAddrPresentPosition, R"doc(
-Memory address for position reading.
-
-Type
-----
-int
-    Memory address (132).
-)doc")
-      .def_readonly_static("AddrGoalCurrent", &DynamixelBus::kAddrGoalCurrent, R"doc(
-Memory address for current goal setting.
-
-Type
-----
-int
-    Memory address (102).
-)doc")
-      .def_readonly_static("AddrGoalPosition", &DynamixelBus::kAddrGoalPosition, R"doc(
-Memory address for position goal setting.
-
-Type
-----
-int
-    Memory address (116).
-)doc")
-      .def_readonly_static("AddrOperatingMode", &DynamixelBus::kAddrOperatingMode, R"doc(
-Memory address for operating mode setting.
-
-Type
-----
-int
-    Memory address (11).
-)doc")
-      .def_readonly_static("AddrPresentButtonState", &DynamixelBus::kAddrPresentButtonState, R"doc(
-Memory address for button state reading.
-
-Type
-----
-int
-    Memory address (132).
-)doc")
-      .def_readonly_static("AddrGoalVibrationLevel", &DynamixelBus::kAddrGoalVibrationLevel, R"doc(
-Memory address for vibration level setting.
-
-Type
-----
-int
-    Memory address (102).
-)doc")
-      .def_readonly_static("AddrPositionPGain", &DynamixelBus::kAddrPositionPGain, R"doc(
-Memory address for position P gain.
-
-Type
-----
-int
-    Memory address (84).
-)doc")
-      .def_readonly_static("AddrPositionIGain", &DynamixelBus::kAddrPositionIGain, R"doc(
-Memory address for position I gain.
-
-Type
-----
-int
-    Memory address (82).
-)doc")
-      .def_readonly_static("AddrPositionDGain", &DynamixelBus::kAddrPositionDGain, R"doc(
-Memory address for position D gain.
-
-Type
-----
-int
-    Memory address (80).
-)doc")
-      .def_readonly_static("TorqueEnable", &DynamixelBus::kTorqueEnable, R"doc(
-Value to enable torque.
-
-Type
-----
-int
-    Torque enable value (1).
-)doc")
-      .def_readonly_static("TorqueDisable", &DynamixelBus::kTorqueDisable, R"doc(
-Value to disable torque.
-
-Type
-----
-int
-    Torque disable value (0).
-)doc")
-      .def_readonly_static("CurrentControlMode", &DynamixelBus::kCurrentControlMode, R"doc(
-Operating mode for current control.
-
-Type
-----
-int
-    Current control mode value (0).
-)doc")
-      .def_readonly_static("CurrentBasedPositionControlMode", &DynamixelBus::kCurrentBasedPositionControlMode, R"doc(
-Operating mode for current-based position control.
-
-Type
-----
-int
-    Current-based position control mode value (5).
-)doc")
-      .def_readonly_static("AddrCurrentTemperature", &DynamixelBus::kAddrCurrentTemperature, R"doc(
-Memory address for temperature reading.
-
-Type
-----
-int
-    Memory address (146).
-)doc")
+      .def_readonly_static("ProtocolVersion", &DynamixelBus::kProtocolVersion, "")
+      .def_readonly_static("DefaultBaudrate", &DynamixelBus::kDefaultBaudrate, "")
+      .def_readonly_static("AddrTorqueEnable", &DynamixelBus::kAddrTorqueEnable, "")
+      .def_readonly_static("AddrPresentCurrent", &DynamixelBus::kAddrPresentCurrent, "")
+      .def_readonly_static("AddrPresentVelocity", &DynamixelBus::kAddrPresentVelocity, "")
+      .def_readonly_static("AddrPresentPosition", &DynamixelBus::kAddrPresentPosition, "")
+      .def_readonly_static("AddrGoalCurrent", &DynamixelBus::kAddrGoalCurrent, "")
+      .def_readonly_static("AddrGoalPosition", &DynamixelBus::kAddrGoalPosition, "")
+      .def_readonly_static("AddrOperatingMode", &DynamixelBus::kAddrOperatingMode, "")
+      .def_readonly_static("AddrPresentButtonState", &DynamixelBus::kAddrPresentButtonState, "")
+      .def_readonly_static("AddrGoalVibrationLevel", &DynamixelBus::kAddrGoalVibrationLevel, "")
+      .def_readonly_static("AddrPositionPGain", &DynamixelBus::kAddrPositionPGain, "")
+      .def_readonly_static("AddrPositionIGain", &DynamixelBus::kAddrPositionIGain, "")
+      .def_readonly_static("AddrPositionDGain", &DynamixelBus::kAddrPositionDGain, "")
+      .def_readonly_static("TorqueEnable", &DynamixelBus::kTorqueEnable, "")
+      .def_readonly_static("TorqueDisable", &DynamixelBus::kTorqueDisable, "")
+      .def_readonly_static("CurrentControlMode", &DynamixelBus::kCurrentControlMode, "")
+      .def_readonly_static("CurrentBasedPositionControlMode", &DynamixelBus::kCurrentBasedPositionControlMode, "")
+      .def_readonly_static("AddrCurrentTemperature", &DynamixelBus::kAddrCurrentTemperature, "")
 
       .def(py::init<const std::string&>(), "dev_name"_a, R"doc(
 Construct a DynamixelBus instance.
@@ -421,8 +211,6 @@ dev_name : str
     Device name (e.g., "/dev/ttyUSB0" on Linux).
 )doc")
       .def("set_torque_constant", &DynamixelBus::SetTorqueConstant, "torque_constant"_a, R"doc(
-set_torque_constant(torque_constant)
-
 Set torque constants for motors.
 
 Parameters
@@ -431,8 +219,6 @@ torque_constant : list[float]
     List of torque constants for each motor.
 )doc")
       .def("open_port", &DynamixelBus::OpenPort, R"doc(
-open_port()
-
 Open the communication port.
 
 Returns
@@ -441,8 +227,6 @@ bool
     True if port opened successfully, False otherwise.
 )doc")
       .def("set_baud_rate", &DynamixelBus::SetBaudRate, "baudrate"_a, R"doc(
-set_baud_rate(baudrate)
-
 Set the communication baudrate.
 
 Parameters
@@ -456,8 +240,6 @@ bool
     True if baudrate set successfully, False otherwise.
 )doc")
       .def("ping", &DynamixelBus::Ping, "id"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-ping()
-
 Ping a motor to check if it's responding.
 
 Parameters
@@ -485,8 +267,6 @@ tuple[int, ButtonState] or None
 )doc")
       .def("send_torque_enable", &DynamixelBus::SendTorqueEnable, "id"_a, "onoff"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-send_torque_enable(id, onoff)
-
 Enable or disable torque for a motor.
 
 Parameters
@@ -498,8 +278,6 @@ onoff : int
 )doc")
       .def("set_position_p_gain", &DynamixelBus::SetPositionPGain, "id"_a, "p_gain"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-set_position_p_gain(id, p_gain)
-
 Set position P gain for a motor.
 
 Parameters
@@ -511,8 +289,6 @@ p_gain : int
 )doc")
       .def("set_position_i_gain", &DynamixelBus::SetPositionIGain, "id"_a, "i_gain"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-set_position_i_gain(id, i_gain)
-
 Set position I gain for a motor.
 
 Parameters
@@ -524,8 +300,6 @@ i_gain : int
 )doc")
       .def("set_position_d_gain", &DynamixelBus::SetPositionDGain, "id"_a, "d_gain"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-set_position_d_gain(id, d_gain)
-
 Set position D gain for a motor.
 
 Parameters
@@ -539,8 +313,6 @@ d_gain : int
            py::overload_cast<int, std::optional<uint16_t>, std::optional<uint16_t>, std::optional<uint16_t>>(
                &DynamixelBus::SetPositionPIDGain),
            "id"_a, "p_gain"_a, "i_gain"_a, "d_gain"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-set_position_pid_gain(id, p_gain, i_gain, d_gain)
-
 Set position PID gains for a motor.
 
 Parameters
@@ -557,8 +329,6 @@ d_gain : int or None, optional
       .def("set_position_pid_gain",
            py::overload_cast<int, const DynamixelBus::PIDGain&>(&DynamixelBus::SetPositionPIDGain), "id"_a,
            "pid_gain"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-set_position_pid_gain(id, pid_gain)
-
 Set position PID gains for a motor using PIDGain struct.
 
 Parameters
@@ -570,8 +340,6 @@ pid_gain : PIDGain
 )doc")
       .def("get_position_p_gain", &DynamixelBus::GetPositionPGain, "id"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-get_position_p_gain(id)
-
 Get position P gain for a motor.
 
 Parameters
@@ -586,8 +354,6 @@ int or None
 )doc")
       .def("get_position_i_gain", &DynamixelBus::GetPositionIGain, "id"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-get_position_i_gain(id)
-
 Get position I gain for a motor.
 
 Parameters
@@ -602,8 +368,6 @@ int or None
 )doc")
       .def("get_position_d_gain", &DynamixelBus::GetPositionDGain, "id"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-get_position_d_gain(id)
-
 Get position D gain for a motor.
 
 Parameters
@@ -618,8 +382,6 @@ int or None
 )doc")
       .def("get_position_pid_gain", &DynamixelBus::GetPositionPIDGain, "id"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-get_position_pid_gain(id)
-
 Get position PID gains for a motor.
 
 Parameters
@@ -633,8 +395,6 @@ PIDGain or None
     PIDGain struct if successful, None otherwise.
 )doc")
       .def("read_torque_enable", &DynamixelBus::ReadTorqueEnable, "id"_a, R"doc(
-read_torque_enable(id)
-
 Read torque enable state for a motor.
 
 Parameters
@@ -648,8 +408,6 @@ int or None
     Torque state (1=enabled, 0=disabled) if successful, None otherwise.
 )doc")
       .def("read_encoder", &DynamixelBus::ReadEncoder, "id"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-read_encoder(id)
-
 Read encoder position for a motor.
 
 Parameters
@@ -664,8 +422,6 @@ float or None
 )doc")
       .def("send_goal_position", &DynamixelBus::SendGoalPosition, "id"_a, "goal_position"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-send_goal_position(id, goal_position)
-
 Send goal position to a motor.
 
 Parameters
@@ -677,8 +433,6 @@ goal_position : int
 )doc")
       .def("read_operating_mode", &DynamixelBus::ReadOperatingMode, "id"_a, "use_cache"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-read_operating_mode(id, use_cache)
-
 Read operating mode for a motor.
 
 Parameters
@@ -695,8 +449,6 @@ int or None
 )doc")
       .def("send_operating_mode", &DynamixelBus::SendOperatingMode, "id"_a, "operating_mode"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-send_operating_mode(id, mode)
-
 Send operating mode to a motor.
 
 Parameters
@@ -713,8 +465,6 @@ bool
 )doc")
       .def("send_torque", &DynamixelBus::SendTorque, "id"_a, "torque"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-send_torque(id, torque)
-
 Send torque command to a motor.
 
 Parameters
@@ -722,12 +472,10 @@ Parameters
 id : int
     Motor ID.
 joint_torque : float
-    Torque value in Nm.
+    Torque value [Nm].
 )doc")
       .def("send_current", &DynamixelBus::SendCurrent, "id"_a, "current"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-send_current(id, current)
-
 Send current command to a motor.
 
 Parameters
@@ -735,11 +483,9 @@ Parameters
 id : int
     Motor ID.
 current : float
-    Current value in amperes.
+    Current value [A].
 )doc")
       .def("read_temperature", &DynamixelBus::ReadTemperature, "id"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-read_temperature(id)
-
 Read temperature for a motor.
 
 Parameters
@@ -754,8 +500,6 @@ int or None
 )doc")
       .def("group_fast_sync_read", &DynamixelBus::GroupFastSyncRead, "ids"_a, "addr"_a, "len"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-group_fast_sync_read(ids, addr, len)
-
 Perform fast synchronous read for multiple motors.
 
 Parameters
@@ -774,8 +518,6 @@ list[tuple[int, int]] or None
 )doc")
       .def("group_fast_sync_read_encoder", &DynamixelBus::GroupFastSyncReadEncoder, "ids"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-group_fast_sync_read_encoder(ids)
-
 Perform fast synchronous read of encoder values.
 
 Parameters
@@ -790,8 +532,6 @@ list[tuple[int, float]] or None
 )doc")
       .def("group_fast_sync_read_operating_mode", &DynamixelBus::GroupFastSyncReadOperatingMode, "ids"_a, "use_cache"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-group_fast_sync_read_operating_mode(ids, use_cache)
-
 Perform fast synchronous read of operating modes.
 
 Parameters
@@ -808,8 +548,6 @@ list[tuple[int, int]] or None
 )doc")
       .def("group_fast_sync_read_torque_enable", &DynamixelBus::GroupFastSyncReadTorqueEnable, "ids"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-group_fast_sync_read_torque_enable(ids)
-
 Perform fast synchronous read of torque enable states.
 
 Parameters
@@ -823,8 +561,6 @@ list[tuple[int, int]] or None
     List of (id, torque_enable) tuples if successful, None otherwise.
 )doc")
       .def("get_motor_states", &DynamixelBus::GetMotorStates, "ids"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-get_motor_states(ids)
-
 Get motor states for multiple motors.
 
 Parameters
@@ -840,8 +576,6 @@ list[tuple[int, MotorState]] or None
       .def("group_sync_write_torque_enable",
            py::overload_cast<const std::vector<std::pair<int, int>>&>(&DynamixelBus::GroupSyncWriteTorqueEnable),
            "id_and_enable_vector"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-group_sync_write_torque_enable(id_and_enable_vector)
-
 Perform synchronous write of torque enable states.
 
 Parameters
@@ -852,8 +586,6 @@ id_and_enable_vector : list[tuple[int, int]]
       .def("group_sync_write_torque_enable",
            py::overload_cast<const std::vector<int>&, int>(&DynamixelBus::GroupSyncWriteTorqueEnable), "ids"_a,
            "enable"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-group_sync_write_torque_enable(ids, enable)
-
 Perform synchronous write of torque enable states.
 
 Parameters
@@ -865,8 +597,6 @@ enable : int
 )doc")
       .def("group_sync_write_operating_mode", &DynamixelBus::GroupSyncWriteOperatingMode, "id_and_mode_vector"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-group_sync_write_operating_mode(id_and_mode_vector)
-
 Perform synchronous write of operating modes.
 
 Parameters
@@ -876,8 +606,6 @@ id_and_mode_vector : list[tuple[int, int]]
 )doc")
       .def("group_sync_write_send_position", &DynamixelBus::GroupSyncWriteSendPosition, "id_and_position_vector"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-group_sync_write_send_position(id_and_position_vector)
-
 Perform synchronous write of goal positions.
 
 Parameters
@@ -887,8 +615,6 @@ id_and_position_vector : list[tuple[int, int]]
 )doc")
       .def("group_sync_write_send_torque", &DynamixelBus::GroupSyncWriteSendTorque, "id_and_torque_vector"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-group_sync_write_send_torque(id_and_torque_vector)
-
 Perform synchronous write of torque commands.
 
 Parameters
@@ -898,8 +624,6 @@ id_and_torque_vector : list[tuple[int, float]]
 )doc")
       .def("send_vibration", &DynamixelBus::SendVibration, "id"_a, "vibration"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-send_vibration(id, vibration)
-
 Send vibration command to a device.
 
 Parameters

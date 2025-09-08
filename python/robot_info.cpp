@@ -18,7 +18,9 @@ Battery information.
 This class represents battery information for the robot.
 **Currently contains no specific attributes.**
 )doc")
-      .def(py::init<>())
+      .def(py::init<>(), R"doc(
+Construct an ``BatteryInfo`` instance.
+)doc")
       .def("__repr__", [](const BatteryInfo&) { return std::string("BatteryInfo()"); })
       .def("__str__", [](const BatteryInfo&) { return std::string("BatteryInfo()"); });
 }
@@ -34,15 +36,10 @@ Attributes
 name : str
     Name/label of an externally controllable power output (e.g., "5v", "12v", "24v").
 )doc")
-      .def(py::init<>())
-      .def_readonly("name", &PowerInfo::name, R"doc(
-Name/label identifying the power output this object describes.
-
-Type
-----
-str
-    Human-readable identifier for the output (e.g., "5v", "12v", "24v"). Read-only.
+      .def(py::init<>(), R"doc(
+Construct an ``PowerInfo`` instance.
 )doc")
+      .def_readonly("name", &PowerInfo::name)
       .def("__repr__",
            [](const PowerInfo& self) {
              using namespace rb::print;
@@ -83,16 +80,9 @@ name : str
     Name identifier for the emergency stop button.
 )doc")
       .def(py::init<>(), R"doc(
-Construct an EMOInfo instance with default values.
+Construct an ``EMOInfo`` instance with default values.
 )doc")
-      .def_readonly("name", &EMOInfo::name, R"doc(
-Name identifier for the emergency stop button.
-
-Type
-----
-str
-    Name of the emergency stop button.
-)doc")
+      .def_readonly("name", &EMOInfo::name)
       .def("__repr__",
            [](const EMOInfo& self) {
              using namespace rb::print;
@@ -138,40 +128,12 @@ firmware_version : str
     Firmware revision running on the motor driver / servo drive.
 )doc")
       .def(py::init<>(), R"doc(
-Construct a JointInfo with default-initialized fields.
+Construct a ``JointInfo`` with default-initialized fields.
 )doc")
-      .def_readonly("name", &JointInfo::name, R"doc(
-Joint name.
-
-Type
-----
-str
-    Human-readable joint name.
-)doc")
-      .def_readonly("has_brake", &JointInfo::has_brake, R"doc(
-Whether the joint includes a brake.
-
-Type
-----
-bool
-    True if the joint has a brake; False otherwise.
-)doc")
-      .def_readonly("product_name", &JointInfo::product_name, R"doc(
-Actuator/driver product name.
-
-Type
-----
-str
-    Hardware model identifier.
-)doc")
-      .def_readonly("firmware_version", &JointInfo::firmware_version, R"doc(
-Firmware revision running on the motor driver / servo drive.
-
-Type
-----
-str
-    Firmware version string.
-)doc")
+      .def_readonly("name", &JointInfo::name)
+      .def_readonly("has_brake", &JointInfo::has_brake)
+      .def_readonly("product_name", &JointInfo::product_name)
+      .def_readonly("firmware_version", &JointInfo::firmware_version)
       .def("__repr__",
            [](const JointInfo& self) {
              using namespace rb::print;
@@ -242,145 +204,25 @@ left_arm_joint_idx : list[int]
     Indices of left arm joints.
 )doc")
       .def(py::init<>(), R"doc(
-Construct a RobotInfo instance with default values.
+Construct a ``RobotInfo`` instance with default values.
 )doc")
-      .def_readonly("version", &RobotInfo::version, R"doc(
-Robot software version.
-
-Type
-----
-str
-    Version string of the robot software.
-)doc")
-      .def_readonly("sdk_version", &RobotInfo::sdk_version, R"doc(
-SDK version.
-
-Type
-----
-str
-    Version string of the SDK.
-)doc")
-      .def_readonly("robot_version", &RobotInfo::robot_version, R"doc(
-Robot version.
-
-Type
-----
-str
-    Version string of the robot (deprecated, use robot_model_name instead).
-)doc")
-      .def_readonly("robot_model_name", &RobotInfo::robot_model_name, R"doc(
-Name of the robot model.
-
-Type
-----
-str
-    Name of the robot model (e.g., "A", "T5", "M", "UB").
-)doc")
-      .def_readonly("robot_model_version", &RobotInfo::robot_model_version, R"doc(
-Version of the robot model.
-
-Type
-----
-str
-    Version string of the robot model (e.g., "v1.0", "v1.2")
-)doc")
-      .def_readonly("sdk_commit_id", &RobotInfo::sdk_commit_id, R"doc(
-SDK commit identifier.
-
-Type
-----
-str
-    Commit identifier of the SDK (deprecated, use sdk_version instead).
-)doc")
-      .def_readonly("battery_info", &RobotInfo::battery_info, R"doc(
-Battery information.
-
-Type
-----
-BatteryInfo
-    Battery information object.
-)doc")
-      .def_readonly("power_infos", &RobotInfo::power_infos, R"doc(
-Robot-controlled external (auxiliary) power outputs.
-
-Type
-----
-list[PowerInfo]
-    Each item describes an externally controllable output rail/port
-    (e.g., "5V", "12V", "24V"). This is distinct from battery status.
-)doc")
-      .def_readonly("emo_infos", &RobotInfo::emo_infos, R"doc(
-List of emergency stop button information.
-
-Type
-----
-list[EMOInfo]
-    List of emergency stop button information objects.
-)doc")
-      .def_readonly("degree_of_freedom", &RobotInfo::degree_of_freedom, R"doc(
-Total number of degrees of freedom.
-
-Type
-----
-int
-    Total number of joints in the robot.
-)doc")
-      .def_readonly("joint_infos", &RobotInfo::joint_infos, R"doc(
-List of joint information.
-
-Type
-----
-list[JointInfo]
-    List of joint information objects.
-)doc")
-      .def_readonly("mobility_joint_idx", &RobotInfo::mobility_joint_idx, R"doc(
-Indices of mobility joints.
-
-Type
-----
-list[int]
-    Indices of mobility joints (e.g., wheels).
-)doc")
-      .def_readonly("body_joint_idx", &RobotInfo::body_joint_idx, R"doc(
-Indices of body joints.
-
-Type
-----
-list[int]
-    Indices of body joints.
-)doc")
-      .def_readonly("head_joint_idx", &RobotInfo::head_joint_idx, R"doc(
-Indices of head joints.
-
-Type
-----
-list[int]
-    Indices of head joints.
-)doc")
-      .def_readonly("torso_joint_idx", &RobotInfo::torso_joint_idx, R"doc(
-Indices of torso joints.
-
-Type
-----
-list[int]
-    Indices of torso joints.
-)doc")
-      .def_readonly("right_arm_joint_idx", &RobotInfo::right_arm_joint_idx, R"doc(
-Indices of right arm joints.
-
-Type
-----
-list[int]
-    Indices of right arm joints.
-)doc")
-      .def_readonly("left_arm_joint_idx", &RobotInfo::left_arm_joint_idx, R"doc(
-Indices of left arm joints.
-
-Type
-----
-list[int]
-    Indices of left arm joints.
-)doc")
+      .def_readonly("version", &RobotInfo::version)
+      .def_readonly("sdk_version", &RobotInfo::sdk_version)
+      .def_readonly("robot_version", &RobotInfo::robot_version)
+      .def_readonly("robot_model_name", &RobotInfo::robot_model_name)
+      .def_readonly("robot_model_version", &RobotInfo::robot_model_version)
+      .def_readonly("sdk_commit_id", &RobotInfo::sdk_commit_id)
+      .def_readonly("battery_info", &RobotInfo::battery_info)
+      .def_readonly("power_infos", &RobotInfo::power_infos)
+      .def_readonly("emo_infos", &RobotInfo::emo_infos)
+      .def_readonly("degree_of_freedom", &RobotInfo::degree_of_freedom)
+      .def_readonly("joint_infos", &RobotInfo::joint_infos)
+      .def_readonly("mobility_joint_idx", &RobotInfo::mobility_joint_idx)
+      .def_readonly("body_joint_idx", &RobotInfo::body_joint_idx)
+      .def_readonly("head_joint_idx", &RobotInfo::head_joint_idx)
+      .def_readonly("torso_joint_idx", &RobotInfo::torso_joint_idx)
+      .def_readonly("right_arm_joint_idx", &RobotInfo::right_arm_joint_idx)
+      .def_readonly("left_arm_joint_idx", &RobotInfo::left_arm_joint_idx)
       .def("__repr__",
            [](const RobotInfo& self) {
              using namespace rb::print;

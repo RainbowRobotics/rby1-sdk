@@ -68,11 +68,7 @@ void pybind11_print_options(py::module_& m) {
                                 float_style, sign, trim_trailing_zeros, scope);
       },
       R"pbdoc(
-set_printoptions(array_mode=None, linewidth=None, precision=None, edgeitems=None, threshold=None,
-                 suppress_small=None, multiline_repr=None, float_style=None, sign=None,
-                 trim_trailing_zeros=None, scope='thread')
-
-Set global or thread-local print options.
+Set global or thread-local rby1_sdk print options.
 
 Controls how SDK objects and NumPy arrays are rendered by `__repr__`/`__str__`.
 `array_mode='numpy'` delegates array printing entirely to NumPy's global
@@ -234,8 +230,6 @@ Provides utilities for controlling master arm and other devices.
   pybind11_robot(m);
 
   m.def("_create_robot", &create_robot, "address"_a, "model"_a = "a", R"doc(
-_create_robot(address, model='a')
-
 Create a robot instance based on the provided model and address.
 
 Parameters
@@ -273,9 +267,7 @@ Examples
   m.def(
       "create_robot_a", [](const std::string& address) { return Robot<y1_model::A>::Create(address); }, "address"_a,
       R"doc(
-create_robot_a(address)
-
-Create a Robot A model instance.
+Create a ``Robot_A`` instance.
 
 Parameters
 ----------
@@ -295,9 +287,7 @@ Examples
   m.def(
       "create_robot_t5", [](const std::string& address) { return Robot<y1_model::T5>::Create(address); }, "address"_a,
       R"doc(
-create_robot_t5(address)
-
-Create a Robot T5 model instance.
+Create a ``Robot_T5`` instance.
 
 Parameters
 ----------
@@ -317,9 +307,7 @@ Examples
   m.def(
       "create_robot_m", [](const std::string& address) { return Robot<y1_model::M>::Create(address); }, "address"_a,
       R"doc(
-create_robot_m(address)
-
-Create a Robot M model instance.
+Create a ``Robot_M`` instance.
 
 Parameters
 ----------
@@ -339,9 +327,7 @@ Examples
   m.def(
       "create_robot_ub", [](const std::string& address) { return Robot<y1_model::UB>::Create(address); }, "address"_a,
       R"doc(
-create_robot_ub(address)
-
-Create a Robot UB model instance.
+Create a ``Robot_UB`` instance.
 
 Parameters
 ----------

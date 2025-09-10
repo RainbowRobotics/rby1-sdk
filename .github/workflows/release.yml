@@ -71,8 +71,8 @@ jobs:
   build-wheels:
     needs: [ bump-version ]
     if: needs.bump-version.outputs.changed == 'true'
+    name: "Build wheels (${{ matrix.os }} - Python ${{ matrix.python-version }})"
     runs-on: ${{ matrix.os }}
-    name: "Build wheels"
 
     strategy:
       fail-fast: false
@@ -141,8 +141,10 @@ jobs:
 
   build-cpp:
     needs: [ bump-version ]
-    name: Build C++ SDK (${{ matrix.os }})
+    if: needs.bump-version.outputs.changed == 'true'
+    name: "Build C++ SDK (${{ matrix.os }})"
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:

@@ -21,49 +21,21 @@ Provides information about system performance including CPU and memory usage.
 Attributes
 ----------
 cpu_usage : float
-    CPU usage percentage (0.0 to 100.0).
+    CPU usage percentage [0.0, 100.0].
 memory_usage : float
-    Memory usage percentage (0.0 to 100.0).
+    Memory usage percentage [0.0, 100.0].
 uptime : float
     System uptime in seconds.
 program_uptime : float
     Program uptime in seconds.
   )doc")
       .def(py::init<>(), R"doc(
-      Construct a SystemStat instance.
+      Construct a ``SystemStat`` instance.
 )doc")
-      .def_readonly("cpu_usage", &SystemStat::cpu_usage, R"doc(
-CPU usage percentage.
-
-Type
-----
-float
-    CPU usage percentage (0.0 to 100.0).
-)doc")
-      .def_readonly("memory_usage", &SystemStat::memory_usage, R"doc(
-Memory usage percentage.
-
-Type
-----
-float
-    Memory usage percentage (0.0 to 100.0).
-)doc")
-      .def_readonly("uptime", &SystemStat::uptime, R"doc(
-System uptime in seconds.
-
-Type
-----
-float
-    System uptime in seconds.
-)doc")
-      .def_readonly("program_uptime", &SystemStat::program_uptime, R"doc(
-Program uptime.
-
-Type
-----
-float
-    Program uptime in seconds.
-)doc")
+      .def_readonly("cpu_usage", &SystemStat::cpu_usage)
+      .def_readonly("memory_usage", &SystemStat::memory_usage)
+      .def_readonly("uptime", &SystemStat::uptime)
+      .def_readonly("program_uptime", &SystemStat::program_uptime)
       .def("__repr__",
            [](const SystemStat& self) {
              using namespace rb::print;
@@ -113,39 +85,18 @@ Provides information about battery status including voltage, current, and charge
 Attributes
 ----------
 voltage : float
-    Battery voltage in volts.
+    Battery voltage in V.
 current : float
-    Battery current in amperes.
+    Battery current [A].
 level_percent : float
     Battery charge level percentage (0.0 to 100.0).
   )doc")
       .def(py::init<>(), R"doc(
-      Construct a BatteryState instance.
+      Construct a ``BatteryState`` instance.
 )doc")
-      .def_readonly("voltage", &BatteryState::voltage, R"doc(
-Battery voltage.
-
-Type
-----
-float
-    Battery voltage in volts.
-)doc")
-      .def_readonly("current", &BatteryState::current, R"doc(
-Battery current.
-
-Type
-----
-float
-    Battery current in amperes.
-)doc")
-      .def_readonly("level_percent", &BatteryState::level_percent, R"doc(
-Battery charge level.
-
-Type
-----
-float
-    Battery charge level percentage (0.0 to 100.0).
-)doc")
+      .def_readonly("voltage", &BatteryState::voltage)
+      .def_readonly("current", &BatteryState::current)
+      .def_readonly("level_percent", &BatteryState::level_percent)
       .def("__repr__",
            [](const BatteryState& self) {
              using namespace rb::print;
@@ -210,35 +161,15 @@ PowerOff : int
 PowerOn : int
     Power is on.
 )doc")
-      .value("Unknown", PowerState::State::kUnknown, R"doc(
-Power state is unknown.
-)doc")
-      .value("PowerOff", PowerState::State::kPowerOff, R"doc(
-Power is off.
-)doc")
-      .value("PowerOn", PowerState::State::kPowerOn, R"doc(
-Power is on.
-)doc");
+      .value("Unknown", PowerState::State::kUnknown)
+      .value("PowerOff", PowerState::State::kPowerOff)
+      .value("PowerOn", PowerState::State::kPowerOn);
 
   ps.def(py::init<>(), R"doc(
-Construct a PowerState instance.
+Construct a ``PowerState`` instance.
 )doc")
-      .def_readonly("state", &PowerState::state, R"doc(
-Current power state.
-
-Type
-----
-State
-    Current power state enumeration value.
-)doc")
-      .def_readonly("voltage", &PowerState::voltage, R"doc(
-Power supply voltage.
-
-Type
-----
-float
-    Power supply voltage in volts.
-)doc")
+      .def_readonly("state", &PowerState::state)
+      .def_readonly("voltage", &PowerState::voltage)
       .def("__repr__",
            [](const PowerState& self) {
              using namespace rb::print;
@@ -294,12 +225,8 @@ Released : int
 Pressed : int
     Emergency stop button is pressed.
 )doc")
-      .value("Released", EMOState::State::kReleased, R"doc(
-Emergency stop button is released.
-)doc")
-      .value("Pressed", EMOState::State::kPressed, R"doc(
-Emergency stop button is pressed.
-)doc");
+      .value("Released", EMOState::State::kReleased)
+      .value("Pressed", EMOState::State::kPressed);
 
   ps.def(py::init<>())
       .def_readonly("state", &EMOState::state)
@@ -337,9 +264,9 @@ Attributes
 ----------
 time_since_last_update : datetime.timedelta
     Time since last update as a Python timedelta.
-gyro : numpy.ndarray
-    Gyroscope readings in rad/s.
-acceleration : numpy.ndarray
+gyro : numpy.ndarray, shape (3,), dtype=float64
+    Gyroscope readings [rad/s].
+acceleration : numpy.ndarray, shape (3,), dtype=float64
     Acceleration readings in m/s².
 switch_A : bool
     Status of switch A.
@@ -359,78 +286,15 @@ Construct a ToolFlangeState instance.
 )doc")
       .def_property_readonly(
           "time_since_last_update",
-          [](const ToolFlangeState& self) { return timespec_to_nanoseconds(self.time_since_last_update); }, R"doc(
-Time since last update.
-
-Type
-----
-datetime.timedelta
-    Time since last update as a Python timedelta.
-)doc")
-      .def_readonly("gyro", &ToolFlangeState::gyro, R"doc(
-Gyroscope readings.
-
-Type
-----
-numpy.ndarray
-    Gyroscope readings in rad/s.
-)doc")
-      .def_readonly("acceleration", &ToolFlangeState::acceleration, R"doc(
-Acceleration readings.
-
-Type
-----
-numpy.ndarray
-    Acceleration readings in m/s².
-)doc")
-      .def_readonly("switch_A", &ToolFlangeState::switch_A, R"doc(
-Switch A status.
-
-Type
-----
-bool
-    Status of switch A.
-)doc")
-      .def_readonly("output_voltage", &ToolFlangeState::output_voltage, R"doc(
-Output voltage.
-
-Type
-----
-float
-    Output voltage in volts.
-)doc")
-      .def_readonly("digital_input_A", &ToolFlangeState::digital_input_A, R"doc(
-Digital input A status.
-
-Type
-----
-bool
-    Status of digital input A.
-)doc")
-      .def_readonly("digital_input_B", &ToolFlangeState::digital_input_B, R"doc(
-Digital input B status.
-
-Type
-----
-bool
-    Status of digital input B.
-)doc")
-      .def_readonly("digital_output_A", &ToolFlangeState::digital_output_A, R"doc(
-Digital output A status.
-
-Type
-----
-bool
-    Status of digital output A.
-)doc")
-      .def_readonly("digital_output_B", &ToolFlangeState::digital_output_B, R"doc(
-Digital output B status.
-
-Type
-----
-bool
-    Status of digital output B.
-)doc")
+          [](const ToolFlangeState& self) { return timespec_to_nanoseconds(self.time_since_last_update); })
+      .def_readonly("gyro", &ToolFlangeState::gyro)
+      .def_readonly("acceleration", &ToolFlangeState::acceleration)
+      .def_readonly("switch_A", &ToolFlangeState::switch_A)
+      .def_readonly("output_voltage", &ToolFlangeState::output_voltage)
+      .def_readonly("digital_input_A", &ToolFlangeState::digital_input_A)
+      .def_readonly("digital_input_B", &ToolFlangeState::digital_input_B)
+      .def_readonly("digital_output_A", &ToolFlangeState::digital_output_A)
+      .def_readonly("digital_output_B", &ToolFlangeState::digital_output_B)
       .def("__repr__",
            [](const ToolFlangeState& self) {
              using namespace rb::print;
@@ -498,40 +362,19 @@ Attributes
 ----------
 time_since_last_update : datetime.timedelta
     Time since last update as a Python timedelta.
-force : numpy.ndarray
+force : numpy.ndarray, shape (3,), dtype=float64
     Force readings in N.
-torque : numpy.ndarray
-    Torque readings in Nm.
+torque : numpy.ndarray, shape (3,), dtype=float64
+    Torque readings [Nm].
 )doc")
       .def(py::init<>(), R"doc(
 Construct a FTSensorData instance.
 )doc")
       .def_property_readonly(
           "time_since_last_update",
-          [](const FTSensorData& self) { return timespec_to_nanoseconds(self.time_since_last_update); }, R"doc(
-Time since last update.
-
-Type
-----
-datetime.timedelta
-    Time since last update as a Python timedelta.
-)doc")
-      .def_readonly("force", &FTSensorData::force, R"doc(
-Force readings.
-
-Type
-----
-numpy.ndarray
-    Force readings in N.
-)doc")
-      .def_readonly("torque", &FTSensorData::torque, R"doc(
-Torque readings.
-
-Type
-----
-numpy.ndarray
-    Torque readings in Nm.
-)doc")
+          [](const FTSensorData& self) { return timespec_to_nanoseconds(self.time_since_last_update); })
+      .def_readonly("force", &FTSensorData::force)
+      .def_readonly("torque", &FTSensorData::torque)
       .def("__repr__",
            [](const FTSensorData& self) {
              using namespace rb::print;
@@ -597,17 +440,17 @@ motor_state : str
 power_on : bool
     Indicates if the joint's power is on.
 position : float
-    Current position of the joint in rad.
+    Current position of the joint [rad].
 velocity : float
-    Current velocity of the joint in rad/s.
+    Current velocity of the joint [rad/s].
 current : float
-    Current current of the joint in A.
+    Current current of the joint [A].
 torque : float
     Current torque of the joint in Nm.
 target_position : float
-    Target position of the joint in rad.
+    Target position of the joint [rad].
 target_velocity : float
-    Target velocity of the joint in rad/s.
+    Target velocity of the joint [rad/s].
 target_feedback_gain : float
     Target feedback gain of the joint.
 target_feedforward_torque : float
@@ -618,182 +461,72 @@ temperature : float
 
   py::enum_<JointState::FETState>(js, "FETState", R"doc(
 FET (power stage) state.
+
+Members
+-------
+Unknown : int
+    State is unknown or not reported.
+On : int
+    Power stage is enabled.
+Off : int
+    Power stage is disabled.
 )doc")
-      .value("Unknown", JointState::FETState::kUnknown, R"doc(
-State is unknown or not reported.
-)doc")
-      .value("On", JointState::FETState::kOn, R"doc(
-Power stage is enabled.
-)doc")
-      .value("Off", JointState::FETState::kOff, R"doc(
-Power stage is disabled.
-)doc");
+      .value("Unknown", JointState::FETState::kUnknown)
+      .value("On", JointState::FETState::kOn)
+      .value("Off", JointState::FETState::kOff);
 
   py::enum_<JointState::RunState>(js, "RunState", R"doc(
 Current run state of the joint.
+
+Members
+-------
+Unknown : int
+    State is unknown or not reported.
+ControlOn : int
+    Closed-loop control is enabled (actively controlling).
+ControlOff : int
+    Closed-loop control is disabled.
 )doc")
-      .value("Unknown", JointState::RunState::kUnknown, R"doc(
-State is unknown or not reported.
-)doc")
-      .value("ControlOn", JointState::RunState::kControlOn, R"doc(
-Closed-loop control is enabled (actively controlling).
-)doc")
-      .value("ControlOff", JointState::RunState::kControlOff, R"doc(
-Closed-loop control is disabled.
-)doc");
+      .value("Unknown", JointState::RunState::kUnknown)
+      .value("ControlOn", JointState::RunState::kControlOn)
+      .value("ControlOff", JointState::RunState::kControlOff);
 
   py::enum_<JointState::InitializationState>(js, "InitializationState", R"doc(
 Initialization state of the joint.
+
+Members
+-------
+Unknown : int
+    Initialization state is unknown.
+Initialized : int
+    Joint has been initialized/homed.
+Uninitialized : int
+    Joint has not been initialized/homed yet.
 )doc")
-      .value("Unknown", JointState::InitializationState::kUnknown, R"doc(
-Initialization state is unknown.
-)doc")
-      .value("Initialized", JointState::InitializationState::kInitialized, R"doc(
-Joint has been initialized/homed.
-)doc")
-      .value("Uninitialized", JointState::InitializationState::kUninitialized, R"doc(
-Joint has not been initialized/homed yet.
-)doc");
+      .value("Unknown", JointState::InitializationState::kUnknown)
+      .value("Initialized", JointState::InitializationState::kInitialized)
+      .value("Uninitialized", JointState::InitializationState::kUninitialized);
 
   js.def(py::init<>())
       .def_property_readonly(
           "time_since_last_update",
-          [](const JointState& self) { return timespec_to_nanoseconds(self.time_since_last_update); }, R"doc(
-Time since last update.
-
-Type
-----
-datetime.timedelta
-    Time since last update as a Python timedelta.
-)doc")
-      .def_readonly("is_ready", &JointState::is_ready, R"doc(
-Joint readiness.
-
-Type
-----
-bool
-    Indicates if the joint is ready to operate.
-)doc")
-      .def_readonly("fet_state", &JointState::fet_state, R"doc(
-FET state.
-
-Type
-----
-FETState
-    Current FET state enumeration value.
-)doc")
-      .def_readonly("run_state", &JointState::run_state, R"doc(
-Run state.
-
-Type
-----
-RunState
-    Current run state enumeration value.
-)doc")
-      .def_readonly("init_state", &JointState::init_state, R"doc(
-Initialization state.
-
-Type
-----
-InitializationState
-    Current initialization state enumeration value.
-)doc")
-      .def_readonly("motor_type", &JointState::motor_type, R"doc(
-Motor type.
-
-Type
-----
-str
-    Type of the joint's motor.
-)doc")
-      .def_readonly("motor_state", &JointState::motor_state, R"doc(
-Motor state.
-
-Type
-----
-str
-    Current state of the joint's motor.
-)doc")
-      .def_readonly("power_on", &JointState::power_on, R"doc(
-Power on status.
-
-Type
-----
-bool
-    Indicates if the joint's power is on.
-)doc")
-      .def_readonly("position", &JointState::position, R"doc(
-Current position.
-
-Type
-----
-float
-    Current position of the joint in rad.
-)doc")
-      .def_readonly("velocity", &JointState::velocity, R"doc(
-Current velocity.
-
-Type
-----
-float
-    Current velocity of the joint in rad/s.
-)doc")
-      .def_readonly("current", &JointState::current, R"doc(
-Current current.
-
-Type
-----
-float
-    Current current of the joint in amperes.
-)doc")
-      .def_readonly("torque", &JointState::torque, R"doc(
-Current torque.
-
-Type
-----
-float
-    Current torque of the joint in Nm.
-)doc")
-      .def_readonly("target_position", &JointState::target_position, R"doc(
-Target position.
-
-Type
-----
-float
-    Target position of the joint in rad.
-)doc")
-      .def_readonly("target_velocity", &JointState::target_velocity, R"doc(
-Target velocity.
-
-Type
-----
-float
-    Target velocity of the joint in rad/s.
-)doc")
-      .def_readonly("target_feedback_gain", &JointState::target_feedback_gain, R"doc(
-Target feedback gain.
-
-Type
-----
-float
-    Target feedback gain of the joint. Range is [0, 10].
-)doc")
-      .def_readonly("target_feedforward_torque", &JointState::target_feedforward_torque, R"doc(
-Target feedforward torque.
-
-Type
-----
-float
-    Target feedforward torque of the joint in Nm.
-)doc")
-      .def_readonly("temperature", &JointState::temperature, R"doc(
-Current temperature.
-
-Type
-----
-float
-    Current temperature of the joint in °C.
-)doc")
+          [](const JointState& self) { return timespec_to_nanoseconds(self.time_since_last_update); })
+      .def_readonly("is_ready", &JointState::is_ready)
+      .def_readonly("fet_state", &JointState::fet_state)
+      .def_readonly("run_state", &JointState::run_state)
+      .def_readonly("init_state", &JointState::init_state)
+      .def_readonly("motor_type", &JointState::motor_type)
+      .def_readonly("motor_state", &JointState::motor_state)
+      .def_readonly("power_on", &JointState::power_on)
+      .def_readonly("position", &JointState::position)
+      .def_readonly("velocity", &JointState::velocity)
+      .def_readonly("current", &JointState::current)
+      .def_readonly("torque", &JointState::torque)
+      .def_readonly("target_position", &JointState::target_position)
+      .def_readonly("target_velocity", &JointState::target_velocity)
+      .def_readonly("target_feedback_gain", &JointState::target_feedback_gain)
+      .def_readonly("target_feedforward_torque", &JointState::target_feedforward_torque)
+      .def_readonly("temperature", &JointState::temperature)
       .def("__repr__",
            [](const JointState& self) {
              using namespace rb::print;
@@ -914,7 +647,7 @@ velocity : numpy.ndarray, shape (DOF,)
 current : numpy.ndarray, shape (DOF,)
     Joint currents [A].
 torque : numpy.ndarray, shape (DOF,)
-    Joint torques [Nm].
+    Joint torques in Nm.
 
 target_position : numpy.ndarray, shape (DOF,)
     Target joint positions [rad].
@@ -923,19 +656,19 @@ target_velocity : numpy.ndarray, shape (DOF,)
 target_feedback_gain : numpy.ndarray, shape (DOF,)
     Target feedback gains per joint. Range is [0, 10].
 target_feedforward_torque : numpy.ndarray, shape (DOF,)
-    Target feedforward torques per joint [Nm].
+    Target feedforward torques per joint in Nm.
 
 odometry : numpy.ndarray, shape (3, 3)
     Base pose as a 2D homogeneous transform (SE(2)): rotation (R) and translation (t).
 center_of_mass : numpy.ndarray, shape (3,)
-    Center of mass position in base frame [m].
+    Center of mass position in base frame in meters.
 
 collisions : list of CollisionResult
     Detected collisions or nearest link pairs (links, closest points, signed distance).
 temperature : numpy.ndarray, shape (DOF,)
-    Joint temperatures [°C].
+    Joint temperatures in degrees Celsius.
 gravity : numpy.ndarray, shape (DOF,)
-    Gravity compensation torques per joint [Nm].
+    Gravity compensation torques per joint in Nm.
 
 Notes
 -----
@@ -948,198 +681,30 @@ where ``DOF = robot.model().robot_dof``.
 Construct a RobotState instance.
 )doc")
       .def_property_readonly(
-          "timestamp", [](const RobotState<T>& self) { return timespec_to_time_point(self.timestamp); }, R"doc(
-Timestamp of the robot state.
-
-Type
-----
-datetime.datetime
-    Timestamp of the robot state.
-)doc")
-      .def_readonly("system_stat", &RobotState<T>::system_stat, R"doc(
-System statistics.
-
-Type
-----
-SystemStat
-    System statistics information, including CPU and memory usage.
-)doc")
-      .def_readonly("battery_state", &RobotState<T>::battery_state, R"doc(
-Battery state.
-
-Type
-----
-BatteryState
-    Battery state information, including voltage, current, and charge level.
-)doc")
-      .def_readonly("power_states", &RobotState<T>::power_states, R"doc(
-Power states.
-
-Type
-----
-list of PowerState
-    List of power supply states for each module.
-)doc")
-      .def_readonly("emo_states", &RobotState<T>::emo_states, R"doc(
-Emergency stop button states.
-
-Type
-----
-list of EMOState
-    List of emergency stop button states for each module.
-)doc")
-      .def_readonly("joint_states", &RobotState<T>::joint_states, R"doc(
-Joint states.
-
-Type
-----
-list of JointState
-    List of joint states, each describing the status and measurements of a single joint.
-)doc")
-      .def_readonly("tool_flange_right", &RobotState<T>::tool_flange_right, R"doc(
-Tool flange state on the right arm.
-
-Type
-----
-ToolFlangeState
-    Tool flange sensor and IO state for the right arm.
-)doc")
-      .def_readonly("tool_flange_left", &RobotState<T>::tool_flange_left, R"doc(
-Tool flange state on the left arm.
-
-Type
-----
-ToolFlangeState
-    Tool flange sensor and IO state for the left arm.
-)doc")
-      .def_readonly("ft_sensor_right", &RobotState<T>::ft_sensor_right, R"doc(
-Force/Torque sensor data on the right arm.
-
-Type
-----
-FTSensorData
-    Force/Torque sensor readings for the right arm.
-)doc")
-      .def_readonly("ft_sensor_left", &RobotState<T>::ft_sensor_left, R"doc(
-Force/Torque sensor data on the left arm.
-
-Type
-----
-FTSensorData
-    Force/Torque sensor readings for the left arm.
-)doc")
-      .def_readonly("is_ready", &RobotState<T>::is_ready, R"doc(
-Robot readiness.
-
-Type
-----
-numpy.ndarray of bool, shape (DOF,)
-    Indicates if each joint of the robot is ready to operate.
-)doc")
-      .def_readonly("position", &RobotState<T>::position, R"doc(
-Current joint positions.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Current joint positions in rad.
-)doc")
-      .def_readonly("velocity", &RobotState<T>::velocity, R"doc(
-Current joint velocities.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Current joint velocities in rad/s.
-)doc")
-      .def_readonly("current", &RobotState<T>::current, R"doc(
-Current joint currents.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Current joint currents in A.
-)doc")
-      .def_readonly("torque", &RobotState<T>::torque, R"doc(
-Current joint torques.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Current joint torques in Nm.
-)doc")
-      .def_readonly("target_position", &RobotState<T>::target_position, R"doc(
-Target joint positions.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Target joint positions in rad.
-)doc")
-      .def_readonly("target_velocity", &RobotState<T>::target_velocity, R"doc(
-Target joint velocities.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Target joint velocities in rad/s.
-)doc")
-      .def_readonly("target_feedback_gain", &RobotState<T>::target_feedback_gain, R"doc(
-Target feedback gain.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Target feedback gain for each joint. Range is [0, 10].
-)doc")
-      .def_readonly("target_feedforward_torque", &RobotState<T>::target_feedforward_torque, R"doc(
-Target feedforward torque.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Target feedforward torque for each joint in Nm.
-)doc")
-      .def_readonly("odometry", &RobotState<T>::odometry, R"doc(
-Odometry data.
-
-Type
-----
-numpy.ndarray, shape (3, 3)
-    Base pose as a 2D homogeneous transform (SE(2)): rotation (R) and translation (t).
-)doc")
-      .def_readonly("center_of_mass", &RobotState<T>::center_of_mass, R"doc(
-Center of mass.
-
-Type
-----
-numpy.ndarray, shape (3,)
-    Center of mass position in the base frame (meters).
-)doc")
-      .def_readonly("collisions", &RobotState<T>::collisions, R"doc(
-Detected collisions or nearest link pairs.
-
-Type
-----
-list of CollisionResult
-    Detected collisions or nearest link pairs (links, closest points, signed distance).
-)doc")
-      .def_readonly("temperature", &RobotState<T>::temperature, R"doc(
-Joint temperatures.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Current temperature of each joint in °C.
-)doc")
-      .def_readonly("gravity", &RobotState<T>::gravity, R"doc(
-Gravity compensation torque.
-
-Type
-----
-numpy.ndarray, shape (DOF,)
-    Gravity compensation torque for each joint in Nm.
-)doc")
+          "timestamp", [](const RobotState<T>& self) { return timespec_to_time_point(self.timestamp); })
+      .def_readonly("system_stat", &RobotState<T>::system_stat)
+      .def_readonly("battery_state", &RobotState<T>::battery_state)
+      .def_readonly("power_states", &RobotState<T>::power_states)
+      .def_readonly("emo_states", &RobotState<T>::emo_states)
+      .def_readonly("joint_states", &RobotState<T>::joint_states)
+      .def_readonly("tool_flange_right", &RobotState<T>::tool_flange_right)
+      .def_readonly("tool_flange_left", &RobotState<T>::tool_flange_left)
+      .def_readonly("ft_sensor_right", &RobotState<T>::ft_sensor_right)
+      .def_readonly("ft_sensor_left", &RobotState<T>::ft_sensor_left)
+      .def_readonly("is_ready", &RobotState<T>::is_ready)
+      .def_readonly("position", &RobotState<T>::position)
+      .def_readonly("velocity", &RobotState<T>::velocity)
+      .def_readonly("current", &RobotState<T>::current)
+      .def_readonly("torque", &RobotState<T>::torque)
+      .def_readonly("target_position", &RobotState<T>::target_position)
+      .def_readonly("target_velocity", &RobotState<T>::target_velocity)
+      .def_readonly("target_feedback_gain", &RobotState<T>::target_feedback_gain)
+      .def_readonly("target_feedforward_torque", &RobotState<T>::target_feedforward_torque)
+      .def_readonly("odometry", &RobotState<T>::odometry)
+      .def_readonly("center_of_mass", &RobotState<T>::center_of_mass)
+      .def_readonly("collisions", &RobotState<T>::collisions)
+      .def_readonly("temperature", &RobotState<T>::temperature)
+      .def_readonly("gravity", &RobotState<T>::gravity)
       .def("__repr__",
            [robot_state_name](const RobotState<T>& self) {
              using namespace rb::print;

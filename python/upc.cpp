@@ -2,7 +2,6 @@
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11/eigen.h>
 #include <Eigen/Core>
 
 #include "print_helper.h"
@@ -65,108 +64,38 @@ including joint positions, velocities, torques, and tool states.
 
 Attributes
 ----------
-q_joint : numpy.ndarray
-    Joint positions, shape (14,), dtype=float64.
-qvel_joint : numpy.ndarray
-    Joint velocities, shape (14,), dtype=float64.
-torque_joint : numpy.ndarray
-    Joint torques, shape (14,), dtype=float64.
-gravity_term : numpy.ndarray
-    Gravity compensation terms, shape (14,), dtype=float64.
-operating_mode : numpy.ndarray
-    Operating modes for each joint, shape (14,), dtype=int32.
+q_joint : numpy.ndarray, shape (14,), dtype=float64
+    Joint positions [rad].
+qvel_joint : numpy.ndarray, shape (14,), dtype=float64
+    Joint velocities [rad/s].
+torque_joint : numpy.ndarray, shape (14,), dtype=float64
+    Joint torques [Nm].
+gravity_term : numpy.ndarray, shape (14,), dtype=float64
+    Gravity compensation terms.
+operating_mode : numpy.ndarray, shape (14,), dtype=int32
+    Operating modes for each joint.
 button_right : ButtonState
     Right tool button and trigger state.
 button_left : ButtonState
     Left tool button and trigger state.
-T_right : numpy.ndarray
-    Right tool transformation matrix, shape (4, 4), dtype=float64.
-T_left : numpy.ndarray
-    Left tool transformation matrix, shape (4, 4), dtype=float64.
+T_right : numpy.ndarray, shape (4, 4), dtype=float64
+    Right tool transformation matrix (SE(3)) with respect to the master arm base.
+T_left : numpy.ndarray, shape (4, 4), dtype=float64
+    Left tool transformation matrix (SE(3)) with respect to the master arm base.
 )doc")
       .def(py::init<>(), R"doc(
 Construct a ``State`` instance with default values.
 )doc")
-      .def_readonly("q_joint", &MasterArm::State::q_joint, R"doc(
-Joint positions.
-
-Type
-----
-numpy.ndarray
-    Shape (14,), dtype=float64. Joint positions in radians.
-)doc")
-      .def_readonly("qvel_joint", &MasterArm::State::qvel_joint, R"doc(
-Joint velocities.
-
-Type
-----
-numpy.ndarray
-    Shape (14,), dtype=float64. Joint velocities in rad/s.
-)doc")
-      .def_readonly("torque_joint", &MasterArm::State::torque_joint, R"doc(
-Joint torques.
-
-Type
-----
-numpy.ndarray
-    Shape (14,), dtype=float64. Joint torques in Nm.
-)doc")
-      .def_readonly("gravity_term", &MasterArm::State::gravity_term, R"doc(
-Gravity compensation terms.
-
-Type
-----
-numpy.ndarray
-    Shape (14,), dtype=float64. Gravity compensation torques in Nm.
-)doc")
-      .def_readonly("operating_mode", &MasterArm::State::operating_mode, R"doc(
-Operating modes for each joint.
-
-Type
-----
-numpy.ndarray
-    Shape (14,), dtype=int32. Operating mode for each joint.
-)doc")
-      .def_readonly("target_position", &MasterArm::State::target_position, R"doc(
-Last joint target positions.
-
-Type
-----
-numpy.ndarray
-    Shape (14,), dtype=float64. Joint target positions in radians.
-)doc")
-      .def_readonly("button_right", &MasterArm::State::button_right, R"doc(
-Right tool button and trigger state.
-
-Type
-----
-ButtonState
-    Button and trigger state for right tool.
-)doc")
-      .def_readonly("button_left", &MasterArm::State::button_left, R"doc(
-Left tool button and trigger state.
-
-Type
-----
-ButtonState
-    Button and trigger state for left tool.
-)doc")
-      .def_readonly("T_right", &MasterArm::State::T_right, R"doc(
-Right tool transformation matrix.
-
-Type
-----
-numpy.ndarray
-    Shape (4, 4), dtype=float64. Homogeneous transformation matrix.
-)doc")
-      .def_readonly("T_left", &MasterArm::State::T_left, R"doc(
-Left tool transformation matrix.
-
-Type
-----
-numpy.ndarray
-    Shape (4, 4), dtype=float64. Homogeneous transformation matrix.
-)doc")
+      .def_readonly("q_joint", &MasterArm::State::q_joint)
+      .def_readonly("qvel_joint", &MasterArm::State::qvel_joint)
+      .def_readonly("torque_joint", &MasterArm::State::torque_joint)
+      .def_readonly("gravity_term", &MasterArm::State::gravity_term)
+      .def_readonly("operating_mode", &MasterArm::State::operating_mode)
+      .def_readonly("target_position", &MasterArm::State::target_position)
+      .def_readonly("button_right", &MasterArm::State::button_right)
+      .def_readonly("button_left", &MasterArm::State::button_left)
+      .def_readonly("T_right", &MasterArm::State::T_right)
+      .def_readonly("T_left", &MasterArm::State::T_left)
       .def("__repr__",
            [](const MasterArm::State& self) {
              using namespace rb::print;
@@ -246,12 +175,12 @@ including target operating modes, positions, and torques.
 
 Attributes
 ----------
-target_operating_mode : numpy.ndarray
-    Target operating modes for each joint, shape (14,), dtype=int32.
-target_position : numpy.ndarray
-    Target positions for each joint, shape (14,), dtype=float64.
-target_torque : numpy.ndarray
-    Target torques for each joint, shape (14,), dtype=float64.
+target_operating_mode : numpy.ndarray, shape (14,), dtype=int32
+    Target operating modes for each joint.
+target_position : numpy.ndarray, shape (14,), dtype=float64
+    Target positions for each joint [rad].
+target_torque : numpy.ndarray, shape (14,), dtype=float64
+    Target torques for each joint [Nm].
 )doc")
       .def(py::init<>(), R"doc(
 Construct a ``ControlInput`` instance with default values.
@@ -264,92 +193,29 @@ Construct a ``ControlInput`` instance with default values.
           [](MasterArm::ControlInput& self, const Eigen::Vector<int, MasterArm::kDOF>& mat) {
             self.target_operating_mode = mat;
           },
-          py::return_value_policy::reference_internal, R"doc(
-Target operating modes for each joint.
-
-Type
-----
-numpy.ndarray
-    Shape (14,), dtype=int32. Target operating mode for each joint.
-)doc")
+          py::return_value_policy::reference_internal)
       .def_property(
           "target_position",
           [](MasterArm::ControlInput& self) -> Eigen::Vector<double, MasterArm::kDOF>& { return self.target_position; },
           [](MasterArm::ControlInput& self, const Eigen::Vector<double, MasterArm::kDOF>& mat) {
             self.target_position = mat;
           },
-          py::return_value_policy::reference_internal, R"doc(
-Target positions for each joint.
-
-Type
-----
-numpy.ndarray
-    Shape (14,), dtype=float64. Target position for each joint in radians.
-)doc")
+          py::return_value_policy::reference_internal)
       .def_property(
           "target_torque",
           [](MasterArm::ControlInput& self) -> Eigen::Vector<double, MasterArm::kDOF>& { return self.target_torque; },
           [](MasterArm::ControlInput& self, const Eigen::Vector<double, MasterArm::kDOF>& mat) {
             self.target_torque = mat;
           },
-          py::return_value_policy::reference_internal, R"doc(
-Target torques for each joint.
-
-Type
-----
-numpy.ndarray
-    Shape (14,), dtype=float64. Target torque for each joint in Nm.
-)doc");
+          py::return_value_policy::reference_internal);
 
   ma_m  //
-      .def_readonly_static("DOF", &MasterArm::kDOF, R"doc(
-Number of degrees of freedom.
-
-Type
-----
-int
-    Number of degrees of freedom (14).
-)doc")
-      .def_readonly_static("DeviceCount", &MasterArm::kDeivceCount, R"doc(
-Total number of devices.
-
-Type
-----
-int
-    Total number of devices including tools (16).
-)doc")
-      .def_readonly_static("TorqueScaling", &MasterArm::kTorqueScaling, R"doc(
-Torque scaling factor.
-
-Type
-----
-float
-    Torque scaling factor for gravity compensation (0.5).
-)doc")
-      .def_readonly_static("MaximumTorque", &MasterArm::kMaximumTorque, R"doc(
-Maximum allowed torque.
-
-Type
-----
-float
-    Maximum allowed torque in Nm (4.0).
-)doc")
-      .def_readonly_static("RightToolId", &MasterArm::kRightToolId, R"doc(
-Right tool device ID.
-
-Type
-----
-int
-    Device ID for right tool (0x80).
-)doc")
-      .def_readonly_static("LeftToolId", &MasterArm::kLeftToolId, R"doc(
-Left tool device ID.
-
-Type
-----
-int
-    Device ID for left tool (0x81).
-)doc")
+      .def_readonly_static("DOF", &MasterArm::kDOF)
+      .def_readonly_static("DeviceCount", &MasterArm::kDeivceCount)
+      .def_readonly_static("TorqueScaling", &MasterArm::kTorqueScaling)
+      .def_readonly_static("MaximumTorque", &MasterArm::kMaximumTorque)
+      .def_readonly_static("RightToolId", &MasterArm::kRightToolId)
+      .def_readonly_static("LeftToolId", &MasterArm::kLeftToolId)
       .def(py::init<const std::string&>(), "dev_name"_a = kMasterArmDeviceName, R"doc(
 Construct a ``MasterArm`` instance.
 
@@ -359,8 +225,6 @@ dev_name : str, optional
     Device name. Default is ``/dev/rby1_master_arm``'.
 )doc")
       .def("set_control_period", &MasterArm::SetControlPeriod, "control_period"_a, R"doc(
-set_control_period(control_period)
-
 Set the control update period.
 
 Parameters
@@ -413,11 +277,35 @@ control : callable, optional
 Returns
 -------
 bool
+
+Examples
+--------
+>>> master_arm = rby.upc.MasterArm(rby.upc.MasterArmDeviceName)
+>>> master_arm.set_model_path("model.urdf") # path/to/master_arm_model.urdf
+>>> master_arm.set_control_period(0.01)
+>>> active_ids = master_arm.initialize(verbose=True)
+>>> if len(active_ids) != rby.upc.MasterArm.DeviceCount:
+...     print("Error: Mismatch in the number of devices detected for RBY Master Arm.")
+...     exit(1)
+>>>
+>>> def control(state: rby.upc.MasterArm.State):
+...     with np.printoptions(suppress=True, precision=3, linewidth=300):
+...         print(f"--- {datetime.datetime.now().time()} ---")
+...         print(f"q: {state.q_joint}")
+...         print(f"g: {state.gravity_term}")
+...         print(
+...             f"right: {state.button_right.button}, left: {state.button_left.button}"
+...         )
+...     input = rby.upc.MasterArm.ControlInput()
+...     input.target_operating_mode.fill(rby.DynamixelBus.CurrentControlMode)
+...     input.target_torque = state.gravity_term
+...     return input
+>>>
+>>> master_arm.start_control(control)
+>>> time.sleep(100)
 )doc")
       .def("stop_control", &MasterArm::StopControl, "torque_disable"_a = false,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-stop_control(torque_disable)
-
 Stop the control loop.
 
 Parameters
@@ -429,13 +317,9 @@ Returns
 bool
 )doc")
       .def("enable_torque", &MasterArm::EnableTorque, py::call_guard<py::gil_scoped_release>(), R"doc(
-enable_torque()
-
 Enable torque of motors
 )doc")
       .def("disable_torque", &MasterArm::DisableTorque, py::call_guard<py::gil_scoped_release>(), R"doc(
-disable_torque()
-
 Disable torque of motors
 )doc")
       .def("__repr__",

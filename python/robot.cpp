@@ -2,6 +2,7 @@
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <sstream>
 
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
@@ -48,30 +49,9 @@ i_gain : int
 d_gain : int
     Derivative gain value.
 )doc")
-      .def_readonly("p_gain", &PIDGain::p_gain, R"doc(
-Proportional gain value.
-
-Type
-----
-int
-    Proportional gain for PID control.
-)doc")
-      .def_readonly("i_gain", &PIDGain::i_gain, R"doc(
-Integral gain value.
-
-Type
-----
-int
-    Integral gain for PID control.
-)doc")
-      .def_readonly("d_gain", &PIDGain::d_gain, R"doc(
-Derivative gain value.
-
-Type
-----
-int
-    Derivative gain for PID control.
-)doc")
+      .def_readonly("p_gain", &PIDGain::p_gain)
+      .def_readonly("i_gain", &PIDGain::i_gain)
+      .def_readonly("d_gain", &PIDGain::d_gain)
       .def("__repr__",
            [](const PIDGain& self) {
              using namespace rb::print;
@@ -105,11 +85,11 @@ Represents a color using red, green, and blue components.
 Attributes
 ----------
 r : int
-    Red component (0-255).
+    Red component [0, 255].
 g : int
-    Green component (0-255).
+    Green component [0, 255].
 b : int
-    Blue component (0-255).
+    Blue component [0, 255].
 )doc")
       .def(py::init<>(), R"doc(
 Construct a Color instance with default values (0, 0, 0).
@@ -120,36 +100,15 @@ Construct a Color instance with specified RGB values.
 Parameters
 ----------
 r : int
-    Red component (0-255).
+    Red component [0, 255].
 g : int
-    Green component (0-255).
+    Green component [0, 255].
 b : int
-    Blue component (0-255).
+    Blue component [0, 255].
 )doc")
-      .def_readwrite("r", &Color::r, R"doc(
-Red component.
-
-Type
-----
-int
-    Red component value (0-255).
-)doc")
-      .def_readwrite("g", &Color::g, R"doc(
-Green component.
-
-Type
-----
-int
-    Green component value (0-255).
-)doc")
-      .def_readwrite("b", &Color::b, R"doc(
-Blue component.
-
-Type
-----
-int
-    Blue component value (0-255).
-)doc")
+      .def_readwrite("r", &Color::r)
+      .def_readwrite("g", &Color::g)
+      .def_readwrite("b", &Color::b)
       .def("__repr__",
            [](const Color& self) {
              using namespace rb::print;
@@ -187,24 +146,10 @@ description : str
     Device description.
 )doc")
       .def(py::init<>(), R"doc(
-Construct a SerialDevice instance.
+Construct a ``SerialDevice`` instance.
 )doc")
-      .def_readonly("path", &SerialDevice::path, R"doc(
-Device path.
-
-Type
-----
-str
-    Device path (e.g., "/dev/ttyUSB0").
-)doc")
-      .def_readonly("description", &SerialDevice::description, R"doc(
-Device description.
-
-Type
-----
-str
-    Human-readable device description.
-)doc")
+      .def_readonly("path", &SerialDevice::path)
+      .def_readonly("description", &SerialDevice::description)
       .def("__repr__",
            [](const SerialDevice& self) {
              using namespace rb::print;
@@ -241,8 +186,6 @@ is_done : bool
     Whether the stream operation is complete.
 )doc")
       .def("connect", &SerialStream::Connect, "verbose"_a, R"doc(
-connect(verbose)
-
 Connect to the serial device.
 
 Parameters
@@ -256,8 +199,6 @@ bool
     True if connection successful, False otherwise.
 )doc")
       .def("disconnect", &SerialStream::Disconnect, R"doc(
-disconnect()
-
 Disconnect from the serial device.
 )doc")
       .def(
@@ -277,15 +218,11 @@ Disconnect from the serial device.
             }
           },
           R"doc(
-wait()
-
 Wait for the stream operation to complete.
 
 This method blocks until the operation is done or cancelled.
 )doc")
       .def("wait_for", &SerialStream::WaitFor, "timeout_ms"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-wait_for(timeout_ms)
-
 Wait for the stream operation with timeout.
 
 Parameters
@@ -309,8 +246,6 @@ bool
     True if stream is open, False otherwise.
 )doc")
       .def("is_cancelled", &SerialStream::IsCancelled, R"doc(
-is_cancelled()
-
 Check if the stream operation was cancelled.
 
 Returns
@@ -337,8 +272,6 @@ bool
             });
           },
           R"doc(
-set_read_callback(cb)
-
 Set a callback function for read operations.
 
 Parameters
@@ -361,8 +294,6 @@ Examples
 )doc")
       .def("write", py::overload_cast<const std::string&>(&SerialStream::Write), "data"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-write(data)
-
 Write character data to the serial stream.
 
 Parameters
@@ -372,8 +303,6 @@ data : str
 )doc")
       .def("write", py::overload_cast<const char*>(&SerialStream::Write), "data"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-write(data)
-
 Write character data with specified length to the serial stream.
 
 Parameters
@@ -385,8 +314,6 @@ n : int
 )doc")
       .def("write", py::overload_cast<const char*, int>(&SerialStream::Write), "data"_a, "n"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-write(data, n)
-
 Write character data with specified length to the serial stream.
 
 Parameters
@@ -397,14 +324,12 @@ n : int
     Number of characters to write.
 )doc")
       .def("write_byte", &SerialStream::WriteByte, "ch"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-write_byte(ch)
-
 Write a single byte to the serial stream.
 
 Parameters
 ----------
 ch : int
-    Byte value to write (0-255).
+    Byte value to write [0, 255].
 )doc")
       .def("__repr__",
            [](const SerialStream& self) {
@@ -430,17 +355,18 @@ ch : int
 }
 
 template <typename T>
-void bind_robot_command_handler(py::module_& m, const std::string& handler_name) {
-  py::class_<RobotCommandHandler<T>>(m, handler_name.c_str(), R"doc(
-Robot command handler.
+void bind_robot_command_handler(py::module_& m) {
+  const std::string model = std::string(T::kModelName);
+  const std::string robot_name = std::string("Robot_") + model;
+  const std::string handler_name = robot_name + "_CommandHandler";
 
+  std::stringstream ss;
+  ss << "Robot (model: ``Model_" << model << "``) command handler.\n";
+  ss << R"doc(
 Handles robot command execution and provides status monitoring.
+)doc";
 
-Attributes
-----------
-is_done : bool
-    Whether the command execution is complete.
-)doc")
+  py::class_<RobotCommandHandler<T>>(m, handler_name.c_str(), ss.str().c_str())
       .def("is_done", &RobotCommandHandler<T>::IsDone, R"doc(
 Check if the command execution is complete.
 
@@ -466,16 +392,12 @@ bool
             }
           },
           R"doc(
-wait()
-
 Wait for the command execution to complete.
 
 This method blocks until the command is done or cancelled.
 )doc")
       .def("wait_for", &RobotCommandHandler<T>::WaitFor, "timeout_ms"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-wait_for(timeout_ms)
-
 Wait for the command execution with timeout.
 
 Parameters
@@ -489,8 +411,6 @@ bool
     ``True`` if command completed, ``False`` if timeout.
 )doc")
       .def("cancel", &RobotCommandHandler<T>::Cancel, py::call_guard<py::gil_scoped_release>(), R"doc(
-cancel()
-
 Cancel the command execution.
 )doc")
       .def(
@@ -510,8 +430,6 @@ Cancel the command execution.
             }
           },
           R"doc(
-get()
-
 Wait for the command execution and get feedback
 
 Returns
@@ -520,8 +438,6 @@ RobotCommandFeedback
     Current feedback information.
 )doc")
       .def("get_status", &RobotCommandHandler<T>::GetStatus, R"doc(
-get_status()
-
 Get gRPC status
 )doc")
       .def("__repr__",
@@ -543,17 +459,23 @@ Get gRPC status
 }
 
 template <typename T>
-void bind_robot_command_stream_handler(py::module_& m, const std::string& handler_name) {
-  py::class_<RobotCommandStreamHandler<T>>(m, handler_name.c_str(), R"doc(
-Robot command stream handler.
+void bind_robot_command_stream_handler(py::module_& m) {
+  const std::string model = std::string(T::kModelName);
+  const std::string robot_name = std::string("Robot_") + model;
+  const std::string handler_name = robot_name + "_CommandStreamHandler";
 
+  std::stringstream ss;
+  ss << "Robot (model: ``Model_" << model << "``) command stream handler.\n";
+  ss << R"doc(
 Handles robot command execution through streaming with send and feedback capabilities.
 
 Attributes
 ----------
 is_done : bool
     Whether the command execution is complete.
-)doc")
+)doc";
+
+  py::class_<RobotCommandStreamHandler<T>>(m, handler_name.c_str(), ss.str().c_str())
       .def("is_done", &RobotCommandStreamHandler<T>::IsDone, R"doc(
 Check if the command execution is complete.
 
@@ -585,8 +507,6 @@ This method blocks until the command is done or cancelled.
 )doc")
       .def("send_command", &RobotCommandStreamHandler<T>::SendCommand, "builder"_a, "timeout_ms"_a = 1000,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-send_command(builder, timeout_ms=1000)
-
 Send a command through the stream.
 
 Parameters
@@ -603,8 +523,6 @@ RobotCommandFeedback
 )doc")
       .def("request_feedback", &RobotCommandStreamHandler<T>::RequestFeedback, "timeout_ms"_a = 1000,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-request_feedback(timeout_ms)
-
 Request feedback from the robot.
 
 Parameters
@@ -618,8 +536,6 @@ RobotCommandFeedback
     Current feedback information.
 )doc")
       .def("cancel", &RobotCommandStreamHandler<T>::Cancel, py::call_guard<py::gil_scoped_release>(), R"doc(
-cancel()
-
 Cancel the current command execution.
 )doc")
       .def("__repr__",
@@ -641,10 +557,14 @@ Cancel the current command execution.
 }
 
 template <typename T>
-void bind_control_state(py::module_& m, const std::string& handler_name) {
-  py::class_<ControlState<T>>(m, handler_name.c_str(), R"doc(
-Robot control state.
+void bind_control_state(py::module_& m) {
+  const std::string model = std::string(T::kModelName);
+  const std::string robot_name = std::string("Robot_") + model;
+  const std::string handler_name = robot_name + "_ControlState";
 
+  std::stringstream ss;
+  ss << "Robot (model: ``Model_" << model << "``) control state.\n";
+  ss << R"doc(
 Represents the current state of robot real-time control including position, velocity, and torque.
 
 Attributes
@@ -653,66 +573,23 @@ t : float
     Current time in seconds.
 is_ready : numpy.ndarray
     Whether the joint is ready for control.
-position : numpy.ndarray
-    Current joint positions in rad.
-velocity : numpy.ndarray
-    Current joint velocities in rad/s.
-current : numpy.ndarray
-    Current joint currents in A.
-torque : numpy.ndarray
-    Current joint torques in Nm.
-)doc")
-      .def(py::init<>(), R"doc(
-Construct a ControlState instance.
-)doc")
-      .def_readonly("t", &ControlState<T>::t, R"doc(
-Current time.
+position : numpy.ndarray, shape (DOF,)
+    Current joint positions [rad].
+velocity : numpy.ndarray, shape (DOF,)
+    Current joint velocities [rad/s].
+current : numpy.ndarray, shape (DOF,)
+    Current joint currents [A].
+torque : numpy.ndarray, shape (DOF,)
+    Current joint torques [Nm].
+)doc";
 
-Type
-----
-float
-    Current time in seconds.
-)doc")
-      .def_readonly("is_ready", &ControlState<T>::is_ready, R"doc(
-Robot readiness status.
-
-Type
-----
-bool
-    Whether the robot is ready for control.
-)doc")
-      .def_readonly("position", &ControlState<T>::position, R"doc(
-Joint positions.
-
-Type
-----
-numpy.ndarray
-    Current joint positions in rad.
-)doc")
-      .def_readonly("velocity", &ControlState<T>::velocity, R"doc(
-Joint velocities.
-
-Type
-----
-numpy.ndarray
-    Current joint velocities in rad/s.
-)doc")
-      .def_readonly("current", &ControlState<T>::current, R"doc(
-Joint currents.
-
-Type
-----
-numpy.ndarray
-    Current joint currents in A.
-)doc")
-      .def_readonly("torque", &ControlState<T>::torque, R"doc(
-Joint torques.
-
-Type
-----
-numpy.ndarray
-    Current joint torques in Nm.
-)doc")
+  py::class_<ControlState<T>>(m, handler_name.c_str(), ss.str().c_str())
+      .def_readonly("t", &ControlState<T>::t)
+      .def_readonly("is_ready", &ControlState<T>::is_ready)
+      .def_readonly("position", &ControlState<T>::position)
+      .def_readonly("velocity", &ControlState<T>::velocity)
+      .def_readonly("current", &ControlState<T>::current)
+      .def_readonly("torque", &ControlState<T>::torque)
       .def("__repr__",
            [handler_name](const ControlState<T>& self) {
              using namespace rb::print;
@@ -775,10 +652,14 @@ numpy.ndarray
 }
 
 template <typename T>
-void bind_control_input(py::module_& m, const std::string& handler_name) {
-  py::class_<ControlInput<T>>(m, handler_name.c_str(), R"doc(
-Robot control input.
+void bind_control_input(py::module_& m) {
+  const std::string model = std::string(T::kModelName);
+  const std::string robot_name = std::string("Robot_") + model;
+  const std::string handler_name = robot_name + "_ControlInput";
 
+  std::stringstream ss;
+  ss << "Robot (model: ``Model_" << model << "``) control input.\n";
+  ss << R"doc(
 Represents control input parameters for robot real-time control including mode, target, and gains.
 
 Attributes
@@ -786,71 +667,51 @@ Attributes
 mode : numpy.ndarray
     Control mode for each joint (boolean array).
 target : numpy.ndarray
-    Target positions for each joint in rad.
+    Target positions for each joint [rad].
 feedback_gain : numpy.ndarray
     Feedback gains for each joint.
 feedforward_torque : numpy.ndarray
-    Feedforward torque for each joint in Nm.
+    Feedforward torque for each joint [Nm].
 finish : bool
     Whether to finish the current control operation.
-)doc")
+)doc";
+
+  py::class_<ControlInput<T>>(m, handler_name.c_str(), ss.str().c_str())
       .def(py::init<>(), R"doc(
 Construct a ``ControlInput`` instance.
+
+Attributes
+----------
+mode : numpy.ndarray, shape (DOF,)
+    Control mode for each joint (boolean array).
+target : numpy.ndarray, shape (DOF,)
+    Target positions for each joint [rad].
+feedback_gain : numpy.ndarray, shape (DOF,)
+    Feedback gains for each joint.
+feedforward_torque : numpy.ndarray, shape (DOF,)
+    Feedforward torque for each joint [Nm].
+finish : bool
+    Whether to finish the current control operation.
 )doc")
       .def_property(
           "mode", [](ControlInput<T>& self) -> Eigen::Vector<bool, T::kRobotDOF>& { return self.mode; },
           [](ControlInput<T>& self, const Eigen::Vector<bool, T::kRobotDOF>& mat) { self.mode = mat; },
-          py::return_value_policy::reference_internal, R"doc(
-Control mode for each joint.
-
-Type
-----
-numpy.ndarray
-    Boolean array indicating control mode for each joint.
-)doc")
+          py::return_value_policy::reference_internal)
       .def_property(
           "target", [](ControlInput<T>& self) -> Eigen::Vector<double, T::kRobotDOF>& { return self.target; },
           [](ControlInput<T>& self, const Eigen::Vector<double, T::kRobotDOF>& mat) { self.target = mat; },
-          py::return_value_policy::reference_internal, R"doc(
-Target positions for each joint.
-
-Type
-----
-numpy.ndarray
-    Target positions in rad for each joint.
-)doc")
+          py::return_value_policy::reference_internal)
       .def_property(
           "feedback_gain",
           [](ControlInput<T>& self) -> Eigen::Vector<unsigned int, T::kRobotDOF>& { return self.feedback_gain; },
           [](ControlInput<T>& self, const Eigen::Vector<unsigned int, T::kRobotDOF>& mat) { self.feedback_gain = mat; },
-          py::return_value_policy::reference_internal, R"doc(
-Feedback gains for each joint.
-
-Type
-----
-numpy.ndarray
-    Feedback gain values for each joint.
-)doc")
+          py::return_value_policy::reference_internal)
       .def_property(
           "feedforward_torque",
           [](ControlInput<T>& self) -> Eigen::Vector<double, T::kRobotDOF>& { return self.feedforward_torque; },
           [](ControlInput<T>& self, const Eigen::Vector<double, T::kRobotDOF>& mat) { self.feedforward_torque = mat; },
-          py::return_value_policy::reference_internal, R"doc(
-Feedforward torque for each joint.
-
-Type
-----
-numpy.ndarray
-    Feedforward torque values in Nm for each joint.
-)doc")
-      .def_readwrite("finish", &ControlInput<T>::finish, R"doc(
-Finish control operation flag.
-
-Type
-----
-bool
-    Whether to finish the current control operation.
-)doc")
+          py::return_value_policy::reference_internal)
+      .def_readwrite("finish", &ControlInput<T>::finish)
       .def("__repr__",
            [handler_name](const ControlInput<T>& self) {
              using namespace rb::print;
@@ -879,37 +740,42 @@ bool
 }
 
 template <typename T>
-void bind_robot(py::module_& m, const std::string& robot_name) {
-  bind_robot_command_handler<T>(m, robot_name + "_CommandHandler");
-  bind_robot_command_stream_handler<T>(m, robot_name + "_CommandStreamHandler");
-  bind_control_state<T>(m, robot_name + "_ControlState");
-  bind_control_input<T>(m, robot_name + "_ControlInput");
+void bind_robot(py::module_& m) {
+  const std::string model = std::string(T::kModelName);
+  const std::string robot_name = std::string("Robot_") + model;
+  bind_robot_command_handler<T>(m);
+  bind_robot_command_stream_handler<T>(m);
+  bind_control_state<T>(m);
+  bind_control_input<T>(m);
 
-  py::class_<Robot<T>, std::shared_ptr<Robot<T>>>(m, robot_name.c_str(), R"doc(
-Robot control interface.
-
+  std::stringstream ss;
+  ss << "Robot (model: ``Model_" << model << "``) control interface.\n";
+  ss << R"doc(
 Provides high-level control interface for robot operations including
 connection management, power control, and command execution.
 
 Attributes
 ----------
-model : PyModel
+model : )doc";
+  ss << "Model_" << T::kModelName << R"doc(
     Robot model configuration.
-)doc")
-      .def_static(
-          "model", []() { return PyModel<T>(); }, R"doc(
-model()
+)doc";
 
+  std::stringstream model_doc_ss;
+  model_doc_ss << R"doc(
 Get the robot model configuration.
 
 Returns
 -------
-PyModel
+)doc";
+  model_doc_ss << "Model_" << T::kModelName << R"doc(
     Robot model configuration object.
-)doc")
-      .def_static("create", &Robot<T>::Create, "address"_a, R"doc(
-create(address)
+)doc";
 
+  py::class_<Robot<T>, std::shared_ptr<Robot<T>>>(m, robot_name.c_str(), ss.str().c_str())
+      .def_static(
+          "model", []() { return PyModel<T>(); }, model_doc_ss.str().c_str())
+      .def_static("create", &Robot<T>::Create, "address"_a, R"doc(
 Create a robot instance.
 
 Parameters
@@ -946,8 +812,6 @@ Examples
             });
           },
           "max_retries"_a = 5, "timeout_ms"_a = 1000, py::call_guard<py::gil_scoped_release>(), R"doc(
-connect(max_retries=5, timeout_ms=1000)
-
 Attempts to establish a connection with the robot.
 
 Parameters
@@ -973,13 +837,9 @@ Examples
 >>> # Custom: robot.connect(max_retries=10, timeout_ms=2000)
 )doc")
       .def("disconnect", &Robot<T>::Disconnect, py::call_guard<py::gil_scoped_release>(), R"doc(
-disconnect()
-
 Disconnects from the robot.
 )doc")
       .def("is_connected", &Robot<T>::IsConnected, R"doc(
-is_connected()
-
 Checks whether the robot is currently connected.
 
 Returns
@@ -988,8 +848,6 @@ bool
     ``True`` if the robot is connected to the robot, ``False`` otherwise.
 )doc")
       .def("get_robot_info", &Robot<T>::GetRobotInfo, R"doc(
-get_robot_info()
-
 Retrieves static information about the robot, such as model name, SDK version, and joint configuration.
 
 Returns
@@ -1010,8 +868,6 @@ Examples
 ...     print(f"Joint: {joint.name}, Brake: {joint.has_brake}, Product name: {joint.product_name}, Firmware version: {joint.firmware_version}")
 )doc")
       .def("get_time_scale", &Robot<T>::GetTimeScale, R"doc(
-get_time_scale()
-
 Get the current time scale.
 
 Returns
@@ -1032,8 +888,6 @@ Examples
 ...     print(f"Robot running at {current_scale * 100}% speed")
 )doc")
       .def("set_time_scale", &Robot<T>::SetTimeScale, "time_scale"_a, R"doc(
-set_time_scale(time_scale)
-
 Set the time scale for motion execution.
 
 Parameters
@@ -1051,8 +905,6 @@ Examples
 >>> # Useful for testing and safety
 )doc")
       .def("power_on", &Robot<T>::PowerOn, "dev_name"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-power_on(dev_name)
-
 Power on a device.
 
 Parameters
@@ -1070,8 +922,6 @@ Examples
 >>> # Specific device: robot.power_on("12v"), robot.power_on("24v"), etc.
 )doc")
       .def("power_off", &Robot<T>::PowerOff, "dev_name"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-power_off(dev_name)
-
 Power off a device.
 
 Parameters
@@ -1080,8 +930,6 @@ dev_name : str
     Device name to power off. Supports regex patterns.
 )doc")
       .def("is_power_on", &Robot<T>::IsPowerOn, "dev_name"_a, R"doc(
-is_power_on(dev_name)
-
 Check if a device is powered on.
 
 Parameters
@@ -1095,8 +943,6 @@ bool
     ``True`` if device is powered on, ``False`` otherwise.
 )doc")
       .def("servo_on", &Robot<T>::ServoOn, "dev_name"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-servo_on(dev_name)
-
 Enable servo control for a device.
 
 Parameters
@@ -1113,8 +959,6 @@ Examples
 >>> # Specific device: robot.servo_on("^torso_.*"), robot.servo_on("^right_arm_.*"), etc.
 )doc")
       .def("is_servo_on", &Robot<T>::IsServoOn, "dev_name"_a, R"doc(
-is_servo_on(dev_name)
-
 Check if servo control is enabled for a device.
 
 Parameters
@@ -1128,8 +972,6 @@ bool
     ``True`` if servo control is enabled, ``False`` otherwise.
 )doc")
       .def("servo_off", &Robot<T>::ServoOff, "dev_name"_a, R"doc(
-servo_off(dev_name)
-
 Disable servo control for a device.
 
 Parameters
@@ -1144,7 +986,6 @@ Examples
 >>> # Specific device: robot.servo_off("^torso_.*")
 )doc")
       .def("break_engage", &Robot<T>::BreakEngage, "dev_name"_a, R"doc(
-break_engage(dev_name)
 
 Engage the brake for a device.
 
@@ -1174,8 +1015,6 @@ Examples
 >>> robot.break_release("right_arm_0")
 )doc")
       .def("home_offset_reset", &Robot<T>::HomeOffsetReset, "dev_name"_a, R"doc(
-home_offset_reset(dev_name)
-
 Reset home offset for a device.
 
 Parameters
@@ -1184,8 +1023,6 @@ dev_name : str
     Device name to reset home offset. Supports regex patterns.
 )doc")
       .def("set_preset_position", &Robot<T>::SetPresetPosition, "joint_name"_a, R"doc(
-set_preset_position(joint_name)
-
 Set preset position for a joint (only available for PVL-based motors).
 
 Parameters
@@ -1217,25 +1054,17 @@ Examples
 >>> # Must be called before sending commands
 )doc")
       .def("disable_control_manager", &Robot<T>::DisableControlManager, py::call_guard<py::gil_scoped_release>(), R"doc(
-disable_control_manager()
-
 Disable the control manager.
 )doc")
       .def("reset_fault_control_manager", &Robot<T>::ResetFaultControlManager, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-reset_fault_control_manager()
-
 Reset fault in the control manager.
 )doc")
       .def("cancel_control", &Robot<T>::CancelControl, py::call_guard<py::gil_scoped_release>(), R"doc(
-cancel_control()
-
 Cancel current control operation.
 )doc")
       .def("set_tool_flange_output_voltage", &Robot<T>::SetToolFlangeOutputVoltage,
            py::call_guard<py::gil_scoped_release>(), "name"_a, "voltage"_a, R"doc(
-set_tool_flange_output_voltage(name, voltage)
-
 Set tool flange output voltage.
 
 Parameters
@@ -1257,8 +1086,6 @@ Examples
 )doc")
       .def("set_tool_flange_digital_output", &Robot<T>::SetToolFlangeDigitalOutput, "name"_a, "channel"_a, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-set_tool_flange_digital_output(name, channel, state)
-
 Set the digital output state of a specific channel on the tool flange
 of the specified arm.
 
@@ -1285,8 +1112,6 @@ Examples
 
       .def("set_tool_flange_digital_output_dual", &Robot<T>::SetToolFlangeDigitalOutputDual, "name"_a, "state_0"_a,
            "state_1"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-set_tool_flange_digital_output_dual(name, state_0, state_1)
-
 Set the digital output states of two channels on the tool flange
 of the specified arm simultaneously.
 
@@ -1327,8 +1152,6 @@ Examples
             }
           },
           "cb"_a, "rate"_a, R"doc(
-start_state_update(cb, rate)
-
 Start state update callback.
 
 Parameters
@@ -1348,13 +1171,9 @@ Examples
 >>> # Stop when done: robot.stop_state_update()
 )doc")
       .def("stop_state_update", &Robot<T>::StopStateUpdate, py::call_guard<py::gil_scoped_release>(), R"doc(
-stop_state_update()
-
 Stop state update callback.
 )doc")
       .def("start_log_stream", &Robot<T>::StartLogStream, "cb"_a, "rate"_a, R"doc(
-start_log_stream(cb, rate)
-        
 Start log stream callback.
 
 Parameters
@@ -1374,13 +1193,9 @@ Examples
 >>> # Stop when done: robot.stop_log_stream()
 )doc")
       .def("stop_log_stream", &Robot<T>::StopLogStream, R"doc(
-stop_log_stream()
-
 Stop log stream callback.
 )doc")
       .def("get_state", &Robot<T>::GetState, py::call_guard<py::gil_scoped_release>(), R"doc(
-get_state()
-
 Get current robot state.
 
 Returns
@@ -1398,8 +1213,6 @@ Examples
 >>> # Total: 24 DOF for model A, 23 DOF for model M, 26 DOF for model M, 18 DOF for model UB
 )doc")
       .def("get_last_log", &Robot<T>::GetLastLog, "count"_a, R"doc(
-get_last_log(count)
-
 Get last log entries.
 
 Parameters
@@ -1413,8 +1226,6 @@ list
     List of log entries.
 )doc")
       .def("get_fault_log_list", &Robot<T>::GetFaultLogList, R"doc(
-get_fault_log_list()
-
 Get fault log list.
 
 Returns
@@ -1423,8 +1234,6 @@ list
     List of fault log entries.
 )doc")
       .def("get_control_manager_state", &Robot<T>::GetControlManagerState, R"doc(
-get_control_manager_state()
-
 Get control manager state.
 
 Returns
@@ -1443,8 +1252,6 @@ Examples
 ...     print("Control manager is enabled")
 )doc")
       .def("send_command", &Robot<T>::SendCommand, "builder"_a, "priority"_a = 1, R"doc(
-send_command(builder, priority=1)
-
 Send a command to the robot.
 
 Parameters
@@ -1479,8 +1286,6 @@ Examples
 >>> # This pattern is used in most examples: examples/python/07_impedance_control.py, 09_demo_motion.py, etc.
 )doc")
       .def("create_command_stream", &Robot<T>::CreateCommandStream, "priority"_a = 1, R"doc(
-create_command_stream(priority=1)
-
 Create a command stream for continuous command sending.
 
 Parameters
@@ -1517,8 +1322,6 @@ Examples
                 port, priority);
           },
           "control"_a, "port"_a = 0, "priority"_a = 1, py::call_guard<py::gil_scoped_release>(), R"doc(
-control(control, port=0, priority=1)
-
 Start a **blocking** real-time control loop using a custom control callback.
 
 This function runs a UDP-based real-time loop that repeatedly calls the user-provided
@@ -1586,9 +1389,9 @@ Reset odometry to specified values.
 Parameters
 ----------
 angle : float
-    New angle in rad.
+    New angle [rad].
 position : numpy.ndarray
-    New position in meters.
+    New position [m].
 
 Examples
 --------
@@ -1601,8 +1404,6 @@ Examples
 >>> # Position is [x, y] in meters, angle is yaw in rad
 )doc")
       .def("get_parameter_list", &Robot<T>::GetParameterList, R"doc(
-get_parameter_list()
-
 Get list of available parameters.
 
 Returns
@@ -1624,8 +1425,6 @@ Examples
 >>> # Common categories: default.*, joint_position_command.*, cartesian_command.*
 )doc")
       .def("set_parameter", &Robot<T>::SetParameter, "name"_a, "value"_a, "write_db"_a = true, R"doc(
-set_parameter(name, value, write_db=True)
-
 Set a robot parameter.
 
 Parameters
@@ -1650,8 +1449,6 @@ Examples
 False
 )doc")
       .def("get_parameter", &Robot<T>::GetParameter, "name"_a, R"doc(
-get_parameter(name)
-
 Retrieve a robot parameter.
 
 Parameters
@@ -1683,8 +1480,6 @@ Examples
             return self.ResetParameterToDefault(name);
           },
           "name"_a, R"doc(
-reset_parameter_to_default(name)
-
 Reset a parameter to its default value (deprecated).
 
 Parameters
@@ -1708,8 +1503,6 @@ This method is deprecated. Use factory_reset_parameter() instead.
             self.ResetAllParametersToDefault();
           },
           R"doc(
-reset_all_parameters_to_default()
-
 Reset all parameters to their default values (deprecated).
 
 .. deprecated:: 0.6.0
@@ -1720,8 +1513,6 @@ Note
 This method is deprecated. Use factory_reset_all_parameters() instead.
 )doc")
       .def("reset_parameter", &Robot<T>::ResetParameter, "name"_a, R"doc(
-reset_parameter(name)
-
 Reset a parameter to its current value.
 
 Parameters
@@ -1730,13 +1521,9 @@ name : str
     Parameter name.
 )doc")
       .def("reset_all_parameters", &Robot<T>::ResetAllParameters, R"doc(
-reset_all_parameters()
-
 Reset all parameters to their current values.
 )doc")
       .def("factory_reset_parameter", &Robot<T>::FactoryResetParameter, "name"_a, R"doc(
-factory_reset_parameter(name)
-
 Factory reset a parameter to its default value.
 
 Parameters
@@ -1745,14 +1532,10 @@ name : str
     Parameter name.
 )doc")
       .def("factory_reset_all_parameters", &Robot<T>::FactoryResetAllParameters, R"doc(
-factory_reset_all_parameters()
-
 Factory reset all parameters to their default values.
 )doc")
       .def("get_robot_model", &Robot<T>::GetRobotModel, R"doc(
-get_robot_model()
-
-Get the current robot model.
+Get the current robot URDF model.
 
 Returns
 -------
@@ -1760,8 +1543,6 @@ RobotModel
     Current robot model.
 )doc")
       .def("import_robot_model", &Robot<T>::ImportRobotModel, "name"_a, "model"_a, R"doc(
-import_robot_model(name, model)
-
 Import a robot model.
 
 Parameters
@@ -1772,8 +1553,6 @@ model : RobotModel
     Robot model to import.
 )doc")
       .def("sync_time", &Robot<T>::SyncTime, R"doc(
-sync_time()
-
 Synchronizes the timestamp of ``RobotState`` to UPC time instead of UTC. 
 Useful when synchronizing multiple devices to UPC time.
 )doc")
@@ -1786,8 +1565,6 @@ bool
     True if time sync is established, False otherwise.
 )doc")
       .def("start_time_sync", &Robot<T>::StartTimeSync, "period_sec"_a, R"doc(
-start_time_sync(period_sec)
-
 Start time synchronization.
 
 Parameters
@@ -1796,13 +1573,9 @@ period_sec : float
     Synchronization period in seconds.
 )doc")
       .def("stop_time_sync", &Robot<T>::StopTimeSync, py::call_guard<py::gil_scoped_release>(), R"doc(
-stop_time_sync()
-
 Stop time synchronization.
 )doc")
       .def("get_dynamics", &Robot<T>::GetDynamics, "urdf_model"_a = "", R"doc(
-get_dynamics(urdf_model='')
-
 Get robot dynamics model.
 
 Parameters
@@ -1825,8 +1598,6 @@ Examples
 )doc")
       .def("set_led_color", &Robot<T>::SetLEDColor, "color"_a, "duration"_a = 1, "transition_time"_a = 0,
            "blinking"_a = false, "blinking_freq"_a = 1, R"doc(
-set_led_color(color, duration=1.0, transition_time=0.0, blinking=False, blinking_freq=1.0)
-
 Set LED color.
 
 Parameters
@@ -1916,8 +1687,6 @@ tuple
             return self.SetSystemTime(ts, timezone_string.empty() ? std::nullopt : std::make_optional(timezone_string));
           },
           "datetime"_a, R"doc(
-set_system_time(datetime)
-
 Set robot system time.
 
 Parameters
@@ -1944,8 +1713,6 @@ datetime : datetime.datetime
             return self.SetSystemTime(ts, time_zone.empty() ? std::nullopt : std::make_optional(time_zone));
           },
           "datetime"_a, "time_zone"_a, R"doc(
-set_system_time(datetime, time_zone)
-
 Set robot system time with timezone.
 
 Parameters
@@ -1975,18 +1742,12 @@ Examples
 )doc")
       .def("set_battery_config", &Robot<T>::SetBatteryConfig, "cutoff_voltage"_a, "fully_charged_voltage"_a,
            "coefficients"_a, R"doc(
-set_battery_config(cutoff_voltage, fully_charged_voltage, coefficients)
-           
 Set battery configuration.
 )doc")
       .def("reset_battery_config", &Robot<T>::ResetBatteryConfig, R"doc(
-reset_battery_config()
-
 Reset battery configuration to default.
 )doc")
       .def("wait_for_control_ready", &Robot<T>::WaitForControlReady, "timeout_ms"_a, R"doc(
-wait_for_control_ready(timeout_ms)
-
 Wait until the robot is ready to accept control commands.
 
 Parameters
@@ -2011,13 +1772,9 @@ Examples
 )doc")
 
       .def("reset_network_setting", &Robot<T>::ResetNetworkSetting, py::call_guard<py::gil_scoped_release>(), R"doc(
-reset_network_setting()
-
 Reset network settings to default.
 )doc")
       .def("scan_wifi", &Robot<T>::ScanWifi, py::call_guard<py::gil_scoped_release>(), R"doc(
-scan_wifi()
-
 Scan for available WiFi networks.
 
 Returns
@@ -2040,8 +1797,6 @@ Examples
       .def("connect_wifi", &Robot<T>::ConnectWifi, "ssid"_a, "password"_a = "", "use_dhcp"_a = true,
            "ip_address"_a = "", "gateway"_a = "", "dns"_a = std::vector<std::string>{},
            py::call_guard<py::gil_scoped_release>(), R"doc(
-connect_wifi(ssid, password='', use_dhcp=True, ip_address='', gateway='', dns=[])
-
 Connect to WiFi network.
 
 Parameters
@@ -2073,13 +1828,9 @@ Examples
 >>> print(f"Connected: {status.connected}, SSID: {status.ssid}")
 )doc")
       .def("disconnect_wifi", &Robot<T>::DisconnectWifi, py::call_guard<py::gil_scoped_release>(), R"doc(
-disconnect_wifi()
-
 Disconnect from WiFi network.
 )doc")
       .def("get_wifi_status", &Robot<T>::GetWifiStatus, py::call_guard<py::gil_scoped_release>(), R"doc(
-get_wifi_status()
-
 Get WiFi connection status.
 
 Returns
@@ -2089,8 +1840,6 @@ WifiStatus
 )doc")
 
       .def("get_serial_device_list", &Robot<T>::GetSerialDeviceList, py::call_guard<py::gil_scoped_release>(), R"doc(
-get_serial_device_list()
-
 Get list of available serial devices on the robot.
 
 Returns
@@ -2113,8 +1862,6 @@ Examples
 )doc")
       .def("open_serial_stream", &Robot<T>::OpenSerialStream, "device_path"_a, "baudrate"_a, "bytesize"_a = 8,
            "parity"_a = 'N', "stopbits"_a = 1, R"doc(
-open_serial_stream(device_path, baudrate, bytesize=8, parity='N', stopbits=1)
-
 Open a serial stream.
 
 Parameters
@@ -2152,8 +1899,6 @@ Examples
                 path, [&](const char* data, size_t size) { py_file_like.attr("write")(py::bytes(data, size)); });
           },
           "path"_a, "file_like"_a, R"(
-download_file(path, file_like)
-
 Downloads a file from the robot and writes it into a file-like object.
 
 Parameters
@@ -2176,8 +1921,6 @@ RuntimeError
            )")
 
       .def("set_position_p_gain", &Robot<T>::SetPositionPGain, "dev_name"_a, "p_gain"_a, R"doc(
-set_position_p_gain(dev_name, p_gain)
-
 Set position P gain for a device.
 
 Parameters
@@ -2193,8 +1936,6 @@ Examples
 >>> robot.set_position_p_gain("torso_5", 220)
 )doc")
       .def("set_position_i_gain", &Robot<T>::SetPositionIGain, "dev_name"_a, "i_gain"_a, R"doc(
-set_position_i_gain(dev_name, i_gain)
-
 Set position I gain for a device.
 
 Parameters
@@ -2210,8 +1951,6 @@ Examples
 >>> robot.set_position_i_gain("torso_5", 40)
 )doc")
       .def("set_position_d_gain", &Robot<T>::SetPositionDGain, "dev_name"_a, "d_gain"_a, R"doc(
-set_position_d_gain(dev_name, d_gain)
-
 Set position D gain for a device.
 
 Parameters
@@ -2230,8 +1969,6 @@ Examples
            static_cast<bool (Robot<T>::*)(const std::string&, uint16_t, uint16_t, uint16_t) const>(
                &Robot<T>::SetPositionPIDGain),
            "dev_name"_a, "p_gain"_a, "i_gain"_a, "d_gain"_a, R"doc(
-set_position_pid_gain(dev_name, p_gain, i_gain, d_gain)
-
 Set position PID gains for a device.
 
 Parameters
@@ -2244,6 +1981,11 @@ i_gain : int
     I gain value.
 d_gain : int
     D gain value.
+
+Returns
+-------
+bool
+    True if successful, False otherwise.
 
 Examples
 --------
@@ -2259,8 +2001,6 @@ Examples
       .def("set_position_pid_gain",
            static_cast<bool (Robot<T>::*)(const std::string&, const rb::PIDGain&) const>(&Robot<T>::SetPositionPIDGain),
            "dev_name"_a, "pid_gain"_a, R"doc(
-set_position_pid_gain(dev_name, pid_gain)
-
 Set position PID gains for a device using PIDGain object.
 
 Parameters
@@ -2269,11 +2009,14 @@ dev_name : str
     Device name.
 pid_gain : PIDGain
     PID gain object.
+
+Returns
+-------
+bool
+    True if successful, False otherwise.
 )doc")
 
       .def("get_torso_position_pid_gains", &Robot<T>::GetTorsoPositionPIDGains, R"doc(
-get_torso_position_pid_gains()
-
 Get torso position PID gains.
 
 Returns
@@ -2290,8 +2033,6 @@ Examples
 >>> print(f"Right arm: {right_arm_pid}")
 )doc")
       .def("get_right_arm_position_pid_gains", &Robot<T>::GetRightArmPositionPIDGains, R"doc(
-get_right_arm_position_pid_gains()
-
 Get right arm position PID gains.
 
 Returns
@@ -2300,8 +2041,6 @@ PIDGain
     Right arm position PID gains.
 )doc")
       .def("get_left_arm_position_pid_gains", &Robot<T>::GetLeftArmPositionPIDGains, R"doc(
-get_left_arm_position_pid_gains()
-
 Get left arm position PID gains.
 
 Returns
@@ -2310,8 +2049,6 @@ PIDGain
     Left arm position PID gains.
 )doc")
       .def("get_head_position_pid_gains", &Robot<T>::GetHeadPositionPIDGains, R"doc(
-get_head_position_pid_gains()
-
 Get head position PID gains.
 
 Returns
@@ -2320,8 +2057,6 @@ PIDGain
     Head position PID gains.
 )doc")
       .def("get_position_pid_gain", &Robot<T>::GetPositionPIDGain, "dev_name"_a, R"doc(
-get_position_pid_gain(dev_name)
-
 Get position PID gains for a device.
 
 Parameters
@@ -2378,8 +2113,8 @@ void pybind11_robot(py::module_& m) {
   bind_pid_gain(m);
   bind_color(m);
   bind_serial(m);
-  bind_robot<y1_model::A>(m, "Robot_A");
-  bind_robot<y1_model::T5>(m, "Robot_T5");
-  bind_robot<y1_model::M>(m, "Robot_M");
-  bind_robot<y1_model::UB>(m, "Robot_UB");
+  bind_robot<y1_model::A>(m);
+  bind_robot<y1_model::T5>(m);
+  bind_robot<y1_model::M>(m);
+  bind_robot<y1_model::UB>(m);
 }

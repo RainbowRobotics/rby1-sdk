@@ -46,56 +46,21 @@ link1 : str
 link2 : str
     Name of the second link involved in collision.
 position1 : numpy.ndarray
-    Position of collision point on first link in meters.
+    Position of collision point on first link [m].
 position2 : numpy.ndarray
-    Position of collision point on second link in meters.
+    Position of collision point on second link [m].
 distance : float
-    Signed distance in meters. Positive when separated, ``0`` when touching,
+    Signed distance [m]. Positive when separated, ``0`` when touching,
     negative when overlapping (penetration depth = ``-distance``).
   )doc")
       .def(py::init<>(), R"doc(
       Construct a ``CollisionResult`` instance.
 )doc")
-      .def_readonly("link1", &dyn::CollisionResult::link1, R"doc(
-First link name.
-
-Type
-----
-str
-    Name of the first link involved in collision.
-)doc")
-      .def_readonly("link2", &dyn::CollisionResult::link2, R"doc(
-Second link name.
-
-Type
-----
-str
-    Name of the second link involved in collision.
-)doc")
-      .def_readonly("position1", &dyn::CollisionResult::position1, R"doc(
-First link collision position.
-
-Type
-----
-numpy.ndarray
-    Position of collision point on first link in meters.
-)doc")
-      .def_readonly("position2", &dyn::CollisionResult::position2, R"doc(
-Second link collision position.
-
-Type
-----
-numpy.ndarray
-    Position of collision point on second link in meters.
-)doc")
-      .def_readonly("distance", &dyn::CollisionResult::distance, R"doc(
-Minimum distance.
-
-Type
-----
-float
-    Minimum distance between the objects in meters.
-)doc")
+      .def_readonly("link1", &dyn::CollisionResult::link1)
+      .def_readonly("link2", &dyn::CollisionResult::link2)
+      .def_readonly("position1", &dyn::CollisionResult::position1)
+      .def_readonly("position2", &dyn::CollisionResult::position2)
+      .def_readonly("distance", &dyn::CollisionResult::distance)
       .def("__repr__",
            [](const dyn::CollisionResult& self) {
              using namespace rb::print;
@@ -161,8 +126,6 @@ colaffinity : int
     Collision affinity identifier.
 )doc")
       .def("get_type", &dyn::Geom::GetType, R"doc(
-get_type()
-
 Get the geometry type.
 
 Returns
@@ -171,8 +134,6 @@ GeomType
     Type of the geometry.
 )doc")
       .def("get_coltype", &dyn::Geom::GetColtype, R"doc(
-get_coltype()
-
 Get the collision type.
 
 Returns
@@ -181,8 +142,6 @@ int
     Collision type identifier.
 )doc")
       .def("get_colaffinity", &dyn::Geom::GetColaffinity, R"doc(
-get_colaffinity()
-
 Get the collision affinity.
 
 Returns
@@ -191,8 +150,6 @@ int
     Collision affinity identifier.
 )doc")
       .def("compute_minimum_distance", &dyn::Geom::ComputeMinimumDistance, "T"_a, "other_geom"_a, "other_T"_a, R"doc(
-compute_minimum_distance(T, other_geom, other_T)
-
 Compute the minimum Euclidean distance between this geometry and another geometry.
 
 Parameters
@@ -234,8 +191,6 @@ Examples
 ...     print(res.distance)
 )doc")
       .def("filter", &dyn::Geom::Filter, "other_geom"_a, R"doc(
-filter(other_geom)
-
 Filter collision detection with another geometry.
 
 Parameters
@@ -280,11 +235,11 @@ Represents a capsule (cylinder with rounded ends) for collision detection.
 Attributes
 ----------
 start_point : numpy.ndarray
-    Start point of the capsule axis in meters.
+    Start point of the capsule axis [m].
 end_point : numpy.ndarray
-    End point of the capsule axis in meters.
+    End point of the capsule axis [m].
 radius : float
-    Radius of the capsule in meters.
+    Radius of the capsule [m].
 )doc")
       .def(py::init<double, double, unsigned int, unsigned int>(), "height"_a, "radius"_a, "coltype"_a, "colaffinity"_a,
            R"doc(
@@ -293,9 +248,9 @@ Construct a ``GeomCapsule`` with height and radius.
 Parameters
 ----------
 height : float
-    Height of the capsule in meters.
+    Height of the capsule [m].
 radius : float
-    Radius of the capsule in meters.
+    Radius of the capsule [m].
 coltype : int
     Collision type identifier.
 colaffinity : int
@@ -308,45 +263,39 @@ Construct a ``GeomCapsule`` with start and end points.
 Parameters
 ----------
 start_point : numpy.ndarray
-    Start point of the capsule axis in meters.
+    Start point of the capsule axis [m].
 end_point : numpy.ndarray
-    End point of the capsule axis in meters.
+    End point of the capsule axis [m].
 radius : float
-    Radius of the capsule in meters.
+    Radius of the capsule [m].
 coltype : int
     Collision type identifier.
 colaffinity : int
     Collision affinity identifier.
 )doc")
       .def("get_start_point", &dyn::GeomCapsule::GetStartPoint, R"doc(
-get_start_point()
-
 Get the start point of the capsule axis.
 
 Returns
 -------
 numpy.ndarray
-    Start point in meters.
+    Start point with respect to link frame.
 )doc")
       .def("get_end_point", &dyn::GeomCapsule::GetEndPoint, R"doc(
-get_end_point()
-
 Get the end point of the capsule axis.
 
 Returns
 -------
 numpy.ndarray
-    End point in meters.
+    End point with respect to link frame.
 )doc")
       .def("get_radius", &dyn::GeomCapsule::GetRadius, R"doc(
-get_radius()
-
 Get the radius of the capsule.
 
 Returns
 -------
 float
-    Radius in meters.
+    Radius [m].
 )doc")
       .def("__repr__",
            [](const dyn::GeomCapsule& self) {
@@ -503,8 +452,6 @@ I : Inertial, optional
     Inertial properties. Default is identity.
 )doc")
       .def("get_name", &dyn::Link::GetName, R"doc(
-get_name()
-
 Get the name of the link.
 
 Returns
@@ -522,8 +469,6 @@ str
             return ptr.lock();
           },
           R"doc(
-get_parent_joint()
-
 Get the parent joint of the link.
 
 Returns
@@ -533,8 +478,6 @@ Joint, optional
 )doc")
       .def("get_child_joint_list",
            static_cast<std::vector<std::shared_ptr<dyn::Joint>> (dyn::Link::*)()>(&dyn::Link::GetChildJointList), R"doc(
-get_child_joint_list()
-
 Get the list of child joints.
 
 Returns
@@ -546,8 +489,6 @@ list
            static_cast<const std::vector<std::shared_ptr<dyn::Joint>>& (dyn::Link::*)() const>(
                &dyn::Link::GetChildJointList),
            py::return_value_policy::reference_internal, R"doc(
-get_child_joint_list()
-
 Get the list of child joints (const version).
 
 Returns
@@ -556,8 +497,6 @@ list
     List of child joints.
 )doc")
       .def("add_collision", &dyn::Link::AddCollision, "collision"_a, R"doc(
-add_collision(collision)
-
 Add a collision object to the link.
 
 Parameters
@@ -567,8 +506,6 @@ collision : Collision
 )doc")
       .def("get_collisions",
            static_cast<std::vector<std::shared_ptr<dyn::Collision>> (dyn::Link::*)()>(&dyn::Link::GetCollisions), R"doc(
-get_collisions()
-
 Get the list of collisions.
 
 Returns
@@ -580,8 +517,6 @@ list
            static_cast<const std::vector<std::shared_ptr<dyn::Collision>>& (dyn::Link::*)() const>(
                &dyn::Link::GetCollisions),
            py::return_value_policy::reference_internal, R"doc(
-get_collisions()
-
 Get the list of collisions (const version).
 
 Returns
@@ -638,8 +573,6 @@ list
 
   joint
       .def_static("make", &dyn::Joint::Make, "name"_a, "S"_a, R"doc(
-make(name, S)
-
 Create a joint with a specific screw axis.
 
 Parameters
@@ -651,8 +584,6 @@ S : numpy.ndarray
 )doc")
       .def_static("make_revolute", &dyn::Joint::MakeRevoluteJoint, "name"_a, "T"_a = math::SE3::Identity(),
                   "axis"_a = Eigen::Vector3d{0, 0, 1}, R"doc(
-make_revolute(name, T=np.identity(4), axis=np.array([0, 0, 1]))
-
 Create a revolute joint.
 
 Parameters
@@ -666,8 +597,6 @@ axis : numpy.ndarray, optional
 )doc")
       .def_static("make_prismatic", &dyn::Joint::MakePrismaticJoint, "name"_a, "T"_a = math::SE3::Identity(),
                   "axis"_a = Eigen::Vector3d{0, 0, 1}, R"doc(
-make_prismatic(name, T=np.identity(4), axis=np.array([0, 0, 1]))
-
 Create a prismatic joint.
 
 Parameters
@@ -680,8 +609,6 @@ axis : numpy.ndarray, optional
     Axis of translation. Defaults to [0, 0, 1].
 )doc")
       .def_static("make_fixed", &dyn::Joint::MakeFixedJoint, "name"_a, R"doc(
-make_fixed(name)
-
 Create a fixed joint.
 
 Parameters
@@ -690,8 +617,6 @@ name : str
     Name of the joint.
 )doc")
       .def("get_name", &dyn::Joint::GetName, R"doc(
-get_name()
-
 Get the name of the joint.
 
 Returns
@@ -701,8 +626,6 @@ str
 )doc")
       .def("connect_links", &dyn::Joint::ConnectLinks, "parent_link"_a, "child_link"_a,
            "T_pj"_a = math::SE3::Identity(), "T_jc"_a = math::SE3::Identity(), R"doc(
-connect_links(parent_link, child_link, T_pj=np.identity(4), T_jc=np.identity(4))
-
 Connect two links through this joint.
 
 Parameters
@@ -711,191 +634,155 @@ parent_link : Link
     Parent link.
 child_link : Link
     Child link.
-T_pj : numpy.ndarray, optional
+T_pj : numpy.ndarray, shape (4, 4), dtype=float64, optional
     Transformation from parent joint to joint. Default is identity.
-T_jc : numpy.ndarray, optional
+T_jc : numpy.ndarray, shape (4, 4), dtype=float64, optional
     Transformation from joint to child joint. Default is identity.
 )doc")
       .def("disconnect", &dyn::Joint::Disconnect, R"doc(
-disconnect()
-
 Disconnect the joint from its parent and child links.
 )doc")
       .def("set_limit_q", &dyn::Joint::SetLimitQ, "lower"_a, "upper"_a, R"doc(
-set_limit_q(lower, upper)
-
 Set joint position limits.
 
 Parameters
 ----------
-lower : numpy.ndarray
-    Lower limit for joint position.
-upper : numpy.ndarray
-    Upper limit for joint position.
+lower : float
+    Lower limit for joint position [rad].
+upper : float
+    Upper limit for joint position [rad].
 )doc")
       .def("set_limit_qdot", &dyn::Joint::SetLimitQdot, "lower"_a, "upper"_a, R"doc(
-set_limit_qdot(lower, upper)
-
 Set joint velocity limits.
 
 Parameters
 ----------
-lower : numpy.ndarray
-    Lower limit for joint velocity.
-upper : numpy.ndarray
-    Upper limit for joint velocity.
+lower : float
+    Lower limit for joint velocity [rad/s].
+upper : float
+    Upper limit for joint velocity [rad/s].
 )doc")
       .def("set_limit_qddot", &dyn::Joint::SetLimitQddot, "lower"_a, "upper"_a, R"doc(
-set_limit_qddot(lower, upper)
-
 Set joint acceleration limits.
 
 Parameters
 ----------
-lower : numpy.ndarray
-    Lower limit for joint acceleration.
-upper : numpy.ndarray
-    Upper limit for joint acceleration.
+lower : float
+    Lower limit for joint acceleration [rad/s²].
+upper : float
+    Upper limit for joint acceleration [rad/s²].
 )doc")
       .def("set_limit_torque", &dyn::Joint::SetLimitTorque, "torque"_a, R"doc(
-set_limit_torque(torque)
-
 Set joint torque limits.
 
 Parameters
 ----------
-torque : numpy.ndarray
+torque : float
     Torque limits.
 )doc")
       .def("get_limit_q_lower", &dyn::Joint::GetLimitQLower, R"doc(
-get_limit_q_lower()
-
 Get lower joint position limit.
 
 Returns
 -------
-numpy.ndarray
-    Lower limit for joint position.
+float
+    Lower limit for joint position [rad].
 )doc")
       .def("get_limit_q_upper", &dyn::Joint::GetLimitQUpper, R"doc(
-get_limit_q_upper()
-
 Get upper joint position limit.
 
 Returns
 -------
-numpy.ndarray
-    Upper limit for joint position.
+float
+    Upper limit for joint position [rad].
 )doc")
       .def("get_limit_qdot_lower", &dyn::Joint::GetLimitQdotLower, R"doc(
-get_limit_qdot_lower()
-
 Get lower joint velocity limit.
 
 Returns
 -------
-numpy.ndarray
-    Lower limit for joint velocity.
+float
+    Lower limit for joint velocity [rad/s].
 )doc")
       .def("get_limit_qdot_upper", &dyn::Joint::GetLimitQdotUpper, R"doc(
-get_limit_qdot_upper()
-
 Get upper joint velocity limit.
 
 Returns
 -------
-numpy.ndarray
-    Upper limit for joint velocity.
+float
+    Upper limit for joint velocity [rad/s].
 )doc")
       .def("get_limit_qddot_lower", &dyn::Joint::GetLimitQddotLower, R"doc(
-get_limit_qddot_lower()
-
 Get lower joint acceleration limit.
 
 Returns
 -------
-numpy.ndarray
-    Lower limit for joint acceleration.
+float
+    Lower limit for joint acceleration [rad/s²].
 )doc")
       .def("get_limit_qddot_upper", &dyn::Joint::GetLimitQddotUpper, R"doc(
-get_limit_qddot_upper()
-
 Get upper joint acceleration limit.
 
 Returns
 -------
-numpy.ndarray
-    Upper limit for joint acceleration.
+float
+    Upper limit for joint acceleration [rad/s²].
 )doc")
       .def("get_limit_torque", &dyn::Joint::GetLimitTorque, R"doc(
-get_limit_torque()
-
 Get joint torque limits.
 
 Returns
 -------
-numpy.ndarray
-    Torque limits.
+float
+    Torque limits [Nm].
 )doc")
       .def("set_limit_q_lower", &dyn::Joint::SetLimitQLower, "val"_a, R"doc(
-set_limit_q_lower(val)
-
 Set lower joint position limit.
 
 Parameters
 ----------
-val : numpy.ndarray
-    New lower limit for joint position.
+val : float
+    New lower limit for joint position [rad].
 )doc")
       .def("set_limit_q_upper", &dyn::Joint::SetLimitQUpper, "val"_a, R"doc(
-set_limit_q_upper(val)
-
 Set upper joint position limit.
 
 Parameters
 ----------
-val : numpy.ndarray
-    New upper limit for joint position.
+val : float
+    New upper limit for joint position [rad].
 )doc")
       .def("set_limit_qdot_lower", &dyn::Joint::SetLimitQdotLower, "val"_a, R"doc(
-set_limit_qdot_lower(val)
-
 Set lower joint velocity limit.
 
 Parameters
 ----------
-val : numpy.ndarray
-    New lower limit for joint velocity.
+val : float
+    New lower limit for joint velocity [rad/s].
 )doc")
       .def("set_limit_qdot_upper", &dyn::Joint::SetLimitQdotUpper, "val"_a, R"doc(
-set_limit_qdot_upper(val)
-
 Set upper joint velocity limit.
 
 Parameters
 ----------
-val : numpy.ndarray
-    New upper limit for joint velocity.
+val : float
+    New upper limit for joint velocity [rad/s].
 )doc")
       .def("set_limit_qddot_lower", &dyn::Joint::SetLimitQddotLower, "val"_a, R"doc(
-set_limit_qddot_lower(val)
-
 Set lower joint acceleration limit.
 
 Parameters
 ----------
-val : numpy.ndarray
-    New lower limit for joint acceleration.
+val : float
+    New lower limit for joint acceleration [rad/s²].
 )doc")
       .def("set_limit_qddot_upper", &dyn::Joint::SetLimitQddotUpper, "val"_a, R"doc(
-set_limit_qddot_upper(val)
-
 Set upper joint acceleration limit.
 
 Parameters
 ----------
-val : numpy.ndarray
-    New upper limit for joint acceleration.
+val : float
+    New upper limit for joint acceleration [rad/s²].
 )doc")
       .def(
           "get_parent_link",
@@ -907,8 +794,6 @@ val : numpy.ndarray
             return ptr.lock();
           },
           R"doc(
-get_parent_link()
-
 Get the parent link of the joint.
 
 Returns
@@ -918,8 +803,6 @@ Link, optional
 )doc")
       .def("get_child_link", static_cast<std::shared_ptr<dyn::Link> (dyn::Joint::*)()>(&dyn::Joint::GetChildLink),
            R"doc(
-get_child_link()
-
 Get the child link of the joint.
 
 Returns
@@ -930,8 +813,6 @@ Link
       .def("get_child_link",
            static_cast<std::shared_ptr<const dyn::Link> (dyn::Joint::*)() const>(&dyn::Joint::GetChildLink),
            py::return_value_policy::reference_internal, R"doc(
-get_child_link()
-
 Get the child link of the joint (const version).
 
 Returns
@@ -940,8 +821,6 @@ Link
     Child link.
 )doc")
       .def("is_fixed", &dyn::Joint::IsFixed, R"doc(
-is_fixed()
-
 Check if the joint is fixed.
 
 Returns
@@ -998,7 +877,7 @@ Differential : int
 Mecanum : int
     Mecanum drive mobile base.
 )doc")
-      .value("None", dyn::MobileBaseType::kNone, R"doc(
+      .value("Unspecified", dyn::MobileBaseType::kNone, R"doc(
 No mobile base.
 )doc")
       .value("Differential", dyn::MobileBaseType::kDifferential, R"doc(
@@ -1016,7 +895,7 @@ Represents the base of the robot that can move.
 Attributes
 ----------
 type : MobileBaseType
-    Type of the mobile base.
+    Type of the mobile base (e.g., differential, mecanum).
 T : numpy.ndarray
     Transformation matrix from the base to the world frame.
 joints : list
@@ -1024,38 +903,10 @@ joints : list
 params : dict
     Parameters of the mobile base.
 )doc")
-      .def_readonly("type", &dyn::MobileBase::type, R"doc(
-Type of the mobile base.
-
-Type
-----
-MobileBaseType
-    Type of the mobile base.
-)doc")
-      .def_readonly("T", &dyn::MobileBase::T, R"doc(
-Transformation matrix from the base to the world frame.
-
-Type
-----
-numpy.ndarray
-    Transformation matrix.
-)doc")
-      .def_readonly("joints", &dyn::MobileBase::joints, R"doc(
-List of joints that make up the mobile base.
-
-Type
-----
-list
-    List of joint objects.
-)doc")
-      .def_readonly("params", &dyn::MobileBase::params, R"doc(
-Parameters of the mobile base.
-
-Type
-----
-dict
-    Dictionary of parameters.
-)doc")
+      .def_readonly("type", &dyn::MobileBase::type)
+      .def_readonly("T", &dyn::MobileBase::T)
+      .def_readonly("joints", &dyn::MobileBase::joints)
+      .def_readonly("params", &dyn::MobileBase::params)
       .def("__repr__",
            [](const dyn::MobileBase& self) {
              using namespace rb::print;
@@ -1094,42 +945,14 @@ right_wheel_idx : int
 left_wheel_idx : int
     Index of the left wheel joint.
 wheel_base : float
-    Distance between the two wheels in meters.
+    Distance between the two wheels [m].
 wheel_radius : float
-    Radius of the wheels in meters.
+    Radius of the wheels [m].
 )doc")
-      .def_readonly("right_wheel_idx", &dyn::MobileBaseDifferential::right_wheel_idx, R"doc(
-Index of the right wheel joint.
-
-Type
-----
-int
-    Index of the right wheel joint.
-)doc")
-      .def_readonly("left_wheel_idx", &dyn::MobileBaseDifferential::left_wheel_idx, R"doc(
-Index of the left wheel joint.
-
-Type
-----
-int
-    Index of the left wheel joint.
-)doc")
-      .def_readonly("wheel_base", &dyn::MobileBaseDifferential::wheel_base, R"doc(
-Distance between the two wheels in meters.
-
-Type
-----
-float
-    Distance between the two wheels.
-)doc")
-      .def_readonly("wheel_radius", &dyn::MobileBaseDifferential::wheel_radius, R"doc(
-Radius of the wheels in meters.
-
-Type
-----
-float
-    Radius of the wheels.
-)doc")
+      .def_readonly("right_wheel_idx", &dyn::MobileBaseDifferential::right_wheel_idx)
+      .def_readonly("left_wheel_idx", &dyn::MobileBaseDifferential::left_wheel_idx)
+      .def_readonly("wheel_base", &dyn::MobileBaseDifferential::wheel_base)
+      .def_readonly("wheel_radius", &dyn::MobileBaseDifferential::wheel_radius)
       .def("__repr__",
            [](const dyn::MobileBaseDifferential& self) {
              using namespace rb::print;
@@ -1197,30 +1020,9 @@ base_link : Link
 mobile_base : MobileBase
     Mobile base of the robot.
 )doc")
-      .def_readwrite("name", &dyn::RobotConfiguration::name, R"doc(
-Name of the robot configuration.
-
-Type
-----
-str
-    Name of the robot configuration.
-)doc")
-      .def_readwrite("base_link", &dyn::RobotConfiguration::base_link, R"doc(
-Base link of the robot.
-
-Type
-----
-Link
-    Base link object.
-)doc")
-      .def_readwrite("mobile_base", &dyn::RobotConfiguration::mobile_base, R"doc(
-Mobile base of the robot.
-
-Type
-----
-MobileBase
-    Mobile base object.
-)doc")
+      .def_readwrite("name", &dyn::RobotConfiguration::name)
+      .def_readwrite("base_link", &dyn::RobotConfiguration::base_link)
+      .def_readwrite("mobile_base", &dyn::RobotConfiguration::mobile_base)
       .def("__repr__",
            [](const dyn::RobotConfiguration& self) {
              using namespace rb::print;
@@ -1265,9 +1067,13 @@ void bind_robot(py::module_& m) {
     ss << "_" << DOF;
   }
 
-  py::class_<dyn::Robot<DOF>, std::shared_ptr<dyn::Robot<DOF>>>(m, ss.str().c_str(), R"doc(
-Robot dynamics model.
-
+  std::stringstream doc_ss;
+  if constexpr (DOF > 0) {
+    doc_ss << "Robot (DOF=" << DOF << ") dynamics model.\n";
+  } else {
+    doc_ss << "Robot dynamics model.\n";
+  }
+  doc_ss << R"doc(
 Represents the dynamics of a robot with a given number of degrees of freedom.
 
 Attributes
@@ -1278,7 +1084,9 @@ link_names : list
     List of names of all links.
 joint_names : list
     List of names of all joints.
-)doc")
+)doc";
+
+  py::class_<dyn::Robot<DOF>, std::shared_ptr<dyn::Robot<DOF>>>(m, ss.str().c_str(), doc_ss.str().c_str())
       .def(py::init<const dyn::RobotConfiguration&>(), "robot_configuration"_a, R"doc(
 Construct a Robot instance.
 
@@ -1288,8 +1096,6 @@ robot_configuration : RobotConfiguration
     Configuration of the robot.
 )doc")
       .def("get_base", py::overload_cast<>(&dyn::Robot<DOF>::GetBase), R"doc(
-get_base()
-
 Get the base link of the robot.
 
 Returns
@@ -1298,8 +1104,6 @@ Link
     Base link.
 )doc")
       .def("get_link_names", &dyn::Robot<DOF>::GetLinkNames, R"doc(
-get_link_names()
-
 Get the list of names of all links.
 
 Returns
@@ -1308,8 +1112,6 @@ list
     List of link names.
 )doc")
       .def("get_joint_names", &dyn::Robot<DOF>::GetJointNames, R"doc(
-get_joint_names()
-
 Get the list of names of all joints.
 
 Returns
@@ -1321,8 +1123,6 @@ list
            static_cast<std::shared_ptr<dyn::Link> (dyn::Robot<DOF>::*)(const std::string&) const>(
                &dyn::Robot<DOF>::GetLink),
            "name"_a, R"doc(
-get_link(name)
-
 Get a link by name.
 
 Parameters
@@ -1339,8 +1139,6 @@ Link, optional
            static_cast<std::shared_ptr<dyn::Link> (dyn::Robot<DOF>::*)(std::shared_ptr<dyn::State<DOF>>, int) const>(
                &dyn::Robot<DOF>::GetLink),
            "state"_a, "index"_a, R"doc(
-get_link(state, index)
-
 Get a link by state and index.
 
 Parameters
@@ -1360,8 +1158,6 @@ Link, optional
           [](dyn::Robot<DOF>& self, const std::vector<std::string>& link_names,
              const std::vector<std::string>& joint_names) { return self.MakeState(link_names, joint_names); },
           "link_names"_a, "joint_names"_a, R"doc(
-make_state(link_names, joint_names)
-
 Create a state from link and joint names.
 
 The state object is essential for using the robot dynamics functions.
@@ -1405,8 +1201,6 @@ Examples
 >>> print(transform)
 )doc")
       .def("get_dof", &dyn::Robot<DOF>::GetDOF, R"doc(
-get_dof()
-
 Get the number of degrees of freedom.
 
 Returns
@@ -1415,8 +1209,6 @@ int
     Number of degrees of freedom.
 )doc")
       .def("get_number_of_joints", &dyn::Robot<DOF>::GetNumberOfJoints, R"doc(
-get_number_of_joints()
-
 Get the number of joints.
 
 Returns
@@ -1426,8 +1218,6 @@ int
 )doc")
       .def("compute_forward_kinematics", &dyn::Robot<DOF>::ComputeForwardKinematics, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_forward_kinematics(state)
-
 Computes the forward kinematics for each joint.
 
 This method calculates the transformation matrix from the base to each joint frame
@@ -1455,8 +1245,6 @@ Examples
 )doc")
       .def("compute_diff_forward_kinematics", &dyn::Robot<DOF>::ComputeDiffForwardKinematics, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_diff_forward_kinematics(state)
-
 Computes the differential forward kinematics for each joint.
 
 This method calculates the body velocity (twist) for each joint frame based on
@@ -1481,8 +1269,6 @@ Examples
 )doc")
       .def("compute_2nd_diff_forward_kinematics", &dyn::Robot<DOF>::Compute2ndDiffForwardKinematics, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_2nd_diff_forward_kinematics(state)
-
 Computes the second-order differential forward kinematics for each joint.
 
 This method calculates the body acceleration for each joint frame based on the
@@ -1508,8 +1294,6 @@ Examples
 )doc")
       .def("compute_inverse_dynamics", &dyn::Robot<DOF>::ComputeInverseDynamics, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_inverse_dynamics(state)
-
 Computes the inverse dynamics of the robot.
 
 This method calculates the joint torques required to achieve the given joint
@@ -1560,8 +1344,6 @@ Examples
 )doc")
       .def("compute_gravity_term", &dyn::Robot<DOF>::ComputeGravityTerm, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_gravity_term(state)
-
 Computes the gravity compensation term for the robot.
 
 This method calculates the joint torques required to counteract gravity at the
@@ -1596,8 +1378,6 @@ Examples
 )doc")
       .def("compute_mass_matrix", &dyn::Robot<DOF>::ComputeMassMatrix, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_mass_matrix(state)
-
 Computes the joint space mass matrix (inertia matrix) of the robot.
 
 Parameters
@@ -1616,8 +1396,6 @@ Notes
 )doc")
       .def("compute_reflective_inertia", &dyn::Robot<DOF>::ComputeReflectiveInertia, "state"_a,
            "reference_link_index"_a, "target_link_index"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_reflective_inertia(state, reference_link_index, target_link_index)
-
 Computes the reflective inertia (task space inertia) of the target link with respect to the reference link.
 
 Parameters
@@ -1640,8 +1418,6 @@ Notes
 )doc")
       .def("compute_transformation", &dyn::Robot<DOF>::ComputeTransformation, "state"_a, "reference_link_index"_a,
            "target_link_index"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_transformation(state, reference_link_index, target_link_index)
-
 Computes the transformation matrix from a reference link to a target link.
 
 Parameters
@@ -1664,8 +1440,6 @@ Notes
 )doc")
       .def("compute_body_velocity", &dyn::Robot<DOF>::ComputeBodyVelocity, "state"_a, "reference_link_index"_a,
            "target_link_index"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_body_velocity(state, reference_link_index, target_link_index)
-
 Computes the relative body velocity (twist) of a target link with respect to a reference link.
 
 Parameters
@@ -1689,8 +1463,6 @@ called before this function.
 )doc")
       .def("compute_space_jacobian", &dyn::Robot<DOF>::ComputeSpaceJacobian, "state"_a, "reference_link_index"_a,
            "target_link_index"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_space_jacobian(state, reference_link_index, target_link_index)
-
 Computes the space Jacobian for a target link relative to a reference link.
 
 Parameters
@@ -1713,8 +1485,6 @@ Notes
 )doc")
       .def("compute_body_jacobian", &dyn::Robot<DOF>::ComputeBodyJacobian, "state"_a, "reference_link_index"_a,
            "target_link_index"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_body_jacobian(state, reference_link_index, target_link_index)
-
 Computes the body Jacobian for a target link relative to a reference link.
 
 Parameters
@@ -1737,8 +1507,6 @@ Notes
 )doc")
       .def("compute_mass", &dyn::Robot<DOF>::ComputeMass, "state"_a, "target_link_index"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_mass(state, target_link_index)
-
 Computes the mass of a specific link.
 
 Parameters
@@ -1757,8 +1525,6 @@ float
            static_cast<Eigen::Vector3d (dyn::Robot<DOF>::*)(std::shared_ptr<dyn::State<DOF>>, unsigned int,
                                                             unsigned int)>(&dyn::Robot<DOF>::ComputeCenterOfMass),
            "state"_a, "ref_link"_a, "target_link"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_center_of_mass(state, ref_link, target_link)
-
 Computes the center of mass of a single target link with respect to a reference link.
 
 Parameters
@@ -1784,8 +1550,6 @@ Notes
                                                             const std::vector<unsigned int>&)>(
                &dyn::Robot<DOF>::ComputeCenterOfMass),
            "state"_a, "ref_link"_a, "target_links"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_center_of_mass(state, ref_link, target_links)
-
 Computes the combined center of mass of multiple target links with respect to a reference link.
 
 Parameters
@@ -1811,8 +1575,6 @@ Notes
                                                                           unsigned int, unsigned int)>(
                &dyn::Robot<DOF>::ComputeCenterOfMassJacobian),
            "state"_a, "ref_link"_a, "target_link"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_center_of_mass_jacobian(state, ref_link, target_link)
-
 Computes the Jacobian for the center of mass of a single target link.
 
 Parameters
@@ -1835,8 +1597,6 @@ Notes
 )doc")
       .def("compute_total_inertial", &dyn::Robot<DOF>::ComputeTotalInertial, "state"_a, "ref_link"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_total_inertial(state, ref_link)
-
 Computes the total spatial inertia of the entire robot with respect to a reference link.
 
 Parameters
@@ -1859,8 +1619,6 @@ Notes
            static_cast<Eigen::Vector3d (dyn::Robot<DOF>::*)(std::shared_ptr<dyn::State<DOF>>, unsigned int)>(
                &dyn::Robot<DOF>::ComputeCenterOfMass),
            "state"_a, "ref_link"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_center_of_mass(state, ref_link)
-
 Computes the center of mass of the entire robot with respect to a reference link.
 
 Parameters
@@ -1883,8 +1641,6 @@ Notes
            static_cast<Eigen::Matrix<double, 3, DOF> (dyn::Robot<DOF>::*)(
                std::shared_ptr<dyn::State<DOF>>, unsigned int)>(&dyn::Robot<DOF>::ComputeCenterOfMassJacobian),
            "state"_a, "ref_link"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_center_of_mass_jacobian(state, ref_link)
-
 Computes the Jacobian for the center of mass of the entire robot.
 
 Parameters
@@ -1905,8 +1661,6 @@ Notes
 )doc")
       .def("detect_collisions_or_nearest_links", &dyn::Robot<DOF>::DetectCollisionsOrNearestLinks, "state"_a,
            "collision_threshold"_a = 0, py::call_guard<py::gil_scoped_release>(), R"doc(
-detect_collisions_or_nearest_links(state, collision_threshold=0)
-
 Detects collisions or finds the nearest links in the robot model.
 
 Parameters
@@ -1932,8 +1686,6 @@ Notes
 )doc")
       .def("get_limit_q_lower", &dyn::Robot<DOF>::GetLimitQLower, "state"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-get_limit_q_lower(state)
-
 Gets the lower position limits for all joints.
 
 Parameters
@@ -1948,8 +1700,6 @@ numpy.ndarray
 )doc")
       .def("get_limit_q_upper", &dyn::Robot<DOF>::GetLimitQUpper, "state"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-get_limit_q_upper(state)
-
 Gets the upper position limits for all joints.
 
 Parameters
@@ -1964,8 +1714,6 @@ numpy.ndarray
 )doc")
       .def("get_limit_qdot_lower", &dyn::Robot<DOF>::GetLimitQdotLower, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-get_limit_qdot_lower(state)
-
 Gets the lower velocity limits for all joints.
 
 Parameters
@@ -1980,8 +1728,6 @@ numpy.ndarray
 )doc")
       .def("get_limit_qdot_upper", &dyn::Robot<DOF>::GetLimitQdotUpper, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-get_limit_qdot_upper(state)
-
 Gets the upper velocity limits for all joints.
 
 Parameters
@@ -1996,8 +1742,6 @@ numpy.ndarray
 )doc")
       .def("get_limit_qddot_lower", &dyn::Robot<DOF>::GetLimitQddotLower, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-get_limit_qddot_lower(state)
-
 Gets the lower acceleration limits for all joints.
 
 Parameters
@@ -2012,8 +1756,6 @@ numpy.ndarray
 )doc")
       .def("get_limit_qddot_upper", &dyn::Robot<DOF>::GetLimitQddotUpper, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-get_limit_qddot_upper(state)
-
 Gets the upper acceleration limits for all joints.
 
 Parameters
@@ -2028,8 +1770,6 @@ numpy.ndarray
 )doc")
       .def("get_limit_torque", &dyn::Robot<DOF>::GetLimitTorque, "state"_a, py::call_guard<py::gil_scoped_release>(),
            R"doc(
-get_limit_torque(state)
-
 Gets the torque limits for all joints.
 
 Parameters
@@ -2044,8 +1784,6 @@ numpy.ndarray
 )doc")
       .def("get_joint_property", &dyn::Robot<DOF>::GetJointProperty, "state"_a, "getter"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-get_joint_property(state, getter)
-
 Gets a specific property for all joints using a provided getter function.
 
 Parameters
@@ -2063,9 +1801,8 @@ numpy.ndarray
       .def("compute_mobility_inverse_diff_kinematics",
            static_cast<void (dyn::Robot<DOF>::*)(std::shared_ptr<dyn::State<DOF>>, const Eigen::Vector2d&, double)>(
                &dyn::Robot<DOF>::ComputeMobilityInverseDiffKinematics),
-           "state"_a, "linear_velocity"_a, "angular_velocity"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_mobility_inverse_diff_kinematics(state, linear_velocity, angular_velocity)
-
+           "state"_a, "linear_velocity"_a, "angular_velocity"_a, py::call_guard<py::gil_scoped_release>(),
+           R"doc(
 Computes the inverse differential kinematics for the mobile base.
 
 Calculates the required wheel velocities to achieve a desired linear and angular
@@ -2076,16 +1813,14 @@ Parameters
 state : rby1_sdk.dynamics.State
     The robot state object to be updated.
 linear_velocity : numpy.ndarray
-    The desired linear velocity (x, y) in m/s.
+    The desired linear velocity (x, y) [m/s].
 angular_velocity : float
-    The desired angular velocity (yaw) in rad/s.
+    The desired angular velocity (yaw) [rad/s].
 )doc")
       .def("compute_mobility_inverse_diff_kinematics",
            static_cast<void (dyn::Robot<DOF>::*)(std::shared_ptr<dyn::State<DOF>>, const math::se2v::MatrixType&)>(
                &dyn::Robot<DOF>::ComputeMobilityInverseDiffKinematics),
            "state"_a, "body_velocity"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_mobility_inverse_diff_kinematics(state, body_velocity)
-
 Computes the inverse differential kinematics for the mobile base from a body velocity vector.
 
 Calculates the required wheel velocities from a desired body velocity (twist).
@@ -2100,8 +1835,6 @@ body_velocity : numpy.ndarray
 )doc")
       .def("compute_mobility_diff_kinematics", &dyn::Robot<DOF>::ComputeMobilityDiffKinematics, "state"_a,
            py::call_guard<py::gil_scoped_release>(), R"doc(
-compute_mobility_diff_kinematics(state)
-
 Computes the forward differential kinematics for the mobile base.
 
 Calculates the linear and angular velocity of the mobile base from the current
@@ -2149,7 +1882,7 @@ int
              const auto joints = self.GetJointNames();
 
              std::ostringstream out;
-             out << "Robot(" << FIRST << "dof=" << self.GetDOF() << SEP  //
+             out << "Robot(" << FIRST << "DOF=" << self.GetDOF() << SEP  //
                  << "links=" << links.size() << SEP                      //
                  << "joints=" << joints.size() << SEP                    //
                  << "base=" << inline_obj(py::cast(base_name))           //
@@ -2160,7 +1893,7 @@ int
         auto base = self.GetBase();
         std::string base_name = base ? base->GetName() : "None";
         std::ostringstream out;
-        out << "Robot(dof=" << self.GetDOF() << ", joints=" << self.GetNumberOfJoints() << ", base=" << base_name
+        out << "Robot(DOF=" << self.GetDOF() << ", joints=" << self.GetNumberOfJoints() << ", base=" << base_name
             << ")";
         return out.str();
       });
@@ -2175,98 +1908,63 @@ void bind_state(py::module_& m) {
     ss << "_" << DOF;
   }
 
-  py::class_<dyn::State<DOF>, std::shared_ptr<dyn::State<DOF>>>(m, ss.str().c_str(), R"doc(
-Robot state for dynamics calculations.
-
+  std::stringstream doc_ss;
+  if constexpr (DOF > 0) {
+    doc_ss << "Robot state (DOF=" << DOF << ") for dynamics calculations.\n";
+  } else {
+    doc_ss << "Robot state for dynamics calculations.\n";
+  }
+  doc_ss << R"doc(
 This class stores the state of the robot, including joint positions, velocities,
 accelerations, and torques. It also serves as a cache for intermediate results
 in dynamics and kinematics calculations to optimize performance.
-)doc")
-      .def_property_readonly("base_link_idx", &dyn::State<DOF>::GetBaseLinkIdx, R"doc(
-Index of the base link.
 
-Type
-----
-int
-)doc")
+Attributes
+----------
+base_link_idx : int
+    Index of the base link.
+q : numpy.ndarray, shape (DOF,)
+    Joint positions vector.
+qdot : numpy.ndarray, shape (DOF,)
+    Joint velocities vector.
+qddot : numpy.ndarray, shape (DOF,)
+    Joint accelerations vector.
+tau : numpy.ndarray, shape (DOF,)
+    Joint torques vector (output of inverse dynamics).
+V0 : numpy.ndarray, shape (6,)
+    Spatial velocity (twist) of the base link.
+Vdot0 : numpy.ndarray, shape (6,)
+    Spatial acceleration of the base link (used to specify gravity).
+    Note that `gravity = -Vdot0`.
+joint_names : list[str]
+    List of joint names.
+link_names : list[str]
+    List of link names.
+)doc";
+
+  py::class_<dyn::State<DOF>, std::shared_ptr<dyn::State<DOF>>>(m, ss.str().c_str(), doc_ss.str().c_str())
+      .def_property_readonly("base_link_idx", &dyn::State<DOF>::GetBaseLinkIdx)
       .def_property(
           "q", [](dyn::State<DOF>& self) { return self.GetQ(); },
-          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> q) { self.SetQ(q); }, R"doc(
-Joint positions.
-
-Type
-----
-numpy.ndarray
-    A vector of size DOF.
-)doc")
+          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> q) { self.SetQ(q); })
       .def_property(
           "qdot", [](dyn::State<DOF>& self) { return self.GetQdot(); },
-          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> qdot) { self.SetQdot(qdot); }, R"doc(
-Joint velocities.
-
-Type
-----
-numpy.ndarray
-    A vector of size DOF.
-)doc")
+          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> qdot) { self.SetQdot(qdot); })
       .def_property(
           "qddot", [](dyn::State<DOF>& self) { return self.GetQddot(); },
-          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> qddot) { self.SetQddot(qddot); }, R"doc(
-Joint accelerations.
-
-Type
-----
-numpy.ndarray
-    A vector of size DOF.
-)doc")
+          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> qddot) { self.SetQddot(qddot); })
       .def_property(
           "tau", [](dyn::State<DOF>& self) { return self.GetTau(); },
-          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> tau) { self.SetTau(tau); }, R"doc(
-Joint torques. This is typically an output of inverse dynamics.
-
-Type
-----
-numpy.ndarray
-    A vector of size DOF.
-)doc")
+          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> tau) { self.SetTau(tau); })
       .def_property(
           "V0", [](dyn::State<DOF>& self) { return self.GetV0(); },
-          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> V0) { self.SetV0(V0); }, R"doc(
-Spatial velocity of the base link (twist).
-
-Type
-----
-numpy.ndarray
-    A 6D vector.
-)doc")
+          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> V0) { self.SetV0(V0); })
       .def_property(
           "Vdot0", [](dyn::State<DOF>& self) { return self.GetVdot0(); },
-          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> Vdot0) { self.SetVdot0(Vdot0); }, R"doc(
-Spatial acceleration of the base link. It is used to specify external forces like gravity.
-Note that `gravity = -Vdot0`.
-
-Type
-----
-numpy.ndarray
-    A 6D vector.
-)doc")
-      .def_property_readonly("joint_names", &dyn::State<DOF>::GetJointNames, R"doc(
-List of joint names associated with this state.
-
-Type
-----
-list[str]
-)doc")
-      .def_property_readonly("link_names", &dyn::State<DOF>::GetLinkNames, R"doc(
-List of link names associated with this state.
-
-Type
-----
-list[str]
-)doc")
+          [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> Vdot0) { self.SetVdot0(Vdot0); })
+      .def_property_readonly("joint_names", &dyn::State<DOF>::GetJointNames)
+      .def_property_readonly("link_names", &dyn::State<DOF>::GetLinkNames)
       .def("get_base_link_idx", &dyn::State<DOF>::GetBaseLinkIdx, R"doc(
-get_base_link_idx()
-
 Get the index of the base link.
 
 Returns
@@ -2276,8 +1974,6 @@ int
 )doc")
       .def(
           "set_q", [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> q) { self.SetQ(q); }, "q"_a, R"doc(
-set_q(q)
-
 Set the joint positions.
 
 Parameters
@@ -2286,8 +1982,6 @@ q : numpy.ndarray
     Joint positions vector.
 )doc")
       .def("get_q", &dyn::State<DOF>::GetQ, R"doc(
-get_q()
-
 Get the joint positions.
 
 Returns
@@ -2298,8 +1992,6 @@ numpy.ndarray
       .def(
           "set_qdot", [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> qdot) { self.SetQdot(qdot); },
           "qdot"_a, R"doc(
-set_qdot(qdot)
-
 Set the joint velocities.
 
 Parameters
@@ -2308,8 +2000,6 @@ qdot : numpy.ndarray
     Joint velocities vector.
 )doc")
       .def("get_qdot", &dyn::State<DOF>::GetQdot, R"doc(
-get_qdot()
-
 Get the joint velocities.
 
 Returns
@@ -2320,8 +2010,6 @@ numpy.ndarray
       .def(
           "set_qddot", [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> qddot) { self.SetQddot(qddot); },
           "qddot"_a, R"doc(
-set_qddot(qddot)
-
 Set the joint accelerations.
 
 Parameters
@@ -2330,8 +2018,6 @@ qddot : numpy.ndarray
     Joint accelerations vector.
 )doc")
       .def("get_qddot", &dyn::State<DOF>::GetQddot, R"doc(
-get_qddot()
-
 Get the joint accelerations.
 
 Returns
@@ -2342,8 +2028,6 @@ numpy.ndarray
       .def(
           "set_tau", [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> tau) { self.SetTau(tau); }, "tau"_a,
           R"doc(
-set_tau(tau)
-
 Set the joint torques.
 
 Parameters
@@ -2352,8 +2036,6 @@ tau : numpy.ndarray
     Joint torques vector.
 )doc")
       .def("get_tau", &dyn::State<DOF>::GetTau, R"doc(
-get_tau()
-
 Get the joint torques.
 
 Returns
@@ -2363,8 +2045,6 @@ numpy.ndarray
 )doc")
       .def(
           "set_V0", [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::VectorXd> V0) { self.SetV0(V0); }, "V0"_a, R"doc(
-set_V0(V0)
-
 Set the spatial velocity of the base link.
 
 Parameters
@@ -2376,8 +2056,6 @@ V0 : numpy.ndarray
           "set_Vdot0",
           [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::Vector<double, 6>> Vdot0) { self.SetVdot0(Vdot0); },
           "Vdot0"_a, R"doc(
-set_Vdot0(Vdot0)
-
 Set the spatial acceleration of the base link.
 
 Parameters
@@ -2389,8 +2067,6 @@ Vdot0 : numpy.ndarray
           "set_gravity",
           [](dyn::State<DOF>& self, Eigen::Ref<const Eigen::Vector<double, 6>> gravity) { self.SetGravity(gravity); },
           "gravity"_a, R"doc(
-set_gravity(gravity)
-
 Set the gravity vector. This is a convenience function that sets `Vdot0 = -gravity`.
 
 Parameters
@@ -2399,8 +2075,6 @@ gravity : numpy.ndarray
     6D gravity vector (e.g., `[0, 0, 0, 0, 0, -9.81]`).
 )doc")
       .def("get_joint_names", &dyn::State<DOF>::GetJointNames, R"doc(
-get_joint_names()
-
 Get the list of joint names associated with this state.
 
 Returns
@@ -2409,8 +2083,6 @@ list[str]
     List of joint names.
 )doc")
       .def("get_link_names", &dyn::State<DOF>::GetLinkNames, R"doc(
-get_link_names()
-
 Get the list of link names associated with this state.
 
 Returns
@@ -2505,8 +2177,6 @@ void pybind11_dynamics(py::module_& m) {
 
   m.def("load_robot_from_urdf_data", &dyn::LoadRobotFromURDFData, "model"_a, "base_link_name"_a,
         R"doc(
-load_robot_from_urdf_data(model, base_link_name)
-
 Load a robot model from URDF data string.
 
 This function parses URDF XML content directly from a string and
@@ -2535,8 +2205,6 @@ Examples
 
   m.def("load_robot_from_urdf", &dyn::LoadRobotFromURDF, "path"_a, "base_link_name"_a,
         R"doc(
-load_robot_from_urdf(path, base_link_name)
-
 Load a robot model from a URDF file.
 
 This function reads a URDF file from the given path and constructs

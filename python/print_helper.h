@@ -4,10 +4,13 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <array>
+#include <iomanip>
 #include <optional>
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -350,6 +353,40 @@ inline ReprStream& operator<<(ReprStream& os, const internal::_set_prefix& sp) {
 inline ReprStream& operator<<(ReprStream& os, const internal::_add_prefix& ao) {
   os.rdbuf_ref().add_prefix(ao.s);
   return os;
+}
+
+inline std::string to_fixed(double v, int prec = 6) {
+  std::ostringstream os;
+  os.setf(std::ios::fixed);
+  os << std::setprecision(prec) << v;
+  return os.str();
+}
+
+template <size_t N>
+inline std::string py_list(const std::array<unsigned int, N>& a) {
+  std::ostringstream os;
+  os << "[";
+  for (size_t i = 0; i < N; ++i) {
+    if (i) {
+      os << ", ";
+    }
+    os << a[i];
+  }
+  os << "]";
+  return os.str();
+}
+
+template <size_t N>
+inline std::string py_list(const std::array<std::string_view, N>& a) {
+  std::ostringstream os;
+  os << "[";
+  for (size_t i = 0; i < N; ++i) {
+    if (i)
+      os << ", ";
+    os << "\'" << a[i] << "\'";
+  }
+  os << "]";
+  return os.str();
 }
 
 }  // namespace rb::print

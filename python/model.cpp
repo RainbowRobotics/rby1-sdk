@@ -2,133 +2,143 @@
 
 #include "print_helper.h"
 
+namespace {
+template <class T>
+inline std::string build_model_class_doc() {
+  using namespace rb::print;
+  std::ostringstream s;
+  s << "Robot model configuration (``" << T::kModelName << "``).\n\n"
+    << "This class provides access to robot model specifications including\n"
+    << "joint configurations, degrees of freedom, and component indices.\n\n"
+    << "Attributes\n"
+    << "----------\n"
+    << "model_name : str\n"
+    << "    \'" << T::kModelName << "\'\n\n"
+    << "    Name identifier for the robot model.\n"
+    << "robot_dof : int\n"
+    << "    " << T::kRobotDOF << "\n\n"
+    << "    Total degrees of freedom.\n"
+    << "robot_joint_names : list[str]\n"
+    << "    " << py_list(T::kRobotJointNames) << "\n\n"
+    << "    List of joint names in index order.\n"
+    << "mobility_idx : list[int]\n"
+    << "    " << py_list(T::kMobilityIdx) << "\n\n"
+    << "    Indices of mobility components (e.g., wheels).\n"
+    << "body_idx : list[int]\n"
+    << "    " << py_list(T::kBodyIdx) << "\n\n"
+    << "    Indices of main body components (excluding mobility and head).\n"
+    << "head_idx : list[int]\n"
+    << "    " << py_list(T::kHeadIdx) << "\n\n"
+    << "    Indices of head components.\n"
+    << "right_arm_idx : list[int]\n"
+    << "    " << py_list(T::kRightArmIdx) << "\n\n"
+    << "    Indices of right arm components.\n"
+    << "left_arm_idx : list[int]\n"
+    << "    " << py_list(T::kLeftArmIdx) << "\n\n"
+    << "    Indices of left arm components.\n"
+    << "torso_idx : list[int]\n"
+    << "    " << py_list(T::kTorsoIdx) << "\n\n"
+    << "    Indices of torso components.\n"
+    << "velocity_estimation_required_idx : list[int]\n"
+    << "    " << py_list(T::kVelocityEstimationRequiredIdx) << "\n\n"
+    << "    Indices of joints requiring velocity estimation.\n"
+    << "control_period : float\n"
+    << "    " << to_fixed(T::kControlPeriod, 6) << "\n\n"
+    << "    Control update period in seconds.\n";
+  return s.str();
+}
+
+template <class T>
+inline std::string doc_model_name() {
+  return std::string("\'") + std::string(T::kModelName) + "\'\n\nName identifier for the robot model.";
+}
+
+template <class T>
+inline std::string doc_robot_dof() {
+  std::ostringstream os;
+  os << T::kRobotDOF << "\n\nTotal degrees of freedom.";
+  return os.str();
+}
+
+template <class T>
+inline std::string doc_robot_joint_names() {
+  return rb::print::py_list(T::kRobotJointNames) + "\n\nList of joint names in index order.";
+}
+
+template <class T>
+inline std::string doc_mobility_idx() {
+  return rb::print::py_list(T::kMobilityIdx) + "\n\nIndices of mobility components (e.g., wheels).";
+}
+
+template <class T>
+inline std::string doc_body_idx() {
+  return rb::print::py_list(T::kBodyIdx) + "\n\nIndices of main body components (excluding mobility and head).";
+}
+
+template <class T>
+inline std::string doc_head_idx() {
+  return rb::print::py_list(T::kHeadIdx) + "\n\nIndices of head components.";
+}
+
+template <class T>
+inline std::string doc_right_arm_idx() {
+  return rb::print::py_list(T::kRightArmIdx) + "\n\nIndices of right arm components.";
+}
+
+template <class T>
+inline std::string doc_left_arm_idx() {
+  return rb::print::py_list(T::kLeftArmIdx) + "\n\nIndices of left arm components.";
+}
+
+template <class T>
+inline std::string doc_torso_idx() {
+  return rb::print::py_list(T::kTorsoIdx) + "\n\nIndices of torso components.";
+}
+
+template <class T>
+inline std::string doc_velreq_idx() {
+  return rb::print::py_list(T::kVelocityEstimationRequiredIdx) + "\n\nIndices of joints where velocity estimation is essential.";
+}
+
+template <class T>
+inline std::string doc_control_period() {
+  return rb::print::to_fixed(T::kControlPeriod, 6) + std::string("\n\nControl period in seconds.");
+}
+}  // namespace
+
 template <typename T>
 void bind_model(py::module_& m, const std::string& model_name) {
-  py::class_<PyModel<T>>(m, model_name.c_str(), R"doc(
-Robot model configuration class.
+  using M = PyModel<T>;
 
-This class provides access to robot model specifications including
-joint configurations, degrees of freedom, and component indices.
+  static const std::string kDocClass = build_model_class_doc<T>();
+  static const std::string kDocName = doc_model_name<T>();
+  static const std::string kDocDof = doc_robot_dof<T>();
+  static const std::string kDocJoints = doc_robot_joint_names<T>();
+  static const std::string kDocMob = doc_mobility_idx<T>();
+  static const std::string kDocBody = doc_body_idx<T>();
+  static const std::string kDocHead = doc_head_idx<T>();
+  static const std::string kDocRarm = doc_right_arm_idx<T>();
+  static const std::string kDocLarm = doc_left_arm_idx<T>();
+  static const std::string kDocTorso = doc_torso_idx<T>();
+  static const std::string kDocVelReq = doc_velreq_idx<T>();
+  static const std::string kDocCtrlPeriod = doc_control_period<T>();
 
-Attributes
-----------
-model_name : str
-    Name identifier for the robot model.
-robot_dof : int
-    Total degrees of freedom for the robot.
-robot_joint_names : list[str]
-    Names of all robot joints in order of their indices.
-mobility_idx : list[int]
-    Indices of mobility components (e.g., wheels).
-body_idx : list[int]
-    Indices of main body components (excluding mobility and head).
-head_idx : list[int]
-    Indices of head components.
-right_arm_idx : list[int]
-    Indices of right arm components.
-left_arm_idx : list[int]
-    Indices of left arm components.
-torso_idx : list[int]
-    Indices of torso components.
-velocity_estimation_required_idx : list[int]
-    Indices of joints requiring velocity estimation.
-control_period : float
-    Control update period in seconds.
-)doc")
-      .def(py::init<>(), R"doc(
-Construct a model instance.
-)doc")
-      .def_property_readonly("model_name", &PyModel<T>::get_model_name, R"doc(
-Get the model name identifier.
-
-Returns
--------
-str
-    Model name (e.g., "A", "T5", "M", "UB").
-)doc")
-      .def_property_readonly("robot_dof", &PyModel<T>::get_robot_dof, R"doc(
-Get the total degrees of freedom.
-
-Returns
--------
-int
-    Total number of joints in the robot.
-)doc")
-      .def_property_readonly("robot_joint_names", &PyModel<T>::get_robot_joint_names, R"doc(
-Get the names of all robot joints.
-
-Returns
--------
-list[str]
-    List of joint names in order of their indices.
-)doc")
-      .def_property_readonly("mobility_idx", &PyModel<T>::get_mobility_idx, R"doc(
-Get indices of mobility components.
-
-Returns
--------
-list[int]
-    Indices of wheels or other mobility joints.
-)doc")
-      .def_property_readonly("body_idx", &PyModel<T>::get_body_idx, R"doc(
-Get indices of body components.
-
-Returns
--------
-list[int]
-    Indices of main body joints (excluding mobility and head).
-)doc")
-      .def_property_readonly("head_idx", &PyModel<T>::get_head_idx, R"doc(
-Get indices of head components.
-
-Returns
--------
-list[int]
-    Indices of head joints.
-)doc")
-      .def_property_readonly("right_arm_idx", &PyModel<T>::get_right_arm_idx, R"doc(
-Get indices of right arm components.
-
-Returns
--------
-list[int]
-    Indices of right arm joints.
-)doc")
-      .def_property_readonly("left_arm_idx", &PyModel<T>::get_left_arm_idx, R"doc(
-Get indices of left arm components.
-
-Returns
--------
-list[int]
-    Indices of left arm joints.
-)doc")
-      .def_property_readonly("torso_idx", &PyModel<T>::get_torso_idx, R"doc(
-Get indices of torso components.
-
-Returns
--------
-list[int]
-    Indices of torso joints.
-)doc")
-      .def_property_readonly("velocity_estimation_required_idx", &PyModel<T>::get_velocity_estimation_required_idx,
-                             R"doc(
-Get indices of joints requiring velocity estimation.
-
-Returns
--------
-list[int]
-    Indices of joints where velocity estimation is essential.
-)doc")
-      .def_property_readonly("control_period", &PyModel<T>::get_control_period, R"doc(
-Get the control update period.
-
-Returns
--------
-float
-    Control period in seconds (typically 0.002).
-)doc")
+  py::class_<M>(m, model_name.c_str(), kDocClass.c_str())
+      .def(py::init<>(), "Construct a model instance.")
+      .def_property_readonly("model_name", &M::get_model_name, kDocName.c_str())
+      .def_property_readonly("robot_dof", &M::get_robot_dof, kDocDof.c_str())
+      .def_property_readonly("robot_joint_names", &M::get_robot_joint_names, kDocJoints.c_str())
+      .def_property_readonly("mobility_idx", &M::get_mobility_idx, kDocMob.c_str())
+      .def_property_readonly("body_idx", &M::get_body_idx, kDocBody.c_str())
+      .def_property_readonly("head_idx", &M::get_head_idx, kDocHead.c_str())
+      .def_property_readonly("right_arm_idx", &M::get_right_arm_idx, kDocRarm.c_str())
+      .def_property_readonly("left_arm_idx", &M::get_left_arm_idx, kDocLarm.c_str())
+      .def_property_readonly("torso_idx", &M::get_torso_idx, kDocTorso.c_str())
+      .def_property_readonly("velocity_estimation_required_idx", &M::get_velocity_estimation_required_idx,
+                             kDocVelReq.c_str())
+      .def_property_readonly("control_period", &M::get_control_period, kDocCtrlPeriod.c_str())
       .def("__repr__",
-           [model_name](const PyModel<T>& self) {
+           [model_name](const M& self) {
              using namespace rb::print;
              const bool ml = use_multiline_repr();
              const char* FIRST = ml ? "\n  " : "";

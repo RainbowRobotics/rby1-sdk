@@ -304,7 +304,9 @@ Notes
 - **Vector length rule**: All vector arguments (``position``, ``stiffness``, ``torque_limit``,
   ``velocity_limit``, ``acceleration_limit``) must have length :math:`N` equal to the DOF of
   the component where this builder is applied.
+
   Examples (Model ``A``):
+  
   - ``set_right_arm_command(...)`` → right arm has :math:`N=7`
   - ``set_body_command(...)``      → whole body has :math:`N=20`
 

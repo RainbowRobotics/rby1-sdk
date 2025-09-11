@@ -248,21 +248,6 @@ class ButtonGrid(QWidget):
                 elif idx >=15 and idx<=21:
                     self.layout.addWidget(lamp, 16+idx-15, 7)
                     
-        elif self.model == "t5":
-            for idx in range(23):
-                lamp = QLineEdit("")
-                lamp.setFixedSize(65,20)
-                lamp.setReadOnly(True)  # 읽기 전용
-                lamp.setFocusPolicy(Qt.NoFocus)  # 선택 안되게 설정
-                lamp.setStyleSheet(IDLE_STATE)
-                
-                if idx >=2 and idx<=6:
-                    self.layout.addWidget(lamp, 7+idx-1, 5)
-                elif idx >=7 and idx<=13:
-                    self.layout.addWidget(lamp, 16+idx-7, 5)
-                elif idx >=14 and idx<=20:
-                    self.layout.addWidget(lamp, 16+idx-14, 7)
-                    
         elif self.model == "m":
             for idx in range(26):
                 lamp = QLineEdit("")
@@ -451,8 +436,6 @@ class ButtonGrid(QWidget):
         )
         if self.model =="a":
             await asyncio.to_thread(Robot_A_CommandHandler.get, handler)
-        elif self.model =="t5":
-            await asyncio.to_thread(Robot_T5_CommandHandler.get, handler)
         elif self.model =="m":
             await asyncio.to_thread(Robot_M_CommandHandler.get, handler)
         
@@ -497,14 +480,6 @@ class ButtonGrid(QWidget):
                     self.layout.addWidget(lamp, 16+idx-8, 5)
                 elif idx >=15 and idx<=21:
                     self.layout.addWidget(lamp, 16+idx-15, 7)
-                    
-            elif self.model == "t5":                
-                if idx >=2 and idx<=6:
-                    self.layout.addWidget(lamp, 7+idx-1, 5)
-                elif idx >=7 and idx<=13:
-                    self.layout.addWidget(lamp, 16+idx-7, 5)
-                elif idx >=14 and idx<=20:
-                    self.layout.addWidget(lamp, 16+idx-14, 7)
                     
             elif self.model == "m":
                 if idx >=4 and idx<=9:
@@ -728,9 +703,6 @@ class ButtonGrid(QWidget):
         if self.model =="a": 
             handler = self.robot.send_command(self.make_joint_control_command([0.] * 20, 4))
             ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler)
-        elif self.model =="t5": 
-            handler = self.robot.send_command(self.make_joint_control_command([0.] * 19, 4))
-            ret = await asyncio.to_thread(Robot_T5_CommandHandler.get, handler)
         elif self.model == "m":
             handler = self.robot.send_command(self.make_joint_control_command([0.] * 20, 4))
             ret = await asyncio.to_thread(Robot_M_CommandHandler.get, handler)
@@ -753,11 +725,6 @@ class ButtonGrid(QWidget):
             target_joint = np.array([0, 80, -140, 60, 0, 0] + [0, 0, 0, -150, 0, 105, 0] + [0, 0, 0, -150, 0, 105, 0])
             handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
             ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler) 
-            
-        if self.model == "t5":
-            target_joint = np.array([80, -140, 60, 0, 0] + [0, 0, 0, -150, 0, 105, 0] + [0, 0, 0, -150, 0, 105, 0])
-            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
-            ret = await asyncio.to_thread(Robot_T5_CommandHandler.get, handler)    
                      
         elif self.model == "m":
             target_joint = np.array([0, 80, -140, 60, 0, 0] + [0, 0, 0, -150, 0, 105, 0] + [0, 0, 0, -150, 0, 105, 0])
@@ -795,10 +762,6 @@ class ButtonGrid(QWidget):
             target_joint = np.array([0, 35, -70, 35, 0, 0] + [0, -90, 0, -100, 0, 90, 0] + [0, 90, 0, -100, 0, 90, 0])
             handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
             ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler) 
-        elif self.model == "t5":
-            target_joint = np.array([35, -70, 35, 0, 0] + [0, -90, 0, -100, 0, 90, 0] + [0, 90, 0, -100, 0, 90, 0])
-            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
-            ret = await asyncio.to_thread(Robot_T5_CommandHandler.get, handler) 
         elif self.model == "m":
             target_joint = np.array([0, 35, -70, 35, 0, 0] + [0, -90, 0, -100, 0, 90, 0] + [0, 90, 0, -100, 0, 90, 0])
             handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
@@ -831,10 +794,6 @@ class ButtonGrid(QWidget):
             target_joint = np.array([0, 35, -70, 35, 0, 0] + [-30, -10, 0, -100, 0, 0, 0] + [-30, 10, 0, -100, 0, 0, 0])
             handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
             ret = await asyncio.to_thread(Robot_A_CommandHandler.get, handler)
-        elif self.model == "t5":
-            target_joint = np.array([35, -70, 35, 0, 0] + [-30, -10, 0, -100, 0, 0, 0] + [-30, 10, 0, -100, 0, 0, 0])
-            handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))
-            ret = await asyncio.to_thread(Robot_T5_CommandHandler.get, handler)  
         elif self.model == "m":
             target_joint = np.array([0, 35, -70, 35, 0, 0] + [-30, -10, 0, -100, 0, 0, 0] + [-30, 10, 0, -100, 0, 0, 0])
             handler = self.robot.send_command(self.make_joint_control_command(np.deg2rad(target_joint), 4))

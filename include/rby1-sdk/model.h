@@ -79,40 +79,6 @@ class RBY1_SDK_API A {
 };
 
 /**
- * @class T5
- * @brief Represents the model description of Robot T5.
- *
- * This class represents the model description of Robot T5, which is derived from the base model A.
- * The T5 model includes torso with 5 degrees of freedom,
- * achieved by removing the torso_0 joint from the base model.
- */
-class RBY1_SDK_API T5 {
- public:
-  static constexpr std::string_view kModelName = "T5";
-
-  static constexpr size_t kRobotDOF = 23;
-
-  static constexpr std::array<std::string_view, kRobotDOF> kRobotJointNames = {
-      "right_wheel", "left_wheel",  "torso_0",     "torso_1",     "torso_2",     "torso_3",
-      "torso_4",     "right_arm_0", "right_arm_1", "right_arm_2", "right_arm_3", "right_arm_4",
-      "right_arm_5", "right_arm_6", "left_arm_0",  "left_arm_1",  "left_arm_2",  "left_arm_3",
-      "left_arm_4",  "left_arm_5",  "left_arm_6",  "head_0",      "head_1"};
-  static constexpr std::array<unsigned int, 2> kMobilityIdx = {0, 1};
-  static constexpr std::array<unsigned int, 19> kBodyIdx = {2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
-                                                            12, 13, 14, 15, 16, 17, 18, 19, 20};
-  static constexpr std::array<unsigned int, 2> kHeadIdx = {21, 22};
-  static constexpr std::array<unsigned int, 7> kRightArmIdx = {7, 8, 9, 10, 11, 12, 13};
-  static constexpr std::array<unsigned int, 7> kLeftArmIdx = {14, 15, 16, 17, 18, 19, 20};
-  static constexpr std::array<unsigned int, 5> kTorsoIdx = {2, 3, 4, 5, 6};
-  static constexpr std::array<unsigned int, 19> kVelocityEstimationRequiredIdx = kBodyIdx;
-
-  static constexpr double kControlPeriod = 0.002;
-
-  using DynRobotType = rb::dyn::Robot<kRobotDOF>;
-  using DynRobotStateType = rb::dyn::State<kRobotDOF>;
-};
-
-/**
  * @class M
  * @brief Represents the model description of Robot M.
  *

@@ -44,11 +44,6 @@ READY_POSE = {
         right_arm=np.deg2rad([0.0, -5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
         left_arm=np.deg2rad([0.0, 5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
     ),
-    "T5": Pose(
-        toros=np.deg2rad([45.0, -90.0, 45.0, 0.0, 0.0]),
-        right_arm=np.deg2rad([0.0, -5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
-        left_arm=np.deg2rad([0.0, 5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
-    ),
     "M": Pose(
         toros=np.deg2rad([0.0, 45.0, -90.0, 45.0, 0.0, 0.0]),
         right_arm=np.deg2rad([0.0, -5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
@@ -215,7 +210,7 @@ def joint_position_command_builder(
 
 
 def move_j(
-    robot: Union[rby.Robot_A, rby.Robot_T5, rby.Robot_M], pose: Pose, minimum_time=5.0
+    robot: Union[rby.Robot_A, rby.Robot_M], pose: Pose, minimum_time=5.0
 ):
     handler = robot.send_command(joint_position_command_builder(pose, minimum_time))
     return handler.get() == rby.RobotCommandFeedback.FinishCode.Ok
@@ -227,7 +222,7 @@ def main(address, model, power, servo, control_mode):
     if not robot.connect():
         logging.error(f"Failed to connect robot {address}")
         exit(1)
-    supported_model = ["A", "T5", "M"]
+    supported_model = ["A", "M"]
     supported_control_mode = ["position", "impedance"]
     model = robot.model()
     dyn_model = robot.get_dynamics()

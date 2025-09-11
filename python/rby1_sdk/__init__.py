@@ -14,14 +14,12 @@ def create_robot(address: str, model_name: Literal["a"]) -> _bindings.Robot_A: .
 @overload
 def create_robot(address: str, model_name: Literal["m"]) -> _bindings.Robot_M: ...
 @overload
-def create_robot(address: str, model_name: Literal["t5"]) -> _bindings.Robot_T5: ...
-@overload
 def create_robot(address: str, model_name: Literal["ub"]) -> _bindings.Robot_UB: ...
 @overload
 def create_robot(
     address: str, model_name: str
 ) -> Union[
-    _bindings.Robot_A, _bindings.Robot_M, _bindings.Robot_T5, _bindings.Robot_UB
+    _bindings.Robot_A, _bindings.Robot_M, _bindings.Robot_UB
 ]: ...
 
 
@@ -46,7 +44,7 @@ def create_robot(address: str, model_name: str):
 
     Returns
     -------
-    Robot_A or Robot_M or Robot_T5 or Robot_UB
+    Robot_A or Robot_M or Robot_UB
         Configured robot instance corresponding to the specified model.
 
     Raises
@@ -58,7 +56,6 @@ def create_robot(address: str, model_name: str):
     --------
     _bindings.create_robot_a : Directly create a Robot A instance.
     _bindings.create_robot_m : Directly create a Robot M instance.
-    _bindings.create_robot_t5 : Directly create a Robot T5 instance.
     _bindings.create_robot_ub : Directly create a Robot UB instance.
 
     Examples

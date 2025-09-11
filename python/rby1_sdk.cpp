@@ -46,8 +46,6 @@ py::object create_robot(const std::string& address, const py::object& model) {
 
   if (is_equal(model_name, y1_model::A::kModelName.data())) {
     return py::cast(Robot<y1_model::A>::Create(address));
-  } else if (is_equal(model_name, y1_model::T5::kModelName.data())) {
-    return py::cast(Robot<y1_model::T5>::Create(address));
   } else if (is_equal(model_name, y1_model::M::kModelName.data())) {
     return py::cast(Robot<y1_model::M>::Create(address));
   } else if (is_equal(model_name, y1_model::UB::kModelName.data())) {
@@ -252,7 +250,6 @@ RuntimeError
 See Also
 --------
 create_robot_a : Create a Robot A model instance.
-create_robot_t5 : Create a Robot T5 model instance.
 create_robot_m : Create a Robot M model instance.
 create_robot_ub : Create a Robot UB model instance.
 
@@ -283,26 +280,6 @@ Examples
 --------
 >>> from rby1_sdk import create_robot_a
 >>> robot = create_robot_a("192.168.1.100:50051")
-)doc");
-  m.def(
-      "create_robot_t5", [](const std::string& address) { return Robot<y1_model::T5>::Create(address); }, "address"_a,
-      R"doc(
-Create a ``Robot_T5`` instance.
-
-Parameters
-----------
-address : str
-    Network address of the robot, e.g. "192.168.1.100:50051".
-
-Returns
--------
-Robot
-    Configured Robot T5 instance.
-
-Examples
---------
->>> from rby1_sdk import create_robot_t5
->>> robot = create_robot_t5("192.168.1.100:50051")
 )doc");
   m.def(
       "create_robot_m", [](const std::string& address) { return Robot<y1_model::M>::Create(address); }, "address"_a,

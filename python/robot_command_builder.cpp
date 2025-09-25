@@ -1647,6 +1647,28 @@ Returns
 CartesianImpedanceControlCommandBuilder
     Self reference for method chaining.
 )doc")
+      .def("set_nullspace_joint_target", &CartesianImpedanceControlCommandBuilder::SetNullspaceJointTarget,
+           "target_position"_a, "weight"_a, "k_p"_a = 0.2, "k_d"_a = 0.2, "cost_weight"_a = 1e-3, R"doc(
+Set nullspace joint target.
+
+Parameters
+----------
+target_position : numpy.ndarray, shape (N,), dtype=float64
+    Desired position [rad].
+weight : numpy.ndarray, shape (N,), dtype=float64
+    Weight for the nullspace term.
+k_p : float, optional, default=0.2
+    Proportional gain for the nullspace term.
+k_d : float, optional, default=0.2
+    Derivative gain for the nullspace term.
+cost_weight : float, optional, default=1e-3
+    Cost weight for the nullspace term.
+
+Returns
+-------
+CartesianImpedanceControlCommandBuilder
+    Self reference for method chaining.
+)doc")
       .def("set_stop_position_tracking_error", &CartesianImpedanceControlCommandBuilder::SetStopPositionTrackingError,
            "stop_position_tracking_error"_a, R"doc(
 Set stop threshold on translational error.

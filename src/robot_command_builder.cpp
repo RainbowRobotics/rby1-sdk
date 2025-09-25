@@ -557,6 +557,32 @@ class CartesianImpedanceControlCommandBuilderImpl {
     }
   }
 
+  void SetNullspaceJointTarget(const Eigen::VectorXd& target_position, const Eigen::VectorXd& weight,
+                               std::optional<double> k_p, std::optional<double> k_d,
+                               std::optional<double> cost_weight) {
+    auto& target = *req_->mutable_nullspace_joint_target();
+    target.clear_target_position();
+    for (int i = 0; i < target_position.size(); i++) {
+      target.add_target_position(target_position(i));
+    }
+    target.clear_weight();
+    for (int i = 0; i < weight.size(); i++) {
+      target.add_weight(weight(i));
+    }
+    target.clear_k_p();
+    if (k_p.has_value()) {
+      target.mutable_k_p()->set_value(k_p.value());
+    }
+    target.clear_k_d();
+    if (k_d.has_value()) {
+      target.mutable_k_d()->set_value(k_d.value());
+    }
+    target.clear_cost_weight();
+    if (cost_weight.has_value()) {
+      target.mutable_cost_weight()->set_value(cost_weight.value());
+    }
+  }
+
   void SetStopPositionTrackingError(double stop_position_tracking_error) {
     req_->mutable_stop_position_tracking_error()->set_value(stop_position_tracking_error);
   }
@@ -1364,6 +1390,13 @@ CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder
     const std::string& joint_name, double target_position, std::optional<double> velocity_limit,
     std::optional<double> acceleration_limit) {
   impl_->AddJointPositionTarget(joint_name, target_position, velocity_limit, acceleration_limit);
+  return *this;
+}
+
+CartesianImpedanceControlCommandBuilder& CartesianImpedanceControlCommandBuilder::SetNullspaceJointTarget(
+    const Eigen::VectorXd& target_position, const Eigen::VectorXd& weight, std::optional<double> k_p,
+    std::optional<double> k_d, std::optional<double> cost_weight) {
+  impl_->SetNullspaceJointTarget(target_position, weight, k_p, k_d, cost_weight);
   return *this;
 }
 

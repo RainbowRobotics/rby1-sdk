@@ -6,8 +6,7 @@
     <mesh file="base_4.obj"/>
     <mesh file="base_5.obj"/>
     <mesh file="base_6.obj"/>
-    <mesh file="base_7.obj"/>  
-
+    <mesh file="base_7.obj"/>
     <mesh file="base_collision_0.obj"/>
     <mesh file="base_collision_1.obj"/>
     <mesh file="base_collision_2.obj"/>
@@ -51,4 +50,28 @@
     <mesh file="base_collision_40.obj"/>
     <mesh file="base_collision_41.obj"/>
     <mesh file="base_collision_42.obj"/>
+    <mesh file="base_collision_43.obj"/>
+    <mesh file="base_collision_44.obj"/>
+    <mesh file="base_collision_45.obj"/>
+    <mesh file="base_collision_46.obj"/>
+    <mesh file="base_collision_47.obj"/>
+    <mesh file="base_collision_48.obj"/>
+    <mesh file="base_collision_49.obj"/>
+    <mesh file="base_collision_50.obj"/>
+    <mesh file="base_collision_51.obj"/>
+    <mesh file="base_collision_52.obj"/>
+    <mesh file="base_collision_53.obj"/>
+    <mesh file="base_collision_54.obj"/>
+    <mesh file="base_collision_55.obj"/>
+    <mesh file="base_collision_56.obj"/>
+    <mesh file="base_collision_57.obj"/>
+    <mesh file="base_collision_58.obj"/>
+    <mesh file="base_collision_59.obj"/>
+    <mesh file="base_collision_60.obj"/>
+    <mesh file="base_collision_61.obj"/>
+    <mesh file="base_collision_62.obj"/>
+    <mesh file="base_collision_63.obj"/>
+    <mesh file="base_collision_64.obj"/>
+    <mesh file="base_collision_65.obj"/>
+    <mesh file="base_collision_66.obj"/>
 </mujoco>

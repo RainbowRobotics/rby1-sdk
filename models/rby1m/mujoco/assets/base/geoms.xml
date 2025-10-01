@@ -1,5 +1,5 @@
 <mujoco>
-      <geom mesh="base_0" material="10,10,10" class="visual"/>
+      <!-- <geom mesh="base_0" material="10,10,10" class="visual"/> -->
       <geom mesh="base_1" material="10,10,10" class="visual"/>
       <geom mesh="base_2" material="25,25,25" class="visual"/>
       <geom mesh="base_3" material="10,10,10" class="visual"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="RBY1_M_v1.3">
+<robot name="RBY1_M_v1.2">
     <mobile type="mecanum" xyz="0 0 0" rpy="0 0 0" joints="wheel_fr wheel_fl wheel_rr wheel_rl"
             params="0.245 0.245 0.076" /> <!-- Lx, Ly, wheel_radius -->
 
@@ -179,10 +179,10 @@
 
     <link name="link_torso_5">
         <inertial>
-            <mass value="14.73283950" />
-            <origin rpy="0 0 0" xyz="-0.03419752 0.00073431 -0.02659420" />
+            <mass value="14.73283950"  />
+            <origin rpy="0 0 0" xyz="-0.03419752 0.00073431 -0.02659420"  />
             <inertia ixx="0.23934353" ixy="0.00158316" ixz="0.02926509" iyy="0.23140544" iyz="0.00018390"
-                izz="0.18873182" />
+                izz="0.18873182"  />
         </inertial>
 
         <visual>
@@ -291,25 +291,18 @@
         </collision>
     </link>
 
-    <link name="link_right_arm_4"> <!--WY-->
+    <link name="link_right_arm_4">
         <inertial>
-            <mass value="1.49373286" />
-            <origin rpy="0 0 0" xyz="-0.00006159 0.00402933 0.09539632" />
-            <inertia ixx="0.00327354" ixy="-0.00000405" ixz="-0.00000027" iyy="0.00252231" iyz="-0.00001749"
-                     izz="0.00186828" />
-            <!-- <mass value="0.42508710" />
+            <mass value="0.42508710" />
             <origin rpy="0 0 0" xyz="-0.00000011 -0.02696036 0.06182110" />
             <inertia ixx="0.00082466" ixy="0.0" ixz="0.0" iyy="0.00075398" iyz="-0.00025338"
-                     izz="0.00039794" /> -->
+                izz="0.00039794" />
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_11_WY.dae" />
+                <mesh filename="./meshes/LINK_11.dae" />
             </geometry>
-            <material name="black">
-                <color rgba="0 0 0 1.0" />
-            </material>
         </visual>
 
         <collision>
@@ -320,55 +313,40 @@
         </collision>
     </link>
 
-    <link name="link_right_arm_5"> <!--WP-->
+    <link name="link_right_arm_5">
         <inertial>
-            <mass value="0.87163780" />
-            <origin rpy="0 0 0" xyz="0.00178191 0.00092083 0.00006831" />
-            <inertia ixx="0.00047456" ixy="0.00002110" ixz="0.00000222" iyy="0.00056446"
-                     iyz="-0.00000011" izz="0.00067619" />
-            <!-- <mass value="1.59194395" />
-            <origin rpy="0 0 0" xyz="0.00318034 -0.00532264 -0.02809655" />
-            <inertia ixx="0.00256054" ixy="-0.00002344" ixz="-0.00001563" iyy="0.00257233"
-                     iyz="0.00021608" izz="0.00156092" /> -->
+            <mass value="1.60506693" />
+            <origin rpy="0 0 0" xyz="0.00592642 -0.00537804 -0.02584713" />
+            <inertia ixx="0.00247557" ixy="-0.00004984" ixz="-0.00009861" iyy="0.00268241"
+                iyz="0.00021452" izz="0.00166724" />
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_12_WP.dae" />
+                <mesh filename="./meshes/LINK_12_v1.1.dae" />
             </geometry>
-            <material name="black">
-                <color rgba="0 0 0 1.0" />
-            </material>
         </visual>
 
         <collision>
-            <origin xyz="0 0 -0.1" rpy="0 0 0" />
+            <origin xyz="0 0 -0.08565" rpy="0 0 0" />
             <geometry>
-                <capsule radius="0.075" length="0.25" coltype="512" colaffinity="31" />
-                <!-- <capsule sp="0.0 0.0 0.002" ep="0.0 0.0 -0.050" radius="0.075" /> -->
+                <capsule radius="0.075" length="0.2213" coltype="512" colaffinity="31" />
             </geometry>
         </collision>
     </link>
 
-    <link name="link_right_arm_6"> <!--WR-->
+    <link name="link_right_arm_6">
         <inertial>
-            <mass value="0.74448182" />
-            <origin rpy="0 0 0" xyz="0.00706872 -0.00102308 -0.08649522" />
-            <inertia ixx="0.00187469" ixy="-0.00003209" ixz="-0.00035074" iyy="0.00160335"
-                     iyz="0.00000005" izz="0.00115053" />
-            <!-- <mass value="0.21137279" />
-            <origin rpy="0 0 0" xyz="0.00066810 -0.00031708 -0.09636043" />
-            <inertia ixx="0.00013511" ixy="-0.00000242" ixz="-0.00000102" iyy="0.00014453"
-                     iyz="0.00000094" izz="0.00025431" /> -->
+            <mass value="0.42751673" />
+            <origin rpy="0 0 0" xyz="0.00024951 -0.00019562 -0.10711314" />
+            <inertia ixx="0.00029613" ixy="-0.00000186" ixz="-0.00000157" iyy="0.00030651"
+                iyz="0.00000221" izz="0.00048946" />
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_13_WR.dae" />
+                <mesh filename="./meshes/LINK_13_v1.1.dae" />
             </geometry>
-            <material name="black">
-                <color rgba="0 0 0 1.0" />
-            </material>
         </visual>
     </link>
 
@@ -460,25 +438,18 @@
         </collision>
     </link>
 
-    <link name="link_left_arm_4"> <!--WY-->
+    <link name="link_left_arm_4">
         <inertial>
-            <mass value="1.49373286" />
-            <origin rpy="0 0 0" xyz="0.00006159 -0.00402933 0.09539632" />
-            <inertia ixx="0.00327354" ixy="-0.00000405" ixz="0.00000027" iyy="0.00252231" iyz="0.00001749"
-                     izz="0.00186828" />
-            <!-- <mass value="0.42508710" />
+            <mass value="0.42508710" />
             <origin rpy="0 0 0" xyz="0.00000011 0.02696036 0.06182110" />
             <inertia ixx="0.00082466" ixy="0.0" ixz="0.0" iyy="0.00075398" iyz="0.00025338"
-                     izz="0.00039794" /> -->
+                izz="0.00039794" />
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_18_WY.dae" />
+                <mesh filename="./meshes/LINK_18.dae" />
             </geometry>
-            <material name="black">
-                <color rgba="0 0 0 1.0" />
-            </material>
         </visual>
 
         <collision>
@@ -489,103 +460,55 @@
         </collision>
     </link>
 
-    <link name="link_left_arm_5"> <!--WP-->
+    <link name="link_left_arm_5">
         <inertial>
-            <mass value="0.87163780" />
-            <origin rpy="0 0 0" xyz="0.00178191 0.00092083 0.00006831" />
-            <inertia ixx="0.00047456" ixy="-0.00002110" ixz="-0.00000222" iyy="0.00056446"
-                     iyz="-0.00000011" izz="0.00067619" />
-            <!-- <mass value="1.44264795" />
-            <origin rpy="0 0 0" xyz="0.00340082 0.00576824 -0.02507309" />
-            <inertia ixx="0.00233577" ixy="0.00003048" ixz="-0.00001191" iyy="0.00232580"
-                     iyz="-0.00019491" izz="0.00138375" /> -->
+            <mass value="1.60424243" />
+            <origin rpy="0 0 0" xyz="0.00592398 -0.01167056 -0.02584035" />
+            <inertia ixx="0.00247523" ixy="-0.00004992" ixz="-0.00009867" iyy="0.00268221"
+                iyz="0.00021464" izz="0.00166703" />
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_19_WP.dae" />
+                <mesh filename="./meshes/LINK_19_v1.1.dae" />
             </geometry>
-            <material name="black">
-                <color rgba="0 0 0 1.0" />
-            </material>
         </visual>
 
         <collision>
-            <origin xyz="0 0 -0.1" rpy="0 0 0" />
+            <origin xyz="0 0 -0.08565" rpy="0 0 0" />
             <geometry>
-                <capsule radius="0.075" length="0.25" colaffinity="1023" />
+                <capsule radius="0.075" length="0.2213" colaffinity="1023" />
             </geometry>
         </collision>
     </link>
 
-    <link name="link_left_arm_6"> <!--WR-->
+    <link name="link_left_arm_6">
         <inertial>
-            <mass value="0.74448182" />
-            <origin rpy="0 0 0" xyz="0.00706872 -0.00102308 -0.08649522" />
-            <inertia ixx="0.00187469" ixy="-0.00003209" ixz="-0.00035074" iyy="0.00160335"
-                     iyz="0.00000005" izz="0.00115053" />
-            <!-- <mass value="0.21137279" />
-            <origin rpy="0 0 0" xyz="-0.00066810 0.00031708 -0.09636043" />
-            <inertia ixx="0.00013511" ixy="-0.00000242" ixz="0.00000102" iyy="0.00014453"
-                     iyz="-0.00000094" izz="0.00025431" /> -->
+            <mass value="0.42751673" />
+            <origin rpy="0 0 0" xyz="-0.00024951 0.00019562 -0.10711314" />
+            <inertia ixx="0.00029613" ixy="-0.00000186" ixz="0.00000157" iyy="0.00030651"
+                iyz="-0.00000221" izz="0.00048946" />
         </inertial>
 
         <visual>
             <geometry>
-                <mesh filename="./meshes/LINK_20_WR.dae" />
-            </geometry>
-            <material name="black">
-                <color rgba="0 0 0 1.0" />
-            </material>
-        </visual>
-    </link>
-
-    <!-- <link name="FT_sensor_R">
-        <inertial>
-            <mass value="0.49078507" />
-            <origin rpy="0 0 0" xyz="0.00010423 0.00108019 -0.01880676" />
-            <inertia ixx="0.00028587" ixy="-0.00000146" ixz="-0.00000026" iyy="0.00030459"
-                     iyz="-0.00000772" izz="0.00036377" />
-        </inertial>
-
-        <visual>
-            <geometry>
-                <mesh filename="./meshes/FT_SENSOR_R.dae" />
+                <mesh filename="./meshes/LINK_20_v1.1.dae" />
             </geometry>
         </visual>
     </link>
-
-    <link name="FT_sensor_L">
-        <inertial>
-            <mass value="0.49078507" />
-            <origin rpy="0 0 0" xyz="-0.00010423 -0.00108019 -0.01880676" />
-            <inertia ixx="0.00028587" ixy="-0.00000146" ixz="0.00000026" iyy="0.00030459" iyz="0.00000772"
-                     izz="0.00036377" />
-        </inertial>
-
-        <visual>
-            <geometry>
-                <mesh filename="./meshes/FT_SENSOR_L.dae" />
-            </geometry>
-        </visual>
-    </link> -->
 
     <link name="ee_right">
         <inertial>
-            <mass value="0.47470074" />
-            <origin rpy="0 0 0" xyz="0.00041345 0.00160451 -0.02702162" />
-            <inertia ixx="0.00053136" ixy="0.00001907" ixz="0.00000050" iyy="0.00031059"
-                     iyz="0.00000880" izz="0.00060261" />
+            <mass value="0.46704998" />
+            <origin rpy="0 0 0" xyz="0.00212703 0.00000615 -0.04287176" />
+            <inertia ixx="0.00032067" ixy="0.00002383" ixz="-0.00000785" iyy="0.00059559"
+                iyz="-0.00000007" izz="0.00052732" />
         </inertial>
 
         <visual>
-            <origin rpy="3.141592 0 0" xyz="0 0 0" />
             <geometry>
-                <mesh filename="./meshes/EE_GR_TF.dae" />
+                <mesh filename="./meshes/EE_BODY.dae" />
             </geometry>
-            <material name="black">
-                <color rgba="0 0 0 1.0" />
-            </material>
         </visual>
     </link>
 
@@ -594,7 +517,7 @@
             <mass value="0.03326999" />
             <origin rpy="0 0 0" xyz="0.00278346 -0.00000329 -0.02570112" />
             <inertia ixx="0.00001231" ixy="0.0" ixz="-0.00000042" iyy="0.00001066" iyz="0.0"
-                     izz="0.00000224" />
+                izz="0.00000224" />
         </inertial>
 
         <visual>
@@ -609,7 +532,7 @@
             <mass value="0.03326999" />
             <origin rpy="0 0 0" xyz="0.00278346 -0.00000329 -0.02570112" />
             <inertia ixx="0.00001231" ixy="0.0" ixz="-0.00000042" iyy="0.00001066" iyz="0.0"
-                     izz="0.00000224" />
+                izz="0.00000224" />
         </inertial>
 
         <visual>
@@ -621,20 +544,16 @@
 
     <link name="ee_left">
         <inertial>
-            <mass value="0.47470074" />
-            <origin rpy="0 0 0" xyz="0.00041345 0.00160451 -0.02702162" />
-            <inertia ixx="0.00053136" ixy="0.00001907" ixz="0.00000050" iyy="0.00031059"
-                     iyz="0.00000880" izz="0.00060261" />
+            <mass value="0.46704998" />
+            <origin rpy="0 0 0" xyz="0.00212703 0.00000615 -0.04287176" />
+            <inertia ixx="0.00032067" ixy="0.00002383" ixz="-0.00000785" iyy="0.00059559"
+                iyz="-0.00000007" izz="0.00052732" />
         </inertial>
 
         <visual>
-            <origin rpy="3.141592 0 0" xyz="0 0 0" />
             <geometry>
-                <mesh filename="./meshes/EE_GR_TF.dae" />
+                <mesh filename="./meshes/EE_BODY.dae" />
             </geometry>
-            <material name="black">
-                <color rgba="0 0 0 1.0" />
-            </material>
         </visual>
     </link>
 
@@ -643,7 +562,7 @@
             <mass value="0.03326999" />
             <origin rpy="0 0 0" xyz="0.00278346 -0.00000329 -0.02570112" />
             <inertia ixx="0.00001231" ixy="0.0" ixz="-0.00000042" iyy="0.00001066" iyz="0.0"
-                     izz="0.00000224" />
+                izz="0.00000224" />
         </inertial>
 
         <visual>
@@ -658,7 +577,7 @@
             <mass value="0.03326999" />
             <origin rpy="0 0 0" xyz="0.00278346 -0.00000329 -0.02570112" />
             <inertia ixx="0.00001231" ixy="0.0" ixz="-0.00000042" iyy="0.00001066" iyz="0.0"
-                     izz="0.00000224" />
+                izz="0.00000224" />
         </inertial>
 
         <visual>
@@ -755,7 +674,7 @@
                velocity="2.09439510"
                lower="-0.261799388"
                upper="0.261799388"
-        />
+         />
     </joint>
 
     <joint name="torso_1" type="revolute">
@@ -770,7 +689,7 @@
                velocity="2.09439510"
                lower="-0.523598776"
                upper="1.570796327"
-        />
+         />
     </joint>
 
     <joint name="torso_2" type="revolute">
@@ -785,7 +704,7 @@
                velocity="2.09439510"
                lower="-2.617993878"
                upper="1.570796327"
-        />
+         />
     </joint>
 
     <joint name="torso_3" type="revolute">
@@ -800,7 +719,7 @@
                velocity="3.141592654"
                lower="-0.785398163"
                upper="1.570796327"
-        />
+         />
     </joint>
 
     <joint name="torso_4" type="revolute">
@@ -815,7 +734,7 @@
                velocity="3.141592654"
                lower="-0.523598776"
                upper="0.523598776"
-        />
+         />
     </joint>
 
     <joint name="torso_5" type="revolute">
@@ -830,7 +749,7 @@
                velocity="3.141592654"
                lower="-2.35619449"
                upper="2.35619449"
-        />
+         />
     </joint>
 
     <joint name="right_arm_0" type="revolute">
@@ -845,7 +764,7 @@
                velocity="3.141592654"
                lower="-3.141592654"
                upper="3.141592654"
-        />
+         />
     </joint>
 
     <joint name="right_arm_1" type="revolute">
@@ -860,7 +779,7 @@
                velocity="3.141592654"
                lower="-3.141592654"
                upper="0.017453293"
-        />
+         />
     </joint>
 
     <joint name="right_arm_2" type="revolute">
@@ -875,7 +794,7 @@
                velocity="3.141592654"
                lower="-3.141592654"
                upper="3.141592654"
-        />
+         />
     </joint>
 
     <joint name="right_arm_3" type="revolute">
@@ -890,21 +809,21 @@
                velocity="3.141592654"
                lower="-2.617993878"
                upper="0.017453293"
-        />
+         />
     </joint>
 
     <joint name="right_arm_4" type="revolute">
         <parent link="link_right_arm_3" />
         <child link="link_right_arm_4" />
-        <origin rpy="0.0 0.0 0.0" xyz="-0.031 0.0 -0.3095" />
+        <origin rpy="0.0 0.0 0.0" xyz="-0.031 0.0 -0.256" />
         <axis xyz="0 0 1" />
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 10Nm, 10rad/s^2, 360deg/s, -180deg, 180deg -->
         <limit effort="10.0"
-               acceleration="10.0"
-               velocity="6.283185308"
-               lower="-3.141592654"
-               upper="3.141592654"
+            acceleration="10.0"
+            velocity="6.283185308"
+            lower="-3.141592654"
+            upper="3.141592654"
         />
     </joint>
 
@@ -916,10 +835,10 @@
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 10Nm, 10rad/s^2, 360deg/s, -90deg, 110deg -->
         <limit effort="10.0"
-               acceleration="10.0"
-               velocity="6.283185308"
-               lower="-0.8726646260"
-               upper="0.8726646260"
+            acceleration="10.0"
+            velocity="6.283185308"
+            lower="-1.570796327"
+            upper="1.919862177"
         />
     </joint>
 
@@ -927,14 +846,14 @@
         <parent link="link_right_arm_5" />
         <child link="link_right_arm_6" />
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
-        <axis xyz="1 0 0" />
+        <axis xyz="0 0 1" />
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 8Nm, 10rad/s^2, 120deg/s, -155deg, 155deg -->
         <limit effort="8.0"
-               acceleration="10.0"
-               velocity="2.094395102"
-               lower="-1.5707963268"
-               upper="1.5707963268"
+            acceleration="10.0"
+            velocity="2.094395102"
+            lower="-2.705260340"
+            upper="2.705260340"
         />
     </joint>
 
@@ -946,10 +865,10 @@
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -180deg, 180deg -->
         <limit effort="70.0"
-               acceleration="10.0"
-               velocity="3.141592654"
-               lower="-3.141592654"
-               upper="3.141592654"
+            acceleration="10.0"
+            velocity="3.141592654"
+            lower="-3.141592654"
+            upper="3.141592654"
         />
     </joint>
 
@@ -961,11 +880,11 @@
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -1deg, 180deg -->
         <limit effort="70.0"
-               acceleration="10.0"
-               velocity="3.141592654"
-               lower="-0.017453293"
-               upper="3.141592654"
-        />
+            acceleration="10.0"
+            velocity="3.141592654"
+            lower="-0.017453293"
+            upper="3.141592654"
+         />
     </joint>
 
     <joint name="left_arm_2" type="revolute">
@@ -976,11 +895,11 @@
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 70Nm, 10rad/s^2, 180deg/s, -180deg, 180deg -->
         <limit effort="70.0"
-               acceleration="10.0"
-               velocity="3.141592654"
-               lower="-3.141592654"
-               upper="3.141592654"
-        />
+            acceleration="10.0"
+            velocity="3.141592654"
+            lower="-3.141592654"
+            upper="3.141592654"
+         />
     </joint>
 
     <joint name="left_arm_3" type="revolute">
@@ -991,25 +910,25 @@
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 40Nm, 10rad/s^2, 180deg/s, -150deg, 1deg -->
         <limit effort="40.0"
-               acceleration="10.0"
-               velocity="3.141592654"
-               lower="-2.617993878"
-               upper="0.017453293"
-        />
+            acceleration="10.0"
+            velocity="3.141592654"
+            lower="-2.617993878"
+            upper="0.017453293"
+         />
     </joint>
 
     <joint name="left_arm_4" type="revolute">
         <parent link="link_left_arm_3" />
         <child link="link_left_arm_4" />
-        <origin rpy="0.0 0.0 0.0" xyz="-0.031 0.0 -0.3095" />
+        <origin rpy="0.0 0.0 0.0" xyz="-0.031 0.0 -0.256" />
         <axis xyz="0 0 1" />
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 10Nm, 10rad/s^2, 360deg/s, -180deg, 180deg -->
         <limit effort="10.0"
-               acceleration="10.0"
-               velocity="6.283185308"
-               lower="-3.141592654"
-               upper="3.141592654"
+            acceleration="10.0"
+            velocity="6.283185308"
+            lower="-3.141592654"
+            upper="3.141592654"
         />
     </joint>
 
@@ -1021,10 +940,10 @@
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 10Nm, 10rad/s^2, 360deg/s, -90deg, 110deg -->
         <limit effort="10.0"
-               acceleration="10.0"
-               velocity="6.283185308"
-               lower="-0.8726646260"
-               upper="0.8726646260"
+            acceleration="10.0"
+            velocity="6.283185308"
+            lower="-1.570796327"
+            upper="1.919862177"
         />
     </joint>
 
@@ -1032,75 +951,61 @@
         <parent link="link_left_arm_5" />
         <child link="link_left_arm_6" />
         <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
-        <axis xyz="1 0 0" />
+        <axis xyz="0 0 1" />
         <!-- Nm, rad/s^2, rad/s, (min) rad, (max) rad -->
         <!-- 8Nm, 10rad/s^2, 120deg/s, -155deg, 155deg -->
         <limit effort="8.0"
-               acceleration="10.0"
-               velocity="2.094395102"
-               lower="-1.5707963268"
-               upper="1.5707963268"
+            acceleration="10.0"
+            velocity="2.094395102"
+            lower="-2.705260340"
+            upper="2.705260340"
         />
     </joint>
 
-    <!-- <joint name="tool_right" type="fixed">
-        <parent link="link_right_arm_6" />
-        <child link="FT_sensor_R" />
-        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.1087" />
-        <axis xyz="0 0 1" />
-    </joint> -->
-
-    <joint name="END_right" type="fixed">
+    <joint name="tool_right" type="fixed">
         <parent link="link_right_arm_6" />
         <child link="ee_right" />
-        <origin rpy="0 0.0 0.0" xyz="0.0 0.0 -0.125" />
-        <axis xyz="0 0 0" />
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.1261" />
+        <axis xyz="0 0 1" />
     </joint>
 
     <joint name="gripper_finger_r1" type="prismatic" in_model_type="fixed">
         <parent link="ee_right" />
         <child link="ee_finger_r1" />
-        <origin rpy="0 0.0 1.5707963268" xyz="0.0 0.0 0.0" />
-        <axis xyz="1 0 0" />
-        <limit effort="1000" velocity="0.05" lower="0.0" upper="0.05" />
+        <origin rpy="0.0 0.0 0.0" xyz="0.003 0.0 -0.075" />
+        <axis xyz="-1 0 0" />
+        <limit effort="1000" velocity="0.05" lower="-0.05" upper="0" />
     </joint>
 
-        <joint name="gripper_finger_r2" type="prismatic" in_model_type="fixed">
+    <joint name="gripper_finger_r2" type="prismatic" in_model_type="fixed">
         <parent link="ee_right" />
         <child link="ee_finger_r2" />
-        <origin rpy="0 0.0 -1.5707963268" xyz="0.0 0.0 0.0" />
-        <axis xyz="-1 0 0" />
-        <limit effort="1000" velocity="0.05" lower="-0.05" upper="0.0" />
+        <origin rpy="0.0 0.0 3.1415926535" xyz="-0.003 0.0 -0.075" />
+        <axis xyz="1 0 0" />
+        <limit effort="1000" velocity="0.05" lower="0" upper="0.05" />
     </joint>
 
-    <!-- <joint name="tool_left" type="fixed">
-        <parent link="link_left_arm_6" />
-        <child link="FT_sensor_L" />
-        <origin rpy="0.0 0.0 0" xyz="0.0 0.0 -0.1087" />
-        <axis xyz="0 0 1" />
-    </joint> -->
-
-    <joint name="END_left" type="fixed">
+    <joint name="tool_left" type="fixed">
         <parent link="link_left_arm_6" />
         <child link="ee_left" />
-        <origin rpy="0 0.0 0.0" xyz="0.0 0.0 -0.125" />
-        <axis xyz="0 0 0" />
+        <origin rpy="0.0 0.0 0" xyz="0.0 0.0 -0.1261" />
+        <axis xyz="0 0 1" />
     </joint>
 
     <joint name="gripper_finger_l1" type="prismatic" in_model_type="fixed">
         <parent link="ee_left" />
         <child link="ee_finger_l1" />
-        <origin rpy="0 0.0 1.5707963268" xyz="0.0 0.0 0.0" />
-        <axis xyz="1 0 0" />
-        <limit effort="1000" velocity="0.05" lower="0.0" upper="0.05" />
+        <origin rpy="0.0 0.0 0.0" xyz="0.003 0.0 -0.075" />
+        <axis xyz="-1 0 0" />
+        <limit effort="1000" velocity="0.05" lower="-0.05" upper="0" />
     </joint>
 
     <joint name="gripper_finger_l2" type="prismatic" in_model_type="fixed">
         <parent link="ee_left" />
         <child link="ee_finger_l2" />
-        <origin rpy="0 0.0 -1.5707963268" xyz="0.0 0.0 0.0" />
-        <axis xyz="-1 0 0" />
-        <limit effort="1000" velocity="0.05" lower="-0.05" upper="0.0" />
+        <origin rpy="0.0 0.0 3.1415926535" xyz="-0.003 0.0 -0.075" />
+        <axis xyz="1 0 0" />
+        <limit effort="1000" velocity="0.05" lower="0" upper="0.05" />
     </joint>
 
     <joint name="head_base" type="fixed">

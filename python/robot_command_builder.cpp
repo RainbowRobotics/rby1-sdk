@@ -90,17 +90,23 @@ JointPositionCommandBuilder
     Self reference for method chaining.
 )doc")
       .def("set_minimum_time", &JointPositionCommandBuilder::SetMinimumTime, "minimum_time"_a, R"doc(
-Set the minimum execution time in seconds.
+Set the minimum execution time for the motion.
 
 Parameters
 ----------
 minimum_time : float
-    Minimum time in seconds. This parameter provides an additional degree
-    of freedom to control the arrival time to a target. Instead of relying
-    solely on velocity/acceleration limits, you can set high limits and
-    control the arrival time using minimum_time. For streaming commands,
-    this helps ensure continuous motion by preventing the robot from
-    stopping if it arrives too early before the next command.
+    The shortest allowed duration (in seconds) to reach the target.
+
+    - If the motion profile based on velocity/acceleration limits would finish earlier,
+      the motion is slowed down to take exactly `minimum_time`.
+    - If the natural motion takes longer than `minimum_time`, this parameter is ignored.
+
+    This parameter provides an additional degree of freedom to control
+    arrival time. Instead of relying solely on velocity and acceleration limits,
+    you can set high limits and then enforce the desired duration using `minimum_time`.
+
+    For streaming commands, this prevents the robot from arriving too early
+    and waiting idly, thereby ensuring smooth and continuous motion.
 
 Returns
 -------
@@ -193,7 +199,7 @@ Notes
 
 Examples
 --------
-Command 6 torso joints by name:
+Command 3 torso joints by name:
 
 >>> import numpy as np, rby1_sdk as rby
 >>> torso = (
@@ -239,7 +245,30 @@ Examples
 ...   .set_minimum_time(2.0)
 ... )
 )doc")
-      .def("set_minimum_time", &JointGroupPositionCommandBuilder::SetMinimumTime, "minimum_time"_a)
+      .def("set_minimum_time", &JointGroupPositionCommandBuilder::SetMinimumTime, "minimum_time"_a, R"doc(
+Set the minimum execution time for the motion.
+
+Parameters
+----------
+minimum_time : float
+    The shortest allowed duration (in seconds) to reach the target.
+
+    - If the motion profile based on velocity/acceleration limits would finish earlier,
+      the motion is slowed down to take exactly `minimum_time`.
+    - If the natural motion takes longer than `minimum_time`, this parameter is ignored.
+
+    This parameter provides an additional degree of freedom to control
+    arrival time. Instead of relying solely on velocity and acceleration limits,
+    you can set high limits and then enforce the desired duration using `minimum_time`.
+
+    For streaming commands, this prevents the robot from arriving too early
+    and waiting idly, thereby ensuring smooth and continuous motion.
+
+Returns
+-------
+JointGroupPositionCommandBuilder
+    Self reference for method chaining.
+)doc")
       .def("set_position", &JointGroupPositionCommandBuilder::SetPosition, "position"_a, R"doc(
 Set group joint target positions in radians.
 
@@ -371,13 +400,23 @@ Examples
 >>> imp = rby.JointImpedanceControlCommandBuilder().set_command_header(header)
 )doc")
       .def("set_minimum_time", &JointImpedanceControlCommandBuilder::SetMinimumTime, "minimum_time"_a, R"doc(
-Set the minimum execution time in seconds.
+Set the minimum execution time for the motion.
 
 Parameters
 ----------
 minimum_time : float
-    Minimum time in seconds. Helpful in streaming to avoid finishing too early
-    before the next command arrives.
+    The shortest allowed duration (in seconds) to reach the target.
+
+    - If the motion profile based on velocity/acceleration limits would finish earlier,
+      the motion is slowed down to take exactly `minimum_time`.
+    - If the natural motion takes longer than `minimum_time`, this parameter is ignored.
+
+    This parameter provides an additional degree of freedom to control
+    arrival time. Instead of relying solely on velocity and acceleration limits,
+    you can set high limits and then enforce the desired duration using `minimum_time`.
+
+    For streaming commands, this prevents the robot from arriving too early
+    and waiting idly, thereby ensuring smooth and continuous motion.
 
 Returns
 -------
@@ -1242,7 +1281,7 @@ Move forward at 0.5 m/s while yawing at 0.2 rad/s, with limits and minimum time:
 >>> # robot.send_command(cmd, priority=1).get()
 )doc")
       .def(py::init<>(), R"doc(
-Construct a SE2VelocityCommandBuilder instance.
+Construct an SE2VelocityCommandBuilder instance.
 )doc")
       .def("set_command_header", &SE2VelocityCommandBuilder::SetCommandHeader, "command_header_builder"_a, R"doc(
 Attach a command header.
@@ -1326,12 +1365,12 @@ Examples
       .def(py::init<>(), R"doc(
 Construct a StopCommandBuilder instance.
 )doc")
-      .def("set_command_header", &StopCommandBuilder::SetCommandHeader, "stop_command_builder"_a, R"doc(
+      .def("set_command_header", &StopCommandBuilder::SetCommandHeader, "command_header_builder"_a, R"doc(
 Attach a command header.
 
 Parameters
 ----------
-stop_command_builder : CommandHeaderBuilder
+command_header_builder : CommandHeaderBuilder
     Command header configuration (e.g., control hold time).
 
 Returns
@@ -1361,7 +1400,7 @@ Examples
 >>> T = np.eye(4); T[0,3] = 0.40; T[2,3] = 0.60           # 40 cm forward, 60 cm up
 >>> cart = (
 ...   rby.CartesianCommandBuilder()
-...   .add_target("base", "link_toso_5", T,
+...   .add_target("base", "link_torso_5", T,
 ...               linear_velocity_limit=0.4,     # [m/s]
 ...               angular_velocity_limit=1.0,    # [rad/s]
 ...               acceleration_limit_scaling=0.6)
@@ -1386,13 +1425,23 @@ CartesianCommandBuilder
     Self reference for method chaining.
 )doc")
       .def("set_minimum_time", &CartesianCommandBuilder::SetMinimumTime, "minimum_time"_a, R"doc(
-Set the minimum execution time in seconds.
+Set the minimum execution time for the motion.
 
 Parameters
 ----------
 minimum_time : float
-    Minimum time [s]. Ensures the motion is timed to take at least this long,
-    independent of the velocity limits (useful for streaming and smoothness).
+    The shortest allowed duration (in seconds) to reach the target.
+
+    - If the motion profile based on velocity/acceleration limits would finish earlier,
+      the motion is slowed down to take exactly `minimum_time`.
+    - If the natural motion takes longer than `minimum_time`, this parameter is ignored.
+
+    This parameter provides an additional degree of freedom to control
+    arrival time. Instead of relying solely on velocity and acceleration limits,
+    you can set high limits and then enforce the desired duration using `minimum_time`.
+
+    For streaming commands, this prevents the robot from arriving too early
+    and waiting idly, thereby ensuring smooth and continuous motion.
 
 Returns
 -------
@@ -1816,12 +1865,12 @@ Examples
 Construct a GravityCompensationCommandBuilder instance.
 )doc")
       .def("set_command_header", &GravityCompensationCommandBuilder::SetCommandHeader,
-           "gravity_compensation_command_builder"_a, R"doc(
+           "command_header_builder"_a, R"doc(
 Attach a command header.
 
 Parameters
 ----------
-gravity_compensation_command_builder : CommandHeaderBuilder
+command_header_builder : CommandHeaderBuilder
     Command header configuration (e.g., control hold time).
 
 Returns
@@ -1913,7 +1962,7 @@ cartesian_command_builder : CartesianCommandBuilder
     Cartesian command to wrap.
 )doc")
       .def(py::init<const ImpedanceControlCommandBuilder&>(), "impedance_control_command_builder"_a, R"doc(
-Construct an ArmCommandBuilder with a Impedance control command.
+Construct an ArmCommandBuilder with an impedance control command.
 
 Parameters
 ----------
@@ -1981,7 +2030,7 @@ ArmCommandBuilder
 )doc")
       .def("set_command", py::overload_cast<const ImpedanceControlCommandBuilder&>(&ArmCommandBuilder::SetCommand),
            "impedance_control_command_builder"_a, R"doc(
-Set a Impedance control command for the arm.
+Set an impedance control command for the arm.
 
 Parameters
 ----------

@@ -117,6 +117,36 @@ class JointPositionCommand(_message.Message):
         def __init__(self, command_header_feedback: _Optional[_Union[_command_header_pb2.CommandHeader.Feedback, _Mapping]] = ..., time_based_progress: _Optional[float] = ..., position_based_progress: _Optional[float] = ...) -> None: ...
     def __init__(self) -> None: ...
 
+class JointGroupPositionCommand(_message.Message):
+    __slots__ = ()
+    class Request(_message.Message):
+        __slots__ = ("command_header", "joint_names", "minimum_time", "position", "velocity_limit", "acceleration_limit")
+        COMMAND_HEADER_FIELD_NUMBER: _ClassVar[int]
+        JOINT_NAMES_FIELD_NUMBER: _ClassVar[int]
+        MINIMUM_TIME_FIELD_NUMBER: _ClassVar[int]
+        POSITION_FIELD_NUMBER: _ClassVar[int]
+        VELOCITY_LIMIT_FIELD_NUMBER: _ClassVar[int]
+        ACCELERATION_LIMIT_FIELD_NUMBER: _ClassVar[int]
+        command_header: _command_header_pb2.CommandHeader.Request
+        joint_names: _containers.RepeatedScalarFieldContainer[str]
+        minimum_time: _duration_pb2.Duration
+        position: _containers.RepeatedScalarFieldContainer[float]
+        velocity_limit: _containers.RepeatedScalarFieldContainer[float]
+        acceleration_limit: _containers.RepeatedScalarFieldContainer[float]
+        def __init__(self, command_header: _Optional[_Union[_command_header_pb2.CommandHeader.Request, _Mapping]] = ..., joint_names: _Optional[_Iterable[str]] = ..., minimum_time: _Optional[_Union[_duration_pb2.Duration, _Mapping]] = ..., position: _Optional[_Iterable[float]] = ..., velocity_limit: _Optional[_Iterable[float]] = ..., acceleration_limit: _Optional[_Iterable[float]] = ...) -> None: ...
+    class Feedback(_message.Message):
+        __slots__ = ("command_header_feedback", "joint_indices", "time_based_progress", "position_based_progress")
+        COMMAND_HEADER_FEEDBACK_FIELD_NUMBER: _ClassVar[int]
+        JOINT_INDICES_FIELD_NUMBER: _ClassVar[int]
+        TIME_BASED_PROGRESS_FIELD_NUMBER: _ClassVar[int]
+        POSITION_BASED_PROGRESS_FIELD_NUMBER: _ClassVar[int]
+        command_header_feedback: _command_header_pb2.CommandHeader.Feedback
+        joint_indices: _containers.RepeatedScalarFieldContainer[int]
+        time_based_progress: float
+        position_based_progress: float
+        def __init__(self, command_header_feedback: _Optional[_Union[_command_header_pb2.CommandHeader.Feedback, _Mapping]] = ..., joint_indices: _Optional[_Iterable[int]] = ..., time_based_progress: _Optional[float] = ..., position_based_progress: _Optional[float] = ...) -> None: ...
+    def __init__(self) -> None: ...
+
 class JointImpedanceControlCommand(_message.Message):
     __slots__ = ()
     class Request(_message.Message):
@@ -255,8 +285,21 @@ class CartesianImpedanceControlCommand(_message.Message):
         lower: float
         upper: float
         def __init__(self, joint_name: _Optional[str] = ..., lower: _Optional[float] = ..., upper: _Optional[float] = ...) -> None: ...
+    class NullspaceJointTarget(_message.Message):
+        __slots__ = ("target_position", "weight", "k_p", "k_d", "cost_weight")
+        TARGET_POSITION_FIELD_NUMBER: _ClassVar[int]
+        WEIGHT_FIELD_NUMBER: _ClassVar[int]
+        K_P_FIELD_NUMBER: _ClassVar[int]
+        K_D_FIELD_NUMBER: _ClassVar[int]
+        COST_WEIGHT_FIELD_NUMBER: _ClassVar[int]
+        target_position: _containers.RepeatedScalarFieldContainer[float]
+        weight: _containers.RepeatedScalarFieldContainer[float]
+        k_p: _wrappers_pb2.DoubleValue
+        k_d: _wrappers_pb2.DoubleValue
+        cost_weight: _wrappers_pb2.DoubleValue
+        def __init__(self, target_position: _Optional[_Iterable[float]] = ..., weight: _Optional[_Iterable[float]] = ..., k_p: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., k_d: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., cost_weight: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ...) -> None: ...
     class Request(_message.Message):
-        __slots__ = ("command_header", "minimum_time", "targets", "joint_position_targets", "stop_position_tracking_error", "stop_orientation_tracking_error", "stop_joint_position_tracking_error", "joint_stiffness", "joint_damping_ratio", "joint_torque_limit", "joint_limits", "reset_reference")
+        __slots__ = ("command_header", "minimum_time", "targets", "joint_position_targets", "stop_position_tracking_error", "stop_orientation_tracking_error", "stop_joint_position_tracking_error", "joint_stiffness", "joint_damping_ratio", "joint_torque_limit", "joint_limits", "reset_reference", "nullspace_joint_target")
         COMMAND_HEADER_FIELD_NUMBER: _ClassVar[int]
         MINIMUM_TIME_FIELD_NUMBER: _ClassVar[int]
         TARGETS_FIELD_NUMBER: _ClassVar[int]
@@ -269,6 +312,7 @@ class CartesianImpedanceControlCommand(_message.Message):
         JOINT_TORQUE_LIMIT_FIELD_NUMBER: _ClassVar[int]
         JOINT_LIMITS_FIELD_NUMBER: _ClassVar[int]
         RESET_REFERENCE_FIELD_NUMBER: _ClassVar[int]
+        NULLSPACE_JOINT_TARGET_FIELD_NUMBER: _ClassVar[int]
         command_header: _command_header_pb2.CommandHeader.Request
         minimum_time: _duration_pb2.Duration
         targets: _containers.RepeatedCompositeFieldContainer[CartesianImpedanceControlCommand.SE3PoseTarget]
@@ -281,7 +325,8 @@ class CartesianImpedanceControlCommand(_message.Message):
         joint_torque_limit: _containers.RepeatedScalarFieldContainer[float]
         joint_limits: _containers.RepeatedCompositeFieldContainer[CartesianImpedanceControlCommand.JointLimit]
         reset_reference: _wrappers_pb2.BoolValue
-        def __init__(self, command_header: _Optional[_Union[_command_header_pb2.CommandHeader.Request, _Mapping]] = ..., minimum_time: _Optional[_Union[_duration_pb2.Duration, _Mapping]] = ..., targets: _Optional[_Iterable[_Union[CartesianImpedanceControlCommand.SE3PoseTarget, _Mapping]]] = ..., joint_position_targets: _Optional[_Iterable[_Union[CartesianImpedanceControlCommand.JointPositionTarget, _Mapping]]] = ..., stop_position_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., stop_orientation_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., stop_joint_position_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., joint_stiffness: _Optional[_Iterable[float]] = ..., joint_damping_ratio: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., joint_torque_limit: _Optional[_Iterable[float]] = ..., joint_limits: _Optional[_Iterable[_Union[CartesianImpedanceControlCommand.JointLimit, _Mapping]]] = ..., reset_reference: _Optional[_Union[_wrappers_pb2.BoolValue, _Mapping]] = ...) -> None: ...
+        nullspace_joint_target: CartesianImpedanceControlCommand.NullspaceJointTarget
+        def __init__(self, command_header: _Optional[_Union[_command_header_pb2.CommandHeader.Request, _Mapping]] = ..., minimum_time: _Optional[_Union[_duration_pb2.Duration, _Mapping]] = ..., targets: _Optional[_Iterable[_Union[CartesianImpedanceControlCommand.SE3PoseTarget, _Mapping]]] = ..., joint_position_targets: _Optional[_Iterable[_Union[CartesianImpedanceControlCommand.JointPositionTarget, _Mapping]]] = ..., stop_position_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., stop_orientation_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., stop_joint_position_tracking_error: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., joint_stiffness: _Optional[_Iterable[float]] = ..., joint_damping_ratio: _Optional[_Union[_wrappers_pb2.DoubleValue, _Mapping]] = ..., joint_torque_limit: _Optional[_Iterable[float]] = ..., joint_limits: _Optional[_Iterable[_Union[CartesianImpedanceControlCommand.JointLimit, _Mapping]]] = ..., reset_reference: _Optional[_Union[_wrappers_pb2.BoolValue, _Mapping]] = ..., nullspace_joint_target: _Optional[_Union[CartesianImpedanceControlCommand.NullspaceJointTarget, _Mapping]] = ...) -> None: ...
     class Feedback(_message.Message):
         __slots__ = ("command_header_feedback", "set_position", "remain_time", "manipulability")
         COMMAND_HEADER_FEEDBACK_FIELD_NUMBER: _ClassVar[int]

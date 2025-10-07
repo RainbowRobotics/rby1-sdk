@@ -3,7 +3,6 @@ syntax = "proto3";
 package rb.api;
 
 import "google/protobuf/duration.proto";
-import "rb/api/geometry.proto";
 
 message CommandHeader {
   message Request {

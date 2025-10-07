@@ -74,6 +74,11 @@ class JointOperationServiceStub(object):
                 request_serializer=rb_dot_api_dot_joint__operation__pb2.SetPositionPIDGainRequest.SerializeToString,
                 response_deserializer=rb_dot_api_dot_joint__operation__pb2.SetPositionPIDGainResponse.FromString,
                 _registered_method=True)
+        self.SetPresetPosition = channel.unary_unary(
+                '/rb.api.JointOperationService/SetPresetPosition',
+                request_serializer=rb_dot_api_dot_joint__operation__pb2.SetPresetPositionRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_joint__operation__pb2.SetPresetPositionResponse.FromString,
+                _registered_method=True)
 
 
 class JointOperationServiceServicer(object):
@@ -121,6 +126,12 @@ class JointOperationServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SetPresetPosition(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_JointOperationServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -158,6 +169,11 @@ def add_JointOperationServiceServicer_to_server(servicer, server):
                     servicer.SetPositionPIDGain,
                     request_deserializer=rb_dot_api_dot_joint__operation__pb2.SetPositionPIDGainRequest.FromString,
                     response_serializer=rb_dot_api_dot_joint__operation__pb2.SetPositionPIDGainResponse.SerializeToString,
+            ),
+            'SetPresetPosition': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetPresetPosition,
+                    request_deserializer=rb_dot_api_dot_joint__operation__pb2.SetPresetPositionRequest.FromString,
+                    response_serializer=rb_dot_api_dot_joint__operation__pb2.SetPresetPositionResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -349,6 +365,33 @@ class JointOperationService(object):
             '/rb.api.JointOperationService/SetPositionPIDGain',
             rb_dot_api_dot_joint__operation__pb2.SetPositionPIDGainRequest.SerializeToString,
             rb_dot_api_dot_joint__operation__pb2.SetPositionPIDGainResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetPresetPosition(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.JointOperationService/SetPresetPosition',
+            rb_dot_api_dot_joint__operation__pb2.SetPresetPositionRequest.SerializeToString,
+            rb_dot_api_dot_joint__operation__pb2.SetPresetPositionResponse.FromString,
             options,
             channel_credentials,
             insecure,

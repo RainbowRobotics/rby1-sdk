@@ -549,7 +549,7 @@
         </inertial>
 
         <visual>
-            <origin rpy="0 0 0" xyz="0 0 0" />
+            <origin rpy="3.141592 0 0" xyz="0 0 0" />
             <geometry>
                 <mesh filename="./meshes/EE_GR_TF.dae" />
             </geometry>
@@ -598,7 +598,7 @@
         </inertial>
 
         <visual>
-            <origin rpy="0 0 0" xyz="0 0 0" />
+            <origin rpy="3.141592 0 0" xyz="0 0 0" />
             <geometry>
                 <mesh filename="./meshes/EE_GR_TF.dae" />
             </geometry>
@@ -1023,14 +1023,14 @@
     <joint name="END_right" type="fixed">
         <parent link="link_right_arm_6"/>
         <child link="ee_right"/>
-        <origin rpy="3.1415926535 0.0 0.0" xyz="0.0 0.0 -0.125"/>
+        <origin rpy="0 0.0 0.0" xyz="0.0 0.0 -0.125"/>
         <axis xyz="0 0 0"/>
     </joint>
 
     <joint name="gripper_finger_r1" type="prismatic" in_model_type="fixed">
         <parent link="ee_right"/>
         <child link="ee_finger_r1"/>
-        <origin rpy="3.1415926535 0.0 1.5707963268" xyz="0.0 0.0 0.0"/>
+        <origin rpy="0 0.0 1.5707963268" xyz="0.0 0.0 0.0"/>
         <axis xyz="1 0 0"/>
         <limit effort="1000" velocity="0.05" lower="0.0" upper="0.05"/>
     </joint>
@@ -1038,7 +1038,7 @@
         <joint name="gripper_finger_r2" type="prismatic" in_model_type="fixed">
         <parent link="ee_right"/>
         <child link="ee_finger_r2"/>
-        <origin rpy="3.1415926535 0.0 -1.5707963268" xyz="0.0 0.0 0.0"/>
+        <origin rpy="0 0.0 -1.5707963268" xyz="0.0 0.0 0.0"/>
         <axis xyz="-1 0 0"/>
         <limit effort="1000" velocity="0.05" lower="-0.05" upper="0.0"/>
     </joint>
@@ -1053,14 +1053,14 @@
     <joint name="END_left" type="fixed">
         <parent link="link_left_arm_6"/>
         <child link="ee_left"/>
-        <origin rpy="3.1415926535 0.0 0.0" xyz="0.0 0.0 -0.125"/>
+        <origin rpy="0 0.0 0.0" xyz="0.0 0.0 -0.125"/>
         <axis xyz="0 0 0"/>
     </joint>
 
     <joint name="gripper_finger_l1" type="prismatic" in_model_type="fixed">
         <parent link="ee_left"/>
         <child link="ee_finger_l1"/>
-        <origin rpy="3.1415926535 0.0 1.5707963268" xyz="0.0 0.0 0.0"/>
+        <origin rpy="0 0.0 1.5707963268" xyz="0.0 0.0 0.0"/>
         <axis xyz="1 0 0"/>
         <limit effort="1000" velocity="0.05" lower="0.0" upper="0.05"/>
     </joint>
@@ -1068,7 +1068,7 @@
     <joint name="gripper_finger_l2" type="prismatic" in_model_type="fixed">
         <parent link="ee_left"/>
         <child link="ee_finger_l2"/>
-        <origin rpy="3.1415926535 0.0 -1.5707963268" xyz="0.0 0.0 0.0"/>
+        <origin rpy="0 0.0 -1.5707963268" xyz="0.0 0.0 0.0"/>
         <axis xyz="-1 0 0"/>
         <limit effort="1000" velocity="0.05" lower="-0.05" upper="0.0"/>
     </joint>

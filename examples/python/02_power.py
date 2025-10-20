@@ -13,7 +13,6 @@
 # Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
 # the use or misuse of this demo code. Please use with caution and at your own discretion.
 
-
 import rby1_sdk
 import argparse
 
@@ -29,7 +28,7 @@ def main(address, model, power_device):
         if not rv:
             print("Failed to power on")
             exit(1)
-            
+
     # Power off
     # robot.power_off(power_device)
 

@@ -1,3 +1,18 @@
+# Robot State Demo
+# This example demonstrates how to connect to an RB-Y1 robot, ensure specified
+# power devices (by regex) are on, retrieve the current robot state, and print
+# it in a readable form.
+#
+# Usage example:
+#     python 03_robot_state.py --address 192.168.30.1:50051 --model a --power '.*'
+#
+# Copyright (c) 2025 Rainbow Robotics. All rights reserved.
+#
+# DISCLAIMER:
+# This is a sample code provided for educational and reference purposes only.
+# Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
+# the use or misuse of this demo code. Please use with caution and at your own discretion.
+
 import rby1_sdk
 import argparse
 import numpy as np

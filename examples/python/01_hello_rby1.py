@@ -9,7 +9,6 @@
 # Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
 # the use or misuse of this demo code. Please use with caution and at your own discretion.
 
-
 import rby1_sdk
 import argparse
 

@@ -35,8 +35,8 @@ def main(address, model, power, servo):
             if model.model_name == "UB"
             else np.deg2rad([0.0, 45.0, -90.0, 45.0, 0.0, 0.0])
         ),
-        right_arm=np.deg2rad([0.0, -5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
-        left_arm=np.deg2rad([0.0, 5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
+        right_arm=np.deg2rad([0.0, -5.0, 0.0, -120.0, 0.0, 40.0, 0.0]),
+        left_arm=np.deg2rad([0.0, 5.0, 0.0, -120.0, 0.0, 40.0, 0.0]),
         minimum_time=3,
     )
 

@@ -26,7 +26,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="07_impedance_control")
+    parser = argparse.ArgumentParser(description="08_zero_pose")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

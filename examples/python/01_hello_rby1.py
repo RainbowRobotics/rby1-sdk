@@ -1,3 +1,15 @@
+# Hello RB-Y1 Demo
+# This example demonstrates basic connection to RB-Y1 robot and retrieves robot information
+# in different string representation formats.
+#
+# Copyright (c) 2025 Rainbow Robotics. All rights reserved.
+#
+# DISCLAIMER:
+# This is a sample code provided for educational and reference purposes only.
+# Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
+# the use or misuse of this demo code. Please use with caution and at your own discretion.
+
+
 import rby1_sdk
 import argparse
 

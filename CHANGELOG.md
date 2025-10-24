@@ -1,3 +1,26 @@
+## v0.9.0 (2025-10-24)
+
+### ♻️ Refactor
+
+- **example**: remove unnecessary parentheses
+
+### ✨ Features
+
+- **model**: add m v1.1
+- add nullspace joint target option for cartesian impedance control
+- **model**: add initial m v1.3 model
+- remove T5 model
+
+### 🐛 Fixes
+
+- **LICENSE**: update copyright year in LICNESE to 2025
+- **model**: fix m v1.3 ee_left/ee_right coordinate pose
+- **python**: support 3.13 python
+- **model**: fix hand orientation
+- **urdf**: fix inertia values for left/right arm URDFs
+- **urdf**: fix inertia values for left/right arm URDFs
+- **proto**: update generated proto file
+
 ## v0.8.3 (2025-09-02)
 
 ### 🐛 Fixes

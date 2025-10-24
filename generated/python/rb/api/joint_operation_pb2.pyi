@@ -212,3 +212,17 @@ class GetPositionPIDGainResponse(_message.Message):
     response_header: _header_pb2.ResponseHeader
     position_gain: _containers.RepeatedCompositeFieldContainer[PositionPIDGain]
     def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., position_gain: _Optional[_Iterable[_Union[PositionPIDGain, _Mapping]]] = ...) -> None: ...
+
+class SetPresetPositionRequest(_message.Message):
+    __slots__ = ("request_header", "name")
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    name: str
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ..., name: _Optional[str] = ...) -> None: ...
+
+class SetPresetPositionResponse(_message.Message):
+    __slots__ = ("response_header",)
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ...) -> None: ...

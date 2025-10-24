@@ -1,3 +1,16 @@
+# Zero Pose Demo
+# This example is part of the RB-Y1 SDK examples. See --help for arguments.
+#
+# Usage example:
+#     python 08_zero_pose.py --help
+#
+# Copyright (c) 2025 Rainbow Robotics. All rights reserved.
+#
+# DISCLAIMER:
+# This is a sample code provided for educational and reference purposes only.
+# Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
+# the use or misuse of this demo code. Please use with caution and at your own discretion.
+
 import rby1_sdk as rby
 from helper import *
 import argparse
@@ -26,7 +39,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="07_impedance_control")
+    parser = argparse.ArgumentParser(description="08_zero_pose")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

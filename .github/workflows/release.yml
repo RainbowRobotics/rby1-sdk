@@ -71,14 +71,14 @@ jobs:
   build-wheels:
     needs: [ bump-version ]
     if: needs.bump-version.outputs.changed == 'true'
+    name: "Build wheels (${{ matrix.os }} - Python ${{ matrix.python-version }})"
     runs-on: ${{ matrix.os }}
-    name: "Build wheels"
 
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-22.04, windows-2022, macos-14, ubuntu-22.04-arm ]
-        python-version: [ '3.12', '3.11', '3.10' ]
+        python-version: [ '3.13', '3.12', '3.11', '3.10' ]
 
     defaults:
       run:
@@ -141,8 +141,10 @@ jobs:
 
   build-cpp:
     needs: [ bump-version ]
-    name: Build C++ SDK (${{ matrix.os }})
+    if: needs.bump-version.outputs.changed == 'true'
+    name: "Build C++ SDK (${{ matrix.os }})"
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:

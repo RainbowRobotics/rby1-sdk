@@ -1,7 +1,6 @@
+import rby1_sdk
 import time
 import os, sys
-import rby1_sdk
-from rby1_sdk import *
 import argparse
 import numpy as np
 import sys

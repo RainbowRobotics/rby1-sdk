@@ -184,7 +184,6 @@ void bind_model(py::module_& m, const std::string& model_name) {
 
 void pybind11_model(py::module_& m) {
   bind_model<y1_model::A>(m, "Model_A");
-  bind_model<y1_model::T5>(m, "Model_T5");
   bind_model<y1_model::M>(m, "Model_M");
   bind_model<y1_model::UB>(m, "Model_UB");
 }

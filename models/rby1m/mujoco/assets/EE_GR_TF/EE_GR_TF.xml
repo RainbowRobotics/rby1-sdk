@@ -1,0 +1,20 @@
+<mujoco model="EE_GR_TF">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="10,10,10.003" specular="0.0" shininess="0.225" rgba="0.039216 0.039216 0.039216 1.000000"/>
+    <mesh file="EE_GR_TF.obj"/>
+  </asset>
+  <worldbody>
+    <body name="EE_GR_TF">
+      <geom material="10,10,10.003" mesh="EE_GR_TF" class="visual"/>
+      <geom mesh="EE_GR_TF" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

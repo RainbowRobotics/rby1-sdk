@@ -1,3 +1,16 @@
+# Motion Demo
+# This example is part of the RB-Y1 SDK examples. See --help for arguments.
+#
+# Usage example:
+#     python 09_demo_motion.py --help
+#
+# Copyright (c) 2025 Rainbow Robotics. All rights reserved.
+#
+# DISCLAIMER:
+# This is a sample code provided for educational and reference purposes only.
+# Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
+# the use or misuse of this demo code. Please use with caution and at your own discretion.
+
 import rby1_sdk
 import numpy as np
 import sys
@@ -33,8 +46,6 @@ def example_joint_position_command_1(robot, model_name):
     # Initialize joint positions
     if model_name == "a":
         q_joint_torso = np.zeros(6)
-    elif model_name == "t5":
-        q_joint_torso = np.zeros(5)
     elif model_name == "m":
         q_joint_torso = np.zeros(6)
         
@@ -82,8 +93,6 @@ def example_joint_position_command_2(robot, model_name):
     # Define joint positions
     if model_name == "a":
         q_joint_torso = np.array([0, 30, -60, 30, 0, 0]) * D2R
-    elif model_name == "t5":
-        q_joint_torso = np.array([30, -60, 30, 0, 0]) * D2R
     elif model_name == "m":
         q_joint_torso = np.array([0, 30, -60, 30, 0, 0]) * D2R
         
@@ -146,8 +155,6 @@ def example_cartesian_command_1(robot, model_name):
     
     if model_name == "a":
         target_link = "link_torso_5"
-    elif model_name == "t5":
-        target_link = "link_torso_4"
     elif model_name == "m":
         target_link = "link_torso_5"
 
@@ -253,8 +260,6 @@ def example_cartesian_command_2(robot, model_name):
     
     if model_name=="a":
         target_link = "link_torso_5"
-    elif model_name=="t5":
-        target_link = "link_torso_4"
     elif model_name=="m":
         target_link = "link_torso_5"
 
@@ -346,8 +351,6 @@ def example_cartesian_command_3(robot, model_name):
 
     if model_name=="a":
         target_link = "link_torso_5"
-    elif model_name=="t5":
-        target_link = "link_torso_4"
     elif model_name=="m":
         target_link = "link_torso_5"
         
@@ -436,8 +439,6 @@ def example_impedance_control_command_1(robot, model_name):
 
     if model_name=="a":
         target_link = "link_torso_5"
-    elif model_name=="t5":
-        target_link = "link_torso_4"
     elif model_name=="m":
         target_link = "link_torso_5"
 
@@ -588,8 +589,6 @@ def example_joint_position_command_3(robot, model_name):
     # Define joint angles in degrees and convert to radians
     if model_name=="a":
         q_joint_torso = np.array([0, 30, -60, 30, 0, 0]) * D2R
-    elif model_name =="t5":
-        q_joint_torso = np.array([30, -60, 30, 0, 0]) * D2R
     elif model_name =="m":
         q_joint_torso = np.array([0, 30, -60, 30, 0, 0]) * D2R
         
@@ -657,8 +656,6 @@ def example_optimal_control_1(robot, model_name):
     
     if model_name=="a":
         target_link = "link_torso_5"
-    elif model_name=="t5":
-        target_link = "link_torso_4"
     elif model_name=="m":
         target_link = "link_torso_5"
 
@@ -730,8 +727,6 @@ def example_optimal_control_2(robot, model_name):
     
     if model_name=="a":
         target_link = "link_torso_5"
-    elif model_name=="t5":
-        target_link = "link_torso_4"
     elif model_name=="m":
         target_link = "link_torso_5"
 
@@ -804,8 +799,6 @@ def example_optimal_control_3(robot, model_name):
     
     if model_name=="a":
         target_link = "link_torso_5"
-    elif model_name=="t5":
-        target_link = "link_torso_4"
     elif model_name=="m":
         target_link = "link_torso_5"
 
@@ -878,18 +871,6 @@ def example_mixed_command_1(robot, model_name):
             .add_cartesian_target("base", target_link, T_torso, 0, WEIGHT)
             .add_joint_position_target(target_joint, -np.pi / 2, WEIGHT)
             .add_joint_position_target("torso_0", 0, WEIGHT)
-            .set_stop_cost(STOP_COST * 1e1)
-            .set_min_delta_cost(MIN_DELTA_COST)
-            .set_patience(PATIENCE)
-        )
-    elif model_name == "t5":
-        target_link = "link_torso_4"
-        target_joint = "torso_1"
-        torso_command = (
-            OptimalControlCommandBuilder()
-            .set_center_of_mass_target("base", np.array([0, 0, 0.4]), WEIGHT * 1e-1)
-            .add_cartesian_target("base", target_link, T_torso, 0, WEIGHT)
-            .add_joint_position_target(target_joint, -np.pi / 2, WEIGHT)
             .set_stop_cost(STOP_COST * 1e1)
             .set_min_delta_cost(MIN_DELTA_COST)
             .set_patience(PATIENCE)
@@ -985,18 +966,6 @@ def example_mixed_command_2(robot, model_name):
             .set_min_delta_cost(MIN_DELTA_COST / 10)
             .set_patience(PATIENCE * 10)
         )
-    elif model_name == "t5":
-        target_link = "link_torso_4"
-        target_joint = "torso_1"
-        torso_command = (
-            OptimalControlCommandBuilder()
-            .set_center_of_mass_target("base", np.array([0, 0, 0.4]), WEIGHT * 1e-1)
-            .add_cartesian_target("base", target_link, T_torso, 0, WEIGHT)
-            .add_joint_position_target(target_joint, -np.pi / 2, WEIGHT)
-            .set_stop_cost(STOP_COST)
-            .set_min_delta_cost(MIN_DELTA_COST / 10)
-            .set_patience(PATIENCE * 10)
-        )
     elif model_name == "m":
         target_link = "link_torso_5"
         target_joint = "torso_2"
@@ -1052,8 +1021,6 @@ def go_to_home_pose_1(robot, model_name):
 
     if model_name == "a":
         q_joint_torso = np.zeros(6)
-    elif model_name == "t5":
-        q_joint_torso = np.zeros(5)
     elif model_name == "m":
         q_joint_torso = np.zeros(6)
         
@@ -1100,8 +1067,6 @@ def go_to_home_pose_2(robot, model_name):
 
     if model_name =="a":
         target_joint = np.zeros(20)
-    elif model_name == "t5":
-        target_joint = np.zeros(19)
     elif model_name == "m":
         target_joint = np.zeros(20)
         

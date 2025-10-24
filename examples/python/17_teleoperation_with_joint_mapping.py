@@ -33,19 +33,14 @@ class Pose:
 class Settings:
     master_arm_loop_period = 1 / 100
 
-    impedance_stiffness = 30
+    impedance_stiffness = 50
     impedance_damping_ratio = 1.0
-    impedance_torque_limit = 10.0
+    impedance_torque_limit = 30.0
 
 
 READY_POSE = {
     "A": Pose(
         toros=np.deg2rad([0.0, 45.0, -90.0, 45.0, 0.0, 0.0]),
-        right_arm=np.deg2rad([0.0, -5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
-        left_arm=np.deg2rad([0.0, 5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
-    ),
-    "T5": Pose(
-        toros=np.deg2rad([45.0, -90.0, 45.0, 0.0, 0.0]),
         right_arm=np.deg2rad([0.0, -5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
         left_arm=np.deg2rad([0.0, 5.0, 0.0, -120.0, 0.0, 70.0, 0.0]),
     ),
@@ -214,9 +209,7 @@ def joint_position_command_builder(
     )
 
 
-def move_j(
-    robot: Union[rby.Robot_A, rby.Robot_T5, rby.Robot_M], pose: Pose, minimum_time=5.0
-):
+def move_j(robot: Union[rby.Robot_A, rby.Robot_M], pose: Pose, minimum_time=5.0):
     handler = robot.send_command(joint_position_command_builder(pose, minimum_time))
     return handler.get() == rby.RobotCommandFeedback.FinishCode.Ok
 
@@ -227,7 +220,7 @@ def main(address, model, power, servo, control_mode):
     if not robot.connect():
         logging.error(f"Failed to connect robot {address}")
         exit(1)
-    supported_model = ["A", "T5", "M"]
+    supported_model = ["A", "M"]
     supported_control_mode = ["position", "impedance"]
     model = robot.model()
     dyn_model = robot.get_dynamics()
@@ -362,7 +355,7 @@ def main(address, model, power, servo, control_mode):
             ma_input.target_operating_mode[0:7].fill(
                 rby.DynamixelBus.CurrentControlMode
             )
-            ma_input.target_torque[0:7] = torque[0:7]
+            ma_input.target_torque[0:7] = torque[0:7] * 0.6
             right_q = state.q_joint[0:7]
         else:
             ma_input.target_operating_mode[0:7].fill(
@@ -375,7 +368,7 @@ def main(address, model, power, servo, control_mode):
             ma_input.target_operating_mode[7:14].fill(
                 rby.DynamixelBus.CurrentControlMode
             )
-            ma_input.target_torque[7:14] = torque[7:14]
+            ma_input.target_torque[7:14] = torque[7:14] * 0.6
             left_q = state.q_joint[7:14]
         else:
             ma_input.target_operating_mode[7:14].fill(

@@ -435,6 +435,14 @@ class RBY1_SDK_API CartesianImpedanceControlCommandBuilder {
       std::optional<double> acceleration_limit = std::nullopt  //
   );
 
+  CartesianImpedanceControlCommandBuilder& SetNullspaceJointTarget(
+      const Eigen::VectorXd& target_position,                   //
+      const Eigen::VectorXd& weight,                            //
+      std::optional<double> k_p = std::nullopt,                 //
+      std::optional<double> k_d = std::nullopt,                 //
+      std::optional<double> cost_weight = std::nullopt          //
+  );
+
   CartesianImpedanceControlCommandBuilder& SetStopPositionTrackingError(double stop_position_tracking_error);
 
   CartesianImpedanceControlCommandBuilder& SetStopOrientationTrackingError(double stop_orientation_tracking_error);

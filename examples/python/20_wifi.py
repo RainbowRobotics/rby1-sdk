@@ -130,9 +130,9 @@ def connect_wifi_interactive(robot, networks):
     )
 
     if success:
-        print(f"✅ Successfully connected to {ssid}!")
+        print(f"Successfully connected to {ssid}!")
     else:
-        print(f"❌ Failed to connect to {ssid}. Please try again.")
+        print(f"Failed to connect to {ssid}. Please try again.")
 
 
 def loading_animation(event):

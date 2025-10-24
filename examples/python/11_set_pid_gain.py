@@ -1,6 +1,19 @@
-import time
+# Set PID Gain Demo
+# This example is part of the RB-Y1 SDK examples. See --help for arguments.
+#
+# Usage example:
+#     python 11_set_pid_gain.py --help
+#
+# Copyright (c) 2025 Rainbow Robotics. All rights reserved.
+#
+# DISCLAIMER:
+# This is a sample code provided for educational and reference purposes only.
+# Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
+# the use or misuse of this demo code. Please use with caution and at your own discretion.
+
+
 import rby1_sdk
-from rby1_sdk import PIDGain
+import time
 import argparse
 import logging
 
@@ -34,18 +47,22 @@ def main(address, model):
         logging.info(f">>> [START] {target_joint_name}")
         original_gain = robot.get_position_pid_gain(target_joint_name)
         logging.info(
-            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}")
+            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}"
+        )
 
         robot.set_position_p_gain(target_joint_name, 100)
         time.sleep(0.05)
         gain = robot.get_position_pid_gain(target_joint_name)
-        logging.info(f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+        logging.info(
+            f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}"
+        )
 
         robot.set_position_pid_gain(target_joint_name, original_gain)
         time.sleep(0.05)
         restored = robot.get_position_pid_gain(target_joint_name)
         logging.info(
-            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}")
+            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}"
+        )
     except RuntimeError as e:
         logging.error(f"Failed on {target_joint_name}: {e}")
 
@@ -55,18 +72,22 @@ def main(address, model):
         logging.info(f">>> [START] {target_joint_name}")
         original_gain = robot.get_position_pid_gain(target_joint_name)
         logging.info(
-            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}")
+            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}"
+        )
 
         robot.set_position_pid_gain(target_joint_name, 60, 10, 100)
         time.sleep(0.05)
         gain = robot.get_position_pid_gain(target_joint_name)
-        logging.info(f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+        logging.info(
+            f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}"
+        )
 
         robot.set_position_pid_gain(target_joint_name, original_gain)
         time.sleep(0.05)
         restored = robot.get_position_pid_gain(target_joint_name)
         logging.info(
-            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}")
+            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}"
+        )
     except RuntimeError as e:
         logging.error(f"Failed on {target_joint_name}: {e}")
 
@@ -76,18 +97,22 @@ def main(address, model):
         logging.info(f">>> [START] {target_joint_name}")
         original_gain = robot.get_position_pid_gain(target_joint_name)
         logging.info(
-            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}")
+            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}"
+        )
 
-        robot.set_position_pid_gain(target_joint_name, PIDGain(700, 0, 3500))
+        robot.set_position_pid_gain(target_joint_name, rby1_sdk.PIDGain(700, 0, 3500))
         time.sleep(0.05)
         gain = robot.get_position_pid_gain(target_joint_name)
-        logging.info(f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+        logging.info(
+            f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}"
+        )
 
         robot.set_position_pid_gain(target_joint_name, original_gain)
         time.sleep(0.05)
         restored = robot.get_position_pid_gain(target_joint_name)
         logging.info(
-            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}")
+            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}"
+        )
     except RuntimeError as e:
         logging.error(f"Failed on {target_joint_name}: {e}")
 
@@ -97,18 +122,22 @@ def main(address, model):
         logging.info(f">>> [START] {target_joint_name}")
         original_gain = robot.get_position_pid_gain(target_joint_name)
         logging.info(
-            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}")
+            f"[Before] [{target_joint_name}] P: {original_gain.p_gain}, I: {original_gain.i_gain}, D: {original_gain.d_gain}"
+        )
 
         robot.set_position_p_gain(target_joint_name, 300)
         time.sleep(0.05)
         gain = robot.get_position_pid_gain(target_joint_name)
-        logging.info(f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+        logging.info(
+            f"[After]  [{target_joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}"
+        )
 
         robot.set_position_pid_gain(target_joint_name, original_gain)
         time.sleep(0.05)
         restored = robot.get_position_pid_gain(target_joint_name)
         logging.info(
-            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}")
+            f"[Restored] [{target_joint_name}] P: {restored.p_gain}, I: {restored.i_gain}, D: {restored.d_gain}"
+        )
     except RuntimeError as e:
         logging.error(f"Failed on {target_joint_name}: {e}")
 

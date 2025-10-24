@@ -54,6 +54,11 @@ class LogServiceStub(object):
                 request_serializer=rb_dot_api_dot_log__pb2.SetLogLevelRequest.SerializeToString,
                 response_deserializer=rb_dot_api_dot_log__pb2.SetLogLevelResponse.FromString,
                 _registered_method=True)
+        self.GetFaultLogList = channel.unary_unary(
+                '/rb.api.LogService/GetFaultLogList',
+                request_serializer=rb_dot_api_dot_log__pb2.GetFaultLogListRequest.SerializeToString,
+                response_deserializer=rb_dot_api_dot_log__pb2.GetFaultLogListResponse.FromString,
+                _registered_method=True)
 
 
 class LogServiceServicer(object):
@@ -77,6 +82,12 @@ class LogServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetFaultLogList(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_LogServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -94,6 +105,11 @@ def add_LogServiceServicer_to_server(servicer, server):
                     servicer.SetLogLevel,
                     request_deserializer=rb_dot_api_dot_log__pb2.SetLogLevelRequest.FromString,
                     response_serializer=rb_dot_api_dot_log__pb2.SetLogLevelResponse.SerializeToString,
+            ),
+            'GetFaultLogList': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetFaultLogList,
+                    request_deserializer=rb_dot_api_dot_log__pb2.GetFaultLogListRequest.FromString,
+                    response_serializer=rb_dot_api_dot_log__pb2.GetFaultLogListResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -177,6 +193,33 @@ class LogService(object):
             '/rb.api.LogService/SetLogLevel',
             rb_dot_api_dot_log__pb2.SetLogLevelRequest.SerializeToString,
             rb_dot_api_dot_log__pb2.SetLogLevelResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetFaultLogList(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/rb.api.LogService/GetFaultLogList',
+            rb_dot_api_dot_log__pb2.GetFaultLogListRequest.SerializeToString,
+            rb_dot_api_dot_log__pb2.GetFaultLogListResponse.FromString,
             options,
             channel_credentials,
             insecure,

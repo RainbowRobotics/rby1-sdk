@@ -2114,7 +2114,6 @@ void pybind11_robot(py::module_& m) {
   bind_color(m);
   bind_serial(m);
   bind_robot<y1_model::A>(m);
-  bind_robot<y1_model::T5>(m);
   bind_robot<y1_model::M>(m);
   bind_robot<y1_model::UB>(m);
 }

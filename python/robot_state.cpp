@@ -842,7 +842,6 @@ void pybind11_robot_state(py::module_& m) {
   bind_ft_sensor(m);
 
   bind_robot_state<y1_model::A>(m, "RobotState_A");
-  bind_robot_state<y1_model::T5>(m, "RobotState_T5");
   bind_robot_state<y1_model::M>(m, "RobotState_M");
   bind_robot_state<y1_model::UB>(m, "RobotState_UB");
 }

@@ -1,0 +1,4 @@
+<mujoco>
+      <geom material="10,10,10" mesh="EE_GR_TF" class="visual"/>
+      <geom mesh="EE_GR_TF" class="collision"/>
+</mujoco>

@@ -79,3 +79,17 @@ class SetLogLevelResponse(_message.Message):
     RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
     response_header: _header_pb2.ResponseHeader
     def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ...) -> None: ...
+
+class GetFaultLogListRequest(_message.Message):
+    __slots__ = ("request_header",)
+    REQUEST_HEADER_FIELD_NUMBER: _ClassVar[int]
+    request_header: _header_pb2.RequestHeader
+    def __init__(self, request_header: _Optional[_Union[_header_pb2.RequestHeader, _Mapping]] = ...) -> None: ...
+
+class GetFaultLogListResponse(_message.Message):
+    __slots__ = ("response_header", "fault_log_list")
+    RESPONSE_HEADER_FIELD_NUMBER: _ClassVar[int]
+    FAULT_LOG_LIST_FIELD_NUMBER: _ClassVar[int]
+    response_header: _header_pb2.ResponseHeader
+    fault_log_list: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, response_header: _Optional[_Union[_header_pb2.ResponseHeader, _Mapping]] = ..., fault_log_list: _Optional[_Iterable[str]] = ...) -> None: ...

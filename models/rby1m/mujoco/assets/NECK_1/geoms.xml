@@ -1,0 +1,4 @@
+<mujoco>
+  <geom material="254,254,255" mesh="NECK_1" class="visual"/>
+  <geom mesh="NECK_1" class="collision"/>
+</mujoco>

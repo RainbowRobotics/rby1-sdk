@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from rb.api import joint_operation_pb2 as rb_dot_api_dot_joint__operation__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n$rb/api/joint_operation_service.proto\x12\x06rb.api\x1a\x1crb/api/joint_operation.proto2\xc1\x04\n\x15JointOperationService\x12<\n\x07ServoOn\x12\x16.rb.api.ServoOnRequest\x1a\x17.rb.api.ServoOnResponse\"\x00\x12?\n\x08ServoOff\x12\x17.rb.api.ServoOffRequest\x1a\x18.rb.api.ServoOffResponse\"\x00\x12H\n\x0b\x42rakeEngage\x12\x1a.rb.api.BrakeEngageRequest\x1a\x1b.rb.api.BrakeEngageResponse\"\x00\x12K\n\x0c\x42rakeRelease\x12\x1b.rb.api.BrakeReleaseRequest\x1a\x1c.rb.api.BrakeReleaseResponse\"\x00\x12T\n\x0fHomeOffsetReset\x12\x1e.rb.api.HomeOffsetResetRequest\x1a\x1f.rb.api.HomeOffsetResetResponse\"\x00\x12]\n\x12GetPositionPIDGain\x12!.rb.api.GetPositionPIDGainRequest\x1a\".rb.api.GetPositionPIDGainResponse\"\x00\x12]\n\x12SetPositionPIDGain\x12!.rb.api.SetPositionPIDGainRequest\x1a\".rb.api.SetPositionPIDGainResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n$rb/api/joint_operation_service.proto\x12\x06rb.api\x1a\x1crb/api/joint_operation.proto2\x9d\x05\n\x15JointOperationService\x12<\n\x07ServoOn\x12\x16.rb.api.ServoOnRequest\x1a\x17.rb.api.ServoOnResponse\"\x00\x12?\n\x08ServoOff\x12\x17.rb.api.ServoOffRequest\x1a\x18.rb.api.ServoOffResponse\"\x00\x12H\n\x0b\x42rakeEngage\x12\x1a.rb.api.BrakeEngageRequest\x1a\x1b.rb.api.BrakeEngageResponse\"\x00\x12K\n\x0c\x42rakeRelease\x12\x1b.rb.api.BrakeReleaseRequest\x1a\x1c.rb.api.BrakeReleaseResponse\"\x00\x12T\n\x0fHomeOffsetReset\x12\x1e.rb.api.HomeOffsetResetRequest\x1a\x1f.rb.api.HomeOffsetResetResponse\"\x00\x12]\n\x12GetPositionPIDGain\x12!.rb.api.GetPositionPIDGainRequest\x1a\".rb.api.GetPositionPIDGainResponse\"\x00\x12]\n\x12SetPositionPIDGain\x12!.rb.api.SetPositionPIDGainRequest\x1a\".rb.api.SetPositionPIDGainResponse\"\x00\x12Z\n\x11SetPresetPosition\x12 .rb.api.SetPresetPositionRequest\x1a!.rb.api.SetPresetPositionResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,5 +23,5 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'rb.api.joint_operation_serv
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_JOINTOPERATIONSERVICE']._serialized_start=79
-  _globals['_JOINTOPERATIONSERVICE']._serialized_end=656
+  _globals['_JOINTOPERATIONSERVICE']._serialized_end=748
 # @@protoc_insertion_point(module_scope)

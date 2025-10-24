@@ -1,6 +1,18 @@
-import time
+# Get PID Gain Demo
+# This example is part of the RB-Y1 SDK examples. See --help for arguments.
+#
+# Usage example:
+#     python 10_get_pid_gain.py --help
+#
+# Copyright (c) 2025 Rainbow Robotics. All rights reserved.
+#
+# DISCLAIMER:
+# This is a sample code provided for educational and reference purposes only.
+# Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
+# the use or misuse of this demo code. Please use with caution and at your own discretion.
 
 import rby1_sdk
+import time
 import argparse
 import logging
 
@@ -30,28 +42,36 @@ def main(address, model):
     try:
         gain_list = robot.get_torso_position_pid_gains()
         for i, gain in enumerate(gain_list):
-            logging.info(f"[torso_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+            logging.info(
+                f"[torso_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}"
+            )
     except RuntimeError:
         logging.error("Failed to get torso PID gains")
 
     try:
         gain_list = robot.get_right_arm_position_pid_gains()
         for i, gain in enumerate(gain_list):
-            logging.info(f"[right_arm_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+            logging.info(
+                f"[right_arm_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}"
+            )
     except RuntimeError:
         logging.error("Failed to get right arm PID gains")
 
     try:
         gain_list = robot.get_left_arm_position_pid_gains()
         for i, gain in enumerate(gain_list):
-            logging.info(f"[left_arm_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+            logging.info(
+                f"[left_arm_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}"
+            )
     except RuntimeError:
         logging.error("Failed to get left arm PID gains")
 
     try:
         gain_list = robot.get_head_position_pid_gains()
         for i, gain in enumerate(gain_list):
-            logging.info(f"[head_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+            logging.info(
+                f"[head_{i}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}"
+            )
     except RuntimeError:
         logging.error("Failed to get head PID gains")
 
@@ -60,7 +80,9 @@ def main(address, model):
     for joint_name in ["torso_0", "right_arm_0", "left_arm_0", "head_0"]:
         try:
             gain = robot.get_position_pid_gain(joint_name)
-            logging.info(f"[{joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}")
+            logging.info(
+                f"[{joint_name}] P: {gain.p_gain}, I: {gain.i_gain}, D: {gain.d_gain}"
+            )
         except RuntimeError:
             logging.error(f"Failed to get PID gain for joint '{joint_name}'")
 

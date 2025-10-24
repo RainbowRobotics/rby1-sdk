@@ -1,3 +1,18 @@
+# Power Control Demo
+# This example demonstrates how to connect to an RB-Y1 robot and power on devices
+# matching a regex pattern. It shows a minimal flow: connect, check power state,
+# and power on the device if it's off.
+#
+# Usage example:
+#     python 02_power.py --address 192.168.30.1:50051 --model a --device '.*'
+#
+# Copyright (c) 2025 Rainbow Robotics. All rights reserved.
+#
+# DISCLAIMER:
+# This is a sample code provided for educational and reference purposes only.
+# Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
+# the use or misuse of this demo code. Please use with caution and at your own discretion.
+
 import rby1_sdk
 import argparse
 
@@ -13,6 +28,9 @@ def main(address, model, power_device):
         if not rv:
             print("Failed to power on")
             exit(1)
+
+    # Power off
+    # robot.power_off(power_device)
 
 
 if __name__ == "__main__":

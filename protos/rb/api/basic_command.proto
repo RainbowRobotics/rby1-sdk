@@ -251,6 +251,18 @@ message CartesianImpedanceControlCommand {
     double upper = 3;
   }
 
+  message NullspaceJointTarget {
+    repeated double target_position = 1; // Length: DOF
+
+    repeated double weight = 2; // Length: DOF, [0, inf), default = 1
+
+    google.protobuf.DoubleValue k_p = 3;      // default = 0.2
+
+    google.protobuf.DoubleValue k_d = 4;      // default = 0.2
+
+    google.protobuf.DoubleValue cost_weight = 5; // default = 1e-3
+  }
+
   message Request {
     CommandHeader.Request command_header = 1;
 
@@ -275,6 +287,8 @@ message CartesianImpedanceControlCommand {
     repeated JointLimit joint_limits = 11;
 
     google.protobuf.BoolValue reset_reference = 12; // default = false
+
+    NullspaceJointTarget nullspace_joint_target = 13;
   }
 
   message Feedback {

@@ -49,10 +49,33 @@ class OptimalControl {
     Eigen::Vector<double, DOF> weight;
   };
 
+  struct NullspaceJointTarget {
+    explicit NullspaceJointTarget(int dof) {
+      q = Eigen::Vector<double, DOF>::Zero(dof);
+      weight = Eigen::Vector<double, DOF>::Zero(dof);
+    }
+
+    NullspaceJointTarget() {
+      if constexpr (DOF > 0) {
+        q.setZero();
+        weight.setZero();
+      } else {
+        static_assert(DOF > 0, "NullspaceJointTarget() is only available for fixed-size DOF");
+      }
+    }
+
+    Eigen::Vector<double, DOF> q;
+    Eigen::Vector<double, DOF> weight;
+    double k_p{0.2};
+    double k_d{0.2};
+    double cost_weight{1e-3};
+  };
+
   struct Input {
     std::optional<std::vector<LinkTarget>> link_targets;
     std::optional<COMTarget> com_target;
     std::optional<JointAngleTarget> q_target;
+    std::optional<NullspaceJointTarget> nullspace_q_target;
   };
 
   explicit OptimalControl(std::shared_ptr<dyn::Robot<DOF>> robot,      //
@@ -120,8 +143,16 @@ class OptimalControl {
       AddJointTargetCost(in.q_target.value(), state, dt, error_scaling, err_sum);
     }
 
+    // Snapshot of the cost before adding nullspace cost
+    const Eigen::MatrixXd A_cost_primary = qp_solver_.GetACost();
+    const Eigen::MatrixXd J_primary = A_cost_primary.leftCols(n_joints_);
+
+    if (in.nullspace_q_target) {
+      AddNullspaceCostTowardQTarget_Projected(*in.nullspace_q_target, state, dt, J_primary);
+    }
+
     if (nullspace_mapping_) {
-      AddNullspaceCost(1);
+      AddNullspaceCost_Projected(1e-4, J_primary);
     }
 
     if (soft_position_boundary_) {
@@ -326,12 +357,50 @@ class OptimalControl {
     qp_solver_.AddCostFunction(A, err);
   }
 
-  void AddNullspaceCost(double weight = 1e-3) {
-    Eigen::MatrixXd P = ComputeNullspaceProjection(qp_solver_.GetACost().leftCols(n_joints_));
-    Eigen::MatrixXd A{Eigen::MatrixXd::Zero(n_joints_, n_vars_)};
-    A.block(0, 0, n_joints_, n_joints_) = P;
+  void AddNullspaceCost_Projected(double weight, const Eigen::MatrixXd& J_primary) {
+    Eigen::MatrixXd P = ComputeNullspaceProjection(J_primary);
+    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n_joints_, n_vars_);
+    A.block(0, 0, n_joints_, n_joints_) = weight * P;
+    qp_solver_.AddCostFunction(A, Eigen::VectorXd::Zero(n_joints_));
+  }
 
-    qp_solver_.AddCostFunction(A * weight, Eigen::VectorXd::Zero(n_joints_));
+  void AddNullspaceCostToward_Projected(const Eigen::Vector<double, DOF>& v_des_full, double weight,
+                                        const Eigen::MatrixXd& J_primary) {
+    const Eigen::MatrixXd P = ComputeNullspaceProjection(J_primary);
+    Eigen::VectorXd v_des = v_des_full(joint_idx_);
+    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n_joints_, n_vars_);
+    A.block(0, 0, n_joints_, n_joints_) = weight * P;
+    Eigen::VectorXd b = weight * P * v_des;
+    qp_solver_.AddCostFunction(A, b);
+  }
+
+  void AddNullspaceCostTowardQTarget_Projected(const NullspaceJointTarget& target,
+                                               const std::shared_ptr<dyn::State<DOF>>& state, double dt,
+                                               const Eigen::MatrixXd& J_primary) {
+    const double h = std::max(dt, 1e-6);
+    const Eigen::VectorXd q = state->GetQ();
+    const Eigen::VectorXd qdot = state->GetQdot();
+
+    Eigen::Vector<double, DOF> v_des;
+    if constexpr (DOF > 0) {
+      v_des.setZero();
+    } else {
+      v_des = Eigen::Vector<double, DOF>::Zero(q.size());
+    }
+    v_des(joint_idx_) = target.k_p * (target.q(joint_idx_) - q(joint_idx_)) / h - target.k_d * qdot(joint_idx_);
+
+    const Eigen::MatrixXd P = ComputeNullspaceProjection(J_primary);
+
+    if ((target.weight.array() > 1e-6).any()) {
+      Eigen::VectorXd w = target.weight(joint_idx_).cwiseMax(0.0);
+      Eigen::MatrixXd W = w.asDiagonal();
+      Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n_joints_, n_vars_);
+      A.block(0, 0, n_joints_, n_joints_) = target.cost_weight * (W * P);
+      Eigen::VectorXd b = target.cost_weight * (W * P) * v_des(joint_idx_);
+      qp_solver_.AddCostFunction(A, b);
+    } else {
+      AddNullspaceCostToward_Projected(v_des, target.cost_weight, J_primary);
+    }
   }
 
   bool SetInequalityConstraints(const Eigen::VectorXd& q,                   //
@@ -366,7 +435,7 @@ class OptimalControl {
 
       lb.head(n_joints_) = qdot_lb;
       ub.head(n_joints_) = qdot_ub;
-      lb.tail(n_consts_ - n_joints_).setZero();  // Slack variables
+      lb.tail(n_consts_ - n_joints_).setZero();
       ub.tail(n_consts_ - n_joints_).setConstant(1e6);
 
       qp_solver_.SetConstraintsFunction(A_const, lb, ub);

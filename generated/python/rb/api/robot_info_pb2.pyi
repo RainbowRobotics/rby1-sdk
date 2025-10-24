@@ -35,10 +35,11 @@ class JointInfo(_message.Message):
     def __init__(self, name: _Optional[str] = ..., has_brake: bool = ..., product_name: _Optional[str] = ..., firmware_version: _Optional[str] = ...) -> None: ...
 
 class RobotInfo(_message.Message):
-    __slots__ = ("robot_version", "robot_model_name", "sdk_commit_id", "battery_info", "power_infos", "emo_infos", "degree_of_freedom", "joint_infos", "mobility_joint_idx", "body_joint_idx", "head_joint_idx", "torso_joint_idx", "right_arm_joint_idx", "left_arm_joint_idx")
-    ROBOT_VERSION_FIELD_NUMBER: _ClassVar[int]
+    __slots__ = ("version", "sdk_version", "robot_model_name", "robot_model_version", "battery_info", "power_infos", "emo_infos", "degree_of_freedom", "joint_infos", "mobility_joint_idx", "body_joint_idx", "head_joint_idx", "torso_joint_idx", "right_arm_joint_idx", "left_arm_joint_idx", "robot_version", "sdk_commit_id")
+    VERSION_FIELD_NUMBER: _ClassVar[int]
+    SDK_VERSION_FIELD_NUMBER: _ClassVar[int]
     ROBOT_MODEL_NAME_FIELD_NUMBER: _ClassVar[int]
-    SDK_COMMIT_ID_FIELD_NUMBER: _ClassVar[int]
+    ROBOT_MODEL_VERSION_FIELD_NUMBER: _ClassVar[int]
     BATTERY_INFO_FIELD_NUMBER: _ClassVar[int]
     POWER_INFOS_FIELD_NUMBER: _ClassVar[int]
     EMO_INFOS_FIELD_NUMBER: _ClassVar[int]
@@ -50,9 +51,12 @@ class RobotInfo(_message.Message):
     TORSO_JOINT_IDX_FIELD_NUMBER: _ClassVar[int]
     RIGHT_ARM_JOINT_IDX_FIELD_NUMBER: _ClassVar[int]
     LEFT_ARM_JOINT_IDX_FIELD_NUMBER: _ClassVar[int]
-    robot_version: str
+    ROBOT_VERSION_FIELD_NUMBER: _ClassVar[int]
+    SDK_COMMIT_ID_FIELD_NUMBER: _ClassVar[int]
+    version: str
+    sdk_version: str
     robot_model_name: str
-    sdk_commit_id: str
+    robot_model_version: str
     battery_info: BatteryInfo
     power_infos: _containers.RepeatedCompositeFieldContainer[PowerInfo]
     emo_infos: _containers.RepeatedCompositeFieldContainer[EMOInfo]
@@ -64,7 +68,9 @@ class RobotInfo(_message.Message):
     torso_joint_idx: _containers.RepeatedScalarFieldContainer[int]
     right_arm_joint_idx: _containers.RepeatedScalarFieldContainer[int]
     left_arm_joint_idx: _containers.RepeatedScalarFieldContainer[int]
-    def __init__(self, robot_version: _Optional[str] = ..., robot_model_name: _Optional[str] = ..., sdk_commit_id: _Optional[str] = ..., battery_info: _Optional[_Union[BatteryInfo, _Mapping]] = ..., power_infos: _Optional[_Iterable[_Union[PowerInfo, _Mapping]]] = ..., emo_infos: _Optional[_Iterable[_Union[EMOInfo, _Mapping]]] = ..., degree_of_freedom: _Optional[int] = ..., joint_infos: _Optional[_Iterable[_Union[JointInfo, _Mapping]]] = ..., mobility_joint_idx: _Optional[_Iterable[int]] = ..., body_joint_idx: _Optional[_Iterable[int]] = ..., head_joint_idx: _Optional[_Iterable[int]] = ..., torso_joint_idx: _Optional[_Iterable[int]] = ..., right_arm_joint_idx: _Optional[_Iterable[int]] = ..., left_arm_joint_idx: _Optional[_Iterable[int]] = ...) -> None: ...
+    robot_version: str
+    sdk_commit_id: str
+    def __init__(self, version: _Optional[str] = ..., sdk_version: _Optional[str] = ..., robot_model_name: _Optional[str] = ..., robot_model_version: _Optional[str] = ..., battery_info: _Optional[_Union[BatteryInfo, _Mapping]] = ..., power_infos: _Optional[_Iterable[_Union[PowerInfo, _Mapping]]] = ..., emo_infos: _Optional[_Iterable[_Union[EMOInfo, _Mapping]]] = ..., degree_of_freedom: _Optional[int] = ..., joint_infos: _Optional[_Iterable[_Union[JointInfo, _Mapping]]] = ..., mobility_joint_idx: _Optional[_Iterable[int]] = ..., body_joint_idx: _Optional[_Iterable[int]] = ..., head_joint_idx: _Optional[_Iterable[int]] = ..., torso_joint_idx: _Optional[_Iterable[int]] = ..., right_arm_joint_idx: _Optional[_Iterable[int]] = ..., left_arm_joint_idx: _Optional[_Iterable[int]] = ..., robot_version: _Optional[str] = ..., sdk_commit_id: _Optional[str] = ...) -> None: ...
 
 class GetRobotInfoRequest(_message.Message):
     __slots__ = ("request_header",)

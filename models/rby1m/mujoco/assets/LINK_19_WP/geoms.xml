@@ -1,0 +1,4 @@
+<mujoco>
+      <geom material="None" mesh="LINK_19_WP" class="visual"/>
+      <geom mesh="LINK_19_WP" class="collision"/>
+</mujoco>

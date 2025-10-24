@@ -327,7 +327,7 @@ class RobotCommandStreamHandlerImpl
     {
       std::unique_lock<std::mutex> lock(command_mtx_);
       if (done_) {
-        throw std::runtime_error("This stream is expired");
+        throw std::runtime_error("This command stream is expired");
       }
       if (write_done_.load() && read_done_.load())
         ;
@@ -3497,12 +3497,6 @@ template class rb::RobotCommandHandler<rb::y1_model::A>;
 template class rb::RobotCommandStreamHandler<rb::y1_model::A>;
 template class rb::ControlInput<rb::y1_model::A>;
 template class rb::ControlState<rb::y1_model::A>;
-
-template class rb::Robot<rb::y1_model::T5>;
-template class rb::RobotCommandHandler<rb::y1_model::T5>;
-template class rb::RobotCommandStreamHandler<rb::y1_model::T5>;
-template class rb::ControlInput<rb::y1_model::T5>;
-template class rb::ControlState<rb::y1_model::T5>;
 
 template class rb::Robot<rb::y1_model::M>;
 template class rb::RobotCommandHandler<rb::y1_model::M>;

@@ -124,18 +124,26 @@ class JointState(_message.Message):
     def __init__(self, is_ready: bool = ..., fet_state: _Optional[_Union[JointState.FETState, str]] = ..., run_state: _Optional[_Union[JointState.RunState, str]] = ..., init_state: _Optional[_Union[JointState.InitializationState, str]] = ..., motor_type: _Optional[int] = ..., motor_state: _Optional[int] = ..., time_since_last_update: _Optional[_Union[_duration_pb2.Duration, _Mapping]] = ..., power_on: bool = ..., position: _Optional[float] = ..., velocity: _Optional[float] = ..., current: _Optional[float] = ..., torque: _Optional[float] = ..., target_position: _Optional[float] = ..., target_velocity: _Optional[float] = ..., target_feedback_gain: _Optional[int] = ..., target_feedforward_torque: _Optional[float] = ..., temperature: _Optional[int] = ...) -> None: ...
 
 class ToolFlangeState(_message.Message):
-    __slots__ = ("time_since_last_update", "gyro", "acceleration", "switch_A", "output_voltage")
+    __slots__ = ("time_since_last_update", "gyro", "acceleration", "switch_A", "output_voltage", "digital_input_A", "digital_input_B", "digital_output_A", "digital_output_B")
     TIME_SINCE_LAST_UPDATE_FIELD_NUMBER: _ClassVar[int]
     GYRO_FIELD_NUMBER: _ClassVar[int]
     ACCELERATION_FIELD_NUMBER: _ClassVar[int]
     SWITCH_A_FIELD_NUMBER: _ClassVar[int]
     OUTPUT_VOLTAGE_FIELD_NUMBER: _ClassVar[int]
+    DIGITAL_INPUT_A_FIELD_NUMBER: _ClassVar[int]
+    DIGITAL_INPUT_B_FIELD_NUMBER: _ClassVar[int]
+    DIGITAL_OUTPUT_A_FIELD_NUMBER: _ClassVar[int]
+    DIGITAL_OUTPUT_B_FIELD_NUMBER: _ClassVar[int]
     time_since_last_update: _duration_pb2.Duration
     gyro: _geometry_pb2.Vec3
     acceleration: _geometry_pb2.Vec3
     switch_A: bool
     output_voltage: int
-    def __init__(self, time_since_last_update: _Optional[_Union[_duration_pb2.Duration, _Mapping]] = ..., gyro: _Optional[_Union[_geometry_pb2.Vec3, _Mapping]] = ..., acceleration: _Optional[_Union[_geometry_pb2.Vec3, _Mapping]] = ..., switch_A: bool = ..., output_voltage: _Optional[int] = ...) -> None: ...
+    digital_input_A: bool
+    digital_input_B: bool
+    digital_output_A: bool
+    digital_output_B: bool
+    def __init__(self, time_since_last_update: _Optional[_Union[_duration_pb2.Duration, _Mapping]] = ..., gyro: _Optional[_Union[_geometry_pb2.Vec3, _Mapping]] = ..., acceleration: _Optional[_Union[_geometry_pb2.Vec3, _Mapping]] = ..., switch_A: bool = ..., output_voltage: _Optional[int] = ..., digital_input_A: bool = ..., digital_input_B: bool = ..., digital_output_A: bool = ..., digital_output_B: bool = ...) -> None: ...
 
 class FTSensorData(_message.Message):
     __slots__ = ("time_since_last_update", "force", "torque")

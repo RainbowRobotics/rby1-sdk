@@ -1,18 +1,24 @@
-"""
-Robot Model Setting Example
+# Robot Model Setting Example
+#
+# This example includes the following features:
+# 1. Loading the current robot model (in URDF format) from the robot.
+# 2. Saving a custom robot model to the robot with a specified name.
+# 3. Assigning the robot model name for the robot to use (applied after reboot).
+#
+# Robot 모델 설정 예제
+#
+# 이 예제에는 아래와 같은 기능을 담고 있습니다.
+# 1. 현재 로봇에서 사용하고 있는 로봇 모델 (URDF 포맷)을 불러옵니다.
+# 2. 사용자 로봇 모델을 로봇에 이름과 함께 저장합니다.
+# 3. 로봇이 사용할 로봇 모델 이름을 지정합니다. (로봇이 재부팅 될 때 반영됩니다.)
+#
+# Copyright (c) 2025 Rainbow Robotics. All rights reserved.
+#
+# DISCLAIMER:
+# This is a sample code provided for educational and reference purposes only.
+# Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
+# the use or misuse of this demo code. Please use with caution and at your own discretion.
 
-This example includes the following features:
-1. Loading the current robot model (in URDF format) from the robot.
-2. Saving a custom robot model to the robot with a specified name.
-3. Assigning the robot model name for the robot to use (applied after reboot).
-
-Robot 모델 설정 예제
-
-이 예제에는 아래와 같은 기능을 담고 있습니다.
-1. 현재 로봇에서 사용하고 있는 로봇 모델 (URDF 포맷)을 불러옵니다.
-2. 사용자 로봇 모델을 로봇에 이름과 함께 저장합니다.
-3. 로봇이 사용할 로봇 모델 이름을 지정합니다. (로봇이 재부팅 될 때 반영됩니다.)
-"""
 
 import rby1_sdk
 import argparse

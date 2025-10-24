@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from rb.api import log_pb2 as rb_dot_api_dot_log__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18rb/api/log_service.proto\x12\x06rb.api\x1a\x10rb/api/log.proto2\xec\x01\n\nLogService\x12\x45\n\nGetLastLog\x12\x19.rb.api.GetLastLogRequest\x1a\x1a.rb.api.GetLastLogResponse\"\x00\x12M\n\x0cGetLogStream\x12\x1b.rb.api.GetLogStreamRequest\x1a\x1c.rb.api.GetLogStreamResponse\"\x00\x30\x01\x12H\n\x0bSetLogLevel\x12\x1a.rb.api.SetLogLevelRequest\x1a\x1b.rb.api.SetLogLevelResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18rb/api/log_service.proto\x12\x06rb.api\x1a\x10rb/api/log.proto2\xc2\x02\n\nLogService\x12\x45\n\nGetLastLog\x12\x19.rb.api.GetLastLogRequest\x1a\x1a.rb.api.GetLastLogResponse\"\x00\x12M\n\x0cGetLogStream\x12\x1b.rb.api.GetLogStreamRequest\x1a\x1c.rb.api.GetLogStreamResponse\"\x00\x30\x01\x12H\n\x0bSetLogLevel\x12\x1a.rb.api.SetLogLevelRequest\x1a\x1b.rb.api.SetLogLevelResponse\"\x00\x12T\n\x0fGetFaultLogList\x12\x1e.rb.api.GetFaultLogListRequest\x1a\x1f.rb.api.GetFaultLogListResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,5 +23,5 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'rb.api.log_service_pb2', _g
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_LOGSERVICE']._serialized_start=55
-  _globals['_LOGSERVICE']._serialized_end=291
+  _globals['_LOGSERVICE']._serialized_end=377
 # @@protoc_insertion_point(module_scope)

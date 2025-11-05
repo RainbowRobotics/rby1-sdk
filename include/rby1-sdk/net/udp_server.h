@@ -1,8 +1,9 @@
 #pragma once
 
+#include <cstring>
+#include <iostream>
 #include <stdexcept>
 #include <string>
-#include <utility>
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -17,7 +18,7 @@ namespace rb {
 
 class UdpServer {
  public:
-  explicit UdpServer(int port = 0) {
+  explicit UdpServer(const int port = 0) {
 #if defined(_WIN32)
     int startup_result = WSAStartup(MAKEWORD(2, 2), &wsa_data_);
     if (startup_result) {
@@ -27,126 +28,219 @@ class UdpServer {
     }
 #endif
 
-    fd_ = socket(AF_INET6, SOCK_DGRAM, 0);
+    // --- IPv4 socket ---
+    fd_v4_ = socket(AF_INET, SOCK_DGRAM, 0);
 #if defined(_WIN32)
-    if (fd_ == INVALID_SOCKET) {
-      WSACleanup();
+    if (fd_v4_ == INVALID_SOCKET) {
 #else
-    if (fd_ < 0) {
+    if (fd_v4_ < 0) {
 #endif
-      throw std::runtime_error("Create udp socket failed");
+      FailAndCleanup("Create IPv4 UDP socket failed");
     }
 
-    int option = 0;
-    if (setsockopt(fd_, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&option, sizeof(option)) == -1) {
-#if defined(_WIN32)
-      closesocket(fd_);
-      WSACleanup();
-#else
-      close(fd_);
-#endif
-      throw std::runtime_error("Failed to set IPV6_V6ONLY");
+    SetSockoptsV4();
+    BindV4(port);
+
+    // get chosen port (when port == 0)
+    {
+      sockaddr_in bound4{};
+      socklen_t blen4 = sizeof(bound4);
+      if (getsockname(fd_v4_, (sockaddr*)&bound4, &blen4) < 0) {
+        FailAndCleanup("Failed to get IPv4 socket name");
+      }
+      port_ = ntohs(bound4.sin_port);
     }
 
-    struct sockaddr_in6 server_addr{};
-
-    std::memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin6_family = AF_INET6;
-    server_addr.sin6_addr = in6addr_any;
-    server_addr.sin6_port = htons(port);
-
-    if (bind(fd_, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+    // --- IPv6 socket ---
+    fd_v6_ = socket(AF_INET6, SOCK_DGRAM, 0);
 #if defined(_WIN32)
-      closesocket(fd_);
-      WSACleanup();
+    if (fd_v6_ == INVALID_SOCKET) {
 #else
-      close(fd_);
+    if (fd_v6_ < 0) {
 #endif
-      throw std::runtime_error("Bind failed");
+      FailAndCleanup("Create IPv6 UDP socket failed");
     }
 
-    // Get the port number
-    struct sockaddr_in6 bound_addr{};
+    SetSockoptsV6();
 
-    socklen_t bound_addr_len = sizeof(bound_addr);
-    if (getsockname(fd_, (struct sockaddr*)&bound_addr, &bound_addr_len) == -1) {
-#if defined(_WIN32)
-      shutdown(fd_, SD_BOTH);
-      closesocket(fd_);
-      WSACleanup();
-#else
-      shutdown(fd_, SHUT_RDWR);
-      close(fd_);
-#endif
-      throw std::runtime_error("Failed to get socket name");
+    {
+      const int on = 1;
+      setsockopt(fd_v6_, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&on, sizeof(on));
     }
-    port_ = ntohs(bound_addr.sin6_port);
 
-    // Non-blocking
+    BindV6(port_);
+
+    // --- Non-blocking ---
+    MakeNonBlocking(fd_v4_);
+    MakeNonBlocking(fd_v6_);
+
 #if defined(_WIN32)
-    u_long mode = 1;
-    if (ioctlsocket(fd_, FIONBIO, &mode) != NO_ERROR) {
-      shutdown(fd_, SD_BOTH);
-      closesocket(fd_);
-      WSACleanup();
-#else
-    if (fcntl(fd_, F_SETFL, fcntl(fd_, F_GETFL) | O_NONBLOCK) < 0) {
-      shutdown(fd_, SHUT_RDWR);
-      close(fd_);
+    DWORD no = FALSE;
+    WSAIoctl(fd_v4_, SIO_UDP_CONNRESET, &no, sizeof(no), nullptr, 0, &no, nullptr, nullptr);
+    WSAIoctl(fd_v6_, SIO_UDP_CONNRESET, &no, sizeof(no), nullptr, 0, &no, nullptr, nullptr);
 #endif
-      throw std::runtime_error("failed to pu the socket in non-blocking mode");
-    }
   }
 
-  ~UdpServer() {
-#if defined(_WIN32)
-    shutdown(fd_, SD_BOTH);
-    closesocket(fd_);
-    WSACleanup();
-#else
-    shutdown(fd_, SHUT_RDWR);
-    close(fd_);
-#endif
-  }
+  ~UdpServer() { CloseAll(); }
 
   int GetPort() const { return port_; }
 
-  void ClearBuffer() const {
-    constexpr size_t kBufferSize = 1024;
-
-    char buffer[kBufferSize];
-
-    struct sockaddr_storage client_addr{};
-
-    socklen_t addr_len = sizeof(client_addr);
+  int RecvFrom(unsigned char* buffer, size_t max_buf_size, struct sockaddr_storage& client_addr) const {
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(fd_v4_, &readfds);
+    FD_SET(fd_v6_, &readfds);
 #if defined(_WIN32)
-    int flags = 0;
+    SOCKET max_fd = (fd_v4_ > fd_v6_) ? fd_v4_ : fd_v6_;
 #else
-    int flags = MSG_DONTWAIT;  // Non-blocking flag
+    const int max_fd = (fd_v4_ > fd_v6_) ? fd_v4_ : fd_v6_;
 #endif
 
-    while (recvfrom(fd_, buffer, kBufferSize, flags, (struct sockaddr*)&client_addr, &addr_len) > 0) {
-      // Do nothing after receiving data (clear buffer)
-    }
-  }
+    timeval tv{};
+    tv.tv_sec = 0;
+    tv.tv_usec = 1000;  // 1 ms
 
-  int RecvFrom(unsigned char* buffer, size_t max_buf_size, struct sockaddr_storage& client_addr) const {
-    socklen_t addr_len = sizeof(client_addr);
-    return (int)recvfrom(fd_, (char*)buffer, max_buf_size, 0, (struct sockaddr*)&client_addr, &addr_len);
+    if (const int ready = select((int)max_fd + 1, &readfds, nullptr, nullptr, &tv); ready <= 0) {
+      return 0;
+    }
+
+    if (FD_ISSET(fd_v4_, &readfds)) {
+      socklen_t len = sizeof(client_addr);
+      return (int)recvfrom(fd_v4_, (char*)buffer, max_buf_size, 0, (sockaddr*)&client_addr, &len);
+    }
+    if (FD_ISSET(fd_v6_, &readfds)) {
+      socklen_t len = sizeof(client_addr);
+      return (int)recvfrom(fd_v6_, (char*)buffer, max_buf_size, 0, (sockaddr*)&client_addr, &len);
+    }
+    return 0;
   }
 
   void SendTo(unsigned char* buffer, size_t buf_size, const struct sockaddr_storage& client_addr) const {
-    sendto(fd_, (const char*)buffer, buf_size, 0, (struct sockaddr*)&client_addr, sizeof(client_addr));
+    if (client_addr.ss_family == AF_INET) {
+      const socklen_t addrlen = (socklen_t)sizeof(sockaddr_in);
+      sendto(fd_v4_, (const char*)buffer, buf_size, 0, (const sockaddr*)&client_addr, addrlen);
+    } else if (client_addr.ss_family == AF_INET6) {
+      const socklen_t addrlen = (socklen_t)sizeof(sockaddr_in6);
+      sendto(fd_v6_, (const char*)buffer, buf_size, 0, (const sockaddr*)&client_addr, addrlen);
+    } else {
+      // Ignore unsupported family
+    }
+  }
+
+  void ClearBuffer() const {
+    constexpr size_t kBufferSize = 1024;
+    unsigned char buffer[kBufferSize];
+
+    auto drain = [&](int fd) {
+      for (;;) {
+        sockaddr_storage tmp{};
+        socklen_t len = sizeof(tmp);
+#if defined(_WIN32)
+        int flags = 0;
+#else
+        int flags = MSG_DONTWAIT;
+#endif
+        int r = (int)recvfrom(fd, (char*)buffer, kBufferSize, flags, (sockaddr*)&tmp, &len);
+        if (r <= 0)
+          break;
+      }
+    };
+    drain(fd_v4_);
+    drain(fd_v6_);
   }
 
  private:
+  void FailAndCleanup(const char* msg) const {
+    CloseAll();
+    throw std::runtime_error(msg);
+  }
+
+  void CloseAll() const {
+#if defined(_WIN32)
+    if (fd_v4_ != INVALID_SOCKET) {
+      shutdown(fd_v4_, SD_BOTH);
+      closesocket(fd_v4_);
+    }
+    if (fd_v6_ != INVALID_SOCKET) {
+      shutdown(fd_v6_, SD_BOTH);
+      closesocket(fd_v6_);
+    }
+    WSACleanup();
+#else
+    if (fd_v4_ >= 0) {
+      shutdown(fd_v4_, SHUT_RDWR);
+      close(fd_v4_);
+    }
+    if (fd_v6_ >= 0) {
+      shutdown(fd_v6_, SHUT_RDWR);
+      close(fd_v6_);
+    }
+#endif
+  }
+
+  void SetSockoptsV4() {
+    const int on = 1;
+    setsockopt(fd_v4_, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof(on));
+#ifdef SO_REUSEPORT
+    setsockopt(fd_v4_, SOL_SOCKET, SO_REUSEPORT, (const char*)&on, sizeof(on));
+#endif
+  }
+
+  void SetSockoptsV6() {
+    const int on = 1;
+    setsockopt(fd_v6_, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof(on));
+#ifdef SO_REUSEPORT
+    setsockopt(fd_v6_, SOL_SOCKET, SO_REUSEPORT, (const char*)&on, sizeof(on));
+#endif
+  }
+
+  void BindV4(int port) {
+    sockaddr_in addr4{};
+    addr4.sin_family = AF_INET;
+    addr4.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr4.sin_port = htons(port);
+    if (bind(fd_v4_, (sockaddr*)&addr4, sizeof(addr4)) < 0) {
+      FailAndCleanup("Bind failed for IPv4 socket");
+    }
+  }
+
+  void BindV6(int port_same_as_v4) {
+    sockaddr_in6 addr6{};
+    std::memset(&addr6, 0, sizeof(addr6));
+    addr6.sin6_family = AF_INET6;
+    addr6.sin6_addr = in6addr_any;
+    addr6.sin6_port = htons(port_same_as_v4);
+    if (bind(fd_v6_, (sockaddr*)&addr6, sizeof(addr6)) < 0) {
+      FailAndCleanup("Bind failed for IPv6 socket");
+    }
+  }
+
+  static void MakeNonBlocking(
+#if defined(_WIN32)
+      SOCKET fd
+#else
+      int fd
+#endif
+  ) {
+#if defined(_WIN32)
+    u_long mode = 1;
+    ioctlsocket(fd, FIONBIO, &mode);
+#else
+    if (const int flags = fcntl(fd, F_GETFL, 0); flags >= 0) {
+      fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    }
+#endif
+  }
+
 #if defined(_WIN32)
   WSADATA wsa_data_{};
-  SOCKET fd_{};
+  SOCKET fd_v4_{INVALID_SOCKET};
+  SOCKET fd_v6_{INVALID_SOCKET};
 #else
-  int fd_{};
+  int fd_v4_{-1};
+  int fd_v6_{-1};
 #endif
-  int port_;
+  int port_{0};
 };
 
 }  // namespace rb

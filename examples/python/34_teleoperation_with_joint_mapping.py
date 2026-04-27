@@ -1,7 +1,7 @@
 # Teleoperation Example
 #
-# This example initializes the robot, gripper, and leader arm connected to a UPC, moves the robot to a
-# ready pose, and streams teleoperation commands that map leader arm joint motion and trigger input to
+# This example initializes the robot, gripper, and master arm connected to a UPC, moves the robot to a
+# ready pose, and streams teleoperation commands that map master arm joint motion and trigger input to
 # robot arm and gripper control. See --help for arguments.
 #
 # Usage example:
@@ -15,7 +15,8 @@
 # the use or misuse of this demo code. Please use with caution and at your own discretion.
 
 
-# Run this example on a UPC to which the leader arm and gripper are connected.
+# Run this example on a UPC to which the master arm and gripper are connected.
+import importlib
 import rby1_sdk as rby
 import numpy as np
 import os
@@ -27,6 +28,9 @@ import threading
 import datetime
 from typing import *
 from dataclasses import dataclass
+
+helper = importlib.import_module("00_helper")
+initialize_robot = helper.initialize_robot
 
 GRIPPER_DIRECTION = False
 
@@ -221,10 +225,8 @@ def move_j(robot: Union[rby.Robot_A, rby.Robot_M], pose: Pose, minimum_time=5.0)
 
 def main(address, model, power, servo, control_mode):
     # ===== SETUP ROBOT =====
-    robot = rby.create_robot(address, model)
-    if not robot.connect():
-        logging.error(f"Failed to connect robot {address}")
-        exit(1)
+    robot = initialize_robot(address, model, power, servo)
+
     supported_model = ["A", "M"]
     supported_control_mode = ["position", "impedance"]
     model = robot.model()
@@ -251,18 +253,7 @@ def main(address, model, power, servo, control_mode):
         )
         exit(1)
     position_mode = control_mode == "position"
-    if not robot.is_power_on(power):
-        if not robot.power_on(power):
-            logging.error(f"Failed to turn power ({power}) on")
-            exit(1)
-    if not robot.is_servo_on(servo):
-        if not robot.servo_on(servo):
-            logging.error(f"Failed to servo ({servo}) on")
-            exit(1)
-    robot.reset_fault_control_manager()
-    if not robot.enable_control_manager():
-        logging.error(f"Failed to enable control manager")
-        exit(1)
+
     for arm in ["right", "left"]:
         if not robot.set_tool_flange_output_voltage(arm, 12):
             logging.error(f"Failed to set tool flange output voltage ({arm}) as 12v")
@@ -329,15 +320,31 @@ def main(address, model, power, servo, control_mode):
     logging.info("Aligning the leader arm to READY_POSE before enabling teleoperation.")
 
     def cleanup(exit_code=1):
-        robot.stop_state_update()
-        leader_arm.stop_control()
-        stream.cancel()
-        robot.cancel_control()
+        print(f"\n[{signum}] stop. safe stop procedure.")
+
+        try: robot.stop_state_update()
+        except: pass
+
+        try: master_arm.stop_control()
+        except: pass
+
+        try: robot.cancel_control()
+        except: pass
+
         time.sleep(0.5)
-        robot.disable_control_manager()
-        robot.power_off("12v")
-        gripper.stop()
-        robot.disconnect()
+        try: robot.disable_control_manager()
+        except: pass
+
+        try: robot.power_off("12v")
+        except: pass
+
+        try: gripper.stop()
+        except: pass
+
+        try: robot.disconnect()
+        except: pass
+
+        print("end.")
         raise SystemExit(exit_code)
 
     log_count = 0
@@ -394,6 +401,51 @@ def main(address, model, power, servo, control_mode):
                 startup_align_failed = True
                 startup_align_failure_message = (
                     "Failed to align the leader arm to READY_POSE within the startup timeout."
+                )
+            return ma_input
+
+        if startup_align_phase:
+            if not startup_align_initialized:
+                right_q = state.q_joint[0:7].copy()
+                left_q = state.q_joint[7:14].copy()
+                startup_align_initialized = True
+
+            right_q += np.clip(
+                READY_POSE.right_arm - right_q,
+                -Settings.startup_align_command_step,
+                Settings.startup_align_command_step,
+            )
+            left_q += np.clip(
+                READY_POSE.left_arm - left_q,
+                -Settings.startup_align_command_step,
+                Settings.startup_align_command_step,
+            )
+
+            ma_input.target_operating_mode[0:7].fill(
+                rby.DynamixelBus.CurrentBasedPositionControlMode
+            )
+            ma_input.target_torque[0:7] = ma_torque_limit[0:7]
+            ma_input.target_position[0:7] = right_q
+            ma_input.target_operating_mode[7:14].fill(
+                rby.DynamixelBus.CurrentBasedPositionControlMode
+            )
+            ma_input.target_torque[7:14] = ma_torque_limit[7:14]
+            ma_input.target_position[7:14] = left_q
+
+            right_error = np.max(np.abs(state.q_joint[0:7] - READY_POSE.right_arm))
+            left_error = np.max(np.abs(state.q_joint[7:14] - READY_POSE.left_arm))
+            if max(right_error, left_error) <= Settings.startup_align_tolerance:
+                startup_align_phase = False
+                right_q = READY_POSE.right_arm.copy()
+                left_q = READY_POSE.left_arm.copy()
+                logging.info("Master arm aligned to READY_POSE. Teleoperation unlocked.")
+            elif (
+                time.monotonic() - startup_align_start_time
+                > Settings.startup_align_timeout
+            ):
+                startup_align_failed = True
+                startup_align_failure_message = (
+                    "Failed to align the master arm to READY_POSE within the startup timeout."
                 )
             return ma_input
 
@@ -553,6 +605,7 @@ def main(address, model, power, servo, control_mode):
         cleanup(1)
 
     signal.signal(signal.SIGINT, handler)
+    signal.signal(signal.SIGTERM, handler)
 
     while True:
         if startup_align_failed:

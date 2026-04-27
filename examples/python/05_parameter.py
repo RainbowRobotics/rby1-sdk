@@ -2,7 +2,7 @@
 # This example demonstrates how to get & set the robot's parameter. See --help for arguments.
 #
 # Usage example:
-#     python 04_parameter.py --address 127.0.0.1:50051
+#     python 05_parameter.py --address 127.0.0.1:50051
 #
 # Scenario
 # 1. Get parameter list

@@ -13,6 +13,7 @@
 # the use or misuse of this demo code. Please use with caution and at your own discretion.
 
 import argparse
+import rby1_sdk as rby
 
 import rby1_sdk as rby
 
@@ -25,6 +26,13 @@ def main(address, model):
         exit(1)
 
     model_info = robot.model()
+    if len(model_info.mobility_idx) == 2 and model == "m":
+        print("wrong model argument. this robot model is a")
+        exit(1)
+    elif len(model_info.mobility_idx) == 4 and model == "a":
+        print("wrong model argument. this robot model is m")
+        exit(1)
+
     robot_info = robot.get_robot_info()
     print(f"Hello, RB-Y1! (Robot model name: {model_info.model_name})")
 

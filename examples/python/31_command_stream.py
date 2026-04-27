@@ -20,9 +20,14 @@ import argparse
 import logging
 import math
 import signal
-import time
-import numpy as np
 import rby1_sdk as rby
+import numpy as np
+import time
+import importlib
+
+helper = importlib.import_module("00_helper")
+initialize_robot = helper.initialize_robot
+movej = helper.movej
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -33,57 +38,12 @@ def move_to_zero_pose(robot):
     torso = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     right_arm = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     left_arm = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-    rv = robot.send_command(
-        rby.RobotCommandBuilder().set_command(
-            rby.ComponentBasedCommandBuilder().set_body_command(
-                rby.BodyComponentBasedCommandBuilder()
-                .set_torso_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(torso)
-                )
-                .set_right_arm_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(right_arm)
-                )
-                .set_left_arm_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(left_arm)
-                )
-            )
-        ),
-        90,
-    ).get()
-    print(f"pre control pose finish_code: {rv.finish_code}")
-    if rv.finish_code != rby.RobotCommandFeedback.FinishCode.Ok:
+    if not movej(robot, torso=torso, right_arm=right_arm, left_arm=left_arm, minimum_time=5.0):
         exit(1)
 
 
 def main(address, model, power, servo):
-    robot = rby.create_robot(address, model)
-    if not robot.connect():
-        logging.error(f"Failed to connect robot {address}")
-        exit(1)
-    if not robot.is_power_on(power):
-        if not robot.power_on(power): 
-            logging.error(f"Failed to turn power ({power}) on")
-            exit(1)
-    if not robot.is_servo_on(servo):
-        if not robot.servo_on(servo):
-            logging.error(f"Failed to servo ({servo}) on")
-            exit(1)
-    if robot.get_control_manager_state().state in [
-        rby.ControlManagerState.State.MajorFault,
-        rby.ControlManagerState.State.MinorFault,
-    ]:
-        if not robot.reset_fault_control_manager():
-            logging.error("Failed to reset control manager")
-            exit(1)
-    if not robot.enable_control_manager():
-        logging.error("Failed to enable control manager")
-        exit(1)
+    robot = initialize_robot(address, model, power, servo)
 
     logging.info("===== Command Stream Example =====")
 
@@ -102,7 +62,7 @@ def main(address, model, power, servo):
 
     dt = 0.001
     for t in range(0, 10000):
-        q = [0.0] * 6 + [0.0] * 7 + [0.0] * 6 + [math.pi / 4.0 * math.sin(math.pi * 2 * t * dt / 5)]
+        q = [0.0] * 6 + [0.0] * 7 + [0.0] * 4 + [math.pi / 4.0 * math.sin(math.pi * 2 * t * dt / 5)] + [0.0] * 2
         rc = rby.RobotCommandBuilder().set_command(
             rby.ComponentBasedCommandBuilder().set_body_command(
                 rby.JointPositionCommandBuilder()

@@ -2,7 +2,7 @@
 # This example demonstrates how to get robot state via stream. See --help for arguments.
 #
 # Usage example:
-#     python 05_robot_state_stream.py --address 192.168.30.1:50051 --model a --power '.*'
+#     python 04_robot_state_stream.py --address 192.168.30.1:50051 --model a --power '.*'
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #

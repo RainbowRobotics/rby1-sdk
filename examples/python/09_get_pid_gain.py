@@ -1,4 +1,6 @@
-# Note: This example does not run in simulation.
+################################ Note ################################
+# This example does not run in simulation.
+######################################################################
 # Get PID Gain Demo
 # This example demonstrates how to get PID gains of the robot. See --help for arguments.
 # 

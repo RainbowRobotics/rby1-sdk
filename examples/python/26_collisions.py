@@ -19,6 +19,11 @@ import time
 
 import numpy as np
 import rby1_sdk as rby
+import importlib
+
+helper = importlib.import_module("00_helper")
+initialize_robot = helper.initialize_robot
+movej = helper.movej
 
 STOP_DISTANCE = 0.03
 RIGHT_ARM_TARGET = np.array(
@@ -49,76 +54,19 @@ def move_to_pre_control_pose(robot):
     torso = np.array([0.0, 0.1, -0.2, 0.1, 0.0, 0.0])
     right_arm = np.array([0.2, -0.2, 0.0, -1.0, 0, 0.7, 0.0])
     left_arm = np.array([0.2, 0.2, 0.0, -1.0, 0, 0.7, 0.0])
-    rv = robot.send_command(
-        rby.RobotCommandBuilder().set_command(
-            rby.ComponentBasedCommandBuilder().set_body_command(
-                rby.BodyComponentBasedCommandBuilder()
-                .set_torso_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(torso)
-                )
-                .set_right_arm_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(right_arm)
-                )
-                .set_left_arm_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(left_arm)
-                )
-            )
-        ),
-        90,
-    ).get()
-    print(f"pre control pose finish_code: {rv.finish_code}")
-    if rv.finish_code != rby.RobotCommandFeedback.FinishCode.Ok:
+    if not movej(robot, torso=torso, right_arm=right_arm, left_arm=left_arm, minimum_time=5.0):
         exit(1)
 
 def main(address, model, power, servo):
     global stop_requested
-    robot = rby.create_robot(address, model)
-    if not robot.connect():
-        logging.error(f"Failed to connect robot {address}")
-        exit(1)
-    if not robot.is_power_on(power):
-        if not robot.power_on(power):
-            logging.error(f"Failed to turn power ({power}) on")
-            exit(1)
-    if not robot.is_servo_on(servo):
-        if not robot.servo_on(servo):
-            logging.error(f"Failed to servo ({servo}) on")
-            exit(1)
-    if robot.get_control_manager_state().state in [
-        rby.ControlManagerState.State.MajorFault,
-        rby.ControlManagerState.State.MinorFault,
-    ]:
-        if not robot.reset_fault_control_manager():
-            logging.error("Failed to reset control manager")
-            exit(1)
-    if not robot.enable_control_manager():
-        logging.error("Failed to enable control manager")
-        exit(1)
+    robot = initialize_robot(address, model, power, servo)
 
     move_to_pre_control_pose(robot)
 
     stop_requested = False
     robot.start_state_update(callback, rate=50)
 
-    rv = robot.send_command(
-        rby.RobotCommandBuilder().set_command(
-            rby.ComponentBasedCommandBuilder().set_body_command(
-                rby.BodyComponentBasedCommandBuilder()
-                .set_right_arm_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(RIGHT_ARM_TARGET)
-                )
-            )
-        ),
-        10,
-    )
+    rv = movej(robot, right_arm=RIGHT_ARM_TARGET, minimum_time=5.0)
 
     while not stop_requested:
         time.sleep(0.01)

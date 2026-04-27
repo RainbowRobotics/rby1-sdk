@@ -16,52 +16,10 @@ import numpy as np
 import time
 import sys
 import argparse
+import importlib
 
-
-def pre_processing(address, model):
-    robot = rby.create_robot(address, model)
-    robot.connect()
-
-    if not robot.is_power_on(".*"):
-        print("Power is currently OFF. Attempting to power on...")
-        if not robot.power_on(".*"):
-            print("Error: Failed to power on the robot.")
-            sys.exit(1)
-        print("Robot powered on successfully.")
-    else:
-        print("Power is already ON.")
-
-    if not robot.is_servo_on(".*"):
-        print("Servo is currently OFF. Attempting to activate servo...")
-        if not robot.servo_on(".*"):
-            print("Error: Failed to activate servo.")
-            sys.exit(1)
-        print("Servo activated successfully.")
-    else:
-        print("Servo is already ON.")
-
-    control_manager_state = robot.get_control_manager_state()
-
-    if (
-        control_manager_state.state == rby.ControlManagerState.State.MinorFault
-        or control_manager_state.state == rby.ControlManagerState.State.MajorFault
-    ):
-        if control_manager_state.state == rby.ControlManagerState.State.MajorFault:
-            print("Warning: Detected a Major Fault in the Control Manager.")
-        else:
-            print("Warning: Detected a Minor Fault in the Control Manager.")
-
-        print("Attempting to reset the fault...")
-        if not robot.reset_fault_control_manager():
-            print("Error: Unable to reset the fault in the Control Manager.")
-            sys.exit(1)
-        print("Fault reset successfully.")
-
-    if not robot.enable_control_manager():
-        print("Error: Failed to enable the Control Manager.")
-        sys.exit(1)
-
-    return robot
+helper = importlib.import_module("00_helper")
+initialize_robot = helper.initialize_robot
 
 
 if __name__ == "__main__":
@@ -69,7 +27,7 @@ if __name__ == "__main__":
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument("--model", type=str, required=True, help="Robot model")
     args = parser.parse_args()
-    robot = pre_processing(args.address, args.model)
+    robot = initialize_robot(args.address, args.model)
     stream = robot.create_command_stream(10)
 
     model = robot.model()

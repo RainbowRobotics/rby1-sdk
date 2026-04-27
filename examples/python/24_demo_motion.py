@@ -19,12 +19,15 @@
 # the use or misuse of this demo code. Please use with caution and at your own discretion.
 
 
-
-
 import rby1_sdk as rby
 import numpy as np
 import argparse
 from typing import Iterable
+import importlib
+
+helper = importlib.import_module("00_helper")
+initialize_robot = helper.initialize_robot
+movej = helper.movej
 
 D2R = np.pi / 180  # Degree to Radian conversion factor
 MINIMUM_TIME = 2
@@ -37,32 +40,6 @@ WEIGHT = 1
 STOP_COST = WEIGHT * WEIGHT * 2e-3
 MIN_DELTA_COST = WEIGHT * WEIGHT * 2e-3
 PATIENCE = 10
-
-def rot_y(angle_rad: float) -> np.ndarray:
-    """Rotation matrix about Y-axis.
-
-    Args:
-        angle_rad: Rotation angle in radians.
-
-    Returns:
-        3x3 rotation numpy array.
-    """
-    c, s = np.cos(angle_rad), np.sin(angle_rad)
-    return np.array([[c, 0.0, s], [0.0, 1.0, 0.0], [-s, 0.0, c]])
-
-
-def rot_z(angle_rad: float) -> np.ndarray:
-    """Rotation matrix about Z-axis.
-
-    Args:
-        angle_rad: Rotation angle in radians.
-
-    Returns:
-        3x3 rotation numpy array.
-    """
-    c, s = np.cos(angle_rad), np.sin(angle_rad)
-    return np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
-
 
 def make_transform(r: np.ndarray, t: Iterable[float]) -> np.ndarray:
     """Build a 4x4 homogeneous transform from rotation and translation.
@@ -84,31 +61,7 @@ def move_to_pre_control_pose(robot):
     torso = np.array([0.0, 0.1, -0.2, 0.1, 0.0, 0.0])
     right_arm = np.array([0.2, -0.2, 0.0, -1.0, 0, 0.7, 0.0])
     left_arm = np.array([0.2, 0.2, 0.0, -1.0, 0, 0.7, 0.0])
-    rv = robot.send_command(
-        rby.RobotCommandBuilder().set_command(
-            rby.ComponentBasedCommandBuilder().set_body_command(
-                rby.BodyComponentBasedCommandBuilder()
-                .set_torso_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(torso)
-                )
-                .set_right_arm_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(right_arm)
-                )
-                .set_left_arm_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(left_arm)
-                )
-            )
-        ),
-        90,
-    ).get()
-    print(f"pre control pose finish_code: {rv.finish_code}")
-    if rv.finish_code != rby.RobotCommandFeedback.FinishCode.Ok:
+    if not movej(robot, torso=torso, right_arm=right_arm, left_arm=left_arm, minimum_time=5.0):
         exit(1)
 
 def rot_y(angle_rad: float) -> np.ndarray:
@@ -136,20 +89,7 @@ def rot_z(angle_rad: float) -> np.ndarray:
     c, s = np.cos(angle_rad), np.sin(angle_rad)
     return np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
 
-def make_transform(r: np.ndarray, t: Iterable[float]) -> np.ndarray:
-    """Build a 4x4 homogeneous transform from rotation and translation.
 
-    Args:
-        r: 3x3 rotation matrix.
-        t: Iterable of 3 floats [x, y, z].
-
-    Returns:
-        4x4 homogeneous transform.
-    """
-    T = np.eye(4)
-    T[:3, :3] = r
-    T[:3, 3] = np.asarray(t, dtype=float)
-    return T
 
 def example_joint_position_command_1(robot):
     print("joint position command example 1")
@@ -160,8 +100,8 @@ def example_joint_position_command_1(robot):
     q_joint_left_arm = np.zeros(7)
 
     # Set specific joint positions
-    q_joint_right_arm[1] = -90 * D2R
-    q_joint_left_arm[1] = 90 * D2R
+    q_joint_right_arm[3] = -90 * D2R
+    q_joint_left_arm[3] = -90 * D2R
 
     rc = rby.RobotCommandBuilder().set_command(
         rby.ComponentBasedCommandBuilder().set_body_command(
@@ -198,7 +138,7 @@ def example_joint_position_command_2(robot):
 
     # Define joint positions
     q_joint_torso = np.array([0, 30, -60, 30, 0, 0]) * D2R
-        
+
     q_joint_right_arm = np.array([-45, -30, 0, -90, 0, 45, 0]) * D2R
     q_joint_left_arm = np.array([-45, 30, 0, -90, 0, 45, 0]) * D2R
 
@@ -224,6 +164,35 @@ def example_joint_position_command_2(robot):
 
     return 0
 
+def example_joint_position_command_3(robot):
+    print("Joint position command example 3")
+
+    # Define joint angles in degrees and convert to radians
+    q_joint_torso = np.array([0, 30, -60, 30, 0, 0]) * D2R
+
+    q_joint_right_arm = np.array([-45, -30, 0, -90, 0, 45, 0]) * D2R
+    q_joint_left_arm = np.array([-45, 30, 0, -90, 0, 45, 0]) * D2R
+
+    # Concatenate joint positions
+    q = np.concatenate((q_joint_torso, q_joint_right_arm, q_joint_left_arm))
+
+    # Build joint position command
+    joint_position_command = (
+        rby.JointPositionCommandBuilder().set_position(q).set_minimum_time(MINIMUM_TIME)
+    )
+
+    # Send command
+    rc = rby.RobotCommandBuilder().set_command(
+        rby.ComponentBasedCommandBuilder().set_body_command(joint_position_command)
+    )
+
+    rv = robot.send_command(rc, 10).get()
+
+    if rv.finish_code != rby.RobotCommandFeedback.FinishCode.Ok:
+        print("Error: Failed to conduct demo motion.")
+        return 1
+
+    return 0
 
 def example_cartesian_command_1(robot):
     print("Cartesian command example 1")
@@ -236,7 +205,7 @@ def example_cartesian_command_1(robot):
     T_left = make_transform(rot_y(angle), [0.5, 0.3, 1.0])
 
     target_link = "link_torso_5"
-    
+
 
     # Build command
     rc = rby.RobotCommandBuilder().set_command(
@@ -356,17 +325,17 @@ def example_cartesian_command_2(robot):
 
 def example_cartesian_command_3(robot):
     print("Cartesian command example 3")
-    
+
     # Define transformation matrices
     angle = np.pi / 6
     T_torso = make_transform(rot_y(angle), [0.1, 0, 1.2])
-    
+
     angle = -np.pi / 4
-    T_right = make_transform(rot_y(angle), [0.4, -0.4, 0])
-    T_left = make_transform(rot_y(angle), [0.4, 0.4, 0])
-    
+    T_right = make_transform(rot_y(angle), [0.35, -0.4, -0.2])
+    T_left = make_transform(rot_y(angle), [0.35, 0.4, -0.2])
+
     target_link = "link_torso_5"
-        
+
     # Build command
     rc = rby.RobotCommandBuilder().set_command(
         rby.ComponentBasedCommandBuilder().set_body_command(
@@ -420,8 +389,9 @@ def example_impedance_control_command_1(robot):
     T_torso = make_transform(rot_y(angle), [0.1, 0, 1.2])
 
     angle = -np.pi / 4
-    T_right = make_transform(rot_y(angle), [0.45, -0.4, -0.1])
-    T_left = make_transform(rot_y(angle), [0.45, 0.4, -0.1])
+    T_right = make_transform(rot_y(angle), [0.35, -0.4, -0.2])
+    T_left = make_transform(rot_y(angle), [0.35, 0.4, -0.2])
+
     target_link = "link_torso_5"
 
     # Build commands
@@ -479,7 +449,7 @@ def example_impedance_control_command_1(robot):
 def example_relative_command_1(robot):
     print("Relative command example 1")
 
-    
+
     # Define transformation matrices
     angle = -np.pi / 4
     T_right = make_transform(rot_y(angle), [0.5, -0.4, 0.9])
@@ -534,35 +504,6 @@ def example_relative_command_1(robot):
     return 0
 
 
-def example_joint_position_command_3(robot):
-    print("Joint position command example 3")
-
-    # Define joint angles in degrees and convert to radians
-    q_joint_torso = np.array([0, 30, -60, 30, 0, 0]) * D2R
-        
-    q_joint_right_arm = np.array([-45, -30, 0, -90, 0, 45, 0]) * D2R
-    q_joint_left_arm = np.array([-45, 30, 0, -90, 0, 45, 0]) * D2R
-
-    # Concatenate joint positions
-    q = np.concatenate((q_joint_torso, q_joint_right_arm, q_joint_left_arm))
-
-    # Build joint position command
-    joint_position_command = (
-        rby.JointPositionCommandBuilder().set_position(q).set_minimum_time(MINIMUM_TIME)
-    )
-
-    # Send command
-    rc = rby.RobotCommandBuilder().set_command(
-        rby.ComponentBasedCommandBuilder().set_body_command(joint_position_command)
-    )
-
-    rv = robot.send_command(rc, 10).get()
-
-    if rv.finish_code != rby.RobotCommandFeedback.FinishCode.Ok:
-        print("Error: Failed to conduct demo motion.")
-        return 1
-
-    return 0
 
 
 def example_optimal_control_1(robot):
@@ -572,8 +513,8 @@ def example_optimal_control_1(robot):
     T_torso = make_transform(np.eye(3), [0, 0, 1.0])
 
     angle = -np.pi / 2
-    T_right = make_transform(rot_y(angle), [0.4, -0.2, 1.0])
-    T_left = make_transform(rot_y(angle), [0.4, 0.2, 1.0])
+    T_right = make_transform(rot_y(angle), [0.5, -0.2, 1.0])
+    T_left = make_transform(rot_y(angle), [0.5, 0.2, 1.0])
 
     target_link = "link_torso_5"
 
@@ -615,7 +556,7 @@ def example_optimal_control_2(robot):
     angle = -np.pi / 2
     T_right = make_transform(rot_y(angle), [0.4, -0.2, 1.0])
     T_left = make_transform(rot_y(angle), [0.4, 0.2, 1.0])
-    
+
     target_link = "link_torso_5"
 
     # Build optimal control command
@@ -657,7 +598,7 @@ def example_optimal_control_3(robot):
     T_left = make_transform(rot_y(angle), [0.5, 0.3, 1.2])
 
     COM = np.array([-0.0, 0.0, 0.47])
-    
+
     target_link = "link_torso_5"
 
     # Build optimal control command
@@ -697,7 +638,7 @@ def example_mixed_command_1(robot):
 
     # Define transformation matrices
     T_torso = make_transform(np.eye(3), [0, 0, 1])
-    
+
     target_link = "link_torso_5"
     target_joint = "torso_2"
     torso_command = (
@@ -743,9 +684,9 @@ def example_mixed_command_2(robot):
     print("Mixed command example 2")
 
     # Define transformation matrices
-    angle = np.pi / 4
+    angle = np.pi / 6
     T_torso = make_transform(rot_z(angle), [0, 0, 1])
-    
+
     target_link = "link_torso_5"
     target_joint = "torso_2"
     torso_command = (
@@ -860,17 +801,7 @@ def go_to_home_pose_2(robot):
 
 
 def main(address, model_name, power, servo):
-    print("Attempting to connect to the robot...")
-
-    robot = rby.create_robot(address, model_name)
-
-    if not robot.connect():
-        print("Error: Unable to establish connection to the robot at")
-        exit(1)
-
-    print("Successfully connected to the robot")
-
-    print("Starting state update...")
+    robot = initialize_robot(address, model_name, power, servo)
 
     # robot.factory_reset_all_parameters()
     robot.set_parameter("default.acceleration_limit_scaling", "1.0")
@@ -883,51 +814,6 @@ def main(address, model_name, power, servo):
 
     print("parameters setting is done")
 
-    if not robot.is_connected():
-        print("Robot is not connected")
-        exit(1)
-
-    if not robot.is_power_on(power):
-        rv = robot.power_on(power)
-        if not rv:
-            print("Failed to power on")
-            exit(1)
-
-    if not robot.is_servo_on(servo):
-        rv = robot.servo_on(servo)
-        if not rv:
-            print("Fail to servo on")
-            exit(1)
-
-    control_manager_state = robot.get_control_manager_state()
-
-    if (
-        control_manager_state.state == rby.ControlManagerState.State.MinorFault
-        or control_manager_state.state == rby.ControlManagerState.State.MajorFault
-    ):
-
-        if control_manager_state.state == rby.ControlManagerState.State.MajorFault:
-            print(
-                "Warning: Detected a Major Fault in the Control Manager!!!!!!!!!!!!!!!."
-            )
-        else:
-            print(
-                "Warning: Detected a Minor Fault in the Control Manager@@@@@@@@@@@@@@@@."
-            )
-
-        print("Attempting to reset the fault...")
-        if not robot.reset_fault_control_manager():
-            print("Error: Unable to reset the fault in the Control Manager.")
-            exit(1)
-        print("Fault reset successfully.")
-
-    print("Control Manager state is normal. No faults detected.")
-
-    print("Enabling the Control Manager...")
-    if not robot.enable_control_manager(unlimited_mode_enabled=True):
-        print("Error: Failed to enable the Control Manager.")
-        exit(1)
-    print("Control Manager enabled successfully.")
     move_to_pre_control_pose(robot)
 
     if not example_joint_position_command_1(robot):

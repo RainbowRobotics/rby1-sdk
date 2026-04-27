@@ -17,10 +17,15 @@
 # Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
 # the use or misuse of this demo code. Please use with caution and at your own discretion.
 
+import importlib
+import rby1_sdk as rby
 import numpy as np
 import sys
 import argparse
-import rby1_sdk as rby
+
+helper = importlib.import_module("00_helper")
+initialize_robot = helper.initialize_robot
+movej = helper.movej
 
 # Note: On the A model, the Y component of SE(2) commands is ignored.
 
@@ -33,24 +38,12 @@ MINIMUM_TIME = 2.5
 def example_ready_command(robot):
     print("example_ready_command")
 
-
     # Set specific joint positions
     q_joint_waist = [0, 45 * D2R, -90 * D2R, 45 * D2R, 0, 0]
-    q_joint_right_arm = [0, -5 * D2R, 0, -120 * D2R, 0, 70 * D2R, 0]
-    q_joint_left_arm = [0, 5 * D2R, 0, -120 * D2R, 0, 70 * D2R, 0]
+    q_joint_right_arm = [0, -5 * D2R, 0, -120 * D2R, 0, 45 * D2R, 0]
+    q_joint_left_arm = [0, 5 * D2R, 0, -120 * D2R, 0, 45 * D2R, 0]
 
-    rc = rby.RobotCommandBuilder().set_command(
-        rby.ComponentBasedCommandBuilder().set_body_command(
-            rby.JointPositionCommandBuilder()
-            .set_command_header(rby.CommandHeaderBuilder().set_control_hold_time(2))
-            .set_minimum_time(7.0)
-            .set_position(q_joint_waist + q_joint_right_arm + q_joint_left_arm)
-        )
-    )
-
-    rv = robot.send_command(rc, 10).get()
-
-    if rv.finish_code != rby.RobotCommandFeedback.FinishCode.Ok:
+    if not movej(robot, torso=q_joint_waist, right_arm=q_joint_right_arm, left_arm=q_joint_left_arm, minimum_time=7.0):
         print("Error: Failed to conduct demo motion.")
         return 1
 
@@ -167,52 +160,7 @@ def example_SE2_turn_right_command(robot):
 
 def main(address, model, power, servo):
     print("Attempting to connect to the robot...")
-    robot = rby.create_robot(address, model)
-
-    if not robot.connect():
-        print(f"Error: Unable to establish connection to the robot at {address}")
-        sys.exit(1)
-
-    if not robot.is_power_on(power):
-        rv = robot.power_on(power)
-        if not rv:
-            print("Failed to power on")
-            exit(1)
-
-    if not robot.is_servo_on(servo):
-        rv = robot.servo_on(servo)
-        if not rv:
-            print("Fail to servo on")
-            exit(1)
-
-    control_manager_state = robot.get_control_manager_state()
-
-    if (
-        control_manager_state.state == rby.ControlManagerState.State.MinorFault
-        or control_manager_state.state == rby.ControlManagerState.State.MajorFault
-    ):
-
-        if control_manager_state.state == rby.ControlManagerState.State.MajorFault:
-            print(
-                "Warning: Detected a Major Fault in the Control Manager!!!!!!!!!!!!!!!."
-            )
-        else:
-            print(
-                "Warning: Detected a Minor Fault in the Control Manager@@@@@@@@@@@@@@@@."
-            )
-
-        print("Attempting to reset the fault...")
-        if not robot.reset_fault_control_manager():
-            print("Error: Unable to reset the fault in the Control Manager.")
-            sys.exit(1)
-        print("Fault reset successfully.")
-
-    print("Control Manager state is normal. No faults detected.")
-
-    print("Enabling the Control Manager...")
-    if not robot.enable_control_manager():
-        print("Error: Failed to enable the Control Manager.")
-        sys.exit(1)
+    robot = initialize_robot(address, model, power, servo)
     print("Control Manager enabled successfully.")
 
     

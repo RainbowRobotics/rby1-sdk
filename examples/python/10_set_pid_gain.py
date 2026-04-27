@@ -1,3 +1,11 @@
+############################## CAUTION ###############################
+# The motor PID values ​​currently set on the robot are internally optimized.
+# Please exercise caution to prevent accidents caused by changing the PID values.
+######################################################################
+################################ Note ################################
+# This example does not run in simulation.
+# This example does not apply when the control manager is enabled.
+######################################################################
 # Set PID Gain Demo
 # This example connects to an RB-Y1 robot, reads the current PID gains for
 # selected joints, updates those gains using different setter forms, and then
@@ -29,7 +37,7 @@ logging.basicConfig(
 def main(address, model):
     logging.info(f"Creating robot with address='{address}', model='{model}'")
     robot = rby.create_robot(address, model)
-    
+
     if not robot.connect():
         logging.error("Robot is not connected")
         exit(1)

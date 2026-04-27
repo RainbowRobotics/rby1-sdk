@@ -14,10 +14,15 @@
 # Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
 # the use or misuse of this demo code. Please use with caution and at your own discretion.
 
-import rby1_sdk as rby
+import importlib
 import argparse
 import numpy as np
 import logging
+import rby1_sdk as rby
+
+helper = importlib.import_module("00_helper")
+initialize_robot = helper.initialize_robot
+movej = helper.movej
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -29,32 +34,54 @@ def move_to_pre_control_pose(robot):
     torso = np.array([0.0, 0.1, -0.2, 0.1, 0.0, 0.0])
     right_arm = np.array([0.2, -0.2, 0.0, -1.0, 0, 0.7, 0.0])
     left_arm = np.array([0.2, 0.2, 0.0, -1.0, 0, 0.7, 0.0])
-    rv = robot.send_command(
-        rby.RobotCommandBuilder().set_command(
-            rby.ComponentBasedCommandBuilder().set_body_command(
-                rby.BodyComponentBasedCommandBuilder()
-                .set_torso_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(torso)
-                )
-                .set_right_arm_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(right_arm)
-                )
-                .set_left_arm_command(
-                    rby.JointPositionCommandBuilder()
-                    .set_minimum_time(5.0)
-                    .set_position(left_arm)
-                )
-            )
-        ),
-        90,
-    ).get()
-    print(f"pre control pose finish_code: {rv.finish_code}")
-    if rv.finish_code != rby.RobotCommandFeedback.FinishCode.Ok:
+    if not movej(robot, torso=torso, right_arm=right_arm, left_arm=left_arm, minimum_time=5.0):
         exit(1)
+
+def example_joint_command(robot):
+    """Move to the joint pose before appling impedance control."""
+    logging.info("===== joint Control Command Example =====")
+
+    torso = np.array([0.0,0.3386,-0.8486,1.0331,0.0,0.0])
+    right_arm = np.array([0.1112, -1.4714,  -0.1801, -2.0418, -1.9436,  0.8052,  -0.6198])
+    left_arm = np.array([0.1112,  1.4715,  0.1801, -2.0418,  1.9436,  0.8052,    0.6198])
+    if not movej(robot, torso=torso, right_arm=right_arm, left_arm=left_arm, minimum_time=5.0):
+        logging.error("Failed to conduct 'joint Control Command' example.")
+        return False
+
+    return True
+
+def example_impedance_control_command(robot):
+    """Send an impedance control command to the right arm.
+
+    Returns:
+        True if the command finished with Ok, otherwise False.
+    """
+    logging.info("===== Impedance Control Command Example =====")
+    model = robot.model()
+    # Joint Impedance Control
+    rc_builder = rby.RobotCommandBuilder().set_command(
+        rby.ComponentBasedCommandBuilder().set_body_command(
+            rby.BodyComponentBasedCommandBuilder()
+            .set_right_arm_command(
+                rby.JointImpedanceControlCommandBuilder()
+                .set_command_header(
+                    rby.CommandHeaderBuilder().set_control_hold_time(10)
+                )
+                .set_position([0.1112, -1.4714,  -0.1801, -2.0418, -1.9436,  0.8052,  -0.6198])
+                .set_minimum_time(5)
+                .set_stiffness([100.0] * len(model.right_arm_idx))
+                .set_damping_ratio(1.0)
+                .set_torque_limit([10] * len(model.right_arm_idx))
+            )
+        )
+    )
+    handler = robot.send_command(rc_builder,10)
+    rv = handler.get()
+
+    if rv.finish_code != rby.RobotCommandFeedback.FinishCode.Ok:
+        logging.error("Failed to conduct 'Impedance Control' example.")
+        return False
+    return True
 
 def main(address, model, power, servo):
     robot = rby.create_robot(address, model)
@@ -80,40 +107,16 @@ def main(address, model, power, servo):
         logging.error(f"Failed to enable control manager")
         exit(1)
 
-    model = robot.model()
+
     move_to_pre_control_pose(robot)
 
-    # Joint Impedance Control
-    rc_builder = rby.RobotCommandBuilder().set_command(
-        rby.ComponentBasedCommandBuilder().set_body_command(
-            rby.BodyComponentBasedCommandBuilder()
-            .set_right_arm_command(
-                rby.JointImpedanceControlCommandBuilder()
-                .set_command_header(
-                    rby.CommandHeaderBuilder().set_control_hold_time(10)
-                )
-                .set_position([0.0] * len(model.right_arm_idx))
-                .set_minimum_time(5)
-                .set_stiffness([100.0] * len(model.right_arm_idx))
-                .set_damping_ratio(1.0)
-                .set_torque_limit([10] * len(model.right_arm_idx))
-            )
-            .set_left_arm_command(
-                rby.JointImpedanceControlCommandBuilder()
-                .set_command_header(
-                    rby.CommandHeaderBuilder().set_control_hold_time(10)
-                )
-                .set_position([0.0] * len(model.left_arm_idx))
-                .set_minimum_time(5)
-                .set_stiffness([100.0] * len(model.left_arm_idx))
-                .set_damping_ratio(1.0)
-                .set_torque_limit([10] * len(model.left_arm_idx))
-            )
-        )
-    )
-    handler = robot.send_command(rc_builder)
-    rv = handler.get()
-    logging.info(f"Finish Code: {rv.finish_code}")
+    if not example_joint_command(robot):
+        exit(1)
+
+    if not example_impedance_control_command(robot):
+        exit(1)
+
+    logging.info("All examples finished successfully.")
 
 
 if __name__ == "__main__":

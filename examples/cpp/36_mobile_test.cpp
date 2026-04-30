@@ -68,7 +68,7 @@ bool ReadyCommand(const std::shared_ptr<Robot<ModelT>>& robot) {
   q_body(8) = 0;
   q_body(9) = -120 * kDeg2Rad;
   q_body(10) = 0;
-  q_body(11) = 70 * kDeg2Rad;
+  q_body(11) = 40 * kDeg2Rad;
   q_body(12) = 0;
   // left arm: [0, 5, 0, -120, 0, 70, 0] deg
   q_body(13) = 0;
@@ -76,7 +76,7 @@ bool ReadyCommand(const std::shared_ptr<Robot<ModelT>>& robot) {
   q_body(15) = 0;
   q_body(16) = -120 * kDeg2Rad;
   q_body(17) = 0;
-  q_body(18) = 70 * kDeg2Rad;
+  q_body(18) = 40 * kDeg2Rad;
   q_body(19) = 0;
 
   auto rv = robot

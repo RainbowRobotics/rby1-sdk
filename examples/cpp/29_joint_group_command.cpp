@@ -1,3 +1,7 @@
+// ################################ Note ################################
+// # This example does not run in simulation.
+// # Joint Group Command is available only on torso.
+// ######################################################################
 // Note: This example does not run in simulation.
 // Joint Group Command Demo
 // This example demonstrates how to control the robot using joint group command.

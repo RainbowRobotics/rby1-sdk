@@ -1,7 +1,7 @@
 // Teleoperation Example
 
-//  This example initializes the robot, gripper, and master arm connected to a UPC, moves the robot to a
-//  ready pose, and streams teleoperation commands that map master arm joint motion and trigger input to
+//  This example initializes the robot, gripper, and leader arm connected to a UPC, moves the robot to a
+//  ready pose, and streams teleoperation commands that map leader arm joint motion and trigger input to
 //  robot arm and gripper control. See --help for arguments.
 
 //  Usage example:
@@ -15,7 +15,7 @@
 //  the use or misuse of this demo code. Please use with caution and at your own discretion.
 
 
-//  Run this example on a UPC to which the master arm and gripper are connected.
+//  Run this example on a UPC to which the leader arm and gripper are connected.
 #if __INTELLISENSE__
 #undef __ARM_NEON
 #undef __ARM_NEON__s
@@ -484,10 +484,10 @@ Eigen::Matrix<double, 14, 1> calc_torque_for_limit_avoid(Eigen::Matrix<double, 1
   return torque_add;
 }
 
-void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel::PacketHandler* packetHandler,
+void control_loop_for_leader_arm(dynamixel::PortHandler* portHandler, dynamixel::PacketHandler* packetHandler,
                                  std::vector<int> activeIDs) {
 
-  auto robot = std::make_shared<rb::dyn::Robot<14>>(LoadRobotFromURDF(PATH "/master_arm.urdf", "Base"));
+  auto robot = std::make_shared<rb::dyn::Robot<14>>(LoadRobotFromURDF(PATH "/leader_arm.urdf", "Base"));
   auto state = robot->MakeState<std::vector<std::string>, std::vector<std::string>>(
       {"Base", "Link_0R", "Link_1R", "Link_2R", "Link_3R", "Link_4R", "Link_5R", "Link_6R", "Link_0L", "Link_1L",
        "Link_2L", "Link_3L", "Link_4L", "Link_5L", "Link_6L"},
@@ -522,7 +522,7 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
   bool startup_align_failed = false;
   Eigen::Matrix<double, 14, 1> startup_align_q = ready_pose;
   const auto startup_align_start_time = std::chrono::steady_clock::now();
-  std::cout << "Aligning master arm to READY_POSE before teleoperation..." << std::endl;
+  std::cout << "Aligning leader arm to READY_POSE before teleoperation..." << std::endl;
 
   while (!g_stop_requested) {
     auto start = std::chrono::steady_clock::now();
@@ -619,13 +619,13 @@ void control_loop_for_master_arm(dynamixel::PortHandler* portHandler, dynamixel:
       const double left_error = (q_joint.block(7, 0, 7, 1) - ready_pose.block(7, 0, 7, 1)).cwiseAbs().maxCoeff();
       if (std::max(right_error, left_error) <= kStartupAlignTolerance) {
         startup_align_phase = false;
-        std::cout << "Master arm aligned to READY_POSE. Teleoperation unlocked." << std::endl;
+        std::cout << "Leader arm aligned to READY_POSE. Teleoperation unlocked." << std::endl;
       } else {
         const double elapsed_sec =
             std::chrono::duration<double>(std::chrono::steady_clock::now() - startup_align_start_time).count();
         if (elapsed_sec > kStartupAlignTimeout) {
           startup_align_failed = true;
-          std::cerr << "Failed to align master arm to READY_POSE within startup timeout." << std::endl;
+          std::cerr << "Failed to align leader arm to READY_POSE within startup timeout." << std::endl;
           g_stop_requested = 1;
         }
       }
@@ -888,7 +888,7 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
   try {
     // Latency timer setting
     upc::InitializeDevice(upc::kGripperDeviceName);
-    upc::InitializeDevice(upc::kMasterArmDeviceName);
+    upc::InitializeDevice(upc::kLeaderArmDeviceName);
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return 1;
@@ -982,9 +982,9 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
   robot->SetParameter("joint_position_command.cutoff_frequency", "10.0");
   std::cout << robot->GetParameter("joint_position_command.cutoff_frequency") << std::endl;
 
-  const char* devicename_master_arm = "/dev/rby1_master_arm";
+  const char* devicename_leader_arm = "/dev/rby1_leader_arm";
 
-  dynamixel::PortHandler* portHandler = dynamixel::PortHandler::getPortHandler(devicename_master_arm);
+  dynamixel::PortHandler* portHandler = dynamixel::PortHandler::getPortHandler(devicename_leader_arm);
   dynamixel::PacketHandler* packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
   if (!portHandler->openPort()) {
@@ -1022,7 +1022,7 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
   }
 
   if (activeIDs.size() != 16) {
-    std::cerr << "Unable to ping all devices for master arm" << std::endl;
+    std::cerr << "Unable to ping all devices for leader arm" << std::endl;
     Eigen::Map<Eigen::VectorXi> ids(activeIDs.data(), activeIDs.size());
     std::cerr << "active ids: " << ids.transpose() << std::endl;
     return 1;
@@ -1041,13 +1041,13 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
     }
   }
 
-  std::thread master_arm_handler(control_loop_for_master_arm, portHandler, packetHandler, activeIDs);
+  std::thread leader_arm_handler(control_loop_for_leader_arm, portHandler, packetHandler, activeIDs);
 
-  auto shutdown_after_master_started = [&](const std::string& reason) -> int {
+  auto shutdown_after_leader_started = [&](const std::string& reason) -> int {
     std::cerr << reason << std::endl;
     g_stop_requested = 1;
-    if (master_arm_handler.joinable()) {
-      master_arm_handler.join();
+    if (leader_arm_handler.joinable()) {
+      leader_arm_handler.join();
     }
     portHandler->closePort();
     robot->CancelControl();
@@ -1062,12 +1062,12 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
   dynamixel::PacketHandler* packetHandler_gripper = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
   if (!portHandler_gripper->openPort()) {
-    return shutdown_after_master_started("Failed to open the gripper port!");
+    return shutdown_after_leader_started("Failed to open the gripper port!");
   }
 
   if (!portHandler_gripper->setBaudRate(BAUDRATE)) {
     portHandler_gripper->closePort();
-    return shutdown_after_master_started("Failed to change the gripper baudrate!");
+    return shutdown_after_leader_started("Failed to change the gripper baudrate!");
   }
 
   std::vector<int> activeIDs_gripper;
@@ -1088,7 +1088,7 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
     Eigen::Map<Eigen::VectorXi> ids(activeIDs_gripper.data(), activeIDs_gripper.size());
     std::cerr << "active ids: " << ids.transpose() << std::endl;
     portHandler_gripper->closePort();
-    return shutdown_after_master_started("Gripper initialization failed.");
+    return shutdown_after_leader_started("Gripper initialization failed.");
   }
 
   for (int id : activeIDs_gripper) {
@@ -1098,7 +1098,7 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
       std::cerr << "Failed to write current control mode value: "
                 << packetHandler_gripper->getTxRxResult(dxl_comm_result) << std::endl;
       portHandler_gripper->closePort();
-      return shutdown_after_master_started("Failed to configure gripper control mode.");
+      return shutdown_after_leader_started("Failed to configure gripper control mode.");
     }
 
     TorqueEnable(portHandler_gripper, packetHandler_gripper, id, 1);
@@ -1305,7 +1305,7 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
   g_stop_requested = 1;
   robot->CancelControl();
 
-  master_arm_handler.join();
+  leader_arm_handler.join();
   gripper_handler.join();
   portHandler->closePort();
   portHandler_gripper->closePort();

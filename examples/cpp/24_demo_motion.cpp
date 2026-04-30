@@ -126,7 +126,7 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
   q_joint_right_arm.setZero();
   q_joint_left_arm.setZero();
 
-  double minimum_time = 2.5;
+  double minimum_time = 4;
 
   if (1) {
     std::cout << "joint position command example 1\n";
@@ -223,16 +223,12 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
                           .SetRightArmCommand(CartesianCommandBuilder()
                                                   .AddTarget("base", "ee_right", T_right, linear_velocity_limit,
                                                              angular_velocity_limit, acceleration_limit / 2)
-                                                  /* Need to be verified */
-                                                  .AddJointPositionTarget("right_arm_2", -10 * M_PI / 180, 3.14, 6.28)
                                                   .SetMinimumTime(minimum_time * 3)
                                                   .SetStopOrientationTrackingError(stop_orientation_tracking_error)
                                                   .SetStopPositionTrackingError(stop_position_tracking_error))
                           .SetLeftArmCommand(CartesianCommandBuilder()
                                                  .AddTarget("base", "ee_left", T_left, linear_velocity_limit,
                                                             angular_velocity_limit, acceleration_limit / 2)
-                                                 /* Need to be verified */
-                                                 .AddJointPositionTarget("left_arm_2", 10 * M_PI / 180, 3.14, 6.28)
                                                  .SetMinimumTime(minimum_time * 3)
                                                  .SetStopOrientationTrackingError(stop_orientation_tracking_error)
                                                  .SetStopPositionTrackingError(stop_position_tracking_error)))))
@@ -267,8 +263,6 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
                                      acceleration_limit)
                           .AddTarget("base", "ee_left", T_left, linear_velocity_limit, angular_velocity_limit,
                                      acceleration_limit)
-                          .AddJointPositionTarget("right_arm_1", -30 * M_PI / 180, {}, {})
-                          .AddJointPositionTarget("left_arm_1", 30 * M_PI / 180, {}, {})
                           .SetStopPositionTrackingError(stop_orientation_tracking_error)
                           .SetStopOrientationTrackingError(stop_position_tracking_error)
                           .SetMinimumTime(minimum_time))))
@@ -466,8 +460,6 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
                           .AddCartesianTarget("base", "link_torso_5", T_torso, weight, weight)
                           .AddCartesianTarget("base", "ee_right", T_right, weight, weight)
                           .AddCartesianTarget("base", "ee_left", T_left, weight, weight)
-                          .AddJointPositionTarget("right_arm_2", 3.141592 / 2., weight / 5)
-                          .AddJointPositionTarget("left_arm_2", -3.141592 / 2., weight / 5)
                           .SetVelocityLimitScaling(0.5)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)
@@ -500,8 +492,6 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
                           .AddCartesianTarget("base", "link_torso_5", T_torso, weight, weight)
                           .AddCartesianTarget("base", "ee_right", T_right, weight, weight)
                           .AddCartesianTarget("base", "ee_left", T_left, weight, weight)
-                          .AddJointPositionTarget("right_arm_2", 0., weight / 2)
-                          .AddJointPositionTarget("left_arm_2", -0., weight / 2)
                           .SetStopCost(stop_cost)
                           .SetMinDeltaCost(min_delta_cost)
                           .SetPatience(patience))))

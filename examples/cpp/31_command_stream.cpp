@@ -102,13 +102,13 @@ int Run(const std::string& address, const std::string& power, const std::string&
     }
     
     Eigen::VectorXd q = Eigen::VectorXd::Zero(static_cast<Eigen::Index>(ModelT::kBodyIdx.size()));
-    q(q.size() - 1) = kPi / 4.0 * std::sin(kPi * 2.0 * t * dt / 5.0);
+    q(q.size() - 3) = kPi / 4.0 * std::sin(kPi * 2.0 * t * dt / 5.0);
 
     RobotCommandBuilder rc;
     rc.SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
         JointPositionCommandBuilder()
             .SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(1.0))
-            .SetMinimumTime(dt)
+            .SetMinimumTime(3)
             .SetPosition(q)));
 
     stream->SendCommand(rc);

@@ -79,7 +79,7 @@ int Run(const std::string& address, const std::string& power, const std::string&
   std::this_thread::sleep_for(500ms);
 
   std::cout << "Brake release requested for " << joint << std::endl;
-  if (!robot->BreakRelease(joint)) {
+  if (!robot->BrakeRelease(joint)) {
     std::cerr << "Failed to release brake for " << joint << std::endl;
     return 1;
   }
@@ -87,7 +87,7 @@ int Run(const std::string& address, const std::string& power, const std::string&
   std::this_thread::sleep_for(500ms);
 
   std::cout << "Brake engage requested for " << joint << std::endl;
-  if (!robot->BreakEngage(joint)) {
+  if (!robot->BrakeEngage(joint)) {
     std::cerr << "Failed to engage brake for " << joint << std::endl;
     return 1;
   }

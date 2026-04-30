@@ -42,7 +42,7 @@ set(EXAMPLES
         24_demo_motion
         25_cancel_control
         26_collisions
-        27_impedance_control
+        27_cartesian_impedance_control
         28_joint_impedance_control
         29_joint_group_command
         30_multi_controls

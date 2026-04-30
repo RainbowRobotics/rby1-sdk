@@ -23,7 +23,7 @@
 
 #include <Eigen/Dense>
 
-#include "rby1-sdk/control_manager_state.h"
+#include "00_helper.cpp"
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 #include "rby1-sdk/robot_command_builder.h"
@@ -41,76 +41,16 @@ std::string ToLower(std::string v) {
 }
 
 template <typename ModelT>
-struct Pose {
-  Eigen::VectorXd torso;
-  Eigen::VectorXd right_arm;
-  Eigen::VectorXd left_arm;
-};
+bool MoveToPreControlPose(const std::shared_ptr<Robot<ModelT>>& robot) {
+  Eigen::VectorXd torso(6);
+  Eigen::VectorXd right_arm(7);
+  Eigen::VectorXd left_arm(7);
 
-template <typename ModelT>
-Pose<ModelT> ReadyPose() {
-  Pose<ModelT> pose;
+  torso << 0.0, 0.1, -0.2, 0.1, 0.0, 0.0;
+  right_arm << 0.2, -0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
+  left_arm << 0.2, 0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
 
-  pose.torso.resize(ModelT::kTorsoIdx.size());
-  pose.right_arm.resize(ModelT::kRightArmIdx.size());
-  pose.left_arm.resize(ModelT::kLeftArmIdx.size());
-
-  const double torso_deg[6] = {0.0, 45.0, -90.0, 45.0, 0.0, 0.0};
-  const double right_deg[7] = {0.0, -5.0, 0.0, -120.0, 0.0, 70.0, 0.0};
-  const double left_deg[7] = {0.0, 5.0, 0.0, -120.0, 0.0, 70.0, 0.0};
-
-  for (size_t i = 0; i < ModelT::kTorsoIdx.size(); ++i) {
-    pose.torso(static_cast<Eigen::Index>(i)) = torso_deg[i] * kD2R;
-  }
-  for (size_t i = 0; i < ModelT::kRightArmIdx.size(); ++i) {
-    pose.right_arm(static_cast<Eigen::Index>(i)) = right_deg[i] * kD2R;
-  }
-  for (size_t i = 0; i < ModelT::kLeftArmIdx.size(); ++i) {
-    pose.left_arm(static_cast<Eigen::Index>(i)) = left_deg[i] * kD2R;
-  }
-
-  return pose;
-}
-
-template <typename ModelT>
-std::shared_ptr<Robot<ModelT>> InitializeRobot(const std::string& address, const std::string& power,
-                                               const std::string& servo) {
-  auto robot = Robot<ModelT>::Create(address);
-
-  if (!robot->Connect()) {
-    std::cerr << "Failed to connect robot " << address << std::endl;
-    return nullptr;
-  }
-  if (!robot->IsConnected()) {
-    std::cerr << "Robot is not connected" << std::endl;
-    return nullptr;
-  }
-  if (!robot->IsPowerOn(power)) {
-    if (!robot->PowerOn(power)) {
-      std::cerr << "Failed to turn power (" << power << ") on" << std::endl;
-      return nullptr;
-    }
-  }
-  if (!robot->IsServoOn(servo)) {
-    if (!robot->ServoOn(servo)) {
-      std::cerr << "Failed to servo (" << servo << ") on" << std::endl;
-      return nullptr;
-    }
-  }
-
-  auto cms = robot->GetControlManagerState();
-  if (cms.state == ControlManagerState::State::kMajorFault || cms.state == ControlManagerState::State::kMinorFault) {
-    if (!robot->ResetFaultControlManager()) {
-      std::cerr << "Failed to reset control manager" << std::endl;
-      return nullptr;
-    }
-  }
-  if (!robot->EnableControlManager()) {
-    std::cerr << "Failed to enable control manager" << std::endl;
-    return nullptr;
-  }
-
-  return robot;
+  return MoveJ<ModelT>(robot, &torso, &right_arm, &left_arm, 5.0);
 }
 
 void PrintUsage(const char* prog) {
@@ -126,36 +66,18 @@ int Run(const std::string& address, const std::string& power, const std::string&
     return 1;
   }
 
-  {
-    Eigen::Vector<double, 6> torso;
-    Eigen::Vector<double, 7> right_arm;
-    Eigen::Vector<double, 7> left_arm;
-
-    torso << 0.0, 0.1, -0.2, 0.1, 0.0, 0.0;
-    right_arm << 0.2, -0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
-    left_arm << 0.2, 0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
-
-    const auto pre_control_feedback =
-        robot
-            ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
-                BodyComponentBasedCommandBuilder()
-                    .SetTorsoCommand(JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(torso))
-                    .SetRightArmCommand(JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(right_arm))
-                    .SetLeftArmCommand(JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(left_arm)))),
-                          90)
-            ->Get();
-
-    std::cout << "pre control pose finish_code: " << static_cast<int>(pre_control_feedback.finish_code())
-              << std::endl;
-    if (pre_control_feedback.finish_code() != RobotCommandFeedback::FinishCode::kOk) {
-      std::cerr << "Failed to move to pre-control pose" << std::endl;
-      return 1;
-    }
+  if (!MoveToPreControlPose<ModelT>(robot)) {
+    std::cerr << "Failed to move to pre-control pose" << std::endl;
+    return 1;
   }
 
   const double minimum_time = 2.0;
-
-  const auto pose = ReadyPose<ModelT>();
+  Eigen::VectorXd right_arm(7);
+  Eigen::VectorXd left_arm(7);
+  right_arm << 0.0, -5.0, 0.0, -120.0, 0.0, 70.0, 0.0;
+  left_arm << 0.0, 5.0, 0.0, -120.0, 0.0, 70.0, 0.0;
+  right_arm *= kD2R;
+  left_arm *= kD2R;
 
   Eigen::VectorXd body_zero(ModelT::kBodyIdx.size());
   body_zero.setZero();
@@ -171,7 +93,7 @@ int Run(const std::string& address, const std::string& power, const std::string&
   auto right_handle = robot->SendCommand(
       RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
           BodyComponentBasedCommandBuilder().SetRightArmCommand(
-              JointPositionCommandBuilder().SetPosition(pose.right_arm).SetMinimumTime(minimum_time)))),
+              JointPositionCommandBuilder().SetPosition(right_arm).SetMinimumTime(minimum_time)))),
       10);
 
   std::this_thread::sleep_for(1s);
@@ -179,7 +101,7 @@ int Run(const std::string& address, const std::string& power, const std::string&
   auto left_handle = robot->SendCommand(
       RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
           BodyComponentBasedCommandBuilder().SetLeftArmCommand(
-              JointPositionCommandBuilder().SetPosition(pose.left_arm).SetMinimumTime(minimum_time)))),
+              JointPositionCommandBuilder().SetPosition(left_arm).SetMinimumTime(minimum_time)))),
       1);
 
   const auto robot_feedback = robot_handle->Get();

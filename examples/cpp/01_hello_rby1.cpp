@@ -3,7 +3,7 @@
 // in different string representation formats. See --help for arguments.
 //
 // Usage example:
-//     ./example_01_hello_rby1 --address 192.168.30.1:50051 --model a
+//     ./example_01_hello_rby1.py --address 192.168.30.1:50051 --model a
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //
@@ -36,6 +36,14 @@ std::string Quote(const std::string& v) {
   std::ostringstream ss;
   ss << std::quoted(v);
   return ss.str();
+}
+
+std::string NormalizeModelName(std::string model_name) {
+  model_name = ToLower(model_name);
+  if (model_name.rfind("rby1", 0) == 0) {
+    model_name = model_name.substr(4);
+  }
+  return model_name;
 }
 
 std::string BoolStr(bool v) { return v ? "True" : "False"; }
@@ -140,7 +148,7 @@ std::string RobotInfoRepr(const RobotInfo& info, bool multiline) {
 }
 
 template <typename ModelT>
-int RunHello(const std::string& address) {
+int RunHello(const std::string& address, const std::string& model_arg) {
   auto robot = Robot<ModelT>::Create(address);
 
   if (!robot->Connect()) {
@@ -153,6 +161,15 @@ int RunHello(const std::string& address) {
   }
 
   const RobotInfo info = robot->GetRobotInfo();
+  const std::string requested_model = NormalizeModelName(model_arg);
+
+  if (info.mobility_joint_idx.size() == 2 && requested_model == "m") {
+    std::cerr << "wrong model argument. this robot model is a" << std::endl;
+    return 1;
+  } else if (info.mobility_joint_idx.size() == 4 && requested_model == "a") {
+    std::cerr << "wrong model argument. this robot model is m" << std::endl;
+    return 1;
+  }
 
   std::cout << "Hello, RB-Y1! (Robot model name: " << ModelT::kModelName << ")" << std::endl;
 
@@ -206,10 +223,10 @@ int main(int argc, char** argv) {
   model = ToLower(model);
 
   if (model == "a") {
-    return RunHello<y1_model::A>(address);
+    return RunHello<y1_model::A>(address, model);
   }
   if (model == "m") {
-    return RunHello<y1_model::M>(address);
+    return RunHello<y1_model::M>(address, model);
   }
 
   std::cerr << "Unknown model: " << model << std::endl;

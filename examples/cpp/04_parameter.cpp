@@ -20,14 +20,17 @@
 // Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
 // the use or misuse of this demo code. Please use with caution and at your own discretion.
 
+#if __INTELLISENSE__
+#undef __ARM_NEON
+#undef __ARM_NEON__
+#endif
+
 #include <iostream>
 #include <string>
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 
 using namespace rb;
-
-namespace {
 
 constexpr const char* kParameterName = "joint_position_command.cutoff_frequency";
 
@@ -94,8 +97,6 @@ int Parameter(const std::string& address) {
   return 0;
 }
 
-}  // namespace
-
 int main(int argc, char** argv) {
   std::string address;
   std::string model = "a";
@@ -132,11 +133,6 @@ int main(int argc, char** argv) {
   if (model == "m") {
     return Parameter<y1_model::M>(address);
   }
-  if (model == "ub") {
-    return Parameter<y1_model::UB>(address);
-  }
+ 
 
-  std::cerr << "Unknown model: " << model << std::endl;
-  PrintUsage(argv[0]);
-  return 1;
 }

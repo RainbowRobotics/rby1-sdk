@@ -28,6 +28,7 @@
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 #include "rby1-sdk/robot_command_builder.h"
+#include "00_helper.cpp"
 
 using namespace rb;
 using namespace std::chrono_literals;
@@ -58,14 +59,13 @@ void PrintUsage(const char* prog) {
 
 template <typename ModelT>
 int RunDemoMotion(const std::string& address, const std::string& power, const std::string& servo) {
-  auto robot = Robot<ModelT>::Create(address);
-
-  std::cout << "Attempting to connect to the robot..." << std::endl;
-  if (!robot->Connect()) {
-    std::cerr << "Error: Unable to establish connection to the robot at " << address << std::endl;
+  std::cout << "Initializing robot..." << std::endl;
+  auto robot = InitializeRobot<ModelT>(address, power, servo);
+  if (!robot) {
+    std::cerr << "Error: Failed to initialize robot at " << address << std::endl;
     return 1;
   }
-  std::cout << "Successfully connected to the robot." << std::endl;
+  std::cout << "Robot initialized successfully." << std::endl;
 
   std::cout << "Starting state update..." << std::endl;
 
@@ -87,53 +87,6 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
 
   std::this_thread::sleep_for(1s);
 
-  std::cout << "Checking power status..." << std::endl;
-  if (!robot->IsPowerOn(power)) {
-    std::cout << "Power is currently OFF. Attempting to power on..." << std::endl;
-    if (!robot->PowerOn(power)) {
-      std::cerr << "Error: Failed to power on the robot." << std::endl;
-      return 1;
-    }
-    std::cout << "Robot powered on successfully." << std::endl;
-  } else {
-    std::cout << "Power is already ON." << std::endl;
-  }
-
-  std::cout << "Checking servo status..." << std::endl;
-  if (!robot->IsServoOn(servo)) {
-    std::cout << "Servo is currently OFF. Attempting to activate servo..." << std::endl;
-    if (!robot->ServoOn(servo)) {
-      std::cerr << "Error: Failed to activate servo." << std::endl;
-      return 1;
-    }
-    std::cout << "Servo activated successfully." << std::endl;
-  } else {
-    std::cout << "Servo is already ON." << std::endl;
-  }
-
-  const auto& control_manager_state = robot->GetControlManagerState();
-  if (control_manager_state.state == ControlManagerState::State::kMajorFault ||
-      control_manager_state.state == ControlManagerState::State::kMinorFault) {
-    std::cerr << "Warning: Detected a "
-              << (control_manager_state.state == ControlManagerState::State::kMajorFault ? "Major" : "Minor")
-              << " Fault in the Control Manager." << std::endl;
-
-    std::cout << "Attempting to reset the fault..." << std::endl;
-    if (!robot->ResetFaultControlManager()) {
-      std::cerr << "Error: Unable to reset the fault in the Control Manager." << std::endl;
-      return 1;
-    }
-    std::cout << "Fault reset successfully." << std::endl;
-  }
-  std::cout << "Control Manager state is normal. No faults detected." << std::endl;
-
-  std::cout << "Enabling the Control Manager..." << std::endl;
-  if (!robot->EnableControlManager()) {
-    std::cerr << "Error: Failed to enable the Control Manager." << std::endl;
-    return 1;
-  }
-  std::cout << "Control Manager enabled successfully." << std::endl;
-
   try {
     if (robot->IsPowerOn("48v")) {
       robot->SetToolFlangeOutputVoltage("right", 12);
@@ -152,25 +105,15 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
   {
     std::cout << "move to pre-control pose\n";
 
-    Eigen::Vector<double, 6> torso;
-    Eigen::Vector<double, 7> right_arm;
-    Eigen::Vector<double, 7> left_arm;
+    Eigen::VectorXd torso(6);
+    Eigen::VectorXd right_arm(7);
+    Eigen::VectorXd left_arm(7);
 
     torso << 0.0, 0.1, -0.2, 0.1, 0.0, 0.0;
     right_arm << 0.2, -0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
     left_arm << 0.2, 0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
 
-    auto rv =
-        robot
-            ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
-                BodyComponentBasedCommandBuilder()
-                    .SetTorsoCommand(JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(torso))
-                    .SetRightArmCommand(JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(right_arm))
-                    .SetLeftArmCommand(JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(left_arm)))))
-            ->Get();
-
-    std::cout << "pre control pose finish_code: " << static_cast<int>(rv.finish_code()) << std::endl;
-    if (rv.finish_code() != RobotCommandFeedback::FinishCode::kOk) {
+    if (!MoveJ<ModelT>(robot, &torso, &right_arm, &left_arm, 5.0)) {
       std::cerr << "Error: Failed to move to pre-control pose." << std::endl;
       return 1;
     }
@@ -191,8 +134,8 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
     q_joint_right_arm.setZero();
     q_joint_left_arm.setZero();
 
-    q_joint_right_arm(1) = -90 * D2R;
-    q_joint_left_arm(1) = 90 * D2R;
+    q_joint_right_arm(3) = -90 * D2R;
+    q_joint_left_arm(3) = -90 * D2R;
 
     // go to ready position
     auto rv =
@@ -346,10 +289,10 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
     T_torso.block(0, 3, 3, 1) << 0.1, 0, 1.2;
 
     T_right.block(0, 0, 3, 3) = math::SO3::RotY(-3.141592 / 4.);
-    T_right.block(0, 3, 3, 1) << 0.4, -0.4, 0;
+    T_right.block(0, 3, 3, 1) << 0.35, -0.4, -0.2;
 
     T_left.block(0, 0, 3, 3) = math::SO3::RotY(-3.141592 / 4.);
-    T_left.block(0, 3, 3, 1) << 0.4, 0.4, 0;
+    T_left.block(0, 3, 3, 1) << 0.35, 0.4, -0.2;
 
     auto rv = robot
                   ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
@@ -380,10 +323,10 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
     T_torso.block(0, 3, 3, 1) << 0.1, 0, 1.2;
 
     T_right.block(0, 0, 3, 3) = math::SO3::RotY(-3.141592 / 4.);
-    T_right.block(0, 3, 3, 1) << 0.45, -0.4, -0.1;
+    T_right.block(0, 3, 3, 1) << 0.35, -0.4, -0.2;
 
     T_left.block(0, 0, 3, 3) = math::SO3::RotY(-3.141592 / 4.);
-    T_left.block(0, 3, 3, 1) << 0.45, 0.4, -0.1;
+    T_left.block(0, 3, 3, 1) << 0.35, 0.4, -0.2;
 
     ImpedanceControlCommandBuilder torso_command;
     torso_command.SetCommandHeader(CommandHeaderBuilder().SetControlHoldTime(minimum_time))
@@ -706,7 +649,7 @@ int RunDemoMotion(const std::string& address, const std::string& power, const st
     std::this_thread::sleep_for(1s);
   }
 
-  if (1) {
+  if (0) {
     std::cout << "go to home pose 1\n";
     q_joint_torso.setZero();
     q_joint_right_arm.setZero();

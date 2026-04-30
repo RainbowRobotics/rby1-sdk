@@ -1,12 +1,21 @@
-//  Robot Model Setting Example
-//
-//  This example includes the following features:
-//  1. Loading the current robot model (in URDF format) from the robot.
-//  2. Saving a custom robot model to the robot with a specified name.
-//  3. Assigning the robot model name for the robot to use (applied after reboot).
+// Robot Model Setting Example
+
+// This example includes the following features:
+// 1. Loading the current robot model (in URDF format) from the robot.
+// 2. Saving a custom robot model to the robot with a specified name.
+// 3. Assigning the robot model name for the robot to use (applied after reboot).
+
+// Note:
+// If the modified URDF causes any issue, users can recover by downloading the
+// proper official URDF for their robot model from the rby1-sdk repository below,
+// parsing it in the same way as this example, and importing it again with a new model name:
+// https://github.com/RainbowRobotics/rby1-sdk/tree/main/models
+
+// If an issue arises while modifying the urdf again after the above step,
+// You can skip the previous step by running only the robot.set_parameter() command.
 //
 // Usage example:
-//   ./example_02_robot_model_setting --address 192.168.30.1:50051 --model a
+//   ./example_02_robot_model --address 192.168.30.1:50051 --model a
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //
@@ -17,7 +26,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "tinyxml2.h"
@@ -48,14 +59,13 @@ int Run(const std::string& address) {
     return 1;
   }
 
-  const std::string model = robot->GetRobotModel();
+  // 1. Load current robot model from robot
+  const std::string urdf_str = robot->GetRobotModel();
+  std::cout << "Current robot model loaded." << std::endl;
 
-  std::cout << "Current robot model: " << std::endl;
-  std::cout << model << std::endl;
-
-  // Modify model (example: inspect head_1 effort limit)
+  // 2. Parse URDF
   tinyxml2::XMLDocument doc;
-  if (doc.Parse(model.c_str()) != tinyxml2::XML_SUCCESS) {
+  if (doc.Parse(urdf_str.c_str()) != tinyxml2::XML_SUCCESS) {
     std::cerr << "Failed to parse robot model XML" << std::endl;
     return 1;
   }
@@ -66,29 +76,69 @@ int Run(const std::string& address) {
     return 1;
   }
 
-  for (auto* joint = root->FirstChildElement("joint"); joint; joint = joint->NextSiblingElement("joint")) {
-    const char* name = joint->Attribute("name");
-    if (name && std::string(name) == "head_1") {
-      auto* limit = joint->FirstChildElement("limit");
-      const char* effort = limit ? limit->Attribute("effort") : nullptr;
-      std::cout << "joint effort = " << (effort ? effort : "(none)") << std::endl;
-      // Example to update:
-      if (limit) limit->SetAttribute("effort", "500");
+  // 3. Modify ee_right mass
+  const std::string target_link_name = "ee_right";
+  constexpr double mass_delta = 0.5;
+  bool modified = false;
+
+  for (auto* link = root->FirstChildElement("link"); link; link = link->NextSiblingElement("link")) {
+    const char* name = link->Attribute("name");
+    if (name && std::string(name) == target_link_name) {
+      auto* inertial = link->FirstChildElement("inertial");
+      if (!inertial) {
+        std::cerr << "[ERROR] link '" << target_link_name << "' has no <inertial> tag." << std::endl;
+        return 1;
+      }
+
+      auto* mass_tag = inertial->FirstChildElement("mass");
+      if (!mass_tag) {
+        std::cerr << "[ERROR] link '" << target_link_name << "' has no <mass> tag." << std::endl;
+        return 1;
+      }
+
+      double old_mass = 0.0;
+      if (mass_tag->QueryDoubleAttribute("value", &old_mass) != tinyxml2::XML_SUCCESS) {
+        std::cerr << "[ERROR] link '" << target_link_name << "' has invalid <mass value>." << std::endl;
+        return 1;
+      }
+
+      const double new_mass = old_mass + mass_delta;
+      std::ostringstream mass_ss;
+      mass_ss << std::fixed << std::setprecision(8) << new_mass;
+      mass_tag->SetAttribute("value", mass_ss.str().c_str());
+
+      std::cout << std::fixed << std::setprecision(8) << "Modified '" << target_link_name
+                << "' mass: " << old_mass << " -> " << new_mass << std::endl;
+      modified = true;
+      break;
     }
   }
 
-  std::cout << "model_name = " << (root->Attribute("name") ? root->Attribute("name") : "") << std::endl;
+  if (!modified) {
+    std::cerr << "[ERROR] link '" << target_link_name << "' not found in URDF." << std::endl;
+    return 1;
+  }
 
+  // 4. Upload modified model with a new name
+  const std::string new_model_name = "temp_ee_right_mass_up";
   tinyxml2::XMLPrinter printer;
   doc.Print(&printer);
-  std::cout << robot->ImportRobotModel("temp", printer.CStr()) << std::endl;
+  const bool ok = robot->ImportRobotModel(new_model_name, printer.CStr());
+  std::cout << "Import robot model: " << std::boolalpha << ok << std::endl;
+  if (!ok) {
+    std::cerr << "[ERROR] Failed to import modified robot model." << std::endl;
+    return 1;
+  }
 
-  // Upload model and save model with name 'temp'
-  // Set robot model (applied after reboot)
-  robot->SetParameter("model_name", "\"temp\"");
+  // 5. Set robot model name (applied after reboot)
+  if (!robot->SetParameter("model_name", "\"" + new_model_name + "\"")) {
+    std::cerr << "[ERROR] Failed to set model_name parameter." << std::endl;
+    return 1;
+  }
+  std::cout << "Set model_name to '" << new_model_name << "'" << std::endl;
+  std::cout << "The modified robot model will be applied after reboot." << std::endl;
 
   return 0;
-  // After reboot, the robot will use uploaded robot model
 }
 
 }  // namespace

@@ -1,11 +1,11 @@
-// Leader Arm Example
+// Master Arm Example
 //
-// This example powers on the UPC leader arm, initializes it with its URDF model, and runs a
-// gravity-compensated current-control loop while printing the leader arm state.
+// This example powers on the UPC master arm, initializes it with its URDF model, and runs a
+// gravity-compensated current-control loop while printing the master arm state.
 // Note: This example is not supported in simulation.
 //
 // Usage example:
-//   ./example_20_leader_arm --address 192.168.30.1:50051 --model a
+//   ./example_20_master_arm --address 192.168.30.1:50051 --model a
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //
@@ -70,31 +70,31 @@ int Run(const std::string& address) {
     return 1;
   }
 
-  auto leader_arm = std::make_shared<upc::LeaderArm>(upc::kLeaderArmDeviceName);
+  auto master_arm = std::make_shared<upc::MasterArm>(upc::kMasterArmDeviceName);
 
-  g_cleanup = [robot, leader_arm]() {
-    leader_arm->StopControl();
+  g_cleanup = [robot, master_arm]() {
+    master_arm->StopControl();
     robot->PowerOff("12v");
   };
 
   std::signal(SIGINT, SignalHandler);
 
   try {
-    upc::InitializeDevice(upc::kLeaderArmDeviceName);
+    upc::InitializeDevice(upc::kMasterArmDeviceName);
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return 1;
   }
 
-  leader_arm->SetModelPath(MODELS_PATH "/leader_arm/model.urdf");
-  leader_arm->SetControlPeriod(0.01);
-  const auto active_ids = leader_arm->Initialize(true);
-  if (active_ids.size() != upc::LeaderArm::kDeviceCount) {
-    std::cerr << "Error: Mismatch in the number of devices detected for RBY Leader Arm." << std::endl;
+  master_arm->SetModelPath(MODELS_PATH "/master_arm/model.urdf");
+  master_arm->SetControlPeriod(0.01);
+  const auto active_ids = master_arm->Initialize(true);
+  if (active_ids.size() != upc::MasterArm::kDeivceCount) {
+    std::cerr << "Error: Mismatch in the number of devices detected for RBY Master Arm." << std::endl;
     return 1;
   }
 
-  leader_arm->StartControl([&](const upc::LeaderArm::State& state) {
+  master_arm->StartControl([&](const upc::MasterArm::State& state) {
     const auto now = std::chrono::system_clock::now();
     const auto t = std::chrono::system_clock::to_time_t(now);
     std::tm tm_local{};
@@ -109,7 +109,7 @@ int Run(const std::string& address) {
     std::cout << "g: " << state.gravity_term.transpose() << std::endl;
     std::cout << "right: " << state.button_right.button << ", left: " << state.button_left.button << std::endl;
 
-    upc::LeaderArm::ControlInput input;
+    upc::MasterArm::ControlInput input;
     input.target_operating_mode.setConstant(DynamixelBus::kCurrentControlMode);
     input.target_torque = state.gravity_term;
     return input;
@@ -117,7 +117,7 @@ int Run(const std::string& address) {
 
   std::this_thread::sleep_for(100s);
 
-  leader_arm->StopControl();
+  master_arm->StopControl();
   robot->PowerOff("12v");
 
   return 0;

@@ -17,6 +17,11 @@
 // Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
 // the use or misuse of this demo code. Please use with caution and at your own discretion.
 
+#if __INTELLISENSE__
+#undef __ARM_NEON
+#undef __ARM_NEON__
+#endif
+
 #include <algorithm>
 #include <atomic>
 #include <cctype>
@@ -27,7 +32,7 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include "rby1-sdk/control_manager_state.h"
+#include "00_helper.cpp"
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 #include "rby1-sdk/robot_command_builder.h"
@@ -55,59 +60,22 @@ void SignalHandler(int) { g_stop_requested.store(true); }
 constexpr double kPi = 3.14159265358979323846;
 
 template <typename ModelT>
-bool MoveToZeroPose(const std::shared_ptr<Robot<ModelT>>& robot) {
-  Eigen::Vector<double, 6> torso = Eigen::Vector<double, 6>::Zero();
-  Eigen::Vector<double, 7> right_arm = Eigen::Vector<double, 7>::Zero();
-  Eigen::Vector<double, 7> left_arm = Eigen::Vector<double, 7>::Zero();
+bool MoveToPreControlPose(const std::shared_ptr<Robot<ModelT>>& robot) {
+  Eigen::VectorXd torso(6);
+  Eigen::VectorXd right_arm(7);
+  Eigen::VectorXd left_arm(7);
 
-  auto rv = robot
-                ->SendCommand(
-                    RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
-                        BodyComponentBasedCommandBuilder()
-                            .SetTorsoCommand(JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(torso))
-                            .SetRightArmCommand(
-                                JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(right_arm))
-                            .SetLeftArmCommand(
-                                JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(left_arm)))),
-                    90)
-                ->Get();
+  torso << 0.0, 0.1, -0.2, 0.1, 0.0, 0.0;
+  right_arm << 0.2, -0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
+  left_arm << 0.2, 0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
 
-  std::cout << "pre control pose finish_code: " << static_cast<int>(rv.finish_code()) << std::endl;
-  return rv.finish_code() == RobotCommandFeedback::FinishCode::kOk;
+  return MoveJ<ModelT>(robot, &torso, &right_arm, &left_arm, 5.0);
 }
 
 template <typename ModelT>
 int Run(const std::string& address, const std::string& power, const std::string& servo) {
-  auto robot = Robot<ModelT>::Create(address);
-  if (!robot->Connect()) {
-    std::cerr << "Failed to connect robot " << address << std::endl;
-    return 1;
-  }
-
-  if (!robot->IsPowerOn(power)) {
-    if (!robot->PowerOn(power)) {
-      std::cerr << "Failed to turn power (" << power << ") on" << std::endl;
-      return 1;
-    }
-  }
-
-  if (!robot->IsServoOn(servo)) {
-    if (!robot->ServoOn(servo)) {
-      std::cerr << "Failed to servo (" << servo << ") on" << std::endl;
-      return 1;
-    }
-  }
-
-  const auto cms = robot->GetControlManagerState();
-  if (cms.state == ControlManagerState::State::kMajorFault || cms.state == ControlManagerState::State::kMinorFault) {
-    if (!robot->ResetFaultControlManager()) {
-      std::cerr << "Failed to reset control manager" << std::endl;
-      return 1;
-    }
-  }
-
-  if (!robot->EnableControlManager()) {
-    std::cerr << "Failed to enable control manager" << std::endl;
+  auto robot = InitializeRobot<ModelT>(address, power, servo);
+  if (!robot) {
     return 1;
   }
 
@@ -118,8 +86,8 @@ int Run(const std::string& address, const std::string& power, const std::string&
   std::cout << std::boolalpha
             << robot->SetParameter("default.acceleration_limit_scaling", "0.8") << std::endl;
 
-  if (!MoveToZeroPose(robot)) {
-    std::cerr << "Failed to move to zero pose" << std::endl;
+  if (!MoveToPreControlPose(robot)) {
+    std::cerr << "Failed to move to pre-control pose" << std::endl;
     return 1;
   }
 

@@ -24,6 +24,7 @@
 
 #include <Eigen/Dense>
 
+#include "00_helper.cpp"
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 
@@ -56,63 +57,21 @@ void PrintUsage(const char* prog) {
 
 template <typename ModelT>
 bool MoveToPreControlPose(const std::shared_ptr<Robot<ModelT>>& robot) {
-  const Eigen::Vector<double, 6> torso{0.0, 0.1, -0.2, 0.1, 0.0, 0.0};
-  const Eigen::Vector<double, 7> right_arm{0.2, -0.2, 0.0, -1.0, 0.0, 0.7, 0.0};
-  const Eigen::Vector<double, 7> left_arm{0.2, 0.2, 0.0, -1.0, 0.0, 0.7, 0.0};
+  Eigen::VectorXd torso(6);
+  Eigen::VectorXd right_arm(7);
+  Eigen::VectorXd left_arm(7);
+  torso << 0.0, 0.1, -0.2, 0.1, 0.0, 0.0;
+  right_arm << 0.2, -0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
+  left_arm << 0.2, 0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
 
-  auto rv = robot
-                ->SendCommand(
-                    RobotCommandBuilder().SetCommand(
-                        ComponentBasedCommandBuilder().SetBodyCommand(
-                            BodyComponentBasedCommandBuilder()
-                                .SetTorsoCommand(JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(torso))
-                                .SetRightArmCommand(
-                                    JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(right_arm))
-                                .SetLeftArmCommand(JointPositionCommandBuilder().SetMinimumTime(5.0).SetPosition(left_arm)))),
-                    90)
-                ->Get();
-
-  std::cout << "pre control pose finish_code: " << static_cast<int>(rv.finish_code()) << std::endl;
-  return rv.finish_code() == RobotCommandFeedback::FinishCode::kOk;
+  return MoveJ<ModelT>(robot, &torso, &right_arm, &left_arm, 5.0);
 }
 
 template <typename ModelT>
 int RunRobotCollisions(const std::string& address, const std::string& power_regex, const std::string& servo_regex) {
-  auto robot = Robot<ModelT>::Create(address);
-
-  if (!robot->Connect()) {
-    std::cerr << "Connection failed" << std::endl;
-    return 1;
-  }
-  if (!robot->IsConnected()) {
-    std::cerr << "Robot is not connected" << std::endl;
-    return 1;
-  }
-
-  if (!robot->IsPowerOn(power_regex)) {
-    if (!robot->PowerOn(power_regex)) {
-      std::cerr << "Failed to power on" << std::endl;
-      return 1;
-    }
-  }
-
-  if (!robot->IsServoOn(servo_regex)) {
-    if (!robot->ServoOn(servo_regex)) {
-      std::cerr << "Failed to servo on" << std::endl;
-      return 1;
-    }
-  }
-
-  const auto cms = robot->GetControlManagerState();
-  if (cms.state == ControlManagerState::State::kMajorFault || cms.state == ControlManagerState::State::kMinorFault) {
-    if (!robot->ResetFaultControlManager()) {
-      std::cerr << "Failed to reset control manager" << std::endl;
-      return 1;
-    }
-  }
-
-  if (!robot->EnableControlManager()) {
-    std::cerr << "Failed to enable control manager" << std::endl;
+  auto robot = InitializeRobot<ModelT>(address, power_regex, servo_regex);
+  if (!robot) {
+    std::cerr << "Failed to initialize robot" << std::endl;
     return 1;
   }
 

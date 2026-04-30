@@ -4,7 +4,7 @@
 // control command for the right arm.
 //
 // Usage example:
-//   ./example_27_impedance_control --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
+//   ./example_27_cartesian_impedance_control --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //
@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 #include <Eigen/Dense>
-#include "rby1-sdk/control_manager_state.h"
+#include "00_helper.cpp"
 #include "rby1-sdk/math/liegroup.h"
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
@@ -36,8 +36,6 @@ namespace {
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-
-constexpr double kD2R = 0.017453292519943295;
 
 std::string ToLower(std::string v) {
   std::transform(v.begin(), v.end(), v.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
@@ -69,92 +67,24 @@ struct CartesianParams {
 };
 
 template <typename ModelT>
-std::shared_ptr<Robot<ModelT>> InitializeRobot(const std::string& address, const std::string& power,
-                                               const std::string& servo) {
-  auto robot = Robot<ModelT>::Create(address);
-
-  if (!robot->Connect()) {
-    std::cerr << "Failed to connect robot " << address << std::endl;
-    return nullptr;
-  }
-  if (!robot->IsConnected()) {
-    std::cerr << "Robot is not connected" << std::endl;
-    return nullptr;
-  }
-  if (!robot->IsPowerOn(power)) {
-    if (!robot->PowerOn(power)) {
-      std::cerr << "Failed to turn power (" << power << ") on" << std::endl;
-      return nullptr;
-    }
-  }
-  if (!robot->IsServoOn(servo)) {
-    if (!robot->ServoOn(servo)) {
-      std::cerr << "Failed to servo (" << servo << ") on" << std::endl;
-      return nullptr;
-    }
-  }
-
-  auto cms = robot->GetControlManagerState();
-  if (cms.state == ControlManagerState::State::kMajorFault || cms.state == ControlManagerState::State::kMinorFault) {
-    if (!robot->ResetFaultControlManager()) {
-      std::cerr << "Failed to reset control manager" << std::endl;
-      return nullptr;
-    }
-  }
-  if (!robot->EnableControlManager()) {
-    std::cerr << "Failed to enable control manager" << std::endl;
-    return nullptr;
-  }
-
-  return robot;
-}
-
-template <typename ModelT>
-bool MoveJ(const std::shared_ptr<Robot<ModelT>>& robot, double minimum_time) {
-  constexpr double torso_deg_full[6] = {0, 30, -60, 30, 0, 0};
-  constexpr double right_deg_full[7] = {30, -10, 0, -100, 0, 20, 0};
-  constexpr double left_deg_full[7] = {30, 10, 0, -100, 0, 20, 0};
-
-  Eigen::VectorXd q_torso(ModelT::kTorsoIdx.size());
-  for (size_t i = 0; i < ModelT::kTorsoIdx.size(); ++i) {
-    q_torso(static_cast<Eigen::Index>(i)) = torso_deg_full[i] * kD2R;
-  }
-
-  Eigen::VectorXd q_right(ModelT::kRightArmIdx.size());
-  for (size_t i = 0; i < ModelT::kRightArmIdx.size(); ++i) {
-    q_right(static_cast<Eigen::Index>(i)) = right_deg_full[i] * kD2R;
-  }
-
-  Eigen::VectorXd q_left(ModelT::kLeftArmIdx.size());
-  for (size_t i = 0; i < ModelT::kLeftArmIdx.size(); ++i) {
-    q_left(static_cast<Eigen::Index>(i)) = left_deg_full[i] * kD2R;
-  }
-
-  auto rv = robot
-                ->SendCommand(RobotCommandBuilder().SetCommand(ComponentBasedCommandBuilder().SetBodyCommand(
-                    BodyComponentBasedCommandBuilder()
-                        .SetTorsoCommand(JointPositionCommandBuilder().SetMinimumTime(minimum_time).SetPosition(q_torso))
-                        .SetRightArmCommand(
-                            JointPositionCommandBuilder().SetMinimumTime(minimum_time).SetPosition(q_right))
-                        .SetLeftArmCommand(
-                            JointPositionCommandBuilder().SetMinimumTime(minimum_time).SetPosition(q_left)))))
-                ->Get();
-
-  if (rv.finish_code() != RobotCommandFeedback::FinishCode::kOk) {
-    std::cerr << "Failed to conduct movej." << std::endl;
-    return false;
-  }
-
-  return true;
-}
-
-template <typename ModelT>
 std::string BodyLinkName() {
   std::string model_name(ModelT::kModelName);
   if (model_name == "A" || model_name == "M") {
     return "link_torso_5";
   }
   return "link_torso_5";
+}
+
+template <typename ModelT>
+bool MoveToPreControlPose(const std::shared_ptr<Robot<ModelT>>& robot) {
+  Eigen::VectorXd torso(6);
+  Eigen::VectorXd right_arm(7);
+  Eigen::VectorXd left_arm(7);
+  torso << 0.0, 0.1, -0.2, 0.1, 0.0, 0.0;
+  right_arm << 0.2, -0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
+  left_arm << 0.2, 0.2, 0.0, -1.0, 0.0, 0.7, 0.0;
+
+  return MoveJ<ModelT>(robot, &torso, &right_arm, &left_arm, 5.0);
 }
 
 template <typename ModelT>
@@ -244,7 +174,7 @@ int Run(const std::string& address, const std::string& power, const std::string&
   robot->SetParameter("cartesian_command.cutoff_frequency", "5");
   robot->SetParameter("default.linear_acceleration_limit", "5");
 
-  if (!MoveJ<ModelT>(robot, 5.0)) {
+  if (!MoveToPreControlPose<ModelT>(robot)) {
     return 1;
   }
 

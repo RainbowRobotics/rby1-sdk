@@ -14,6 +14,12 @@ set(EXAMPLES
 
         log
         reset_odometry
+        get_robot_state2
+        gravity_compensation
+        mobility_command
+        rtcomm_protocol
+        set_pid_gain
+        demo_motion_with_leader_arm
 
         # Numbered examples (matching Python numbering)
         01_hello_rby1
@@ -35,7 +41,7 @@ set(EXAMPLES
         17_fault_log
         18_dynamics_modeling
         19_dynamics_robot
-        20_leader_arm
+        20_leader_arm_state_check
         21_record
         22_replay
         23_zero_pose
@@ -49,24 +55,11 @@ set(EXAMPLES
         31_command_stream
         32_cartesian_command_stream
         33_real_time_control
-        34_teleoperation_with_joint_mapping
+        34_leader_arm_teleop_with_monitor
         35_brake_test
         36_mobile_test
-        37_stop_command
-        38_battery_config
-        39_serial_communication
-
-        get_robot_state2
-        gravity_compensation
-        # self_collision_checking
-
-        mobility_command
-
-        rtcomm_protocol
-
-        set_pid_gain
-
-        demo_motion_with_leader_arm
+        37_serial_device
+        38_serial_communication
 )
 
 foreach (SRC IN LISTS EXAMPLES)

@@ -1,9 +1,15 @@
-// Battery Config Demo
-// This example demonstrates how to control (set, reset) the battery configuration of the robot.
-// See --help for arguments.
+// ################################ Note ################################
+// # This example does not run in simulation.
+// # This example does not apply when the control manager is enabled.
+// ######################################################################
+// 
+// Serial Device List Example
+//
+// This example connects to the robot and prints serial devices exposed by
+// GetSerialDeviceList().
 //
 // Usage example:
-//     ./example_38_battery_config --address 192.168.30.1:50051 --model a
+//   ./example_37_serial_device --address 192.168.30.1:50051 --model a
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //
@@ -14,15 +20,13 @@
 
 #include <algorithm>
 #include <cctype>
-#include <chrono>
 #include <iostream>
 #include <string>
-#include <thread>
+
 #include "rby1-sdk/model.h"
 #include "rby1-sdk/robot.h"
 
 using namespace rb;
-using namespace std::chrono_literals;
 
 namespace {
 
@@ -32,7 +36,7 @@ std::string ToLower(std::string v) {
 }
 
 void PrintUsage(const char* prog) {
-  std::cerr << "Usage: " << prog << " --address <server address> [--model a|m]" << std::endl;
+  std::cerr << "Usage: " << prog << " --address <server address> [--model a|m|ub]" << std::endl;
   std::cerr << "   or: " << prog << " <server address> [model]" << std::endl;
 }
 
@@ -40,18 +44,25 @@ template <typename ModelT>
 int Run(const std::string& address) {
   auto robot = Robot<ModelT>::Create(address);
 
-  if (!robot->Connect()) {
-    std::cerr << "Failed to connect robot " << address << std::endl;
+  robot->Connect();
+  if (!robot->IsConnected()) {
+    std::cerr << "Error: Robot connection failed." << std::endl;
     return 1;
   }
 
-  std::cout << "# Set battery level as 50" << std::endl;
-  std::cout << " -- " << (robot->SetBatteryLevel(50) ? "SUCCESS" : "FAIL") << std::endl;
+  const auto serial_devices = robot->GetSerialDeviceList();
+  if (serial_devices.empty()) {
+    std::cout << "No serial devices found in GetSerialDeviceList()." << std::endl;
+    return 0;
+  }
 
-  std::this_thread::sleep_for(1s);
-
-  std::cout << "# Reset battery configuration" << std::endl;
-  std::cout << " -- " << (robot->ResetBatteryConfig() ? "SUCCESS" : "FAIL") << std::endl;
+  for (size_t i = 0; i < serial_devices.size(); ++i) {
+    std::cout << "[" << i << "] " << serial_devices[i].path;
+    if (!serial_devices[i].description.empty()) {
+      std::cout << " (" << serial_devices[i].description << ")";
+    }
+    std::cout << std::endl;
+  }
 
   return 0;
 }

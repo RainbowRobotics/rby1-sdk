@@ -1,3 +1,7 @@
+// ################################ Note ################################
+// # This example does not run in simulation.
+// ######################################################################
+//
 // Leader Arm Example
 //
 // This example powers on the UPC leader arm, initializes it with its URDF model, and runs a
@@ -5,7 +9,7 @@
 // Note: This example is not supported in simulation.
 //
 // Usage example:
-//   ./example_20_leader_arm --address 192.168.30.1:50051 --model a
+//   ./example_20_leader_arm_state_check --address 192.168.30.1:50051 --model a
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

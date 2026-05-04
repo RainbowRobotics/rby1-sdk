@@ -1,3 +1,7 @@
+// ################################ Note ################################
+// # This example does not run in simulation.
+// ######################################################################
+// 
 // Teleoperation Example
 
 //  This example initializes the robot, gripper, and leader arm connected to a UPC, moves the robot to a
@@ -5,7 +9,7 @@
 //  robot arm and gripper control. See --help for arguments.
 
 //  Usage example:
-//      ./example_34_teleoperation_with_joint_mapping.py --address 192.168.30.1:50051 --model a --servo 'torso_.*|right_arm_.*|left_arm_.*' --mode position --mode position
+//      ./example_34_leader_arm_teleop_with_monitor.py --address 192.168.30.1:50051 --model a --servo 'torso_.*|right_arm_.*|left_arm_.*' --mode position --mode position
 
 //  Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 

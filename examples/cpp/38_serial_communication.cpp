@@ -1,9 +1,18 @@
+// ############################## CAUTION ###############################
+// # Please be careful if you are using modules that return data immediately upon connection,
+// # such as sensors, as this can overload the RPC and cause problems.
+// ######################################################################
+// ################################ Note ################################
+// # This example does not run in simulation.
+// # This example does not apply when the control manager is enabled.
+// ######################################################################
+//
 // Serial Communication Demo
 // This example demonstrates how to setup serial communication with the robot.
 // See --help for arguments.
 //
 // Usage example:
-//     ./example_39_serial_communication --address 192.168.30.1:50051 --model a --device /dev/ttyUSB1 --baudrate 19200
+//     ./example_38_serial_communication --address 192.168.30.1:50051 --model a --device /dev/ttyUSB0 --baudrate 19200
 //
 // Default device_path: /dev/ttyUSB1, default baudrate: 19200
 //
@@ -13,6 +22,7 @@
 // This is a sample code provided for educational and reference purposes only.
 // Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
 // the use or misuse of this demo code. Please use with caution and at your own discretion.
+
 
 #include <algorithm>
 #include <cctype>
@@ -36,8 +46,27 @@ std::string ToLower(std::string v) {
 
 void PrintUsage(const char* prog) {
   std::cerr << "Usage: " << prog
-            << " --address <server address> [--model a|m] [--device <path>] [--baudrate <rate>]" << std::endl;
+            << " --address <server address> [--model a|m] [--device <path> | --device_path <path>] [--baudrate <rate>]"
+            << std::endl;
   std::cerr << "   or: " << prog << " <server address> [model] [device_path] [baudrate]" << std::endl;
+}
+
+bool ParseHexToBytes(const std::string& hex, std::vector<char>& out) {
+  if (hex.empty() || (hex.size() % 2 != 0)) {
+    return false;
+  }
+
+  out.clear();
+  out.reserve(hex.size() / 2);
+  for (size_t i = 0; i < hex.size(); i += 2) {
+    unsigned int byte_val;
+    std::istringstream iss(hex.substr(i, 2));
+    if (!(iss >> std::hex >> byte_val)) {
+      return false;
+    }
+    out.push_back(static_cast<char>(byte_val & 0xFF));
+  }
+  return true;
 }
 
 template <typename ModelT>
@@ -65,49 +94,42 @@ int Run(const std::string& address, const std::string& device_path, int baudrate
     std::cout << std::dec << std::endl;
   });
 
-  std::string line;
-  while (true) {
-    std::cout << "\n>> Enter hex data to send (e.g., 'B7B8010401C5C6'), or type 'exit': ";
-    if (!std::getline(std::cin, line)) {
-      break;
-    }
-
-    // Trim whitespace
-    size_t start = line.find_first_not_of(" \t\r\n");
-    if (start == std::string::npos) {
-      continue;
-    }
-    line = line.substr(start, line.find_last_not_of(" \t\r\n") - start + 1);
-
-    if (line == "exit") {
-      break;
-    }
-
-    if (line.size() % 2 != 0) {
-      std::cerr << "Hex string must have even number of characters." << std::endl;
-      continue;
-    }
-
-    // Parse hex string to bytes
-    std::vector<char> bytes;
-    bool valid = true;
-    for (size_t i = 0; i < line.size(); i += 2) {
-      unsigned int byte_val;
-      std::istringstream iss(line.substr(i, 2));
-      if (!(iss >> std::hex >> byte_val)) {
-        valid = false;
+  std::thread input_thread([&]() {
+    std::string line;
+    while (true) {
+      std::cout << "\n>> Enter hex data to send (e.g., 'B7B8010401C5C6'), or type 'exit': " << std::flush;
+      if (!std::getline(std::cin, line)) {
         break;
       }
-      bytes.push_back(static_cast<char>(byte_val));
-    }
 
-    if (!valid) {
-      std::cerr << "Invalid hex input. Please enter valid hexadecimal characters (0-9, A-F)." << std::endl;
-      continue;
-    }
+      // Trim whitespace
+      size_t start = line.find_first_not_of(" \t\r\n");
+      if (start == std::string::npos) {
+        continue;
+      }
+      line = line.substr(start, line.find_last_not_of(" \t\r\n") - start + 1);
 
-    dev->Write(bytes.data(), static_cast<int>(bytes.size()));
-  }
+      if (ToLower(line) == "exit") {
+        break;
+      }
+
+      std::vector<char> bytes;
+      if (!ParseHexToBytes(line, bytes)) {
+        if (line.size() % 2 != 0) {
+          std::cerr << "Hex string must have even number of characters." << std::endl;
+        } else {
+          std::cerr << "Invalid hex input. Please enter valid hexadecimal characters (0-9, A-F)." << std::endl;
+        }
+        continue;
+      }
+
+      if (!dev->Write(bytes.data(), static_cast<int>(bytes.size()))) {
+        std::cerr << "Failed to write data." << std::endl;
+      }
+    }
+  });
+
+  input_thread.join();
 
   std::cout << "Disconnecting serial stream..." << std::endl;
   dev->Disconnect();
@@ -123,6 +145,7 @@ int main(int argc, char** argv) {
   std::string model = "a";
   std::string device_path = "/dev/ttyUSB1";
   int baudrate = 19200;
+  bool device_provided = false;
 
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
@@ -130,8 +153,9 @@ int main(int argc, char** argv) {
       address = argv[++i];
     } else if (arg == "--model" && i + 1 < argc) {
       model = argv[++i];
-    } else if (arg == "--device" && i + 1 < argc) {
+    } else if ((arg == "--device" || arg == "--device_path") && i + 1 < argc) {
       device_path = argv[++i];
+      device_provided = true;
     } else if (arg == "--baudrate" && i + 1 < argc) {
       baudrate = std::stoi(argv[++i]);
     } else if (arg.rfind("--", 0) == 0) {
@@ -141,8 +165,9 @@ int main(int argc, char** argv) {
       address = arg;
     } else if (model == "a") {
       model = arg;
-    } else if (device_path == "/dev/ttyUSB1") {
+    } else if (!device_provided) {
       device_path = arg;
+      device_provided = true;
     } else {
       baudrate = std::stoi(arg);
     }

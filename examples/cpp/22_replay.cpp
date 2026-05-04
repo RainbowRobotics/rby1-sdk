@@ -1,8 +1,3 @@
-// ################### CAUTION ###################
-// # CAUTION:
-// # Ensure that the robot has enough surrounding clearance before running this example.
-// ###############################################
-
 // Replay Demo
 // This example demonstrates how to replay the robot's positions. See --help for arguments.
 //

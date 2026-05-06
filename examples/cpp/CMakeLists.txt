@@ -26,20 +26,21 @@ set(EXAMPLES
         22_replay
         23_zero_pose
         24_demo_motion
-        25_cancel_control
-        26_collisions
-        27_cartesian_impedance_control
-        28_joint_impedance_control
-        29_joint_group_command
-        30_multi_controls
-        31_command_stream
-        32_cartesian_command_stream
-        33_real_time_control
-        34_leader_arm_teleop_with_monitor
-        35_brake_test
-        36_mobile_test
-        37_serial_device
-        38_serial_communication
+        25_wiggle_motion
+        26_cancel_control
+        27_collisions
+        28_cartesian_impedance_control
+        29_joint_impedance_control
+        30_joint_group_command
+        31_multi_controls
+        32_command_stream
+        33_cartesian_command_stream
+        34_real_time_control
+        35_leader_arm_teleop_with_monitor
+        36_brake_test
+        37_mobile_test
+        38_serial_device
+        39_serial_communication
 )
 
 foreach (SRC IN LISTS EXAMPLES)

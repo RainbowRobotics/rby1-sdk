@@ -1,8 +1,8 @@
 ################################ Note ################################
 # This example does not run in simulation.
 ######################################################################
-# This example initializes the robot, gripper, and master arm connected to a UPC, moves the robot to a
-# ready pose, and streams teleoperation commands that map master arm joint motion and trigger input to
+# This example initializes the robot, gripper, and leader arm connected to a UPC, moves the robot to a
+# ready pose, and streams teleoperation commands that map leader arm joint motion and trigger input to
 # robot arm and gripper control. See --help for arguments.
 #
 # additional function
@@ -34,7 +34,7 @@ import queue
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 URDF_PATH = os.path.join(SCRIPT_DIR, "../../models/leader_arm", "model.urdf") # /../../models/leader_arm/model.urdf
-LEADER_ARM_DEVICE_NAME = rby.upc.MasterArmDeviceName
+LEADER_ARM_DEVICE_NAME = rby.upc.LeaderArmDeviceName
 
 GRIPPER_DIRECTION = False
 
@@ -662,7 +662,7 @@ class Pose:
 
 
 class Settings:
-    master_arm_loop_period = 1 / 100
+    leader_arm_loop_period = 1 / 100
 
     impedance_stiffness = 50
     impedance_damping_ratio = 1.0
@@ -907,7 +907,7 @@ def main(address, model_name, power, servo, control_mode):
         nonlocal robot_q
         robot_q = state.position
 
-    robot.start_state_update(robot_state_callback, 1 / Settings.master_arm_loop_period)
+    robot.start_state_update(robot_state_callback, 1 / Settings.leader_arm_loop_period)
 
     # ===== SETUP GRIPPER =====
     gripper = Gripper()
@@ -919,16 +919,16 @@ def main(address, model_name, power, servo, control_mode):
     gripper.homing()
     gripper.start()
 
-    # ===== MASTER ARM SETUP =====
-    master_arm = LeaderArm(
-        control_period=Settings.master_arm_loop_period,
+    # ===== LEADER ARM SETUP =====
+    leader_arm = LeaderArm(
+        control_period=Settings.leader_arm_loop_period,
     )
-    active_ids = master_arm.initialize(verbose=True)
+    active_ids = leader_arm.initialize(verbose=True)
 
-    if len(master_arm.active_ids) != master_arm.DEVICE_COUNT:
+    if len(leader_arm.active_ids) != leader_arm.DEVICE_COUNT:
         logging.error(
             f"Mismatch in the number of devices detected. "
-            f"Expected {master_arm.DEVICE_COUNT}, got {len(master_arm.active_ids)}"
+            f"Expected {leader_arm.DEVICE_COUNT}, got {len(leader_arm.active_ids)}"
         )
         exit(1)
 
@@ -972,7 +972,7 @@ def main(address, model_name, power, servo, control_mode):
     # =========================================================
     # CONTROL CALLBACK (Teleop + Real-time Monitoring)
     # =========================================================
-    def master_arm_control_loop(state: LeaderArm.State):
+    def leader_arm_control_loop(state: LeaderArm.State):
         nonlocal position_mode, right_q, left_q
         nonlocal right_minimum_time, left_minimum_time
         nonlocal session_stats
@@ -1049,7 +1049,7 @@ def main(address, model_name, power, servo, control_mode):
         gripper.set_target(gripper_target)
 
         # --------------------------------------------------
-        # 3. Master Arm Torque Calculation (from teleop)
+        # 3. Leader Arm Torque Calculation (from teleop)
         # --------------------------------------------------
         ma_input = LeaderArm.ControlInput()
 
@@ -1123,9 +1123,9 @@ def main(address, model_name, power, servo, control_mode):
         rc = rby.BodyComponentBasedCommandBuilder()
 
         if state.button_right.button and not is_collision:
-            right_minimum_time -= Settings.master_arm_loop_period
+            right_minimum_time -= Settings.leader_arm_loop_period
             right_minimum_time = max(
-                right_minimum_time, Settings.master_arm_loop_period * 1.01
+                right_minimum_time, Settings.leader_arm_loop_period * 1.01
             )
             right_arm_builder = (
                 rby.JointPositionCommandBuilder()
@@ -1162,9 +1162,9 @@ def main(address, model_name, power, servo, control_mode):
             right_minimum_time = 0.8
 
         if state.button_left.button and not is_collision:
-            left_minimum_time -= Settings.master_arm_loop_period
+            left_minimum_time -= Settings.leader_arm_loop_period
             left_minimum_time = max(
-                left_minimum_time, Settings.master_arm_loop_period * 1.01
+                left_minimum_time, Settings.leader_arm_loop_period * 1.01
             )
             left_arm_builder = (
                 rby.JointPositionCommandBuilder()
@@ -1226,9 +1226,9 @@ def main(address, model_name, power, servo, control_mode):
 
         print(error_msg, flush=True)
 
-        # Priority 1: Hardware safety - immediately turn off master arm torque; call directly because stop_control can deadlock
+        # Priority 1: Hardware safety - immediately turn off leader arm torque; call directly because stop_control can deadlock
         try:
-            master_arm.DisableTorque()
+            leader_arm.DisableTorque()
         except Exception:
             pass
 
@@ -1252,9 +1252,9 @@ def main(address, model_name, power, servo, control_mode):
         except Exception:
             pass
 
-        # Priority 4: Master arm & gripper cleanup
+        # Priority 4: Leader arm & gripper cleanup
         try:
-            master_arm.stop_control(torque_disable=False)  # Torque is already off
+            leader_arm.stop_control(torque_disable=False)  # Torque is already off
         except Exception:
             pass
         try:
@@ -1270,14 +1270,14 @@ def main(address, model_name, power, servo, control_mode):
     # =========================================================
     # START CONTROL LOOP
     # =========================================================
-    master_arm.start_control(master_arm_control_loop, safety_function=safety_function)
+    leader_arm.start_control(leader_arm_control_loop, safety_function=safety_function)
 
     # ===== SIGNAL HANDLER (Ctrl+C) =====
     def handler(signum, frame):
         print("\n\nInterrupt received. Stopping...")
         robot.stop_state_update()
-        if master_arm:
-            master_arm.close()
+        if leader_arm:
+            leader_arm.close()
         robot.cancel_control()
         time.sleep(0.5)
         robot.disable_control_manager()
@@ -1289,7 +1289,7 @@ def main(address, model_name, power, servo, control_mode):
     signal.signal(signal.SIGINT, handler)
 
     # Main thread waits
-    while master_arm.ctrl_session_active:
+    while leader_arm.ctrl_session_active:
         time.sleep(1)
 
 

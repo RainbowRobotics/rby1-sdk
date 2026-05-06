@@ -20,7 +20,7 @@
 - **examples**: comprehensive renumbering, deduplication, and cleanup of all numbered examples (Python + C++)
 - **examples**: rename `cancel_command` → `cancel_control`
 - **examples/python**: restore passive collisions example
-- **master-arm**: set torque limits to 1/5 of stall torque
+- **leader-arm**: set torque limits to 1/5 of stall torque
 
 ### 🐛 Fixes
 

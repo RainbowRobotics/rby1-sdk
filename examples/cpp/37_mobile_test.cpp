@@ -11,7 +11,7 @@
 // Note: On the A model, the Y component of SE(2) commands is ignored.
 //
 // Usage example:
-//     ./example_36_mobile_test --address 192.168.30.1:50051 --model m --power '.*' --servo '.*'
+//     ./example_37_mobile_test --address 192.168.30.1:50051 --model m --power '.*' --servo '.*'
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

@@ -3,7 +3,7 @@
 # commands with different priorities, and prints each command handle's finish code. See --help for arguments.
 #
 # Usage example:
-#   python 30_multi_controls.py --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
+#   python 31_multi_controls.py --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -102,7 +102,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="30_multi_controls")
+    parser = argparse.ArgumentParser(description="31_multi_controls")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

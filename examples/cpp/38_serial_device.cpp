@@ -9,7 +9,7 @@
 // GetSerialDeviceList().
 //
 // Usage example:
-//   ./example_37_serial_device --address 192.168.30.1:50051 --model a
+//   ./example_38_serial_device --address 192.168.30.1:50051 --model a
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

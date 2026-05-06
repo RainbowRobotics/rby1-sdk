@@ -12,7 +12,7 @@
 // See --help for arguments.
 //
 // Usage example:
-//     ./example_38_serial_communication --address 192.168.30.1:50051 --model a --device /dev/ttyUSB0 --baudrate 19200
+//     ./example_39_serial_communication --address 192.168.30.1:50051 --model a --device /dev/ttyUSB0 --baudrate 19200
 //
 // Default device_path: /dev/ttyUSB1, default baudrate: 19200
 //

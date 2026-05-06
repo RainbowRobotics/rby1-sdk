@@ -10,7 +10,7 @@
 //   4. Wait for done (press Ctrl+C to stop)
 //
 // Usage example:
-//   ./example_33_real_time_control --address 127.0.0.1:50051 --model a --power ".*" --servo ".*"
+//   ./example_34_real_time_control --address 127.0.0.1:50051 --model a --power ".*" --servo ".*"
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

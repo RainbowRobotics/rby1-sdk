@@ -10,7 +10,7 @@
 # releases the brake for a target joint, waits briefly, and then engages the brake again. See --help for arguments.
 #
 # Usage example:
-#     python 35_brake_test.py --address 192.168.30.1:50051 --model a --power '.*' --joint right_arm_0
+#     python 36_brake_test.py --address 192.168.30.1:50051 --model a --power '.*' --joint right_arm_0
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -61,7 +61,7 @@ def main(address, model, power, joint):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="35_brake_test")
+    parser = argparse.ArgumentParser(description="36_brake_test")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

@@ -6,7 +6,7 @@
 //   3. Command both arms toward the zero position with stiffness, damping, and torque limits
 //
 // Usage example:
-//   ./example_28_joint_impedance_control --address 127.0.0.1:50051 --model a --power ".*" --servo ".*"
+//   ./example_29_joint_impedance_control --address 127.0.0.1:50051 --model a --power ".*" --servo ".*"
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

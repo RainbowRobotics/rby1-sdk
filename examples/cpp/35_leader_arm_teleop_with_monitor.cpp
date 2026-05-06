@@ -9,7 +9,7 @@
 //  robot arm and gripper control. See --help for arguments.
 
 //  Usage example:
-//      ./example_34_leader_arm_teleop_with_monitor.py --address 192.168.30.1:50051 --model a --servo 'torso_.*|right_arm_.*|left_arm_.*' --mode position --mode position
+//      ./example_35_leader_arm_teleop_with_monitor --address 192.168.30.1:50051 --model a --servo 'torso_.*|right_arm_.*|left_arm_.*' --mode position --mode position
 
 //  Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 

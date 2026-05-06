@@ -8,7 +8,7 @@
 # and then streams right-arm Cartesian targets while monitoring feedback. See --help for arguments.
 #
 # Usage example:
-#     python 32_cartesian_command_stream.py --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
+#     python 33_cartesian_command_stream.py --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -136,7 +136,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="32_cartesian_command_stream")
+    parser = argparse.ArgumentParser(description="33_cartesian_command_stream")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

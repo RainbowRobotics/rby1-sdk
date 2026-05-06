@@ -3,7 +3,7 @@
 // commands with different priorities, and prints each command handle's finish code.
 //
 // Usage example:
-//   ./example_30_multi_controls --address 192.168.30.1:50051 --model a --power ".*" --servo ".*" 
+//   ./example_31_multi_controls --address 192.168.30.1:50051 --model a --power ".*" --servo ".*" 
 //  
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.

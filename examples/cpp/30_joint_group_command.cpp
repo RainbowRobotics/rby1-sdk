@@ -7,7 +7,7 @@
 // This example demonstrates how to control the robot using joint group command.
 //
 // Usage example:
-//   ./example_29_joint_group_command --address 127.0.0.1:50051 --model a --power ".*" --servo ".*"
+//   ./example_30_joint_group_command --address 127.0.0.1:50051 --model a --power ".*" --servo ".*"
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

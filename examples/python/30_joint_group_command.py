@@ -6,7 +6,7 @@
 # This example demonstrates how to control the robot using joint group command. See --help for arguments.
 #
 # Usage example:
-#     python 29_joint_group_command.py --address 127.0.0.1:50051 --model a
+#     python 30_joint_group_command.py --address 127.0.0.1:50051 --model a
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -80,7 +80,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="29_joint_group_command")
+    parser = argparse.ArgumentParser(description="30_joint_group_command")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

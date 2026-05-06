@@ -8,7 +8,7 @@
 # This example brings up the robot and runs several mobility commands using joint velocity and SE(2) velocity control. See --help for arguments.
 #
 # Usage example:
-#     python 36_mobile_test.py --address 192.168.30.1:50051 --model m --power '.*' --servo '.*'
+#     python 37_mobile_test.py --address 192.168.30.1:50051 --model m --power '.*' --servo '.*'
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -184,7 +184,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="36_mobile_test")
+    parser = argparse.ArgumentParser(description="37_mobile_test")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

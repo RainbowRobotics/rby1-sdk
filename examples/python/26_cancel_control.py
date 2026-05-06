@@ -2,7 +2,7 @@
 # This example demonstrates how to cancel robot control. See --help for arguments.
 #
 # Usage example:
-#     python 25_cancel_control.py --address 192.168.30.1:50051 --model a
+#     python 26_cancel_control.py --address 192.168.30.1:50051 --model a
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -57,7 +57,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="25_cancel_control")
+    parser = argparse.ArgumentParser(description="26_cancel_control")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

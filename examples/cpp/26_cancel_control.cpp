@@ -2,7 +2,7 @@
 // This example demonstrates how to cancel robot control.
 //
 // Usage example:
-//   ./example_25_cancel_control --address 192.168.30.1:50051 --model a --power ".*" --servo ".*"
+//   ./example_26_cancel_control --address 192.168.30.1:50051 --model a --power ".*" --servo ".*"
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

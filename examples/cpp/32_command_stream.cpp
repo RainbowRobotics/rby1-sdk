@@ -8,7 +8,7 @@
 // joint follows a sinusoidal target. See --help for arguments.
 //
 // Usage example:
-//     ./example_31_command_stream --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
+//     ./example_32_command_stream --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

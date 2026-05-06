@@ -6,7 +6,7 @@
 # This example demonstrates how to get the serial_device in RPC.
 # 
 # Usage example:
-#     python 37_rpc_serial_device.py --address 192.168.30.1:50051 
+#     python 38_rpc_serial_device.py --address 192.168.30.1:50051 
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -33,7 +33,7 @@ def main(address):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="37_rpc_serial_device")
+    parser = argparse.ArgumentParser(description="38_rpc_serial_device")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     args = parser.parse_args()
 

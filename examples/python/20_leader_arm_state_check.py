@@ -3,7 +3,7 @@
 ######################################################################
 # Leader arm state check
 # Check leader arm's q,torque,current,etc.
-# if connect failed continuously and it's occured more than N times, operate safety function and close node.
+# if connect failed continuously and it's occurred more than N times, operate safety function and close node.
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 # Usage example:
 #     python 20_leader_arm_state_check.py --address 192.168.30.1:50051 --model m
@@ -25,7 +25,7 @@ import copy
 import queue
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-URDF_PATH = os.path.join(SCRIPT_DIR, "../../models/master_arm", "model.urdf") # /../../models/master_arm/model.urdf"
+URDF_PATH = os.path.join(SCRIPT_DIR, "../../models/leader_arm", "model.urdf") # /../../models/leader_arm/model.urdf
 LEADER_ARM_DEVICE_NAME = rby.upc.MasterArmDeviceName
 
 class LeaderArm:
@@ -788,7 +788,7 @@ def main(address, model):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="19_master_arm")
+    parser = argparse.ArgumentParser(description="20_leader_arm_state_check")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

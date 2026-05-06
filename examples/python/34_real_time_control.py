@@ -2,7 +2,7 @@
 # This example demonstrates how to control the robot using real time control. See --help for arguments.
 #
 # Usage example:
-#     python 33_real_time_control.py --address 127.0.0.1:50051 --model a
+#     python 34_real_time_control.py --address 127.0.0.1:50051 --model a
 #
 # Scenario
 # - real-time control cannot use the builder type commands provided by the existing SDK

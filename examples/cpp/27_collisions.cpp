@@ -3,7 +3,7 @@
 // monitors collision distance during motion, and sends a stop command when the robot gets too close.
 //
 // Usage example:
-//   ./example_26_collisions --address 192.168.30.1:50051 --model a --power ".*" --servo ".*"
+//   ./example_27_collisions --address 192.168.30.1:50051 --model a --power ".*" --servo ".*"
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

@@ -70,7 +70,7 @@ def main(address):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="04_parameter")
+    parser = argparse.ArgumentParser(description="05_parameter")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     args = parser.parse_args()
 

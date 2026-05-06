@@ -4,7 +4,7 @@
 # control command for the right arm. See --help for arguments.
 #
 # Usage example:
-#     python 27_impedance_control.py --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
+#     python 28_cartesian_impedance_control.py --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #

@@ -8,7 +8,7 @@
 // and then streams right-arm Cartesian targets while monitoring feedback. See --help for arguments.
 //
 // Usage example:
-//     ./example_32_cartesian_command_stream --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
+//     ./example_33_cartesian_command_stream --address 192.168.30.1:50051 --model a --power '.*' --servo '.*'
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

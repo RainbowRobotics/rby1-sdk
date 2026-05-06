@@ -10,7 +10,7 @@
 # This example demonstrates how to parse serial communication in an RPC.
 # 
 # Usage example:
-#     python 38_rpc_serial_communication.py --address 192.168.30.1:50051 --device_path /dev/ttyUSB1 --baudrate 19200
+#     python 39_rpc_serial_communication.py --address 192.168.30.1:50051 --device_path /dev/ttyUSB1 --baudrate 19200
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -76,7 +76,7 @@ def main(address, device_path, baudrate):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="38_rpc_serial_communication")
+    parser = argparse.ArgumentParser(description="39_rpc_serial_communication")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument("--device_path", type=str, default="/dev/ttyUSB1", help="Serial port in RPC")
     parser.add_argument("--baudrate", type=int, default=19200, help="Baudrate")

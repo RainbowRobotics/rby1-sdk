@@ -10,7 +10,7 @@
 // releases the brake for a target joint, waits briefly, and then engages the brake again.
 //
 // Usage example:
-//     ./example_35_brake_test --address 192.168.30.1:50051 --model a --power '.*' --joint right_arm_6
+//     ./example_36_brake_test --address 192.168.30.1:50051 --model a --power '.*' --joint right_arm_6
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //

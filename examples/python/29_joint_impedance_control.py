@@ -5,7 +5,7 @@
 # 2. Run joint impedance control for both arms
 # 3. Command both arms toward the zero position with stiffness, damping, and torque limits
 # Usage example:
-#     python 28_joint_impedance_control.py --address 127.0.0.1:50051 --model a --power '.*' --servo '.*'
+#     python 29_joint_impedance_control.py --address 127.0.0.1:50051 --model a --power '.*' --servo '.*'
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -120,7 +120,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="28_joint_impedance_control")
+    parser = argparse.ArgumentParser(description="29_joint_impedance_control")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

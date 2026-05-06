@@ -3,7 +3,7 @@
 # monitors collision distance during motion, and sends a stop command when the robot gets too close. See --help for arguments.
 #
 # Usage example:
-#     python 26_collisions.py --address 192.168.30.1:50051 --model a --power ".*"
+#     python 27_collisions.py --address 192.168.30.1:50051 --model a --power ".*"
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -77,7 +77,7 @@ def main(address, model, power, servo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="26_collisions")
+    parser = argparse.ArgumentParser(description="27_collisions")
     parser.add_argument("--address", type=str, required=True, help="Robot address")
     parser.add_argument(
         "--model", type=str, default="a", help="Robot Model Name (default: 'a')"

@@ -1,0 +1,139 @@
+label onto
+
+# Branch chore-merge-merge-origin-main-into-main
+reset 49d3a2e # refactor(examples/python): remove duplicated numbered examples under 22
+pick 014afeb # fix(examples/python): update wifi, real-time control, and dynamics robot examples
+merge -C 81e9884 1fd7e60 # chore(merge): merge main from kaiseong/rby1-sdk
+pick b20c6a2 # refactor(examples/python): rename cancel command example to cancel control
+label chore-merge-merge-origin-main-into-main
+
+# Reword 76aece3: merge origin/main with real content message
+reset onto
+merge -C 76aece3 chore-merge-merge-origin-main-into-main # chore(merge): merge origin/main into main
+exec git commit --amend -m "feat(examples/python): add real_time_control and dynamics_robot examples"
+pick 4f40b95 # fix(examples/python): update factory default PID gain example
+pick 7cd9800 # fix(examples/python): update servo off example
+label branch-point
+pick 85103fb # docs(examples/python): add safety note to demo motion example
+label chore-merge-merge-main-from-kaiseong-rby1-sdk
+
+reset branch-point # fix(examples/python): update servo off example
+pick bf36629 # fix(examples/python): update wifi example
+merge -C c737a9b chore-merge-merge-main-from-kaiseong-rby1-sdk # chore(merge): merge main from kaiseong/rby1-sdk
+pick 0c6d7b9 # fix(examples/python): update wifi example
+pick 124cc99 # fix(examples/python): update real-time control example
+label branch-point-2
+pick 1842324 # feat(examples/cpp): add C++ SDK examples
+pick 297ed59 # feat(examples/cpp): add C++ SDK examples
+label chore-merge-merge-main-from-kaiseong-rby1-sdk-2
+
+reset branch-point-2 # fix(examples/python): update real-time control example
+pick e655f1a # fix(examples/python): update real-time control example
+merge -C 964c191 chore-merge-merge-main-from-kaiseong-rby1-sdk-2 # chore(merge): merge main from kaiseong/rby1-sdk
+pick 0a7c4b7 # fix(examples/python): update real-time control example
+label branch-point-3
+# Group B squash: a6f9488 + 46a4fac -> one commit; drop merge 9803253
+pick a6f9488 # feat(examples/cpp): add C++ SDK examples
+fixup 46a4fac # feat(examples/cpp): add C++ SDK examples (duplicate -> squash)
+label branch-point-4
+pick 592a0b1 # feat(examples/cpp): add kgs teleoperation example variant
+label chore-merge-merge-main-from-kaiseong-rby1-sdk-3
+
+reset branch-point-4 # after squashed Group B
+pick 1f47d3b # fix(examples/python): update cancel control and log stream examples
+merge -C 904ef1c chore-merge-merge-main-from-kaiseong-rby1-sdk-3 # chore(merge): merge main from kaiseong/rby1-sdk
+label branch-point-5
+pick fa92eff # build(examples/cpp): add build target for kgs teleoperation example
+label chore-merge-merge-main-from-kaiseong-rby1-sdk-4
+
+reset branch-point-5 # chore(merge): merge main from kaiseong/rby1-sdk
+pick f505a07 # fix(examples/python): update real-time control example
+merge -C 689ba70 chore-merge-merge-main-from-kaiseong-rby1-sdk-4 # chore(merge): merge main from kaiseong/rby1-sdk
+pick 85b0a83 # refactor(examples/python): apply first-round example updates
+label branch-point-6
+pick c879de7 # refactor(examples/python): prepare non-numbered examples cleanup
+pick b3da3b3 # docs(examples/python): update pre-control pose descriptions
+pick 0cdb91d # docs(examples/python): align numbered example annotations
+label chore-merge-merge-main-from-kaiseong-rby1-sdk-5
+
+reset branch-point-6 # refactor(examples/python): apply first-round example updates
+pick ade39ef # fix(examples/python): update zero pose, joint group, and real-time examples
+merge -C 8c5d689 chore-merge-merge-main-from-kaiseong-rby1-sdk-5 # chore(merge): merge main from kaiseong/rby1-sdk
+pick 25b1754 # fix(examples/python): update parameter, record, and replay examples
+label chore-merge-merge-fork-main-into-main
+
+reset chore-merge-merge-main-from-kaiseong-rby1-sdk-5 # docs(examples/python): align numbered example annotations
+pick 2a8724c # docs(examples/python): fix example annotations
+pick e1016a6 # refactor(examples/python): refine cartesian command stream example
+pick 90e3f3f # refactor(examples/python): clean up real-time control example
+merge -C c3b8a8e chore-merge-merge-fork-main-into-main # chore(merge): merge fork/main into main
+pick c3707ee # refactor(examples/python): clean up joint group, real-time, command stream, and mobile examples
+pick 1d5a0eb # fix(examples/python): update teleoperation, collisions, mobile, and test examples
+pick 6b36a19 # fix(examples/python): update teleoperation startup alignment
+pick 22ff0d2 # fix(examples/python): clean up Python example issues
+pick ec5ad6d # fix(examples/python): update factory default PID gain and command stream examples
+pick 4eeaddf # fix(examples/python): update cancel control example
+label branch-point-7
+pick 0ecc5f8 # refactor(examples/python): remove helper usage from demo motion
+pick 73a8daa # docs(examples/python): remove leftover helper note from zero pose example
+label chore-merge-merge-main-from-kaiseong-rby1-sdk-6
+
+reset branch-point-7 # fix(examples/python): update cancel control example
+pick 593aea7 # fix(examples/python): update record and replay examples
+merge -C bb9ac52 chore-merge-merge-main-from-kaiseong-rby1-sdk-6 # chore(merge): merge main from kaiseong/rby1-sdk
+label branch-point-8
+pick a82b0d2 # refactor(examples/python): reorder and renumber Python examples
+label origin-main
+
+reset a3274bb # bump: version 0.9.0 → 0.9.1
+pick 1a03fc8 # refactor: update master-arm torque limits to 1/5 of stall torque
+label origin-feature-master-arm
+
+reset b1596b7 # fix: install conan on MacOS through Homebrew
+# Reword 54ec517: merge feature/master-arm with meaningful message
+merge -C 54ec517 origin-feature-master-arm # Merge remote-tracking branch 'origin/feature/master-arm' into dev
+exec git commit --amend -m "feat(api+ci): merge LeaderArm feature branch; bump pyproject version, adjust torque limits"
+pick 89e911c # fix(api): rename Break to Brake for engage and release methods
+pick c2eb515 # refactor(api): rename MasterArm to LeaderArm
+pick 2a6cbbe # ci(workflow): add ubuntu-24.04, macos-15, macos-26 and python 3.12 to build matrix
+pick def299f # refactor(examples): renumber and replace all examples; rename master arm to leader arm
+# Group C squash: 891f3d4 + 9e88df6
+pick 891f3d4 # fix(api): add kDeviceCount alias, fix ResolveLeaderArmDeviceName fallback, fix brake_engage docstring
+fixup 9e88df6 # fix(examples): use kLeaderArmDeviceName, fix kDeviceCount, fix brake usage, fix log labels and import
+exec git commit --amend -m "fix(api+examples): add kDeviceCount alias, fix LeaderArm device name resolution, brake usage, and related example fixes"
+# Group A squash: b4475d8 + 5ffc8d7 + 015a594 + 5493bbb (reorder ce9fc58 after)
+pick b4475d8 # ci(workflow): increase Conan HTTP retry limit to handle transient 502 errors
+fixup 5ffc8d7 # ci(workflow): use global.conf to set Conan HTTP retry settings
+fixup 015a594 # ci(workflow): fix Conan configuration key for download retry wait
+fixup 5493bbb # ci(workflow): specify bash shell for Conan configuration
+exec git commit --amend -m "ci(workflow): configure Conan HTTP retry with global.conf and bash shell"
+pick ce9fc58 # fix(api): add missing include to control_manager_state.h
+pick c0ba50b # fix(examples): add missing include and Windows math defines
+label chore-merge-upstream-dev-and-resolve-conflicts
+
+reset branch-point-8 # chore(merge): merge main from kaiseong/rby1-sdk
+pick 6d22837 # feat(examples): convert even-numbered Python examples to C++
+pick a841d74 # refactor(examples/cpp): renumber, unify style, and add missing C++ examples
+# Reword bb4aec8: merge with meaningful message
+merge -C bb4aec8 origin-main # Merge remote-tracking branch 'origin/main'
+exec git commit --amend -m "fix(examples/python): fix usage comment numbering in Python examples"
+pick a9e5e24 # chore(examples/cpp): remove temporary helper scripts
+pick 11664ea # new file: examples/python/00_helper.py + misc python updates
+pick 220683a # modified: examples/python updates
+pick 2d43ae6 # modified: examples/python/31,32,36
+pick 350539a # modified: examples/python/36_mobile_test.py
+pick 083606f # modified: examples/python/24,29
+merge -C 9fcdce5 chore-merge-upstream-dev-and-resolve-conflicts # chore: merge upstream/dev and resolve conflicts
+pick 8540985 # modified: examples/python/34_teleoperation_with_joint_mapping.py
+pick 668b82f # fix(examples): resolve leftover merge markers
+pick b0b08d0 # chore(examples): trim trailing whitespace
+pick 2470000 # fix(examples): align C++ files with dev
+label kaiseong-feature-test-jsm
+
+reset chore-merge-upstream-dev-and-resolve-conflicts # fix(examples): add missing include and Windows math defines
+merge -C 0f65ed5 kaiseong-feature-test-jsm # Merge pull request #148 from kaiseong/feature/test_jsm
+pick 4cfed35 # refactor(examples): update examples
+pick 5293d1f # refactor(examples): update examples
+pick d3d4027 # refactor(examples): update examples
+pick a7abe44 # refactor(examples): update examples
+pick 49bc01c # fix(examples): use ResolveLeaderArmDeviceName for backward compatibility

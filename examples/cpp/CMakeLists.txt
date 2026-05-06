@@ -1,26 +1,6 @@
 add_subdirectory(dynamics)
-add_subdirectory(module_test)
 
 set(EXAMPLES
-        trapezoidal_motion_generator
-        so3
-        optimal_control
-        velocity_estimation
-
-        teleoperation_with_joint_mapping
-
-        kinematic_calibration
-        kinematic_calibration2
-
-        log
-        reset_odometry
-        get_robot_state2
-        gravity_compensation
-        mobility_command
-        rtcomm_protocol
-        set_pid_gain
-        demo_motion_with_leader_arm
-
         # Numbered examples (matching Python numbering)
         01_hello_rby1
         02_robot_model_setting

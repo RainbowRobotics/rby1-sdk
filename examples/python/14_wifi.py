@@ -59,7 +59,7 @@ def wifi_setup_ui(stdscr, networks):
         elif current_step == "password":
             stdscr.addstr(f"Selected: {selected_network.ssid}\n", curses.A_BOLD)
             stdscr.addstr("Enter password (press Enter to confirm):\n")
-            stdscr.addstr(f"{'*' * len(input_text)}", curses.A_REVERSE)  # 비밀번호 마스킹
+            stdscr.addstr(f"{'*' * len(input_text)}", curses.A_REVERSE)  # Mask the password
         elif current_step == "dhcp":
             stdscr.addstr(f"Selected: {selected_network.ssid}\n", curses.A_BOLD)
             stdscr.addstr("Use DHCP? (y/n): ")
@@ -130,7 +130,7 @@ def wifi_setup_ui(stdscr, networks):
                     dns = input_text.split(",")
                     current_step = "confirm"
                     input_text = ""
-            elif 32 <= key <= 126:  # 일반적인 키 입력 (ASCII)
+            elif 32 <= key <= 126:  # Standard key input (ASCII)
                 input_text += chr(key)
         elif current_step == "confirm":
             if key in [curses.KEY_ENTER, 10, 13]:

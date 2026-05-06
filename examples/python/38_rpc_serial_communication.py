@@ -68,7 +68,7 @@ def main(address, device_path, baudrate):
             dev.disconnect()
             print("Disconnected. Exiting.")
 
-    # 스레드 시작
+    # Start the thread
     input_thread = threading.Thread(target=user_input_loop)
     input_thread.start()
 

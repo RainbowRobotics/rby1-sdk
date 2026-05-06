@@ -53,13 +53,13 @@ class LeaderArm:
     kRightLinkId = 7
     kLeftLinkId = 14
 
-    class ButtonState: # 버튼 상태 구조체
+    class ButtonState: # Button state structure
         __slots__ = ['button', 'trigger']
         def __init__(self, b, t):
             self.button = b
             self.trigger = t
 
-    class State: # 기본적으로 저장되는 변수들
+    class State: # Variables stored by default
         __slots__ = [
             'q_joint', 'qvel_joint', 'torque_joint', 'gravity_term', 
             'operating_mode', 'target_position', 'button_right', 
@@ -79,16 +79,16 @@ class LeaderArm:
             self.T_right = np.eye(4)
             self.T_left = np.eye(4)
             self.temperatures = np.zeros(dof, dtype=np.float64)
-            self.fault_ids = [] # 통신실패한 id
+            self.fault_ids = [] # IDs with communication failures
             self.joint_fault_ids = []
-            self.tool_fault_ids = [] # 통신실패한 tool id 
+            self.tool_fault_ids = [] # Tool IDs with communication failures
             self.fault_ids_history = np.zeros(dof +2, dtype=np.int64)
             self.current = np.zeros(dof, dtype=np.float64)
             self.tool_error_counts = 0
             self.joint_error_counts = 0
             self.check_status_duration = 0.0
 
-        # 메모리 접근충돌을 막기 위해 데이터를 복사해서 사용
+        # Copy data before use to prevent memory access conflicts
         def copy(self):
             # Create a shallow copy of the object structure
             snapshot = copy.copy(self)
@@ -154,7 +154,7 @@ class LeaderArm:
             self.target_position = np.zeros(dof, dtype=np.float64)
             self.target_torque = np.zeros(dof, dtype=np.float64)
     
-    # 기존 멀티스레드 관리방식이랑 동일하게 구현해놓음
+    # Implemented in the same way as the existing multithread management logic
     class EventLoop:
         def __init__(self):
             self._tasks = queue.Queue()
@@ -224,7 +224,7 @@ class LeaderArm:
                 finally:
                     self._tasks.task_done()
 
-    # 리더암 클래스의 초기화 함수
+    # Initialization function for the leader arm class
     def __init__(self, dev_name=LEADER_ARM_DEVICE_NAME, control_period=0.01, check_goal_position=True):
         self.dev_name = dev_name
         self.bus = rby.DynamixelBus(dev_name)
@@ -273,7 +273,7 @@ class LeaderArm:
         if self.initialized:
             self.bus.set_torque_constant(self.torque_constant.tolist())
     
-    # 동역학 모델 정의
+    # Define the dynamics model
     def _init_dynamics(self):
         # Initialize robot kinematics and state using the trusted factory pattern
         config = rby.dynamics.load_robot_from_urdf(self.model_path, "Base")
@@ -287,9 +287,9 @@ class LeaderArm:
         )
         self.dyn_state.set_gravity([0, 0, 0, 0, 0, -9.81])
 
-    # 기존 초기화 기능과 동일. cpp에는 좀 더 긴데, 그건 함수로 모듈화해놓고 사용중
+    # Same as the existing initialization logic. The C++ version is longer and uses modularized functions.
     def initialize(self, verbose=False):
-        # 내부 쓰레드 오류를 터미널에 표시하기 위해 기본 로깅을 설정
+        # Configure basic logging to display internal thread errors in the terminal
         if verbose:
             logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
         else:
@@ -347,7 +347,7 @@ class LeaderArm:
         self.MAX_TOOL_RETRIES = max_tool_retries
         self.MAX_JOINT_RETRIES = max_joint_retries
 
-    # qc를 위해 자세들을 입력해서 모터를 움직이는 코드
+    # Move the motors by entering poses for QC
     def set_target_position(self, q_target, goal_current=0.5):
         if len(q_target) != self.DOF:
             logging.error(f"Target position length mismatch: expected {self.DOF}, got {len(q_target)}")
@@ -386,7 +386,7 @@ class LeaderArm:
             task()
         return True
 
-    # 기존 start_control 함수. 테스크의 내용은 아래에 있음
+    # Existing start_control function. The task details are below.
     def start_control(self, callback, safety_function=None):
         if not self.initialized:
             return False
@@ -434,7 +434,7 @@ class LeaderArm:
         self.control_callback = None
         return True
 
-    # 데이터 읽는 테스크
+    # Data reading task
     def _ev_task(self):
         try:
             # 0. Reset/Initialize faults for the current cycle
@@ -587,7 +587,7 @@ class LeaderArm:
                 self.safety_function(self.state)
             raise e
 
-    # 유저가 정의한 콜백 함수를 실행하는 테스크
+    # Task that runs the user-defined callback function
     def _ctrl_task(self, state):
         try:
             if state.joint_fault_ids:
@@ -1210,7 +1210,7 @@ def main(address, model_name, power, servo, control_mode):
 
     # =========================================================
     # SAFETY FUNCTION (from leader_arm_state_check.py)
-    # 통신 장애 시 즉시 12V 차단 후 프로세스 종료
+    # Immediately cut 12V power and exit the process if a communication fault occurs
     # =========================================================
     def safety_function(state: LeaderArm.State):
         import sys
@@ -1226,19 +1226,19 @@ def main(address, model_name, power, servo, control_mode):
 
         print(error_msg, flush=True)
 
-        # Priority 1: Hardware Safety — 마스터암 토크 즉시 끄기 (stop_control은 데드락 위험이므로 직접 호출)
+        # Priority 1: Hardware safety - immediately turn off master arm torque; call directly because stop_control can deadlock
         try:
             master_arm.DisableTorque()
         except Exception:
             pass
 
-        # Priority 2: 12V 즉시 차단
+        # Priority 2: Immediately cut 12V power
         try:
             robot.power_off("12v")
         except Exception:
             pass
 
-        # Priority 3: Robot control 정리
+        # Priority 3: Clean up robot control
         try:
             robot.stop_state_update()
         except Exception:
@@ -1254,7 +1254,7 @@ def main(address, model_name, power, servo, control_mode):
 
         # Priority 4: Master arm & gripper cleanup
         try:
-            master_arm.stop_control(torque_disable=False)  # 토크는 이미 끔
+            master_arm.stop_control(torque_disable=False)  # Torque is already off
         except Exception:
             pass
         try:

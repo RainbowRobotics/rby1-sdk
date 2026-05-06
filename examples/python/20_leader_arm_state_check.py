@@ -39,13 +39,13 @@ class LeaderArm:
     kRightLinkId = 7
     kLeftLinkId = 14
 
-    class ButtonState: # 버튼 상태 구조체
+    class ButtonState: # Button state structure
         __slots__ = ['button', 'trigger']
         def __init__(self, b, t):
             self.button = b
             self.trigger = t
 
-    class State: # 기본적으로 저장되는 변수들
+    class State: # Variables stored by default
         __slots__ = [
             'q_joint', 'qvel_joint', 'torque_joint', 'gravity_term', 
             'operating_mode', 'target_position', 'button_right', 
@@ -65,16 +65,16 @@ class LeaderArm:
             self.T_right = np.eye(4)
             self.T_left = np.eye(4)
             self.temperatures = np.zeros(dof, dtype=np.float64)
-            self.fault_ids = [] # 통신실패한 id
+            self.fault_ids = [] # IDs with communication failures
             self.joint_fault_ids = []
-            self.tool_fault_ids = [] # 통신실패한 tool id 
+            self.tool_fault_ids = [] # Tool IDs with communication failures
             self.fault_ids_history = np.zeros(dof +2, dtype=np.int64)
             self.current = np.zeros(dof, dtype=np.float64)
             self.tool_error_counts = 0
             self.joint_error_counts = 0
             self.check_status_duration = 0.0
 
-        # 메모리 접근충돌을 막기 위해 데이터를 복사해서 사용
+        # Copy data before use to prevent memory access conflicts
         def copy(self):
             # Create a shallow copy of the object structure
             snapshot = copy.copy(self)
@@ -140,7 +140,7 @@ class LeaderArm:
             self.target_position = np.zeros(dof, dtype=np.float64)
             self.target_torque = np.zeros(dof, dtype=np.float64)
     
-    # 기존 멀티스레드 관리방식이랑 동일하게 구현해놓음
+    # Implemented in the same way as the existing multithread management logic
     class EventLoop:
         def __init__(self):
             self._tasks = queue.Queue()
@@ -210,7 +210,7 @@ class LeaderArm:
                 finally:
                     self._tasks.task_done()
 
-    # 리더암 클래스의 초기화 함수
+    # Initialization function for the leader arm class
     def __init__(self, dev_name=LEADER_ARM_DEVICE_NAME, control_period=0.01, check_goal_position=True):
         self.dev_name = dev_name
         self.bus = rby.DynamixelBus(dev_name)
@@ -259,7 +259,7 @@ class LeaderArm:
         if self.initialized:
             self.bus.set_torque_constant(self.torque_constant.tolist())
     
-    # 동역학 모델 정의
+    # Define the dynamics model
     def _init_dynamics(self):
         # Initialize robot kinematics and state using the trusted factory pattern
         config = rby.dynamics.load_robot_from_urdf(self.model_path, "Base")
@@ -273,9 +273,9 @@ class LeaderArm:
         )
         self.dyn_state.set_gravity([0, 0, 0, 0, 0, -9.81])
 
-    # 기존 초기화 기능과 동일. cpp에는 좀 더 긴데, 그건 함수로 모듈화해놓고 사용중
+    # Same as the existing initialization logic. The C++ version is longer and uses modularized functions.
     def initialize(self, verbose=False):
-        # 내부 쓰레드 오류를 터미널에 표시하기 위해 기본 로깅을 설정
+        # Configure basic logging to display internal thread errors in the terminal
         if verbose:
             logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
         else:
@@ -333,7 +333,7 @@ class LeaderArm:
         self.MAX_TOOL_RETRIES = max_tool_retries
         self.MAX_JOINT_RETRIES = max_joint_retries
 
-    # qc를 위해 자세들을 입력해서 모터를 움직이는 코드
+    # Move the motors by entering poses for QC
     def set_target_position(self, q_target, goal_current=0.5):
         if len(q_target) != self.DOF:
             logging.error(f"Target position length mismatch: expected {self.DOF}, got {len(q_target)}")
@@ -372,7 +372,7 @@ class LeaderArm:
             task()
         return True
 
-    # 기존 start_control 함수. 테스크의 내용은 아래에 있음
+    # Existing start_control function. The task details are below.
     def start_control(self, callback, safety_function=None):
         if not self.initialized:
             return False
@@ -420,7 +420,7 @@ class LeaderArm:
         self.control_callback = None
         return True
 
-    # 데이터 읽는 테스크
+    # Data reading task
     def _ev_task(self):
         try:
             # 0. Reset/Initialize faults for the current cycle
@@ -573,7 +573,7 @@ class LeaderArm:
                 self.safety_function(self.state)
             raise e
 
-    # 유저가 정의한 콜백 함수를 실행하는 테스크
+    # Task that runs the user-defined callback function
     def _ctrl_task(self, state):
         try:
             if state.joint_fault_ids:
@@ -661,7 +661,7 @@ def main(address, model):
         print(f"Error: Mismatch in the number of devices detected. Expected {leader_arm.DEVICE_COUNT}, got {len(leader_arm.active_ids)}")
         exit(1)
 
-    # 모니터링을 위한 함수
+    # Function for monitoring
     def fmt(arr):
         return ", ".join([f"{x:7.3f}" for x in arr])
 
@@ -669,10 +669,10 @@ def main(address, model):
         return ", ".join([f"{int(x):7d}" for x in arr])
 
 
-    # 사용자 정의함수
-    # 1. 상태 모니터링
-    # 2. 중력보상값 모터에 입력
-    # 3. 통신문제(조인트가 문제발생, 혹은 버튼 트리거 관련 신호가 5번 연속으로 문제생길경우) 발생 시 12v 공급 차단
+    # User-defined function
+    # 1. Monitor state
+    # 2. Send gravity compensation values to the motors
+    # 3. Cut 12V power if communication issues occur, such as joint faults or five consecutive button trigger signal failures
     def control(state: LeaderArm.State):
         header = f"--- Leader Arm state Monitor | {datetime.datetime.now().strftime('%H:%M:%S.%f')[:-3]} ---"
         line_idx = "index:        " + ", ".join([f"{i:7d}" for i in range(len(state.q_joint))])
@@ -715,7 +715,7 @@ def main(address, model):
 
         return input
 
-    # safety_function 중복 실행 방지용 플래그
+    # Flag to prevent duplicate safety_function execution
     shutdown_lock = threading.Lock()
     shutdown_done = False
 
@@ -723,7 +723,7 @@ def main(address, model):
         nonlocal shutdown_done
         import sys
 
-        # 중복 실행 방지: 첫 번째 호출만 실행, 나머지는 무시
+        # Prevent duplicate execution: only the first call runs, and the rest are ignored
         with shutdown_lock:
             if shutdown_done:
                 return
@@ -740,17 +740,17 @@ def main(address, model):
         
         print(error_msg, flush=True)
         
-        # Priority 1: Cleanup (제어 루프 중지, 토크 비활성화)
+        # Priority 1: Cleanup (stop the control loop and disable torque)
         if leader_arm:
             leader_arm.stop_control(torque_disable=True)
 
-        # Priority 2: 12V 차단
+        # Priority 2: Cut 12V power
         try:
             robot.power_off("12v")
         except:
             pass
 
-        # Priority 3: 분리된 프로세스로 ping test 예약 (부모 종료 후 자동 실행됨)
+        # Priority 3: Schedule a ping test in a separate process, which runs automatically after the parent exits
         # run_final_ping_test()
             
         print("Shutdown complete. Exiting.", flush=True)
@@ -765,7 +765,7 @@ def main(address, model):
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt detected. Stopping...")
     finally:
-        # safety_function이 이미 처리한 경우 중복 실행 방지
+        # Prevent duplicate execution if safety_function has already handled this
         with shutdown_lock:
             if shutdown_done:
                 return

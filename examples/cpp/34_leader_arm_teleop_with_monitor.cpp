@@ -892,7 +892,7 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
   try {
     // Latency timer setting
     upc::InitializeDevice(upc::kGripperDeviceName);
-    upc::InitializeDevice(upc::kLeaderArmDeviceName);
+    upc::InitializeDevice(upc::ResolveLeaderArmDeviceName());
   } catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return 1;

@@ -1,44 +1,75 @@
-## Unreleased
-
-### ⚠️ Breaking Changes
-
-- **api**: rename `BreakEngage`/`BreakRelease` → `BrakeEngage`/`BrakeRelease` (C++)
-- **api**: rename `break_engage`/`break_release` → `brake_engage`/`brake_release` (Python)
-- **api**: rename `MasterArm` → `LeaderArm` (C++/Python). `MasterArm` is kept as a deprecated alias.
-- **api**: rename `kMasterArmDeviceName` → `kLeaderArmDeviceName` (C++), `MasterArmDeviceName` → `LeaderArmDeviceName` (Python). Old names are kept as deprecated aliases.
-- **api**: device path changed from `/dev/rby1_master_arm` to `/dev/rby1_leader_arm`. Constructor auto-falls back to legacy path if new path does not exist.
-- **examples**: numbered examples shifted (former 25–38 → 26–39) to make room for the new `25_wiggle_motion`. External scripts that reference example file numbers must be updated.
-
-### ✨ Features
-
-- **examples**: add `25_wiggle_motion` (Python + C++) — continuous circular torso motion using joint impedance control, with 2 s linear ramp-up on start and graceful 2 s ramp-down on Ctrl+C (amplitude 0.13 rad, period 2 s, 100 Hz loop)
-- **examples/cpp**: port even-numbered Python examples to C++ for full Python ↔ C++ parity
-- **examples/cpp**: add additional C++ SDK examples and a build target for the kgs teleoperation example variant
+## v0.10.0 (2026-05-07)
 
 ### ♻️ Refactor
 
-- **examples**: comprehensive renumbering, deduplication, and cleanup of all numbered examples (Python + C++)
-- **examples**: rename `cancel_command` → `cancel_control`
+- **examples**: replace hardcoded /dev paths with SDK constants
+- **examples**: rename leftover master_arm identifiers to leader_arm
+- **examples**: update examples
+- **examples**: update examples
+- **examples**: update examples
+- **examples**: update examples
+- **examples**: update examples
+- **examples**: renumber and replace all examples; rename master arm to leader arm
+- **api**: rename MasterArm to LeaderArm
+- update master-arm torque limits to 1/5 of stall torque
+- **examples/python**: reorder and renumber Python examples
+- **examples/cpp**: renumber, unify style, and add missing C++ examples
+- **examples/python**: remove helper usage from demo motion
+- **examples/python**: clean up joint group, real-time, command stream, and mobile examples
+- **examples/python**: clean up real-time control example
+- **examples/python**: refine cartesian command stream example
+- **examples/python**: prepare non-numbered examples cleanup
+- **examples/python**: apply first-round example updates
+- **examples/python**: rename cancel command example to cancel control
+- **examples/python**: remove duplicated numbered examples under 22
+- **examples/python**: update even-numbered examples
 - **examples/python**: restore passive collisions example
-- **leader-arm**: set torque limits to 1/5 of stall torque
+- **examples/python**: refine brake test example
+- **examples/python**: refine odd-numbered examples
+
+### ✨ Features
+
+- **examples**: add --amplitude and --period args to wiggle motion
+- **upc**: add leader arm device name resolver with legacy fallback
+- **examples**: add wiggle_motion example as no.25 with circular torso motion
+- **examples**: convert even-numbered Python examples to C++
+- **examples/cpp**: add kgs teleoperation example variant
+- **examples/cpp**: add C++ SDK examples
+- **examples/cpp**: add C++ SDK examples
+- **examples/cpp**: add C++ SDK examples
+- **examples/cpp**: add C++ SDK examples
+- **examples/cpp**: expand and reorder SDK examples
+- **examples/python**: add numbered example copies under 22
 
 ### 🐛 Fixes
 
-- **api**: add `kDeviceCount` alias and `ResolveLeaderArmDeviceName` fallback so existing user code keeps compiling
-- **api**: add missing `<cstdint>` include in `control_manager_state.h`
-- **examples**: add missing `<cmath>` include and Windows math defines
-- **examples**: assorted alignment fixes between Python and C++ variants
-- remove duplicate URDF
-
-### 👷 CI
-
-- expand build matrix to ubuntu-24.04, macos-15, macos-26, and Python 3.12
-- harden Conan downloads: use `global.conf`, raise HTTP retry limit, fix retry-wait config key, pin bash shell
-
-### 📝 Docs
-
-- **README**: add `-DBUILD_EXAMPLES=ON` to the CMake < 3.23 build instructions
-- example annotation cleanups, Korean comment fixes, and added safety notes (e.g. `demo_motion`)
+- Delete duplicate urdf
+- **examples**: use ResolveLeaderArmDeviceName for backward compatibility
+- **examples**: align C++ files with dev
+- **examples**: resolve leftover merge markers
+- **examples**: add missing  include and Windows math defines
+- **api**: add missing  include to control_manager_state.h
+- **examples**: use kLeaderArmDeviceName, fix kDeviceCount, fix brake usage, fix log labels and import
+- **api**: add kDeviceCount alias, fix ResolveLeaderArmDeviceName fallback, fix brake_engage docstring
+- **api**: rename Break to Brake for engage and release methods
+- **examples/python**: update record and replay examples
+- **examples/python**: update cancel control example
+- **examples/python**: update factory default PID gain and command stream examples
+- **examples/python**: clean up Python example issues
+- **examples/python**: update teleoperation startup alignment
+- **examples/python**: update teleoperation, collisions, mobile, and test examples
+- **examples/python**: update parameter, record, and replay examples
+- **examples/python**: update zero pose, joint group, and real-time examples
+- **examples/python**: update real-time control example
+- **examples/python**: update cancel control and log stream examples
+- **examples/python**: update real-time control example
+- **examples/python**: update real-time control example
+- **examples/python**: update real-time control example
+- **examples/python**: update wifi example
+- **examples/python**: update wifi example
+- **examples/python**: update servo off example
+- **examples/python**: update factory default PID gain example
+- **examples/python**: update wifi, real-time control, and dynamics robot examples
 
 ## v0.9.1 (2025-11-05)
 

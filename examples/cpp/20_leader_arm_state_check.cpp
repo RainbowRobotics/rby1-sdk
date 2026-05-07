@@ -69,9 +69,21 @@ int Run(const std::string& address) {
     return 1;
   }
 
+  if (robot->GetControlManagerState().state == ControlManagerState::State::kEnabled) {
+    std::cout << "Disabling control manager..." << std::endl;
+    robot->DisableControlManager();
+    std::this_thread::sleep_for(1s);
+  }
+
   if (!robot->PowerOn("12v")) {
     std::cerr << "Error: Failed to power on 12V." << std::endl;
     return 1;
+  }
+
+  if (robot->GetControlManagerState().state != ControlManagerState::State::kEnabled) {
+    std::cout << "Enabling control manager..." << std::endl;
+    robot->EnableControlManager();
+    std::this_thread::sleep_for(1s);
   }
 
   auto leader_arm = std::make_shared<upc::LeaderArm>(upc::kLeaderArmDeviceName);
@@ -122,6 +134,11 @@ int Run(const std::string& address) {
   std::this_thread::sleep_for(100s);
 
   leader_arm->StopControl();
+  if (robot->GetControlManagerState().state == ControlManagerState::State::kEnabled) {
+    std::cout << "Disabling control manager..." << std::endl;
+    robot->DisableControlManager();
+    std::this_thread::sleep_for(1s);
+  }
   robot->PowerOff("12v");
 
   return 0;

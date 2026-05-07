@@ -646,9 +646,17 @@ def main(address, model):
         print("Error: Robot connection failed.")
         exit(1)
 
+    if robot.get_control_manager_state().state == rby.ControlManagerState.State.Enabled:
+                print("Disabling control manager...")
+                robot.disable_control_manager()
+                time.sleep(1)
     if not robot.power_on("12v"):
         print("Error: Failed to power on 12V.")
         exit(1)
+    if robot.get_control_manager_state().state != rby.ControlManagerState.State.Enabled:
+                print("Enabling control manager...")
+                robot.enable_control_manager()
+                time.sleep(1)
 
     leader_arm = LeaderArm(control_period=0.01)
     leader_arm.set_max_retries(max_tool_retries=100, max_joint_retries=100)
@@ -777,6 +785,7 @@ def main(address, model):
             if robot.get_control_manager_state().state == rby.ControlManagerState.State.Enabled:
                 print("Disabling control manager...")
                 robot.disable_control_manager()
+                time.sleep(1)
         except Exception:
             pass
         try:

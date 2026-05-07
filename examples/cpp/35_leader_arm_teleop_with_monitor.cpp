@@ -986,9 +986,9 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
   robot->SetParameter("joint_position_command.cutoff_frequency", "10.0");
   std::cout << robot->GetParameter("joint_position_command.cutoff_frequency") << std::endl;
 
-  const char* devicename_leader_arm = "/dev/rby1_leader_arm";
+  const std::string devicename_leader_arm = upc::ResolveLeaderArmDeviceName();
 
-  dynamixel::PortHandler* portHandler = dynamixel::PortHandler::getPortHandler(devicename_leader_arm);
+  dynamixel::PortHandler* portHandler = dynamixel::PortHandler::getPortHandler(devicename_leader_arm.c_str());
   dynamixel::PacketHandler* packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
   if (!portHandler->openPort()) {
@@ -1060,9 +1060,7 @@ int RunTeleoperation(const std::string& address, const std::string& power, const
     return 1;
   };
 
-  const char* devicename_gripper = "/dev/rby1_gripper";
-
-  dynamixel::PortHandler* portHandler_gripper = dynamixel::PortHandler::getPortHandler(devicename_gripper);
+  dynamixel::PortHandler* portHandler_gripper = dynamixel::PortHandler::getPortHandler(upc::kGripperDeviceName);
   dynamixel::PacketHandler* packetHandler_gripper = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
 
   if (!portHandler_gripper->openPort()) {

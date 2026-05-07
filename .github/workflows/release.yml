@@ -77,7 +77,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, windows-2022, macos-14, ubuntu-22.04-arm ]
+        os: [ ubuntu-22.04, ubuntu-24.04, ubuntu-22.04-arm, ubuntu-24.04-arm, windows-2022, macos-14, macos-15, macos-26 ]
         python-version: [ '3.13', '3.12', '3.11', '3.10' ]
 
     defaults:
@@ -103,12 +103,12 @@ jobs:
         name: Update PATH (Windows)
         run: |
           echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
-      - if: matrix.os == 'ubuntu-22.04'
+      - if: startsWith(matrix.os, 'ubuntu')
         name: Update PATH (Ubuntu)
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - if: matrix.os == 'macos-14'
-        name: Update PATH (Ubuntu)
+      - if: startsWith(matrix.os, 'macos')
+        name: Update PATH (macOS)
         run: |
           echo "$HOME/Library/Application Support/pypoetry/venv/bin/poetry" >> $GITHUB_PATH
 
@@ -151,12 +151,20 @@ jobs:
         include:
           - os: ubuntu-22.04
             tag: linux-x86_64-gcc11
+          - os: ubuntu-24.04
+            tag: linux-x86_64-gcc13
           - os: ubuntu-22.04-arm
             tag: linux-armv8-gcc11
+          - os: ubuntu-24.04-arm
+            tag: linux-armv8-gcc13
           - os: windows-2022
             tag: windows-x86_64-msvc194
           - os: macos-14
             tag: macos-armv8-appleclang15
+          - os: macos-15
+            tag: macos-armv8-appleclang16
+          - os: macos-26
+            tag: macos-armv8-appleclang17
 
     steps:
       - uses: actions/checkout@v4
@@ -197,10 +205,14 @@ jobs:
           python -m pip install --upgrade pip conan
 
       - name: Configure Conan
+        shell: bash
         run: |
           conan profile detect --force
-          conan config set core.net.http:max_retries=10
-          conan config set core.net.http:retry_wait=30
+          mkdir -p "$(conan config home)"
+          cat >> "$(conan config home)/global.conf" <<'EOF'
+          core.net.http:max_retries=10
+          core.download:retry_wait=30
+          EOF
 
       # RELEASE MODE
 

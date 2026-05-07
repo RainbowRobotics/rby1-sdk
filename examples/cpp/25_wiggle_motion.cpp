@@ -10,14 +10,15 @@
 // Amplitude ramps up smoothly on start and tapers to zero on Ctrl+C.
 //
 // Circular motion parameters:
-//   - Amplitude : 0.13 rad
-//   - Period    : 2.0 s
+//   - Amplitude : 0.13 rad  (override with --amplitude)
+//   - Period    : 2.0 s     (override with --period)
 //   - pitch joints (torso_1,2,3 / Y-axis): sin(ωt)
 //   - roll  joints (torso_0,4   / X-axis): cos(ωt)  ← 90° phase shift → circular trajectory
 //   - torso_5 (Z-axis yaw): held at start position
 //
 // Usage example:
 //   ./example_25_wiggle_motion --address 192.168.30.1:50051 --model m --power ".*" --servo ".*"
+//   ./example_25_wiggle_motion --address 192.168.30.1:50051 --amplitude 0.08 --period 3.0
 //
 // Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 //
@@ -65,7 +66,8 @@ void SignalHandler(int) { g_stop_requested.store(true); }
 
 void PrintUsage(const char* prog) {
   std::cerr << "Usage: " << prog
-            << " --address <server address> [--model a|m|ub] [--power <regex>] [--servo <regex>]" << std::endl;
+            << " --address <server address> [--model a|m|ub] [--power <regex>] [--servo <regex>]"
+               " [--amplitude <rad, max 0.15>] [--period <sec, min 1.5>]" << std::endl;
   std::cerr << "   or: " << prog << " <server address> [model] [power_regex] [servo_regex]" << std::endl;
 }
 
@@ -113,17 +115,19 @@ bool MoveToReadyPose(const std::shared_ptr<Robot<ModelT>>& robot) {
   }
 
   Eigen::VectorXd right_arm(7);
-  right_arm << 0.0, -5.0 * kDeg2Rad, 0.0, -120.0 * kDeg2Rad, 0.0, 70.0 * kDeg2Rad, 0.0;
+  right_arm << 0.0, -5.0 * kDeg2Rad, 0.0, -120.0 * kDeg2Rad, 0.0, 0.0, 0.0;
 
   Eigen::VectorXd left_arm(7);
-  left_arm  << 0.0,  5.0 * kDeg2Rad, 0.0, -120.0 * kDeg2Rad, 0.0, 70.0 * kDeg2Rad, 0.0;
+  left_arm  << 0.0,  5.0 * kDeg2Rad, 0.0, -120.0 * kDeg2Rad, 0.0, 0.0, 0.0;
 
   std::cout << "Moving to ready pose..." << std::endl;
   return MoveJ<ModelT>(robot, &torso, &right_arm, &left_arm, 5.0);
 }
 
 template <typename ModelT>
-int Run(const std::string& address, const std::string& power, const std::string& servo) {
+int Run(const std::string& address, const std::string& power, const std::string& servo,
+        double amplitude, double period) {
+  const double omega = 2.0 * M_PI / period;
   auto robot = InitializeRobot<ModelT>(address, power, servo);
   if (!robot) {
     return 1;
@@ -188,15 +192,16 @@ int Run(const std::string& address, const std::string& power, const std::string&
 
     // Ramp-up at start, ramp-down on Ctrl+C
     double amplitude;
+    double cur_amplitude;
     if (stop_triggered) {
       const double t_since_stop = std::chrono::duration<double>(std::chrono::steady_clock::now() - t_stop).count();
-      amplitude = kAmplitude * std::max(0.0, 1.0 - t_since_stop / kDecelTime);
+      cur_amplitude = amplitude * std::max(0.0, 1.0 - t_since_stop / kDecelTime);
     } else {
-      amplitude = kAmplitude * std::min(1.0, elapsed / kAccelTime);
+      cur_amplitude = amplitude * std::min(1.0, elapsed / kAccelTime);
     }
 
-    const double sin_val = amplitude * std::sin(kOmega * elapsed);  // pitch component
-    const double cos_val = amplitude * std::cos(kOmega * elapsed);  // roll  component (90° lead)
+    const double sin_val = cur_amplitude * std::sin(omega * elapsed);  // pitch component
+    const double cos_val = cur_amplitude * std::cos(omega * elapsed);  // roll  component (90° lead)
 
     // Circular motion: pitch joints (Y-axis, indices 1,2,3) follow sin,
     // roll joints (X-axis, indices 0,4) follow cos. torso_5 (yaw) held at start.
@@ -263,6 +268,8 @@ int main(int argc, char** argv) {
   std::string model = "a";
   std::string power = ".*";
   std::string servo = ".*";
+  double amplitude = kAmplitude;
+  double period    = 2.0 * M_PI / kOmega;
 
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
@@ -274,6 +281,18 @@ int main(int argc, char** argv) {
       power = argv[++i];
     } else if (arg == "--servo" && i + 1 < argc) {
       servo = argv[++i];
+    } else if (arg == "--amplitude" && i + 1 < argc) {
+      amplitude = std::stod(argv[++i]);
+      if (amplitude > 0.15) {
+        std::cerr << "--amplitude must be <= 0.15 rad" << std::endl;
+        return 1;
+      }
+    } else if (arg == "--period" && i + 1 < argc) {
+      period = std::stod(argv[++i]);
+      if (period < 1.5) {
+        std::cerr << "--period must be >= 1.5 s" << std::endl;
+        return 1;
+      }
     } else if (arg.rfind("--", 0) == 0) {
       PrintUsage(argv[0]);
       return 1;
@@ -299,13 +318,13 @@ int main(int argc, char** argv) {
   model = ToLower(model);
 
   if (model == "a") {
-    return Run<y1_model::A>(address, power, servo);
+    return Run<y1_model::A>(address, power, servo, amplitude, period);
   }
   if (model == "m") {
-    return Run<y1_model::M>(address, power, servo);
+    return Run<y1_model::M>(address, power, servo, amplitude, period);
   }
   if (model == "ub") {
-    return Run<y1_model::UB>(address, power, servo);
+    return Run<y1_model::UB>(address, power, servo, amplitude, period);
   }
 
   std::cerr << "Unknown model: " << model << std::endl;

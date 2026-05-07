@@ -10,14 +10,15 @@
 # Press Ctrl+C to stop.
 #
 # Circular motion parameters:
-#   - Amplitude : 0.1 rad
-#   - Period    : 2.0 s
+#   - Amplitude : 0.13 rad  (override with --amplitude)
+#   - Period    : 2.0 s     (override with --period)
 #   - pitch joints (torso_1,2,3 / Y-axis): sin(ωt)
 #   - roll  joints (torso_0,4   / X-axis): cos(ωt)  ← 90° phase shift → circular trajectory
 #   - torso_5 (Z-axis yaw): held at start position
 #
 # Usage example:
 #     python 25_wiggle_motion.py --address 192.168.30.1:50051 --model m --power '.*' --servo '.*'
+#     python 25_wiggle_motion.py --address 192.168.30.1:50051 --amplitude 0.08 --period 3.0
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -48,8 +49,8 @@ logging.basicConfig(
 # A / M v1.0-v1.2 : torso [0,45,-90,45,0,0],  arms [0,∓5,0,-120,0,70,0]
 # M v1.3           : arms [0,∓5,0,-120,0,30,0] — indistinguishable at runtime; use 70°
 # UB               : torso [0,0] (2-DOF, zero), arms same
-_RIGHT_READY = np.deg2rad([0.0, -5.0, 0.0, -120.0, 0.0, 70.0, 0.0])
-_LEFT_READY  = np.deg2rad([0.0,  5.0, 0.0, -120.0, 0.0, 70.0, 0.0])
+_RIGHT_READY = np.deg2rad([0.0, -5.0, 0.0, -120.0, 0.0, 0.0, 0.0])
+_LEFT_READY  = np.deg2rad([0.0,  5.0, 0.0, -120.0, 0.0, 0.0, 0.0])
 
 # Circular wiggle parameters
 # pitch joints (torso_1,2,3 — Y-axis): driven with sin(ωt)
@@ -97,7 +98,8 @@ def move_to_ready_pose(robot):
         exit(1)
 
 
-def main(address, model, power, servo):
+def main(address, model, power, servo, amplitude=_AMPLITUDE, period=2.0 * math.pi / _OMEGA):
+    omega = 2.0 * math.pi / period
     robot = initialize_robot(address, model, power, servo)
 
     # Explicitly reset and re-enable control manager (mirrors pattern from example 28).
@@ -142,12 +144,12 @@ def main(address, model, power, servo):
         # Ramp-up at start, ramp-down on Ctrl+C
         t_since_stop = time.monotonic() - stop_requested[1] if stop_requested[0] else 0.0
         if stop_requested[0]:
-            amplitude = _AMPLITUDE * max(0.0, 1.0 - t_since_stop / _DECEL_TIME)
+            cur_amplitude = amplitude * max(0.0, 1.0 - t_since_stop / _DECEL_TIME)
         else:
-            amplitude = _AMPLITUDE * min(1.0, elapsed / _ACCEL_TIME)
+            cur_amplitude = amplitude * min(1.0, elapsed / _ACCEL_TIME)
 
-        sinval = amplitude * math.sin(_OMEGA * elapsed)  # pitch component
-        cosval = amplitude * math.cos(_OMEGA * elapsed)  # roll  component (90° lead)
+        sinval = cur_amplitude * math.sin(omega * elapsed)  # pitch component
+        cosval = cur_amplitude * math.cos(omega * elapsed)  # roll  component (90° lead)
 
         # Circular motion: pitch joints (Y-axis) follow sin, roll joints (X-axis) follow cos.
         # 90° phase difference between the two axes traces a circle in joint space.
@@ -229,11 +231,32 @@ if __name__ == "__main__":
         default=".*",
         help="Servo name regex pattern (default: '.*')",
     )
+    parser.add_argument(
+        "--amplitude",
+        type=float,
+        default=_AMPLITUDE,
+        help=f"Wiggle amplitude in radians (default: {_AMPLITUDE}, max: 0.15)",
+    )
+    parser.add_argument(
+        "--period",
+        type=float,
+        default=2.0 * math.pi / _OMEGA,
+        help=f"Wiggle period in seconds (default: {2.0 * math.pi / _OMEGA:.1f}, min: 1.5)",
+    )
     args = parser.parse_args()
+
+    _MAX_AMPLITUDE = 0.15
+    _MIN_PERIOD    = 1.5
+    if args.amplitude > _MAX_AMPLITUDE:
+        parser.error(f"--amplitude must be <= {_MAX_AMPLITUDE} rad")
+    if args.period < _MIN_PERIOD:
+        parser.error(f"--period must be >= {_MIN_PERIOD} s")
 
     main(
         address=args.address,
         model=args.model,
         power=args.power,
         servo=args.servo,
+        amplitude=args.amplitude,
+        period=args.period,
     )

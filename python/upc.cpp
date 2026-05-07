@@ -17,6 +17,26 @@ void bind_device(py::module_& m) {
   m.attr("GripperDeviceName") = kGripperDeviceName;
   m.attr("LeaderArmDeviceName") = kLeaderArmDeviceName;
   m.attr("MasterArmDeviceName") = kLeaderArmDeviceName;  // Deprecated alias
+  m.attr("LegacyLeaderArmDeviceName") = kLegacyLeaderArmDeviceName;
+
+  m.def("resolve_leader_arm_device_name", &ResolveLeaderArmDeviceName, R"doc(
+resolve_leader_arm_device_name() -> str
+
+Return the leader arm device path, falling back to the legacy path if needed.
+
+Returns ``'/dev/rby1_leader_arm'`` if it exists, otherwise falls back to
+``'/dev/rby1_master_arm'`` (with a warning printed to stderr). On Windows, or
+when neither device is present, returns ``'/dev/rby1_leader_arm'``.
+
+Returns
+-------
+str
+    Resolved device path.
+)doc");
+  // Deprecated alias kept for backward compatibility with code that used the
+  // ``MasterArm`` naming. Both names invoke the same resolver.
+  m.def("resolve_master_arm_device_name", &ResolveLeaderArmDeviceName,
+        "Deprecated alias for resolve_leader_arm_device_name().");
 
   m.def("initialize_device", &InitializeDevice, "device_name"_a, R"doc(
 initialize_device(device_name)

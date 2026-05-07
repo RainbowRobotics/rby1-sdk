@@ -34,7 +34,7 @@ import queue
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 URDF_PATH = os.path.join(SCRIPT_DIR, "../../models/leader_arm", "model.urdf") # /../../models/leader_arm/model.urdf
-LEADER_ARM_DEVICE_NAME = rby.upc.LeaderArmDeviceName
+LEADER_ARM_DEVICE_NAME = rby.upc.resolve_leader_arm_device_name()
 
 GRIPPER_DIRECTION = False
 

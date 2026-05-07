@@ -73,10 +73,18 @@ void InitializeDevice(const std::string& device_name) {
 #if defined(_WIN32)
   throw std::runtime_error("Not implemented: Unable to initialize device on Windows");
 #else
-  std::string real_path = ResolveSymlink(device_name);
+  // Mirror the fallback behaviour of upc::LeaderArm: when the caller passes
+  // the canonical leader-arm path (or an empty string), automatically try
+  // the legacy device path if the new udev symlink is not present.
+  std::string resolved_name = device_name;
+  if (resolved_name.empty() || resolved_name == kLeaderArmDeviceName) {
+    resolved_name = ResolveLeaderArmDeviceName();
+  }
+
+  std::string real_path = ResolveSymlink(resolved_name);
 
   if (real_path.empty()) {
-    real_path = device_name;
+    real_path = resolved_name;
   }
   std::string device_path =
       "/sys/bus/usb-serial/devices/" + real_path.substr(real_path.find_last_of('/') + 1) + "/latency_timer";

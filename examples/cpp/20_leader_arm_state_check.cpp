@@ -74,7 +74,7 @@ int Run(const std::string& address) {
     return 1;
   }
 
-  auto leader_arm = std::make_shared<upc::LeaderArm>(upc::ResolveLeaderArmDeviceName());
+  auto leader_arm = std::make_shared<upc::LeaderArm>(upc::kLeaderArmDeviceName);
 
   g_cleanup = [robot, leader_arm]() {
     leader_arm->StopControl();
@@ -84,7 +84,7 @@ int Run(const std::string& address) {
   std::signal(SIGINT, SignalHandler);
 
   try {
-    upc::InitializeDevice(upc::ResolveLeaderArmDeviceName());
+    upc::InitializeDevice(upc::kLeaderArmDeviceName);
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return 1;

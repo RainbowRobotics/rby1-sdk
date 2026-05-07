@@ -1136,7 +1136,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return result;
   }
 
-  bool BreakEngage(const std::string& dev_name) const {
+  bool BrakeEngage(const std::string& dev_name) const {
     api::JointCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(dev_name);
@@ -1158,7 +1158,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     return res.status() == api::JointCommandResponse::STATUS_SUCCESS;
   }
 
-  bool BreakRelease(const std::string& dev_name) const {
+  bool BrakeRelease(const std::string& dev_name) const {
     api::JointCommandRequest req;
     InitializeRequestHeader(req.mutable_request_header());
     req.set_name(dev_name);
@@ -3055,13 +3055,13 @@ rb::PIDGain Robot<T>::GetPositionPIDGain(const std::string& dev_name) const {
 }
 
 template <typename T>
-bool Robot<T>::BreakEngage(const std::string& dev_name) const {
-  return impl_->BreakEngage(dev_name);
+bool Robot<T>::BrakeEngage(const std::string& dev_name) const {
+  return impl_->BrakeEngage(dev_name);
 }
 
 template <typename T>
-bool Robot<T>::BreakRelease(const std::string& dev_name) const {
-  return impl_->BreakRelease(dev_name);
+bool Robot<T>::BrakeRelease(const std::string& dev_name) const {
+  return impl_->BrakeRelease(dev_name);
 }
 
 template <typename T>

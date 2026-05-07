@@ -271,7 +271,7 @@ class RBY1_SDK_API Robot : public std::enable_shared_from_this<Robot<T>> {
    * @param dev_name Device name (joint name) to engage brake. Supports regex patterns.
    * @return True if successful, false otherwise.
    */
-  bool BreakEngage(const std::string& dev_name) const;
+  bool BrakeEngage(const std::string& dev_name) const;
 
   /**
    * @brief Release the brake for a device.
@@ -279,7 +279,7 @@ class RBY1_SDK_API Robot : public std::enable_shared_from_this<Robot<T>> {
    * @param dev_name Device name (joint name) to release brake. Supports regex patterns.
    * @return True if successful, false otherwise.
    */
-  bool BreakRelease(const std::string& dev_name) const;
+  bool BrakeRelease(const std::string& dev_name) const;
 
   /**
    * @brief Reset home offset for a device.

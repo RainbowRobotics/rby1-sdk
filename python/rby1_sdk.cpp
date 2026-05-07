@@ -214,7 +214,7 @@ joint dynamics, and link properties.
   auto upc_m = m.def_submodule("upc", R"doc(
 Module for controlling and communicating with devices.
 
-Provides utilities for controlling master arm and other devices.
+Provides utilities for controlling leader arm and other devices.
 )doc");
   pybind11_upc(upc_m);
 

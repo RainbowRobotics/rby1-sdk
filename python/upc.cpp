@@ -6,7 +6,7 @@
 
 #include "print_helper.h"
 #include "rby1-sdk/upc/device.h"
-#include "rby1-sdk/upc/master_arm.h"
+#include "rby1-sdk/upc/leader_arm.h"
 
 namespace py = pybind11;
 using namespace rb;
@@ -15,7 +15,28 @@ using namespace py::literals;
 
 void bind_device(py::module_& m) {
   m.attr("GripperDeviceName") = kGripperDeviceName;
-  m.attr("MasterArmDeviceName") = kMasterArmDeviceName;
+  m.attr("LeaderArmDeviceName") = kLeaderArmDeviceName;
+  m.attr("MasterArmDeviceName") = kLeaderArmDeviceName;  // Deprecated alias
+  m.attr("LegacyLeaderArmDeviceName") = kLegacyLeaderArmDeviceName;
+
+  m.def("resolve_leader_arm_device_name", &ResolveLeaderArmDeviceName, R"doc(
+resolve_leader_arm_device_name() -> str
+
+Return the leader arm device path, falling back to the legacy path if needed.
+
+Returns ``'/dev/rby1_leader_arm'`` if it exists, otherwise falls back to
+``'/dev/rby1_master_arm'`` (with a warning printed to stderr). On Windows, or
+when neither device is present, returns ``'/dev/rby1_leader_arm'``.
+
+Returns
+-------
+str
+    Resolved device path.
+)doc");
+  // Deprecated alias kept for backward compatibility with code that used the
+  // ``MasterArm`` naming. Both names invoke the same resolver.
+  m.def("resolve_master_arm_device_name", &ResolveLeaderArmDeviceName,
+        "Deprecated alias for resolve_leader_arm_device_name().");
 
   m.def("initialize_device", &InitializeDevice, "device_name"_a, R"doc(
 initialize_device(device_name)
@@ -25,18 +46,18 @@ Initialize a device with the given name.
 Sets the latency timer of the device to 1.
 
 Args:
-    device_name (str): Name of the device to initialize (e.g., '/dev/ttyUSB0', '/dev/rby1_master_arm').
+    device_name (str): Name of the device to initialize (e.g., '/dev/ttyUSB0', '/dev/rby1_leader_arm').
 
 Returns:
     bool: True if device initialized successfully, False otherwise.
 )doc");
 }
 
-void bind_master_arm(py::module_& m) {
-  auto ma_m = py::class_<MasterArm>(m, "MasterArm", R"doc(
-Master arm control interface.
+void bind_leader_arm(py::module_& m) {
+  auto ma_m = py::class_<LeaderArm>(m, "LeaderArm", R"doc(
+Leader arm control interface.
 
-This class provides control interface for a master arm device
+This class provides control interface for a leader arm device
 with 14 degrees of freedom, including joint control, gravity compensation,
 and button/trigger input handling.
 
@@ -56,10 +77,10 @@ LeftToolId : int
     Device ID for left tool (0x81).
 )doc");
 
-  py::class_<MasterArm::State>(ma_m, "State", R"doc(
-Master arm state information.
+  py::class_<LeaderArm::State>(ma_m, "State", R"doc(
+Leader arm state information.
 
-This class represents the current state of the master arm
+This class represents the current state of the leader arm
 including joint positions, velocities, torques, and tool states.
 
 Attributes
@@ -79,25 +100,25 @@ button_right : ButtonState
 button_left : ButtonState
     Left tool button and trigger state.
 T_right : numpy.ndarray, shape (4, 4), dtype=float64
-    Right tool transformation matrix (SE(3)) with respect to the master arm base.
+    Right tool transformation matrix (SE(3)) with respect to the leader arm base.
 T_left : numpy.ndarray, shape (4, 4), dtype=float64
-    Left tool transformation matrix (SE(3)) with respect to the master arm base.
+    Left tool transformation matrix (SE(3)) with respect to the leader arm base.
 )doc")
       .def(py::init<>(), R"doc(
 Construct a ``State`` instance with default values.
 )doc")
-      .def_readonly("q_joint", &MasterArm::State::q_joint)
-      .def_readonly("qvel_joint", &MasterArm::State::qvel_joint)
-      .def_readonly("torque_joint", &MasterArm::State::torque_joint)
-      .def_readonly("gravity_term", &MasterArm::State::gravity_term)
-      .def_readonly("operating_mode", &MasterArm::State::operating_mode)
-      .def_readonly("target_position", &MasterArm::State::target_position)
-      .def_readonly("button_right", &MasterArm::State::button_right)
-      .def_readonly("button_left", &MasterArm::State::button_left)
-      .def_readonly("T_right", &MasterArm::State::T_right)
-      .def_readonly("T_left", &MasterArm::State::T_left)
+      .def_readonly("q_joint", &LeaderArm::State::q_joint)
+      .def_readonly("qvel_joint", &LeaderArm::State::qvel_joint)
+      .def_readonly("torque_joint", &LeaderArm::State::torque_joint)
+      .def_readonly("gravity_term", &LeaderArm::State::gravity_term)
+      .def_readonly("operating_mode", &LeaderArm::State::operating_mode)
+      .def_readonly("target_position", &LeaderArm::State::target_position)
+      .def_readonly("button_right", &LeaderArm::State::button_right)
+      .def_readonly("button_left", &LeaderArm::State::button_left)
+      .def_readonly("T_right", &LeaderArm::State::T_right)
+      .def_readonly("T_left", &LeaderArm::State::T_left)
       .def("__repr__",
-           [](const MasterArm::State& self) {
+           [](const LeaderArm::State& self) {
              using namespace rb::print;
              const bool ml = use_multiline_repr();
 
@@ -156,10 +177,10 @@ Construct a ``State`` instance with default values.
 
              return ss.str();
            })
-      .def("__str__", [](const MasterArm::State& self) {
+      .def("__str__", [](const LeaderArm::State& self) {
         using namespace rb::print;
         std::ostringstream ss;
-        ss << "MasterArm.State(q=" << np_array_to_string(py::cast(self.q_joint), Style::Str)
+        ss << "LeaderArm.State(q=" << np_array_to_string(py::cast(self.q_joint), Style::Str)
            << ", dq=" << np_array_to_string(py::cast(self.qvel_joint), Style::Str)
            << ", tau=" << np_array_to_string(py::cast(self.torque_joint), Style::Str)
            << ", right_btn=" << inline_obj_one_line(py::cast(self.button_right))
@@ -167,10 +188,10 @@ Construct a ``State`` instance with default values.
         return ss.str();
       });
 
-  py::class_<MasterArm::ControlInput>(ma_m, "ControlInput", R"doc(
-Master arm control input.
+  py::class_<LeaderArm::ControlInput>(ma_m, "ControlInput", R"doc(
+Leader arm control input.
 
-This class represents the control input for the master arm
+This class represents the control input for the leader arm
 including target operating modes, positions, and torques.
 
 Attributes
@@ -187,44 +208,47 @@ Construct a ``ControlInput`` instance with default values.
 )doc")
       .def_property(
           "target_operating_mode",
-          [](MasterArm::ControlInput& self) -> Eigen::Vector<int, MasterArm::kDOF>& {
+          [](LeaderArm::ControlInput& self) -> Eigen::Vector<int, LeaderArm::kDOF>& {
             return self.target_operating_mode;
           },
-          [](MasterArm::ControlInput& self, const Eigen::Vector<int, MasterArm::kDOF>& mat) {
+          [](LeaderArm::ControlInput& self, const Eigen::Vector<int, LeaderArm::kDOF>& mat) {
             self.target_operating_mode = mat;
           },
           py::return_value_policy::reference_internal)
       .def_property(
           "target_position",
-          [](MasterArm::ControlInput& self) -> Eigen::Vector<double, MasterArm::kDOF>& { return self.target_position; },
-          [](MasterArm::ControlInput& self, const Eigen::Vector<double, MasterArm::kDOF>& mat) {
+          [](LeaderArm::ControlInput& self) -> Eigen::Vector<double, LeaderArm::kDOF>& { return self.target_position; },
+          [](LeaderArm::ControlInput& self, const Eigen::Vector<double, LeaderArm::kDOF>& mat) {
             self.target_position = mat;
           },
           py::return_value_policy::reference_internal)
       .def_property(
           "target_torque",
-          [](MasterArm::ControlInput& self) -> Eigen::Vector<double, MasterArm::kDOF>& { return self.target_torque; },
-          [](MasterArm::ControlInput& self, const Eigen::Vector<double, MasterArm::kDOF>& mat) {
+          [](LeaderArm::ControlInput& self) -> Eigen::Vector<double, LeaderArm::kDOF>& { return self.target_torque; },
+          [](LeaderArm::ControlInput& self, const Eigen::Vector<double, LeaderArm::kDOF>& mat) {
             self.target_torque = mat;
           },
           py::return_value_policy::reference_internal);
 
   ma_m  //
-      .def_readonly_static("DOF", &MasterArm::kDOF)
-      .def_readonly_static("DeviceCount", &MasterArm::kDeivceCount)
-      .def_readonly_static("TorqueScaling", &MasterArm::kTorqueScaling)
-      .def_readonly_static("MaximumTorque", &MasterArm::kMaximumTorque)
-      .def_readonly_static("RightToolId", &MasterArm::kRightToolId)
-      .def_readonly_static("LeftToolId", &MasterArm::kLeftToolId)
-      .def(py::init<const std::string&>(), "dev_name"_a = kMasterArmDeviceName, R"doc(
-Construct a ``MasterArm`` instance.
+      .def_readonly_static("DOF", &LeaderArm::kDOF)
+      .def_readonly_static("DeviceCount", &LeaderArm::kDeviceCount)
+      .def_readonly_static("TorqueScaling", &LeaderArm::kTorqueScaling)
+      .def_readonly_static("MaximumTorque", &LeaderArm::kMaximumTorque)
+      .def_readonly_static("RightToolId", &LeaderArm::kRightToolId)
+      .def_readonly_static("LeftToolId", &LeaderArm::kLeftToolId)
+      .def(py::init<const std::string&>(), "dev_name"_a = "", R"doc(
+Construct a ``LeaderArm`` instance.
+
+If no device name is provided, the constructor automatically resolves the device path:
+first trying ``/dev/rby1_leader_arm``, then falling back to ``/dev/rby1_master_arm``.
 
 Parameters
 ----------
 dev_name : str, optional
-    Device name. Default is ``/dev/rby1_master_arm``'.
+    Device name. Default is auto-resolved.
 )doc")
-      .def("set_control_period", &MasterArm::SetControlPeriod, "control_period"_a, R"doc(
+      .def("set_control_period", &LeaderArm::SetControlPeriod, "control_period"_a, R"doc(
 Set the control update period.
 
 Parameters
@@ -232,7 +256,7 @@ Parameters
 control_period : float
     Control period in seconds.
 )doc")
-      .def("set_model_path", &MasterArm::SetModelPath, "model_path"_a, R"doc(
+      .def("set_model_path", &LeaderArm::SetModelPath, "model_path"_a, R"doc(
 Set the path to the URDF model file.
 
 Parameters
@@ -240,7 +264,7 @@ Parameters
 model_path : str
     Path to the URDF model file.
 )doc")
-      .def("set_torque_constant", &MasterArm::SetTorqueConstant, "torque_constant"_a, R"doc(
+      .def("set_torque_constant", &LeaderArm::SetTorqueConstant, "torque_constant"_a, R"doc(
 Set torque constant.
 
 Parameters
@@ -252,8 +276,8 @@ Parameters
 model_path : str
     Path to the URDF model file.
 )doc")
-      .def("initialize", &MasterArm::Initialize, "verbose"_a = false, py::call_guard<py::gil_scoped_release>(), R"doc(
-Initialize the master arm and detect active devices.
+      .def("initialize", &LeaderArm::Initialize, "verbose"_a = false, py::call_guard<py::gil_scoped_release>(), R"doc(
+Initialize the leader arm and detect active devices.
 
 Parameters
 ----------
@@ -265,7 +289,7 @@ Returns
 list[int]
     List of active device IDs.
 )doc")
-      .def("start_control", &MasterArm::StartControl, "control"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
+      .def("start_control", &LeaderArm::StartControl, "control"_a, py::call_guard<py::gil_scoped_release>(), R"doc(
 Start the control loop.
 
 Parameters
@@ -280,15 +304,15 @@ bool
 
 Examples
 --------
->>> master_arm = rby.upc.MasterArm(rby.upc.MasterArmDeviceName)
->>> master_arm.set_model_path("model.urdf") # path/to/master_arm_model.urdf
->>> master_arm.set_control_period(0.01)
->>> active_ids = master_arm.initialize(verbose=True)
->>> if len(active_ids) != rby.upc.MasterArm.DeviceCount:
-...     print("Error: Mismatch in the number of devices detected for RBY Master Arm.")
+>>> leader_arm = rby.upc.LeaderArm()
+>>> leader_arm.set_model_path("model.urdf") # path/to/leader_arm_model.urdf
+>>> leader_arm.set_control_period(0.01)
+>>> active_ids = leader_arm.initialize(verbose=True)
+>>> if len(active_ids) != rby.upc.LeaderArm.DeviceCount:
+...     print("Error: Mismatch in the number of devices detected for RBY Leader Arm.")
 ...     exit(1)
 >>>
->>> def control(state: rby.upc.MasterArm.State):
+>>> def control(state: rby.upc.LeaderArm.State):
 ...     with np.printoptions(suppress=True, precision=3, linewidth=300):
 ...         print(f"--- {datetime.datetime.now().time()} ---")
 ...         print(f"q: {state.q_joint}")
@@ -296,15 +320,15 @@ Examples
 ...         print(
 ...             f"right: {state.button_right.button}, left: {state.button_left.button}"
 ...         )
-...     input = rby.upc.MasterArm.ControlInput()
+...     input = rby.upc.LeaderArm.ControlInput()
 ...     input.target_operating_mode.fill(rby.DynamixelBus.CurrentControlMode)
 ...     input.target_torque = state.gravity_term
 ...     return input
 >>>
->>> master_arm.start_control(control)
+>>> leader_arm.start_control(control)
 >>> time.sleep(100)
 )doc")
-      .def("stop_control", &MasterArm::StopControl, "torque_disable"_a = false,
+      .def("stop_control", &LeaderArm::StopControl, "torque_disable"_a = false,
            py::call_guard<py::gil_scoped_release>(), R"doc(
 Stop the control loop.
 
@@ -316,14 +340,14 @@ Returns
 -------
 bool
 )doc")
-      .def("enable_torque", &MasterArm::EnableTorque, py::call_guard<py::gil_scoped_release>(), R"doc(
+      .def("enable_torque", &LeaderArm::EnableTorque, py::call_guard<py::gil_scoped_release>(), R"doc(
 Enable torque of motors
 )doc")
-      .def("disable_torque", &MasterArm::DisableTorque, py::call_guard<py::gil_scoped_release>(), R"doc(
+      .def("disable_torque", &LeaderArm::DisableTorque, py::call_guard<py::gil_scoped_release>(), R"doc(
 Disable torque of motors
 )doc")
       .def("__repr__",
-           [](const MasterArm::ControlInput& self) {
+           [](const LeaderArm::ControlInput& self) {
              using namespace rb::print;
              const bool ml = use_multiline_repr();
 
@@ -356,10 +380,10 @@ Disable torque of motors
 
              return ss.str();
            })
-      .def("__str__", [](const MasterArm::ControlInput& self) {
+      .def("__str__", [](const LeaderArm::ControlInput& self) {
         using namespace rb::print;
         std::ostringstream ss;
-        ss << "MasterArm.ControlInput(target_mode="
+        ss << "LeaderArm.ControlInput(target_mode="
            << np_array_to_string(py::cast(self.target_operating_mode), Style::Str)
            << ", target_position=" << np_array_to_string(py::cast(self.target_position), Style::Str)
            << ", target_torque=" << np_array_to_string(py::cast(self.target_torque), Style::Str) << ")";
@@ -369,5 +393,6 @@ Disable torque of motors
 
 void pybind11_upc(py::module_& m) {
   bind_device(m);
-  bind_master_arm(m);
+  bind_leader_arm(m);
+  m.attr("MasterArm") = m.attr("LeaderArm");  // Deprecated alias
 }

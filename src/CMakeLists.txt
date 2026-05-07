@@ -24,7 +24,7 @@ add_library(rby1-sdk ${LIBRARY_TYPE}
         dynamics/robot.cpp
 
         upc/device.cpp
-        upc/master_arm.cpp
+        upc/leader_arm.cpp
 
         net/real_time_control_protocol.cpp
 

@@ -1,8 +1,8 @@
 # Robot State Stream Demo
-# This example is part of the RB-Y1 SDK examples. See --help for arguments.
+# This example demonstrates how to get robot state via stream. See --help for arguments.
 #
 # Usage example:
-#     python 04_robot_state_stream.py --help
+#     python 04_robot_state_stream.py --address 192.168.30.1:50051 --model a --power '.*'
 #
 # Copyright (c) 2025 Rainbow Robotics. All rights reserved.
 #
@@ -11,13 +11,13 @@
 # Rainbow Robotics shall not be held liable for any damages or malfunctions resulting from
 # the use or misuse of this demo code. Please use with caution and at your own discretion.
 
-import rby1_sdk
+import rby1_sdk as rby
 import time
 import argparse
 import numpy as np
 
 
-def callback(robot_state, control_manager_state: rby1_sdk.ControlManagerState):
+def callback(robot_state, control_manager_state: rby.ControlManagerState):
     np.set_printoptions(precision=3, suppress=True, floatmode="fixed")
 
     print(robot_state)
@@ -30,9 +30,8 @@ def callback(robot_state, control_manager_state: rby1_sdk.ControlManagerState):
 
 
 def main(address, model, power):
-    robot = rby1_sdk.create_robot(address, model)
-    robot.connect()
-    if not robot.is_connected():
+    robot = rby.create_robot(address, model)
+    if not robot.connect():
         print("Robot is not connected")
         exit(1)
     if not robot.is_power_on(power):

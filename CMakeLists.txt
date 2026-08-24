@@ -27,6 +27,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples")
 set(BUILD_LIB_STATIC OFF CACHE BOOL "Build static rby1_sdk library")
 set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "Build Python bindings using Pybind11")
+set(RBY1_BUILD_TOOLS OFF CACHE BOOL "Build development tools (QP benchmark, analysis)")
+set(RBY1_WITH_PROXQP ON CACHE BOOL "Build the ProxQP (proxsuite) QP backend")
+set(RBY1_WITH_DAQP ON CACHE BOOL "Build the DAQP QP backend")
 set(INSTALL_MODELS ON CACHE BOOL "Install library with models")
 
 message(STATUS "RBY1-SDK: Build examples: " ${BUILD_EXAMPLES})
@@ -81,6 +84,10 @@ add_subdirectory(third-party)
 add_subdirectory(src)
 
 find_package(Threads REQUIRED)
+
+if (RBY1_BUILD_TOOLS)
+    add_subdirectory(tools)
+endif ()
 
 if (BUILD_EXAMPLES)
     add_subdirectory(examples/cpp)

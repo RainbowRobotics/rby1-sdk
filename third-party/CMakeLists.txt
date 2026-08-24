@@ -64,3 +64,30 @@ set(CMAKE_SKIP_INSTALL_RULES ON)
 add_subdirectory(osqp-eigen EXCLUDE_FROM_ALL)
 set(CMAKE_SKIP_INSTALL_RULES OFF)
 target_compile_definitions(OsqpEigen PUBLIC PROFILING)
+
+###############################################################
+# ProxQP (proxsuite, header-only; vectorization/simde disabled)
+###############################################################
+if (RBY1_WITH_PROXQP)
+    if (NOT TARGET proxsuite::proxsuite)
+        set(BUILD_WITH_VECTORIZATION_SUPPORT OFF CACHE INTERNAL "")
+        set(BUILD_TESTING OFF CACHE INTERNAL "")
+        set(BUILD_PYTHON_INTERFACE OFF CACHE INTERNAL "")
+        set(BUILD_DOCUMENTATION OFF CACHE INTERNAL "")
+        set(CMAKE_SKIP_INSTALL_RULES ON)
+        add_subdirectory(proxsuite EXCLUDE_FROM_ALL)
+        set(CMAKE_SKIP_INSTALL_RULES OFF)
+    endif ()
+endif ()
+
+###############################################################
+# DAQP (dense active-set, C)
+###############################################################
+if (RBY1_WITH_DAQP)
+    if (NOT TARGET daqp::daqpstat)
+        set(CMAKE_SKIP_INSTALL_RULES ON)
+        add_subdirectory(daqp EXCLUDE_FROM_ALL)
+        set(CMAKE_SKIP_INSTALL_RULES OFF)
+        set_target_properties(daqpstat PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    endif ()
+endif ()

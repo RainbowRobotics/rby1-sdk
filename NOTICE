@@ -47,3 +47,11 @@ This project includes the following third-party libraries:
 8. **skbuild-conan**  
    Licensed under the MIT License  
    https://github.com/d-krupke/skbuild-conan
+
+9. **proxsuite (ProxQP)**  
+   Licensed under the BSD 2-Clause License  
+   https://github.com/Simple-Robotics/proxsuite
+
+10. **DAQP**  
+    Licensed under the MIT License  
+    https://github.com/darnstrom/daqp

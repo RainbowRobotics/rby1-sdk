@@ -13,6 +13,9 @@ add_library(rby1-sdk ${LIBRARY_TYPE}
         base/dynamixel_bus.cpp
 
         math/qp_solver.cpp
+        math/qp_backend_osqp.cpp
+        $<$<BOOL:${RBY1_WITH_PROXQP}>:math/qp_backend_proxqp.cpp>
+        $<$<BOOL:${RBY1_WITH_DAQP}>:math/qp_backend_daqp.cpp>
         math/se2.cpp
         math/so3.cpp
         math/se3.cpp
@@ -42,6 +45,14 @@ target_link_libraries(rby1-sdk PRIVATE
         nlohmann_json::nlohmann_json
         DynamixelSDK
 )
+if (RBY1_WITH_PROXQP)
+    target_link_libraries(rby1-sdk PRIVATE proxsuite)
+    target_compile_definitions(rby1-sdk PRIVATE RBY1_WITH_PROXQP)
+endif ()
+if (RBY1_WITH_DAQP)
+    target_link_libraries(rby1-sdk PRIVATE daqp::daqpstat)
+    target_compile_definitions(rby1-sdk PRIVATE RBY1_WITH_DAQP)
+endif ()
 if(WIN32)
     target_link_libraries(rby1-sdk PUBLIC wsock32 ws2_32)
 endif()

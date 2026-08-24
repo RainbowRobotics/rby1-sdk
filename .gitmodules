@@ -7,3 +7,9 @@
 [submodule "third-party/osqp-eigen"]
 	path = third-party/osqp-eigen
 	url = https://github.com/robotology/osqp-eigen
+[submodule "third-party/proxsuite"]
+	path = third-party/proxsuite
+	url = https://github.com/Simple-Robotics/proxsuite.git
+[submodule "third-party/daqp"]
+	path = third-party/daqp
+	url = https://github.com/darnstrom/daqp.git

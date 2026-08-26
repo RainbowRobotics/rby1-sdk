@@ -753,8 +753,8 @@
         <limit effort="270.0"
                acceleration="5.0"
                velocity="2.09439510"
-               lower="-2.617993878"
-               upper="1.570796327"
+               lower="-2.4434609528"
+               upper="1.3962634016"
         />
     </joint>
 

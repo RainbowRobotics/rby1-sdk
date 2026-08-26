@@ -27,7 +27,7 @@
 
     <position name="link1_act" joint="torso_0" ctrlrange="-0.349066 0.349066" />
     <position name="link2_act" joint="torso_1" ctrlrange="-1.0472 1.52173" />
-    <position name="link3_act" joint="torso_2" ctrlrange="-2.47837 1.5708" />
+    <position name="link3_act" joint="torso_2" ctrlrange="-2.4434609528 1.3962634016" />
     <position name="link4_act" joint="torso_3" ctrlrange="-0.785398 1.5708" />
     <position name="link5_act" joint="torso_4" ctrlrange="-0.523599 0.523599" />
     <position name="link6_act" joint="torso_5" ctrlrange="-1.5708 1.5708" />

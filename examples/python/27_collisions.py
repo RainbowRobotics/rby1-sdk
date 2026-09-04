@@ -66,13 +66,19 @@ def main(address, model, power, servo):
     stop_requested = False
     robot.start_state_update(callback, rate=50)
 
-    rv = movej(robot, right_arm=RIGHT_ARM_TARGET, minimum_time=5.0)
+    move_thread = threading.Thread(
+        target=movej, args=(robot,), kwargs={"right_arm": RIGHT_ARM_TARGET, "minimum_time": 5.0}
+    )
+    move_thread.start()
 
-    while not stop_requested:
+    while move_thread.is_alive() and not stop_requested:
         time.sleep(0.01)
 
-    
-    robot.cancel_control()
+    if stop_requested:
+        print("Stopping motion due to collision.")
+        robot.cancel_control()
+
+    move_thread.join()
     robot.stop_state_update()
 
 

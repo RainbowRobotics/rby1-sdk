@@ -97,7 +97,7 @@
           <geom size="0.115 0.11" pos="0.01 0 0.24" class="in-model-collision" />
           <body name="link_torso_2" pos="0 0 0.35">
             <inertial pos="0.00653835 -0.0176954 0.0563658" quat="0.99687 -0.052526 0.0433482 -0.0401474" mass="9.21692" diaginertia="0.12242 0.116748 0.0292915" />
-            <joint name="torso_2" pos="0 0 0" axis="0 1 0" limited="true" range="-2.47837 1.5708" />
+            <joint name="torso_2" pos="0 0 0" axis="0 1 0" limited="true" range="-2.4434609528 1.3962634016" />
             <include file="./assets/LINK_3/geoms.xml" />
             <geom size="0.095 0.08" pos="0.025 0 0.23" class="in-model-collision" />
             <body name="link_torso_3" pos="0 0 0.35">

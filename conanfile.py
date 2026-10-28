@@ -18,11 +18,11 @@ class rby1_sdkRecipe(ConanFile):
     version = extract_version_from_pyproject_toml()
 
     # Optional metadata
-    license = "Rainbow Robotics"
+    license = "Apache-2.0"
     author = "Keunjun Choi <keunjun.choi@rainbow-robotics.com>"
     url = "https://www.rainbow-robotics.com/"
     description = "RB-Y1 SDK"
-    topics = ("rainbow-robotics")
+    topics = ("rainbow-robotics", "robotics", "sdk")
 
     generators = "CMakeDeps", "CMakeToolchain"
 

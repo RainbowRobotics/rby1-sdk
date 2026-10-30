@@ -321,7 +321,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare PyPI distributions
+        run: |
+          mkdir -p ./wheelhouse-pypi
+          cp ./wheelhouse/*.tar.gz ./wheelhouse-pypi/ || true
+          find ./wheelhouse -maxdepth 1 -type f -name "*.whl" ! -name "*-linux_*.whl" -exec cp {} ./wheelhouse-pypi/ \;
+          ls -lh ./wheelhouse-pypi
+
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: ./wheelhouse/
+          packages-dir: ./wheelhouse-pypi/

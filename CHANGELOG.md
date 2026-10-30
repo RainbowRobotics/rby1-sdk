@@ -1,10 +1,3 @@
-## v0.10.1 (2026-10-28)
-
-### 🐛 Fixes
-
-- **examples**: stop motion immediately on collision in 27_collisions.py
-- **models**: correct the torso_2 joint limit to [-140, 80] deg
-
 ## v0.10.0 (2026-05-07)
 
 ### ♻️ Refactor

@@ -1070,7 +1070,7 @@ class RobotImpl : public std::enable_shared_from_this<RobotImpl<T>> {
     }
     auto res_gains = res.position_gain();
     if (res_gains.empty()) {
-      throw std::runtime_error("Failed to retrieve right arm PID gains");
+      throw std::runtime_error("Failed to retrieve left arm PID gains");
     }
 
     std::vector<rb::PIDGain> result;

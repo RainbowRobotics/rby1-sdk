@@ -59,7 +59,7 @@
     <light directional="true" diffuse=".8 .8 .8" specular="0 0 0" pos="0 0 5" dir="0 0 -1" castshadow="false" />
 
     <body name="base">
-      <inertial pos="-0.0615794 -0.00142271 0.135139" quat="0.00383057 0.733861 -0.00742942 0.679248" mass="60.0804" diaginertia="3.77525 2.99424 1.36264" />
+      <inertial pos="-0.05361531 -0.00279946 0.13500266" mass="82.93082168" fullinertia="2.38184773 4.04857218 5.45210782 0.00958286 0.32695003 -0.01527373" />
       <joint name="world_j" type="free" limited="false" actuatorfrclimited="false" />
       <include file="./assets/base/geoms.xml" />
 
